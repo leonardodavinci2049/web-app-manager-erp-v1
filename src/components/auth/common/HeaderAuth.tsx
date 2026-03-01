@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Logo from "@/components/logo";
+import Logo from "@/components/common/logo";
 import ModeToggle from "@/components/theme/mode-toggle";
 
 export default function HeaderAuth() {
