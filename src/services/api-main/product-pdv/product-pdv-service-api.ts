@@ -65,9 +65,9 @@ export class ProductPdvServiceApi extends BaseApiService {
         pe_flag_stock: validatedParams.pe_flag_stock ?? 0,
         pe_flag_service: validatedParams.pe_flag_service ?? 0,
         pe_records_quantity: validatedParams.pe_records_quantity ?? 100,
-        pe_page_id: validatedParams.pe_page_id ?? 1,
+        pe_page_id: validatedParams.pe_page_id ?? 0,
         pe_column_id: validatedParams.pe_column_id ?? 1,
-        pe_order_id: validatedParams.pe_order_id ?? 3,
+        pe_order_id: validatedParams.pe_order_id ?? 1,
       });
 
       const response = await this.post<ProductPdvFindAllResponse>(

@@ -14,7 +14,7 @@ export const ProductPdvFindAllSchema = z.object({
   pe_flag_stock: z.number().int().min(0).max(1).optional(),
   pe_flag_service: z.number().int().min(0).max(1).optional(),
   pe_records_quantity: z.number().int().positive().optional(),
-  pe_page_id: z.number().int().positive().optional(),
+  pe_page_id: z.number().int().min(0).optional(),
   pe_column_id: z.number().int().optional(),
   pe_order_id: z.number().int().min(1).max(2).optional(),
 });
