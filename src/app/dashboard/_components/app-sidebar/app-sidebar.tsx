@@ -82,7 +82,7 @@ const data = {
         },
         {
           title: "Novos Produtos",
-          url: "#",
+          url: "/dashboard/product/new-product",
         },
         {
           title: "Mais vendidos",
