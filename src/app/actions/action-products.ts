@@ -1,6 +1,8 @@
 "use server";
 
+import { revalidateTag } from "next/cache";
 import { createLogger } from "@/lib/logger";
+import { CACHE_TAGS } from "@/lib/cache-config";
 import { ProductServiceApi } from "@/services/api/product/product-service-api";
 import { generateSlugFromName } from "@/utils/slug-utils";
 
@@ -160,6 +162,9 @@ export async function createProductFromForm(formData: FormData): Promise<{
       };
     }
 
+    // Invalida o cache da listagem de produtos
+    revalidateTag(CACHE_TAGS.productsPdv);
+
     return {
       success: true,
       productId,
@@ -285,6 +290,9 @@ export async function createProduct(data: CreateProductData): Promise<{
         error: "ID do produto não foi retornado",
       };
     }
+
+    // Invalida o cache da listagem de produtos
+    revalidateTag(CACHE_TAGS.productsPdv);
 
     return {
       success: true,
