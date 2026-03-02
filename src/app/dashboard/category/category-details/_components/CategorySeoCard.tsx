@@ -124,23 +124,16 @@ export function CategorySeoCard({ category }: CategorySeoCardProps) {
               </Button>
             </div>
           ) : (
-            <div
-              role="button"
-              tabIndex={0}
-              className="group flex items-center gap-2 rounded-md border border-transparent bg-muted/50 px-3 py-2 transition-colors hover:border-border hover:bg-background cursor-pointer"
+            <button
+              type="button"
+              className="group flex items-center gap-2 rounded-md border border-transparent bg-muted/50 px-3 py-2 transition-colors hover:border-border hover:bg-background cursor-pointer w-full text-left"
               onClick={() => startEditing("metaTitle", metaTitle)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  startEditing("metaTitle", metaTitle);
-                }
-              }}
             >
               <p className="flex-1 text-sm text-muted-foreground">
                 {metaTitle || "Eletrônicos e Tecnologia - Melhores Produtos"}
               </p>
               <Edit2 className="h-3.5 w-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
-            </div>
+            </button>
           )}
         </div>
 
@@ -186,24 +179,17 @@ export function CategorySeoCard({ category }: CategorySeoCardProps) {
               </div>
             </div>
           ) : (
-            <div
-              role="button"
-              tabIndex={0}
-              className="group flex items-start gap-2 rounded-md border border-transparent bg-muted/50 px-3 py-2 transition-colors hover:border-border hover:bg-background cursor-pointer"
+            <button
+              type="button"
+              className="group flex items-start gap-2 rounded-md border border-transparent bg-muted/50 px-3 py-2 transition-colors hover:border-border hover:bg-background cursor-pointer w-full text-left"
               onClick={() => startEditing("metaDescription", metaDescription)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  startEditing("metaDescription", metaDescription);
-                }
-              }}
             >
               <p className="flex-1 text-sm text-muted-foreground">
                 {metaDescription ||
                   "Descubra nossa ampla linha de produtos eletrônicos"}
               </p>
               <Edit2 className="h-3.5 w-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 mt-0.5" />
-            </div>
+            </button>
           )}
         </div>
       </div>

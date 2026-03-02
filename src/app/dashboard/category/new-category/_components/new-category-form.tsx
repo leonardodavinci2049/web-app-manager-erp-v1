@@ -9,12 +9,12 @@ import Form from "next/form";
 import { useState } from "react";
 import { toast } from "sonner";
 import { createCategoryAction } from "@/app/actions/action-categories";
-import { SubmitButton } from "@/components/forms/submit-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { TaxonomyData } from "@/services/api/taxonomy/types/taxonomy-types";
+import { SubmitButton } from "./submit-button";
 
 interface NewCategoryFormProps {
   categories: TaxonomyData[];

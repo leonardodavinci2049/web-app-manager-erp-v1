@@ -118,23 +118,16 @@ export function CategoryNotesCard({ category }: CategoryNotesCardProps) {
               </div>
             </div>
           ) : (
-            <div
-              role="button"
-              tabIndex={0}
-              className="group flex items-start gap-2 rounded-md border border-transparent bg-muted/50 px-3 py-2 transition-colors hover:border-border hover:bg-background cursor-pointer min-h-[100px]"
+            <button
+              type="button"
+              className="group flex items-start gap-2 rounded-md border border-transparent bg-muted/50 px-3 py-2 transition-colors hover:border-border hover:bg-background cursor-pointer min-h-[100px] w-full text-left"
               onClick={() => startEditing("notes", notes)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  startEditing("notes", notes);
-                }
-              }}
             >
               <p className="flex-1 text-sm text-muted-foreground whitespace-pre-wrap">
                 {notes || "Informações adicionais sobre a categoria"}
               </p>
               <Edit2 className="h-3.5 w-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 mt-0.5" />
-            </div>
+            </button>
           )}
         </div>
       </div>

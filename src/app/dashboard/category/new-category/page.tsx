@@ -8,6 +8,7 @@
  */
 
 import { Suspense } from "react";
+import { connection } from "next/server";
 import { getCategoryOptions } from "@/app/actions/action-categories";
 import { PageTitleSection } from "@/components/common/page-title-section";
 import { NewCategoryForm, NewCategoryHeader } from "./_components/";
@@ -47,6 +48,7 @@ function CategoryFormSkeleton() {
  * Conteúdo do formulário com dados carregados no servidor
  */
 async function CategoryFormContent() {
+  await connection();
   // Carregar categorias no servidor
   const categories = await getCategoryOptions();
 

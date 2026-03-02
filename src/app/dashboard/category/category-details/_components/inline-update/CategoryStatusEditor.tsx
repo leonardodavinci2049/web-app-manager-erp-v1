@@ -122,24 +122,17 @@ export function CategoryStatusEditor({
         </div>
       ) : (
         <div className="space-y-2">
-          <div
-            role="button"
-            tabIndex={0}
-            className="group flex items-center gap-2 rounded-md border border-transparent bg-muted/50 px-3 py-2 transition-colors hover:border-border hover:bg-background cursor-pointer"
+          <button
+            type="button"
+            className="group flex items-center gap-2 rounded-md border border-transparent bg-muted/50 px-3 py-2 transition-colors hover:border-border hover:bg-background cursor-pointer w-full text-left"
             onClick={handleEdit}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                handleEdit();
-              }
-            }}
           >
             <Badge variant={status === 0 ? "default" : "secondary"}>
               {status === 0 ? "Ativo" : "Inativo"}
             </Badge>
             <div className="flex-1" />
             <Edit2 className="h-3.5 w-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
-          </div>
+          </button>
         </div>
       )}
     </div>

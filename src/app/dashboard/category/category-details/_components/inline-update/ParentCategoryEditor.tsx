@@ -204,21 +204,14 @@ export function ParentCategoryEditor({
         </div>
       ) : (
         <div className="space-y-2">
-          <div
-            role="button"
-            tabIndex={0}
-            className="group flex items-center gap-2 rounded-md border border-transparent bg-muted/50 px-3 py-2 transition-colors hover:border-border hover:bg-background cursor-pointer"
+          <button
+            type="button"
+            className="group flex items-center gap-2 rounded-md border border-transparent bg-muted/50 px-3 py-2 transition-colors hover:border-border hover:bg-background cursor-pointer w-full text-left"
             onClick={handleEdit}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                handleEdit();
-              }
-            }}
           >
             <p className="flex-1 text-sm text-muted-foreground">{parentName}</p>
             <Edit2 className="h-3.5 w-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
-          </div>
+          </button>
         </div>
       )}
     </div>
