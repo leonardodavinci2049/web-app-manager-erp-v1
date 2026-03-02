@@ -230,54 +230,51 @@ export function ProductFiltersImproved({
 
   return (
     <div className="space-y-6">
-      {/* Card de Pesquisa */}
-      <Card>
-        <CardContent className="py-4">
-          <div className="flex flex-col items-center gap-4">
-            {/* Linha principal - Input e botão de pesquisa centralizados */}
-            <div className="flex items-center justify-center gap-3 w-full">
-              <div className="relative w-full max-w-sm lg:w-[33vw] lg:max-w-none">
-                <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-                <Input
-                  placeholder="Buscar por nome ou SKU..."
-                  value={searchInputValue}
-                  onChange={(e) => setSearchInputValue(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  className="pl-10 pr-10"
-                  disabled={isLoading}
-                />
-                {searchInputValue && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleClearSearch}
-                    className="absolute top-1/2 right-1 h-6 w-6 p-0 -translate-y-1/2 hover:bg-transparent"
-                    disabled={isLoading}
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
-                )}
-              </div>
-
-              <Button
-                onClick={handleSearch}
-                disabled={
-                  isLoading || searchInputValue.trim() === filters.searchTerm
-                }
-                size="sm"
-                className="gap-2 whitespace-nowrap"
-              >
-                {isLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Search className="h-4 w-4" />
-                )}
-                <span className="hidden sm:inline">Pesquisar</span>
-              </Button>
+      {/* Barra de Pesquisa */}
+      <div className="flex items-center justify-center w-full">
+        <div className="flex items-center w-full max-w-xl lg:max-w-2xl">
+          {/* Input com ícones */}
+          <div className="relative flex-1 group">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
+              <Search className="h-4.5 w-4.5 text-muted-foreground transition-colors group-focus-within:text-primary" />
             </div>
+            <Input
+              placeholder="Buscar por nome ou SKU..."
+              value={searchInputValue}
+              onChange={(e) => setSearchInputValue(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="h-11 rounded-r-none border-r-0 pl-10 pr-9 text-sm shadow-sm focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-primary"
+              disabled={isLoading}
+            />
+            {searchInputValue && (
+              <button
+                type="button"
+                onClick={handleClearSearch}
+                className="absolute inset-y-0 right-0 flex items-center pr-2.5 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+                disabled={isLoading}
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
           </div>
-        </CardContent>
-      </Card>
+
+          {/* Botão Pesquisar integrado */}
+          <Button
+            onClick={handleSearch}
+            disabled={
+              isLoading || searchInputValue.trim() === filters.searchTerm
+            }
+            className="h-11 rounded-l-none px-4 sm:px-5 gap-2 shadow-sm shrink-0"
+          >
+            {isLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Search className="h-4 w-4" />
+            )}
+            <span className="hidden sm:inline text-sm">Pesquisar</span>
+          </Button>
+        </div>
+      </div>
 
       {/* Accordion de Filtros */}
       <Accordion type="single" collapsible className="w-full">

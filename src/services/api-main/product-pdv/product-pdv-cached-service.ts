@@ -40,14 +40,11 @@ export async function getProductsPdv(
   cacheLife("seconds");
   cacheTag(CACHE_TAGS.productsPdv);
 
- // console.log("getProductsPdv called with params  :", params);
+  // console.log("getProductsPdv called with params  :", params);
 
   if (!params.pe_system_client_id) {
     return [];
   }
-
-
-
 
   try {
     const response = await productPdvServiceApi.findAllProductsPdv({
