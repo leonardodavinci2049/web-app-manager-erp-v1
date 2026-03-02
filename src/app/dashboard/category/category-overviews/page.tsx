@@ -8,9 +8,9 @@ import {
 } from "@/components/ui/card";
 import { TaxonomyServiceApi } from "@/services/api/taxonomy/taxonomy-service-api";
 import type { TaxonomyData } from "@/services/api/taxonomy/types/taxonomy-types";
-import { CategoryTree } from "./CategoryTree";
-import { CategoryOverviewsHeaderClient } from "./category-overviews-header";
-import type { CategoryNode } from "./category-tree.types";
+import { CategoryTree } from "./_components/CategoryTree";
+import { CategoryOverviewsHeaderClient } from "./_components/category-overviews-header";
+import type { CategoryNode } from "./_components/category-tree.types";
 import {
   transformTaxonomyToHierarchy,
   validateTaxonomyData,
@@ -30,8 +30,8 @@ export default async function CategoryOverviewsPage() {
 
         {/* Título da Página */}
         <PageTitleSection
-          titleKey="dashboard.category.overviews.title"
-          subtitleKey="dashboard.category.overviews.subtitle"
+          title="Visão Geral das Categorias"
+          subtitle="Visualize a estrutura hierárquica de categorias de produtos"
         />
 
         <div className="space-y-6">

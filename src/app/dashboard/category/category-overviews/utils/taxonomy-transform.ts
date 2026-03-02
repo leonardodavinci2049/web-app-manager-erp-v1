@@ -3,7 +3,7 @@
  */
 
 import type { TaxonomyData } from "@/services/api/taxonomy/types/taxonomy-types";
-import type { CategoryNode } from "../category-tree.types";
+import type { CategoryNode } from "../_components/category-tree.types";
 
 /**
  * Converte dados da API em estrutura hierárquica
