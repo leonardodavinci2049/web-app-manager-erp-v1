@@ -13,6 +13,15 @@ const publicEnvsSchema = z.object({
   NEXT_PUBLIC_COMPANY_PHONE: z.string().min(10).max(20),
   NEXT_PUBLIC_COMPANY_EMAIL: z.string().email(),
   NEXT_PUBLIC_COMPANY_WHATSAPP: z.string().min(10).max(20),
+  NEXT_PUBLIC_COMPANY_META_TITLE_MAIN: z
+    .string()
+    .min(1, "NEXT_PUBLIC_COMPANY_META_TITLE_MAIN is required"),
+  NEXT_PUBLIC_COMPANY_META_TITLE_CAPTION: z
+    .string()
+    .min(1, "NEXT_PUBLIC_COMPANY_META_TITLE_CAPTION is required"),
+  NEXT_PUBLIC_COMPANY_META_DESCRIPTION: z
+    .string()
+    .min(1, "NEXT_PUBLIC_COMPANY_META_DESCRIPTION is required"),
 });
 
 // Variáveis exclusivas do servidor
@@ -53,6 +62,12 @@ const publicValidation = publicEnvsSchema.safeParse({
   NEXT_PUBLIC_COMPANY_PHONE: process.env.NEXT_PUBLIC_COMPANY_PHONE,
   NEXT_PUBLIC_COMPANY_EMAIL: process.env.NEXT_PUBLIC_COMPANY_EMAIL,
   NEXT_PUBLIC_COMPANY_WHATSAPP: process.env.NEXT_PUBLIC_COMPANY_WHATSAPP,
+  NEXT_PUBLIC_COMPANY_META_TITLE_MAIN:
+    process.env.NEXT_PUBLIC_COMPANY_META_TITLE_MAIN || "",
+  NEXT_PUBLIC_COMPANY_META_TITLE_CAPTION:
+    process.env.NEXT_PUBLIC_COMPANY_META_TITLE_CAPTION || "",
+  NEXT_PUBLIC_COMPANY_META_DESCRIPTION:
+    process.env.NEXT_PUBLIC_COMPANY_META_DESCRIPTION || "",
 });
 
 if (!publicValidation.success && typeof window === "undefined") {
