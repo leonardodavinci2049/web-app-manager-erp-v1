@@ -1,8 +1,8 @@
 "use server";
 
 import { revalidateTag } from "next/cache";
-import { createLogger } from "@/lib/logger";
 import { CACHE_TAGS } from "@/lib/cache-config";
+import { createLogger } from "@/lib/logger";
 import { ProductServiceApi } from "@/services/api/product/product-service-api";
 import { generateSlugFromName } from "@/utils/slug-utils";
 
@@ -163,7 +163,7 @@ export async function createProductFromForm(formData: FormData): Promise<{
     }
 
     // Invalida o cache da listagem de produtos
-    revalidateTag(CACHE_TAGS.productsPdv);
+    revalidateTag(CACHE_TAGS.productsPdv, "seconds");
 
     return {
       success: true,
@@ -292,7 +292,7 @@ export async function createProduct(data: CreateProductData): Promise<{
     }
 
     // Invalida o cache da listagem de produtos
-    revalidateTag(CACHE_TAGS.productsPdv);
+    revalidateTag(CACHE_TAGS.productsPdv, "seconds");
 
     return {
       success: true,
