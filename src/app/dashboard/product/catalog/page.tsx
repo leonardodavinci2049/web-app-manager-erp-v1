@@ -103,7 +103,7 @@ export default async function CatalogoPage(props: CatalogoPageProps) {
       typeId: searchParams.type ? Number(searchParams.type) : undefined,
       flagStock: searchParams.stock === "1" ? 1 : undefined,
       recordsQuantity: limit,
-      pageId: Number(searchParams.page) || 1,
+      pageId: Number(searchParams.page) || 0,
       columnId: sort.columnId,
       orderId: sort.orderId,
       ...apiContext,
