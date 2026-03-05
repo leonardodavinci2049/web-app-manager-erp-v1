@@ -146,7 +146,8 @@ function CategoryListLoadingFallback() {
           <div className="space-y-2">
             {Array.from({ length: 5 }).map((_item, index) => (
               <div
-                key={`skeleton-loading-${Date.now()}-${index}`}
+                // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton list
+                key={`skeleton-loading-${index}`}
                 className="rounded-lg border p-4"
               >
                 <div className="flex items-center gap-4">

@@ -181,7 +181,8 @@ export function ProductDetailsLayoutSkeleton() {
           <div className="grid grid-cols-5 gap-2">
             {Array.from({ length: 5 }).map((_, i) => (
               <Skeleton
-                key={`gallery-skeleton-${i + 1}`}
+                // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton list
+                key={`gallery-skeleton-${i}`}
                 className="aspect-square w-full"
               />
             ))}
@@ -200,7 +201,8 @@ export function ProductDetailsLayoutSkeleton() {
             <div className="flex items-center gap-1">
               {Array.from({ length: 5 }).map((_, i) => (
                 <Skeleton
-                  key={`rating-skeleton-${i + 1}`}
+                  // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton list
+                  key={`rating-skeleton-${i}`}
                   className="h-4 w-4"
                 />
               ))}

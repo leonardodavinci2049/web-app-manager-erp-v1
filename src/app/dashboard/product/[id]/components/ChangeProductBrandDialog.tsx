@@ -1,7 +1,7 @@
 "use client";
 
 import { Search } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { updateProductBrand } from "@/app/actions/action-product-updates";
 import { Button } from "@/components/ui/button";
@@ -16,8 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
-import type { BrandData } from "@/services/api/brand/types/brand-types";
+import { useBrands } from "@/hooks/use-brands";
 
 interface ChangeProductBrandDialogProps {
   productId: number;
@@ -26,12 +25,6 @@ interface ChangeProductBrandDialogProps {
   onSuccess?: () => void;
 }
 
-/**
- * ChangeProductBrandDialog Component
- *
- * Dialog to change the product brand.
- * Allows searching and selecting from available brands.
- */
 export function ChangeProductBrandDialog({
   productId,
   currentBrandId,
@@ -39,40 +32,11 @@ export function ChangeProductBrandDialog({
   onSuccess,
 }: ChangeProductBrandDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [brands, setBrands] = useState<BrandData[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-
-  // Load brands when dialog opens
-  const loadBrands = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch("/api/brand/list", {
-        method: "GET",
-      });
-
-      if (!response.ok) {
-        throw new Error("Erro ao carregar marcas");
-      }
-
-      const data = await response.json();
-      setBrands(data.brands || []);
-    } catch (_error) {
-      toast.error("Erro ao carregar marcas");
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (isOpen) {
-      loadBrands();
-    }
-  }, [isOpen, loadBrands]);
+  const { brands, isLoading } = useBrands();
 
   async function handleChangeBrand(brandId: number) {
-    // Prevent selecting the same brand
     if (brandId === currentBrandId) {
       toast.info("Esta já é a marca atual do produto");
       return;
@@ -100,14 +64,9 @@ export function ChangeProductBrandDialog({
     }
   }
 
-  // Filter brands based on search
-  const filteredBrands = brands.filter((brand) => {
-    const brandName = brand.MARCA || "";
-    const matchesSearch = brandName
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    return matchesSearch;
-  });
+  const filteredBrands = brands.filter((brand) =>
+    brand.name.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -125,7 +84,6 @@ export function ChangeProductBrandDialog({
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Search Input */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -136,7 +94,6 @@ export function ChangeProductBrandDialog({
             />
           </div>
 
-          {/* Brands List */}
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <p className="text-sm text-muted-foreground">Carregando...</p>
@@ -152,23 +109,23 @@ export function ChangeProductBrandDialog({
               <div className="space-y-1 p-4">
                 {filteredBrands.map((brand) => (
                   <button
-                    key={brand.ID_MARCA}
+                    key={brand.id}
                     type="button"
-                    onClick={() => handleChangeBrand(brand.ID_MARCA)}
-                    disabled={isUpdating || brand.ID_MARCA === currentBrandId}
+                    onClick={() => handleChangeBrand(brand.id)}
+                    disabled={isUpdating || brand.id === currentBrandId}
                     className="flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-accent disabled:pointer-events-none disabled:opacity-50 data-[current=true]:bg-muted"
-                    data-current={brand.ID_MARCA === currentBrandId}
+                    data-current={brand.id === currentBrandId}
                   >
                     <span className="flex items-center gap-2">
-                      <span>{brand.MARCA || "(Sem nome)"}</span>
-                      {brand.ID_MARCA === currentBrandId && (
+                      <span>{brand.name}</span>
+                      {brand.id === currentBrandId && (
                         <span className="text-xs text-muted-foreground">
                           (Marca atual)
                         </span>
                       )}
                     </span>
                     <span className="text-xs text-muted-foreground">
-                      ID: {brand.ID_MARCA}
+                      ID: {brand.id}
                     </span>
                   </button>
                 ))}

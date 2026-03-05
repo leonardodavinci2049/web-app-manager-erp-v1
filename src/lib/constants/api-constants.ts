@@ -136,17 +136,6 @@ export const ACCOUNT_ENDPOINTS = {
   UPDATE_PASSWORD: "/account/v1/upd-account-password",
 } as const;
 
-// Endpoints de Validação (Check if Exists)
-export const CHECK_ENDPOINTS = {
-  STATUS: "/check", // Health check endpoint (GET)
-  EMAIL: "/check/v2/check-if-email-exists",
-  CPF: "/check/v2/check-if-cpf-exists",
-  CNPJ: "/check/v2/check-if-cnpj-exists",
-  TAXONOMY_SLUG: "/check/v2/check-if-taxonomy-slug-exists",
-  PRODUCT_NAME: "/check/v2/check-if-product-name-exists",
-  PRODUCT_SLUG: "/check/v2/check-if-product-slug-exists",
-} as const;
-
 // Configurações padrão do sistema
 export const SYSTEM_CONFIG = {
   ID_SYSTEM: 1,

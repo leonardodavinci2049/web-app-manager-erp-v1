@@ -1,7 +1,7 @@
 "use client";
 
 import { Search } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { updateProductType } from "@/app/actions/action-product-updates";
 import { Button } from "@/components/ui/button";
@@ -16,8 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
-import type { PtypeData } from "@/services/api/ptype/types/ptype-types";
+import { usePtypes } from "@/hooks/use-ptypes";
 
 interface ChangeProductTypeDialogProps {
   productId: number;
@@ -39,37 +38,9 @@ export function ChangeProductTypeDialog({
   onSuccess,
 }: ChangeProductTypeDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [types, setTypes] = useState<PtypeData[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-
-  // Load types when dialog opens
-  const loadTypes = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch("/api/ptype/list", {
-        method: "GET",
-      });
-
-      if (!response.ok) {
-        throw new Error("Erro ao carregar tipos");
-      }
-
-      const data = await response.json();
-      setTypes(data.types || []);
-    } catch (_error) {
-      toast.error("Erro ao carregar tipos");
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (isOpen) {
-      loadTypes();
-    }
-  }, [isOpen, loadTypes]);
+  const { ptypes, isLoading } = usePtypes();
 
   async function handleChangeType(typeId: number) {
     // Prevent selecting the same type
@@ -101,10 +72,10 @@ export function ChangeProductTypeDialog({
   }
 
   // Filter types based on search
-  const filteredTypes = types.filter((type) => {
-    const matchesSearch = type.TIPO.toLowerCase().includes(
-      searchTerm.toLowerCase(),
-    );
+  const filteredTypes = ptypes.filter((type) => {
+    const matchesSearch = type.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
     return matchesSearch;
   });
 
@@ -151,23 +122,23 @@ export function ChangeProductTypeDialog({
               <div className="space-y-1 p-4">
                 {filteredTypes.map((type) => (
                   <button
-                    key={type.ID_TIPO}
+                    key={type.id}
                     type="button"
-                    onClick={() => handleChangeType(type.ID_TIPO)}
-                    disabled={isUpdating || type.ID_TIPO === currentTypeId}
+                    onClick={() => handleChangeType(type.id)}
+                    disabled={isUpdating || type.id === currentTypeId}
                     className="flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-accent disabled:pointer-events-none disabled:opacity-50 data-[current=true]:bg-muted"
-                    data-current={type.ID_TIPO === currentTypeId}
+                    data-current={type.id === currentTypeId}
                   >
                     <span className="flex items-center gap-2">
-                      <span>{type.TIPO}</span>
-                      {type.ID_TIPO === currentTypeId && (
+                      <span>{type.name}</span>
+                      {type.id === currentTypeId && (
                         <span className="text-xs text-muted-foreground">
                           (Tipo atual)
                         </span>
                       )}
                     </span>
                     <span className="text-xs text-muted-foreground">
-                      ID: {type.ID_TIPO}
+                      ID: {type.id}
                     </span>
                   </button>
                 ))}
