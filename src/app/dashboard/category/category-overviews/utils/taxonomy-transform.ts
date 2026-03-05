@@ -63,12 +63,13 @@ function buildHierarchyFromFlatData(flatData: TaxonomyItem[]): CategoryNode[] {
         }
         parentNode.children.push(currentNode);
       } else {
-        // If parent doesn't exist, treat as root node
-        console.warn(
-          `Pai não encontrado para ID ${currentNode.id} (parentId: ${currentNode.parentId}), tratando como raiz`,
-        );
-        currentNode.parentId = null;
-        rootNodes.push(currentNode);
+        // Pai não encontrado: somente nível 1 pode ser raiz.
+        // Itens órfãos de nível 2+ são ignorados para não poluir a árvore.
+        if (currentNode.level === 1) {
+          currentNode.parentId = null;
+          rootNodes.push(currentNode);
+        }
+        // Nível 2/3 sem pai válido são descartados silenciosamente
       }
     }
   }

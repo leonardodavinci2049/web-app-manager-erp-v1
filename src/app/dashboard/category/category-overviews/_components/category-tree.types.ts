@@ -49,8 +49,12 @@ export interface CategoryTreeItemProps {
   /** Nó de categoria */
   node: CategoryNode;
 
-  /** Callback quando expandir/colapsar */
-  onToggle?: (id: string | number, isExpanded: boolean) => void;
+  /** Callback quando expandir/colapsar (inclui parentId para accordion) */
+  onToggle?: (
+    id: string | number,
+    isExpanded: boolean,
+    parentId?: string | number | null,
+  ) => void;
 
   /** IDs dos nós expandidos */
   expandedIds?: Set<string | number>;
