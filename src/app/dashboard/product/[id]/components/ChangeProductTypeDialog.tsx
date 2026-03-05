@@ -73,9 +73,9 @@ export function ChangeProductTypeDialog({
 
   // Filter types based on search
   const filteredTypes = ptypes.filter((type) => {
-    const matchesSearch = type.name.toLowerCase().includes(
-      searchTerm.toLowerCase(),
-    );
+    const matchesSearch = type.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
     return matchesSearch;
   });
 
