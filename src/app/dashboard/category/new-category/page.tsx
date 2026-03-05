@@ -7,8 +7,8 @@
  * - Componentes Client isolados para interatividade
  */
 
-import { Suspense } from "react";
 import { connection } from "next/server";
+import { Suspense } from "react";
 import { getCategoryOptions } from "@/app/actions/action-categories";
 import { PageTitleSection } from "@/components/common/page-title-section";
 import { NewCategoryForm, NewCategoryHeader } from "./_components/";
