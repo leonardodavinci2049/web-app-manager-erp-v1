@@ -7,14 +7,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { TaxonomyData } from "@/services/api/taxonomy/types/taxonomy-types";
+import type { UITaxonomy } from "@/services/api-main/taxonomy-base/transformers/transformers";
 import { DeleteCategoryDialog } from "./DeleteCategoryDialog";
 
 /**
  * Props for CategoryList Component
  */
 interface CategoryListProps {
-  categories: TaxonomyData[];
+  categories: UITaxonomy[];
   isLoading?: boolean;
   onDelete?: (categoryId: number) => void;
 }
@@ -97,7 +97,7 @@ export function CategoryCardList({
     <div className="space-y-2">
       {categories.map((category) => (
         <Card
-          key={category.ID_TAXONOMY}
+          key={category.id}
           className="hover:bg-accent transition-colors duration-200"
         >
           {/* Layout responsivo: horizontal em desktop, vertical em mobile */}
@@ -106,10 +106,10 @@ export function CategoryCardList({
             <div className="flex items-center gap-3 sm:flex-1">
               {/* Image */}
               <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-md border bg-muted">
-                {category.PATH_IMAGEM ? (
+                {category.imagePath ? (
                   <Image
-                    src={category.PATH_IMAGEM}
-                    alt={category.TAXONOMIA}
+                    src={category.imagePath}
+                    alt={category.name}
                     fill
                     className="object-cover"
                     sizes="80px"
@@ -123,12 +123,12 @@ export function CategoryCardList({
 
               {/* Main Info */}
               <div className="flex-1 min-w-0">
-                <h3 className="font-semibold truncate">{category.TAXONOMIA}</h3>
+                <h3 className="font-semibold truncate">{category.name}</h3>
                 <div className="mt-1 flex flex-col gap-1 text-xs text-muted-foreground sm:flex-row sm:flex-wrap sm:items-center sm:gap-3 sm:text-sm">
-                  <span className="truncate">ID: {category.ID_TAXONOMY}</span>
-                  {category.PARENT_ID !== 0 && (
+                  <span className="truncate">ID: {category.id}</span>
+                  {category.parentId !== 0 && (
                     <span className="truncate">
-                      Categoria Pai: {category.PARENT_ID}
+                      Categoria Pai: {category.parentId}
                     </span>
                   )}
                 </div>
@@ -140,7 +140,7 @@ export function CategoryCardList({
                   size="sm"
                   variant="outline"
                   className="h-8 px-2"
-                  onClick={() => handleViewDetails(category.ID_TAXONOMY)}
+                  onClick={() => handleViewDetails(category.id)}
                 >
                   <ChevronRight className="h-4 w-4" />
                 </Button>
@@ -151,16 +151,16 @@ export function CategoryCardList({
             <div className="flex items-center justify-between gap-2 sm:flex-shrink-0 sm:justify-end">
               {/* Badges */}
               <div className="flex flex-wrap items-center gap-2">
-                {category.LEVEL !== null && category.LEVEL !== undefined && (
+                {category.level !== null && category.level !== undefined && (
                   <Badge variant="secondary" className="text-xs">
-                    Nível {category.LEVEL}
+                    Nível {category.level}
                   </Badge>
                 )}
-                {category.QT_RECORDS !== null &&
-                  category.QT_RECORDS !== undefined &&
-                  category.QT_RECORDS > 0 && (
+                {category.productCount !== null &&
+                  category.productCount !== undefined &&
+                  category.productCount > 0 && (
                     <Badge variant="default" className="text-xs">
-                      {category.QT_RECORDS} Produtos
+                      {category.productCount} Produtos
                     </Badge>
                   )}
               </div>
@@ -171,15 +171,15 @@ export function CategoryCardList({
                   size="sm"
                   variant="outline"
                   className="gap-2"
-                  onClick={() => handleViewDetails(category.ID_TAXONOMY)}
+                  onClick={() => handleViewDetails(category.id)}
                 >
                   <ChevronRight className="h-4 w-4" />
                   Detalhe
                 </Button>
                 <DeleteCategoryDialog
-                  categoryId={category.ID_TAXONOMY}
-                  categoryName={category.TAXONOMIA}
-                  onSuccess={() => onDelete?.(category.ID_TAXONOMY)}
+                  categoryId={category.id}
+                  categoryName={category.name}
+                  onSuccess={() => onDelete?.(category.id)}
                   variant="outline"
                   size="sm"
                   showLabel={false}

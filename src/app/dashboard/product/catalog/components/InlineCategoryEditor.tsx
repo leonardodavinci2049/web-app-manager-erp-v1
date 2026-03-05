@@ -34,6 +34,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import type { UITaxonomyRelProduct } from "@/services/api-main/taxonomy-rel/transformers/transformers";
 import type { ProductCategory } from "../../../../../types/types";
 import { AddCategoryInlineDialog } from "./AddCategoryInlineDialog";
 
@@ -50,7 +51,7 @@ export function InlineCategoryEditor({
   productName,
   onCategoriesUpdated,
 }: InlineCategoryEditorProps) {
-  const [categories, setCategories] = useState<ProductCategory[]>([]);
+  const [categories, setCategories] = useState<UITaxonomyRelProduct[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -58,7 +59,7 @@ export function InlineCategoryEditor({
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [categoryToDelete, setCategoryToDelete] =
-    useState<ProductCategory | null>(null);
+    useState<UITaxonomyRelProduct | null>(null);
 
   // Load categories only when Sheet is opened
   const loadCategories = async () => {
@@ -71,8 +72,13 @@ export function InlineCategoryEditor({
       if (result.success) {
         setCategories(result.data);
         setHasLoadedOnce(true);
-        // Notify parent about updated categories
-        onCategoriesUpdated?.(result.data);
+        // Notify parent about updated categories (map to ProductCategory for compatibility)
+        onCategoriesUpdated?.(
+          result.data.map((c) => ({
+            ID_TAXONOMY: c.taxonomyId,
+            TAXONOMIA: c.name,
+          })),
+        );
       } else {
         setError(result.message);
         setCategories([]);
@@ -106,7 +112,7 @@ export function InlineCategoryEditor({
   };
 
   // Open confirmation dialog for delete
-  const handleDeleteClick = (category: ProductCategory) => {
+  const handleDeleteClick = (category: UITaxonomyRelProduct) => {
     setCategoryToDelete(category);
   };
 
@@ -117,13 +123,13 @@ export function InlineCategoryEditor({
 
   // Confirm and execute delete
   const handleConfirmDelete = async () => {
-    if (!categoryToDelete?.ID_TAXONOMY) return;
+    if (!categoryToDelete?.taxonomyId) return;
 
     setIsDeleting(true);
 
     try {
       const result = await deleteTaxonomyRelationship(
-        categoryToDelete.ID_TAXONOMY,
+        categoryToDelete.taxonomyId,
         productId,
       );
 
@@ -236,23 +242,18 @@ export function InlineCategoryEditor({
                 ) : (
                   // Categories list
                   categories.map((category) => (
-                    <TableRow key={category.ID_TAXONOMY}>
+                    <TableRow key={category.taxonomyId}>
                       <TableCell className="font-medium">
-                        {category.ID_TAXONOMY}
+                        {category.taxonomyId}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          {category.LEVEL && category.LEVEL > 1 && (
-                            <span className="text-muted-foreground">
-                              {"└─".repeat(category.LEVEL - 1)}
-                            </span>
-                          )}
-                          <span>{category.TAXONOMIA}</span>
+                          <span>{category.name}</span>
                         </div>
                       </TableCell>
                       <TableCell>
                         <span className="text-xs text-muted-foreground">
-                          Nível {category.LEVEL}
+                          ---
                         </span>
                       </TableCell>
                       <TableCell className="text-right">
@@ -294,7 +295,7 @@ export function InlineCategoryEditor({
               <AlertDialogDescription>
                 Tem certeza que deseja remover a categoria{" "}
                 <span className="font-semibold">
-                  "{categoryToDelete?.TAXONOMIA}"
+                  "{categoryToDelete?.name}"
                 </span>{" "}
                 deste produto?
               </AlertDialogDescription>

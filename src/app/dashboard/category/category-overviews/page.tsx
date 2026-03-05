@@ -6,8 +6,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { TaxonomyServiceApi } from "@/services/api/taxonomy/taxonomy-service-api";
-import type { TaxonomyData } from "@/services/api/taxonomy/types/taxonomy-types";
+import { getAuthContext } from "@/server/auth-context";
+import {
+  getTaxonomies,
+  getTaxonomyMenu,
+} from "@/services/api-main/taxonomy-base/taxonomy-base-cached-service";
 import { CategoryTree } from "./_components/CategoryTree";
 import { CategoryOverviewsHeaderClient } from "./_components/category-overviews-header";
 import type { CategoryNode } from "./_components/category-tree.types";
@@ -195,62 +198,39 @@ async function fetchCategoryHierarchy(): Promise<{
 }
 
 async function tryBuildHierarchyFromMenu(): Promise<CategoryNode[]> {
-  const response = await TaxonomyServiceApi.findTaxonomyMenu({
-    pe_id_tipo: 1,
-    // pe_parent_id is optional, defaults to 0 (root level)
-  });
+  const { apiContext } = await getAuthContext();
+  const menuItems = await getTaxonomyMenu(1, 0, apiContext);
 
-  if (!TaxonomyServiceApi.isValidTaxonomyMenuResponse(response)) {
+  if (menuItems.length === 0) {
     return [];
   }
 
-  const taxonomyData = TaxonomyServiceApi.extractTaxonomyMenuList(response);
-  if (!validateTaxonomyData(taxonomyData)) {
+  if (!validateTaxonomyData(menuItems)) {
     return [];
   }
 
-  return transformTaxonomyToHierarchy(taxonomyData);
+  return transformTaxonomyToHierarchy(menuItems);
 }
 
 async function tryBuildHierarchyFromList(): Promise<CategoryNode[]> {
-  const perPage = 100;
-  const collected: TaxonomyData[] = [];
-  const maxPages = 5;
+  const { apiContext } = await getAuthContext();
+  const taxonomies = await getTaxonomies({
+    parentId: -1,
+    inactive: 0,
+    recordsQuantity: 500,
+    pageId: 0,
+    columnId: 2,
+    orderId: 1,
+    ...apiContext,
+  });
 
-  for (let page = 0; page < maxPages; page += 1) {
-    const response = await TaxonomyServiceApi.findTaxonomies({
-      pe_id_parent: -1,
-      pe_flag_inativo: 0,
-      pe_qt_registros: perPage,
-      pe_pagina_id: page,
-      pe_coluna_id: 2,
-      pe_ordem_id: 1,
-    });
-
-    if (!TaxonomyServiceApi.isValidTaxonomyResponse(response)) {
-      break;
-    }
-
-    const pageData = TaxonomyServiceApi.extractTaxonomyList(response);
-    if (!validateTaxonomyData(pageData)) {
-      break;
-    }
-
-    collected.push(...pageData);
-
-    const total = response.quantity ?? collected.length;
-    if (collected.length >= total) {
-      break;
-    }
-
-    if (pageData.length < perPage) {
-      break;
-    }
-  }
-
-  if (collected.length === 0) {
+  if (taxonomies.length === 0) {
     return [];
   }
 
-  return transformTaxonomyToHierarchy(collected);
+  if (!validateTaxonomyData(taxonomies)) {
+    return [];
+  }
+
+  return transformTaxonomyToHierarchy(taxonomies);
 }

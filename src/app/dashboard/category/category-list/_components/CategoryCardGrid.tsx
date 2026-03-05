@@ -18,11 +18,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import type { TaxonomyData } from "@/services/api/taxonomy/types/taxonomy-types";
+import type { UITaxonomy } from "@/services/api-main/taxonomy-base/transformers/transformers";
 import { DeleteCategoryDialog } from "./DeleteCategoryDialog";
 
 interface CategoryCardProps {
-  category: TaxonomyData;
+  category: UITaxonomy;
   onDelete?: () => void;
 }
 
@@ -30,26 +30,24 @@ export function CategoryCardGrid({ category, onDelete }: CategoryCardProps) {
   const router = useRouter();
 
   // Determinar se é categoria raiz
-  const isRoot = category.PARENT_ID === 0 || category.PARENT_ID === null;
+  const isRoot = category.parentId === 0 || category.parentId === null;
 
   // Formatar informações da categoria
-  const categoryLevel = category.LEVEL || 1;
-  const productCount = category.QT_RECORDS || 0;
+  const categoryLevel = category.level || 1;
+  const productCount = category.productCount || 0;
 
   const handleViewDetails = () => {
-    router.push(
-      `/dashboard/category/category-details?id=${category.ID_TAXONOMY}`,
-    );
+    router.push(`/dashboard/category/category-details?id=${category.id}`);
   };
 
   return (
     <Card className="group overflow-hidden transition-all hover:shadow-lg">
       {/* Imagem da Categoria */}
       <div className="relative aspect-video w-full overflow-hidden bg-muted">
-        {category.PATH_IMAGEM ? (
+        {category.imagePath ? (
           <Image
-            src={category.PATH_IMAGEM}
-            alt={category.TAXONOMIA}
+            src={category.imagePath}
+            alt={category.name}
             fill
             className="object-cover transition-transform group-hover:scale-105"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -72,15 +70,13 @@ export function CategoryCardGrid({ category, onDelete }: CategoryCardProps) {
       {/* Conteúdo do Card */}
       <CardHeader className="space-y-2">
         {/* Nome da Categoria */}
-        <CardTitle className="line-clamp-2 text-lg">
-          {category.TAXONOMIA}
-        </CardTitle>
+        <CardTitle className="line-clamp-2 text-lg">{category.name}</CardTitle>
 
         {/* ID da Categoria e Quantidade de Produtos */}
         <CardDescription className="flex items-center gap-3">
           <span className="flex items-center gap-1">
             <Tag className="h-3 w-3" />
-            ID: {category.ID_TAXONOMY}
+            ID: {category.id}
           </span>
         </CardDescription>
       </CardHeader>
@@ -92,7 +88,7 @@ export function CategoryCardGrid({ category, onDelete }: CategoryCardProps) {
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">Categoria Pai:</span>
             <span className="font-medium">
-              {isRoot ? "Raiz" : `ID ${category.PARENT_ID}`}
+              {isRoot ? "Raiz" : `ID ${category.parentId}`}
             </span>
           </div>
 
@@ -109,9 +105,9 @@ export function CategoryCardGrid({ category, onDelete }: CategoryCardProps) {
         </div>
 
         {/* Anotações (se houver) */}
-        {category.ANOTACOES && (
+        {category.notes && (
           <p className="line-clamp-2 text-xs text-muted-foreground">
-            {category.ANOTACOES}
+            {category.notes}
           </p>
         )}
 
@@ -126,8 +122,8 @@ export function CategoryCardGrid({ category, onDelete }: CategoryCardProps) {
             Detalhe
           </Button>
           <DeleteCategoryDialog
-            categoryId={category.ID_TAXONOMY}
-            categoryName={category.TAXONOMIA}
+            categoryId={category.id}
+            categoryName={category.name}
             onSuccess={onDelete}
             variant="outline"
             size="sm"

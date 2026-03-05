@@ -13,10 +13,10 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { TaxonomyData } from "@/services/api/taxonomy/types/taxonomy-types";
+import type { UITaxonomy } from "@/services/api-main/taxonomy-base/transformers/transformers";
 
 interface CategoryMediaCardProps {
-  category: TaxonomyData;
+  category: UITaxonomy;
 }
 
 interface EditingState {
@@ -29,7 +29,7 @@ export function CategoryMediaCard({ category }: CategoryMediaCardProps) {
     field: null,
     value: "",
   });
-  const [imagePath, setImagePath] = useState(category.PATH_IMAGEM || "");
+  const [imagePath, setImagePath] = useState(category.imagePath || "");
 
   // Check if a field is being edited
   const isEditing = (fieldName: string) => editingState.field === fieldName;

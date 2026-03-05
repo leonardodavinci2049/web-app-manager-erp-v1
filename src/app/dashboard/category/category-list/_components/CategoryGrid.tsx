@@ -10,14 +10,14 @@
 import { FolderOpen, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { TaxonomyData } from "@/services/api/taxonomy/types/taxonomy-types";
+import type { UITaxonomy } from "@/services/api-main/taxonomy-base/transformers/transformers";
 import { CategoryCardGrid } from "./CategoryCardGrid";
 import { CategoryCardList } from "./CategoryCardList";
 
 type ViewMode = "grid" | "list";
 
 interface CategoryGridProps {
-  categories: TaxonomyData[];
+  categories: UITaxonomy[];
   isLoading?: boolean;
   isLoadingMore?: boolean;
   hasMore?: boolean;
@@ -84,9 +84,9 @@ export function CategoryGrid({
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {categories.map((category) => (
             <CategoryCardGrid
-              key={category.ID_TAXONOMY}
+              key={category.id}
               category={category}
-              onDelete={() => onDelete?.(category.ID_TAXONOMY)}
+              onDelete={() => onDelete?.(category.id)}
             />
           ))}
         </div>

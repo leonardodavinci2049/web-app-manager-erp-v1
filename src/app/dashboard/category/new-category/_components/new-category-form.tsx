@@ -13,11 +13,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { TaxonomyData } from "@/services/api/taxonomy/types/taxonomy-types";
+import type { UITaxonomyMenuItem } from "@/services/api-main/taxonomy-base/transformers/transformers";
 import { SubmitButton } from "./submit-button";
 
 interface NewCategoryFormProps {
-  categories: TaxonomyData[];
+  categories: UITaxonomyMenuItem[];
 }
 
 /**
@@ -89,14 +89,11 @@ export function NewCategoryForm({ categories }: NewCategoryFormProps) {
             >
               <option value="0">Categoria Raiz</option>
               {categories.map((category) => (
-                <option
-                  key={category.ID_TAXONOMY}
-                  value={category.ID_TAXONOMY.toString()}
-                >
-                  {category.LEVEL &&
-                    category.LEVEL > 1 &&
-                    "— ".repeat(category.LEVEL - 1)}
-                  {category.TAXONOMIA}
+                <option key={category.id} value={category.id.toString()}>
+                  {category.level &&
+                    category.level > 1 &&
+                    "— ".repeat(category.level - 1)}
+                  {category.name}
                 </option>
               ))}
             </select>
