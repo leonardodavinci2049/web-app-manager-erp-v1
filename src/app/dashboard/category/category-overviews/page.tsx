@@ -1,3 +1,5 @@
+import { connection } from "next/server";
+import { Suspense } from "react";
 import { PageTitleSection } from "@/components/common/page-title-section";
 import {
   Card,
@@ -24,7 +26,6 @@ import {
  * Server Component que renderiza a estrutura de categorias em árvore interativa
  */
 export default async function CategoryOverviewsPage() {
-  const { categories, error } = await fetchCategoryHierarchy();
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
       <div className="container mx-auto max-w-4xl">
@@ -47,25 +48,9 @@ export default async function CategoryOverviewsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {/* Árvore de categorias interativa */}
-              <div className="rounded-lg border border-muted bg-card p-4">
-                {error ? (
-                  <div className="text-center py-8">
-                    <p className="text-muted-foreground mb-2">
-                      ⚠️ Erro ao carregar categorias
-                    </p>
-                    <p className="text-sm text-red-600">{error}</p>
-                  </div>
-                ) : categories.length > 0 ? (
-                  <CategoryTree categories={categories} />
-                ) : (
-                  <div className="text-center py-8">
-                    <p className="text-muted-foreground">
-                      Nenhuma categoria encontrada
-                    </p>
-                  </div>
-                )}
-              </div>
+              <Suspense fallback={<CategoryTreeSkeleton />}>
+                <CategoryTreeContent />
+              </Suspense>
             </CardContent>
           </Card>
 
@@ -233,4 +218,47 @@ async function tryBuildHierarchyFromList(): Promise<CategoryNode[]> {
   }
 
   return transformTaxonomyToHierarchy(taxonomies);
+}
+
+/** Componente async que busca e renderiza a árvore de categorias (dinâmico, dentro do Suspense) */
+async function CategoryTreeContent() {
+  await connection();
+  const { categories, error } = await fetchCategoryHierarchy();
+
+  return (
+    <div className="rounded-lg border border-muted bg-card p-4">
+      {error ? (
+        <div className="text-center py-8">
+          <p className="text-muted-foreground mb-2">
+            ⚠️ Erro ao carregar categorias
+          </p>
+          <p className="text-sm text-red-600">{error}</p>
+        </div>
+      ) : categories.length > 0 ? (
+        <CategoryTree categories={categories} />
+      ) : (
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">Nenhuma categoria encontrada</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CategoryTreeSkeleton() {
+  return (
+    <div className="rounded-lg border border-muted bg-card p-4 animate-pulse">
+      <div className="space-y-3">
+        {[100, 80, 60, 40, 20].map((width) => (
+          <div key={`sk-${width}`} className="flex items-center gap-2">
+            <div className="h-4 w-4 rounded bg-muted" />
+            <div
+              className="h-4 rounded bg-muted"
+              style={{ width: `${width}%` }}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
