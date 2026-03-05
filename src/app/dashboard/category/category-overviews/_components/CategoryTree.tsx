@@ -2,10 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { CategoryTreeItem } from "./CategoryTreeItem";
-import type {
-  CategoryNode,
-  CategoryTreeProps,
-} from "./category-tree.types";
+import type { CategoryNode, CategoryTreeProps } from "./category-tree.types";
 
 /** Busca um nó pelo ID na árvore */
 function findNodeById(
