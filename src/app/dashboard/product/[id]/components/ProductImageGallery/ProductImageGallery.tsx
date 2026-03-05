@@ -440,7 +440,7 @@ export function ProductImageGallery({
       <div className="grid grid-cols-4 gap-2">
         {images.map((image, index) => (
           <Card
-            key={`product-gallery-${image.id}-${index}`}
+            key={`product-gallery-${image.id}`}
             className={`cursor-pointer overflow-hidden transition-all hover:ring-2 hover:ring-primary ${
               selectedImageIndex === index ? "ring-2 ring-primary" : ""
             } ${imageErrors.has(index) ? "opacity-50" : ""}`}

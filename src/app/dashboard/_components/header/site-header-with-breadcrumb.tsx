@@ -62,7 +62,7 @@ export async function SiteHeaderWithBreadcrumb({
             <BreadcrumbList>
               {breadcrumbItems.map((item, index) => (
                 <div
-                  key={`${item.label}-${index}`}
+                  key={item.href || item.label}
                   className="flex items-center"
                 >
                   {index > 0 && (

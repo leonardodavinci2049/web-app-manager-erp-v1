@@ -33,7 +33,8 @@ function CategoryGridSkeleton() {
   return (
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {Array.from({ length: 8 }).map((_, index) => (
-        <div key={`skeleton-cat-${Date.now()}-${index}`} className="space-y-3">
+        // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton list
+        <div key={`skeleton-cat-${index}`} className="space-y-3">
           <Skeleton className="h-48 w-full rounded-lg" />
           <Skeleton className="h-4 w-3/4" />
           <Skeleton className="h-4 w-1/2" />
