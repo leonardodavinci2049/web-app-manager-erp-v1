@@ -43,6 +43,68 @@ export const PRODUCT_ENDPOINTS = {
   UPDATE_METADATA: "/product/v2/product-upd-metadata",
 } as const;
 
+// Endpoints de Produto Inline (V3)
+export const PRODUCT_INLINE_ENDPOINTS = {
+  UPDATE_BRAND: "/product-inline/v3/product-upd-inl-brand",
+  UPDATE_DESCRIPTION: "/product-inline/v3/product-upd-inl-description",
+  UPDATE_NAME: "/product-inline/v3/product-upd-inl-name",
+  UPDATE_IMAGE_PATH: "/product-inline/v3/product-upd-inl-path-image",
+  UPDATE_SHORT_DESCRIPTION:
+    "/product-inline/v3/product-upd-inl-short-description",
+  UPDATE_STOCK_MIN: "/product-inline/v3/product-upd-inl-stock-min",
+  UPDATE_STOCK: "/product-inline/v3/product-upd-inl-stock",
+  UPDATE_TYPE: "/product-inline/v3/product-upd-inl-type",
+  UPDATE_VARIOUS: "/product-inline/v3/product-upd-inl-variou",
+} as const;
+
+// Endpoints de Product Update (V3) - Mutations agrupadas
+export const PRODUCT_UPDATE_ENDPOINTS = {
+  UPDATE_CHARACTERISTICS: "/product-update/v3/product-upd-characteristics",
+  UPDATE_FLAGS: "/product-update/v3/product-upd-flags",
+  UPDATE_GENERAL: "/product-update/v3/product-upd-general",
+  UPDATE_METADATA: "/product-update/v3/product-upd-metadata",
+  UPDATE_PRICE: "/product-update/v3/product-upd-price",
+  UPDATE_TAX_VALUES: "/product-update/v3/product-upd-tax-values",
+} as const;
+
+// Endpoints de Product Base (V3) - CRUD completo
+export const PRODUCT_BASE_ENDPOINTS = {
+  FIND_ALL: "/product-base/v3/product-find-all",
+  FIND_BY_ID: "/product-base/v3/product-find-id",
+  SEARCH_ALL: "/product-base/v3/product-search-all",
+  CREATE: "/product-base/v3/product-create",
+} as const;
+
+// Endpoints de Taxonomy Base (V3) - CRUD completo
+export const TAXONOMY_BASE_ENDPOINTS = {
+  FIND_ALL: "/taxonomy-base/v3/taxonomy-find-all",
+  FIND_BY_ID: "/taxonomy-base/v3/taxonomy-find-id",
+  FIND_MENU: "/taxonomy-base/v3/taxonomy-find-menu",
+  CREATE: "/taxonomy-base/v3/taxonomy-create",
+  UPDATE: "/taxonomy-base/v3/taxonomy-update",
+  DELETE: "/taxonomy-base/v3/taxonomy-delete",
+  UPDATE_METADATA: "/taxonomy-base/v3/taxonomy-upd-metadata",
+} as const;
+
+// Endpoints de Taxonomy Inline (V3) - Mutations inline
+export const TAXONOMY_INLINE_ENDPOINTS = {
+  UPDATE_IMAGE_PATH: "/taxonomy-inline/v3/taxonomy-upd-inl-image-path",
+  UPDATE_INACTIVE: "/taxonomy-inline/v3/taxonomy-upd-inl-inactive",
+  UPDATE_NAME: "/taxonomy-inline/v3/taxonomy-upd-inl-name",
+  UPDATE_NOTES: "/taxonomy-inline/v3/taxonomy-upd-inl-notes",
+  UPDATE_ORDER: "/taxonomy-inline/v3/taxonomy-upd-inl-order",
+  UPDATE_PARENT_ID: "/taxonomy-inline/v3/taxonomy-upd-inl-parent-id",
+  UPDATE_QT_PRODUCTS: "/taxonomy-inline/v3/taxonomy-upd-inl-qt-products",
+  UPDATE_SLUG: "/taxonomy-inline/v3/taxonomy-upd-inl-slug",
+} as const;
+
+// Endpoints de Taxonomy Rel (V3) - Relações taxonomia↔produto
+export const TAXONOMY_REL_ENDPOINTS = {
+  FIND_ALL_PRODUCTS: "/taxonomy-rel/v3/taxonomy-rel-produto-all",
+  CREATE: "/taxonomy-rel/v3/taxonomy-rel-create",
+  DELETE: "/taxonomy-rel/v3/taxonomy-rel-delete",
+} as const;
+
 // Endpoints de Produto Web
 export const PRODUCT_WEB_ENDPOINTS = {
   FIND_BY_ID: "/product/v2/product-web-find-id",
