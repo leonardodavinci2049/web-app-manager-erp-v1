@@ -1,8 +1,11 @@
 "use server";
 
-import { createLogger } from "@/lib/logger";
-import { ProductServiceApi } from "@/services/api/product/product-service-api";
+import { revalidateTag } from "next/cache";
+import { createLogger } from "@/core/logger";
+import { CACHE_TAGS } from "@/lib/cache-config";
+import { getAuthContext } from "@/server/auth-context";
 import { assetsApiService } from "@/services/api-assets/assets-api-service";
+import { productInlineServiceApi } from "@/services/api-main/product-inline";
 import type { FileAsset } from "@/types/api-assets";
 import { isApiError } from "@/types/api-assets";
 import { uploadFileAction } from "./action-test-assets";
@@ -10,26 +13,33 @@ import { uploadFileAction } from "./action-test-assets";
 const logger = createLogger("action-product-images");
 
 /**
+ * Helper: atualiza PATH_IMAGEM no produto via novo serviço inline.
+ * Lança exceção em caso de erro de SP (tratado pelo serviço).
+ */
+async function updateImagePath(
+  productId: number,
+  imagePath: string,
+  apiContext: Record<string, unknown>,
+): Promise<void> {
+  await productInlineServiceApi.updateProductImagePathInline({
+    pe_product_id: productId,
+    pe_path_imagem: imagePath,
+    ...apiContext,
+  });
+  revalidateTag(CACHE_TAGS.productsBase, "seconds");
+  revalidateTag(CACHE_TAGS.productBase(String(productId)), "hours");
+}
+
+/**
  * Helper function to update product PATH_IMAGEM when a new primary image is set
- *
- * This function checks if the uploaded image became the primary image in the gallery
- * and updates PATH_IMAGEM accordingly. It handles the following scenarios:
- *
- * 1. First image uploaded → automatically becomes primary → update PATH_IMAGEM
- * 2. Additional image uploaded → NOT primary → don't update PATH_IMAGEM
- * 3. Image replaces deleted primary → becomes primary → update PATH_IMAGEM
- *
- * @param productId - Product ID to update
- * @param uploadedImageId - The ID of the newly uploaded image
- * @param imageUrl - New image URL to set as PATH_IMAGEM
  */
 async function updateProductImagePathIfPrimary(
   productId: number,
   uploadedImageId: string,
   imageUrl: string,
+  apiContext: Record<string, unknown>,
 ): Promise<void> {
   try {
-    // Fetch the gallery to check if the uploaded image is now the primary
     const galleryResponse = await assetsApiService.getEntityGallery({
       entityType: "PRODUCT",
       entityId: productId.toString(),
@@ -43,12 +53,10 @@ async function updateProductImagePathIfPrimary(
       return;
     }
 
-    // Find the uploaded image in the gallery
     const uploadedImage = galleryResponse.images?.find(
       (img) => img.id === uploadedImageId,
     );
 
-    // Only update PATH_IMAGEM if the uploaded image is now the primary image
     if (!uploadedImage?.isPrimary) {
       logger.debug(
         `Uploaded image ${uploadedImageId} is not primary for product ${productId}. Skipping PATH_IMAGEM update.`,
@@ -56,27 +64,12 @@ async function updateProductImagePathIfPrimary(
       return;
     }
 
-    // The uploaded image is the primary image, update PATH_IMAGEM
     logger.debug(
       `Uploaded image ${uploadedImageId} is primary for product ${productId}. Updating PATH_IMAGEM.`,
     );
 
-    const updateResponse = await ProductServiceApi.updateProductImagePath({
-      pe_id_produto: productId,
-      pe_path_imagem: imageUrl,
-    });
-
-    // Check if update was successful
-    if (ProductServiceApi.isOperationSuccessful(updateResponse)) {
-      logger.debug(`Successfully updated PATH_IMAGEM for product ${productId}`);
-    } else {
-      const spResponse =
-        ProductServiceApi.extractStoredProcedureResponse(updateResponse);
-      logger.warn(
-        `Failed to update PATH_IMAGEM for product ${productId}:`,
-        spResponse?.sp_message || updateResponse.message,
-      );
-    }
+    await updateImagePath(productId, imageUrl, apiContext);
+    logger.debug(`Successfully updated PATH_IMAGEM for product ${productId}`);
   } catch (error) {
     logger.error(`Error updating PATH_IMAGEM for product ${productId}:`, error);
     throw error;
@@ -160,10 +153,12 @@ export async function uploadProductImageAction(
     // If upload was successful, check if this image became the primary and update PATH_IMAGEM
     if (result.success && result.data?.id && result.data?.urls?.preview) {
       try {
+        const { apiContext } = await getAuthContext();
         await updateProductImagePathIfPrimary(
           Number(productId),
           result.data.id,
           result.data.urls.preview,
+          apiContext,
         );
       } catch (pathUpdateError) {
         // Log error but don't fail the upload - image was successfully uploaded
@@ -231,6 +226,8 @@ export async function deleteProductImageAction(
     // If the deleted image was primary and we have productId, update PATH_IMAGEM
     if (wasPrimary && productId) {
       try {
+        const { apiContext } = await getAuthContext();
+
         // Fetch the updated gallery to get the new primary image
         const galleryResponse = await assetsApiService.getEntityGallery({
           entityType: "PRODUCT",
@@ -238,85 +235,63 @@ export async function deleteProductImageAction(
         });
 
         if (!isApiError(galleryResponse)) {
-          // Find the new primary image (the one with isPrimary = true)
           const newPrimaryImage = galleryResponse.images?.find(
             (img) => img.isPrimary,
           );
 
           if (newPrimaryImage?.urls?.preview) {
-            // Update PATH_IMAGEM with the new primary image URL
             logger.debug(
               `Updating PATH_IMAGEM for product ${productId} with new primary image: ${newPrimaryImage.urls.preview}`,
             );
-            const updateResponse =
-              await ProductServiceApi.updateProductImagePath({
-                pe_id_produto: Number(productId),
-                pe_path_imagem: newPrimaryImage.urls.preview,
-              });
-
-            if (!ProductServiceApi.isOperationSuccessful(updateResponse)) {
-              const spResponse =
-                ProductServiceApi.extractStoredProcedureResponse(
-                  updateResponse,
-                );
+            try {
+              await updateImagePath(
+                Number(productId),
+                newPrimaryImage.urls.preview,
+                apiContext,
+              );
+            } catch (updateError) {
               logger.warn(
                 `Failed to update PATH_IMAGEM for product ${productId}:`,
-                spResponse?.sp_message || updateResponse.message,
+                updateError,
               );
             }
           } else if (
             !galleryResponse.images ||
             galleryResponse.images.length === 0
           ) {
-            // No images left, clear PATH_IMAGEM
             logger.debug(
               `No images left for product ${productId}. Clearing PATH_IMAGEM.`,
             );
-            const updateResponse =
-              await ProductServiceApi.updateProductImagePath({
-                pe_id_produto: Number(productId),
-                pe_path_imagem: "",
-              });
-
-            if (!ProductServiceApi.isOperationSuccessful(updateResponse)) {
-              const spResponse =
-                ProductServiceApi.extractStoredProcedureResponse(
-                  updateResponse,
-                );
+            try {
+              await updateImagePath(Number(productId), "", apiContext);
+            } catch (updateError) {
               logger.warn(
                 `Failed to clear PATH_IMAGEM for product ${productId}:`,
-                spResponse?.sp_message || updateResponse.message,
+                updateError,
               );
             }
           } else {
-            // Images exist but none is primary - this shouldn't happen normally
-            // The Assets API should auto-promote the next image, but let's handle it
             const firstImage = galleryResponse.images[0];
             if (firstImage?.urls?.preview) {
               logger.warn(
                 `No primary image found for product ${productId} after deletion. Using first image as fallback.`,
               );
-              const updateResponse =
-                await ProductServiceApi.updateProductImagePath({
-                  pe_id_produto: Number(productId),
-                  pe_path_imagem: firstImage.urls.preview,
-                });
-
-              if (!ProductServiceApi.isOperationSuccessful(updateResponse)) {
-                const spResponse =
-                  ProductServiceApi.extractStoredProcedureResponse(
-                    updateResponse,
-                  );
+              try {
+                await updateImagePath(
+                  Number(productId),
+                  firstImage.urls.preview,
+                  apiContext,
+                );
+              } catch (updateError) {
                 logger.warn(
                   `Failed to update PATH_IMAGEM for product ${productId}:`,
-                  spResponse?.sp_message || updateResponse.message,
+                  updateError,
                 );
               }
             }
           }
         }
       } catch (pathUpdateError) {
-        // Log error but don't fail - the image was deleted successfully
         logger.warn(
           `Failed to update PATH_IMAGEM after deleting primary image for product ${productId}:`,
           pathUpdateError,
@@ -383,24 +358,14 @@ export async function setPrimaryImageAction(
     const imageDetails = await assetsApiService.findFile({ id: imageId });
 
     if (!isApiError(imageDetails) && imageDetails.urls?.preview) {
-      // Update PATH_IMAGEM with the new primary image URL
       try {
-        const updateResponse = await ProductServiceApi.updateProductImagePath({
-          pe_id_produto: Number(productId),
-          pe_path_imagem: imageDetails.urls.preview,
-        });
-
-        if (!ProductServiceApi.isOperationSuccessful(updateResponse)) {
-          const spResponse =
-            ProductServiceApi.extractStoredProcedureResponse(updateResponse);
-          logger.warn(
-            `Failed to update PATH_IMAGEM for product ${productId}:`,
-            spResponse?.sp_message || updateResponse.message,
-          );
-          // Don't fail the operation - primary image was set successfully
-        }
+        const { apiContext } = await getAuthContext();
+        await updateImagePath(
+          Number(productId),
+          imageDetails.urls.preview,
+          apiContext,
+        );
       } catch (pathUpdateError) {
-        // Log error but don't fail - the primary image was set successfully in Assets API
         logger.warn(
           `Failed to update PATH_IMAGEM for product ${productId}:`,
           pathUpdateError,

@@ -46,7 +46,7 @@ async function CategoryDetailsHeaderLoader({
     return null;
   }
 
-  return <CategoryDetailsHeaderClient categoryName={category.TAXONOMIA} />;
+  return <CategoryDetailsHeaderClient categoryName={category.name} />;
 }
 
 async function CategoryDetailsContent({ categoryId }: { categoryId: number }) {
@@ -58,7 +58,7 @@ async function CategoryDetailsContent({ categoryId }: { categoryId: number }) {
   }
 
   // Buscar nome da categoria pai se houver
-  const parentName = await getCategoryParentName(category.PARENT_ID);
+  const parentName = await getCategoryParentName(category.parentId);
 
   // Buscar lista de categorias para o seletor de categoria pai
   const categories = await getCategoryOptions();
@@ -77,10 +77,10 @@ async function CategoryDetailsContent({ categoryId }: { categoryId: number }) {
       <div className="flex flex-col gap-4">
         <div className="space-y-1">
           <h2 className="text-xl font-semibold tracking-tight">
-            {category.TAXONOMIA}
+            {category.name}
           </h2>
           <p className="text-sm text-muted-foreground">
-            Editar detalhes da categoria ID: {category.ID_TAXONOMY}
+            Editar detalhes da categoria ID: {category.id}
           </p>
         </div>
 
@@ -96,19 +96,21 @@ async function CategoryDetailsContent({ categoryId }: { categoryId: number }) {
             <p className="text-xs font-medium text-muted-foreground uppercase">
               Nível
             </p>
-            <p className="text-sm font-semibold">{category.LEVEL || "-"}</p>
+            <p className="text-sm font-semibold">{category.level || "-"}</p>
           </div>
           <div className="space-y-1">
             <p className="text-xs font-medium text-muted-foreground uppercase">
               Ordem
             </p>
-            <p className="text-sm font-semibold">{category.ORDEM}</p>
+            <p className="text-sm font-semibold">{category.order}</p>
           </div>
           <div className="space-y-1">
             <p className="text-xs font-medium text-muted-foreground uppercase">
               QT Produtos
             </p>
-            <p className="text-sm font-semibold">{category.QT_RECORDS || 0}</p>
+            <p className="text-sm font-semibold">
+              {category.productCount || 0}
+            </p>
           </div>
         </div>
       </div>
@@ -119,14 +121,14 @@ async function CategoryDetailsContent({ categoryId }: { categoryId: number }) {
       <div className="space-y-6">
         {/* Card 1: Nome da Categoria */}
         <CategoryNameCard
-          categoryId={category.ID_TAXONOMY}
-          initialName={category.TAXONOMIA}
+          categoryId={category.id}
+          initialName={category.name}
         />
 
         {/* Card 2: Categoria Pai */}
         <ParentCategoryCard
-          categoryId={category.ID_TAXONOMY}
-          currentParentId={category.PARENT_ID}
+          categoryId={category.id}
+          currentParentId={category.parentId}
           currentParentName={parentName}
           categories={categories}
         />
@@ -139,9 +141,9 @@ async function CategoryDetailsContent({ categoryId }: { categoryId: number }) {
 
         {/* Card 3: Ordem de Exibição */}
         <CategoryOrderCard
-          categoryId={category.ID_TAXONOMY}
-          parentId={category.PARENT_ID}
-          initialOrder={category.ORDEM}
+          categoryId={category.id}
+          parentId={category.parentId}
+          initialOrder={category.order}
         />
 
         {/* Card 4: Mídia */}
@@ -149,8 +151,8 @@ async function CategoryDetailsContent({ categoryId }: { categoryId: number }) {
 
         {/* Card 7: Status - Movido para o final */}
         <CategoryStatusCard
-          categoryId={category.ID_TAXONOMY}
-          initialStatus={category.INATIVO}
+          categoryId={category.id}
+          initialStatus={category.inactive ? 1 : 0}
         />
       </div>
     </div>

@@ -1,44 +1,54 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
+import { auth } from "@/lib/auth/auth";
 import { createLogger } from "@/lib/logger";
-import { TaxonomyServiceApi } from "@/services/api/taxonomy/taxonomy-service-api";
+import { taxonomyRelServiceApi } from "@/services/api-main/taxonomy-rel";
+import {
+  transformTaxonomyRelProductList,
+  type UITaxonomyRelProduct,
+} from "@/services/api-main/taxonomy-rel/transformers/transformers";
 
 const logger = createLogger("TaxonomyActions");
 
+async function getSessionContext() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  if (!session) return null;
+  return {
+    session,
+    apiContext: {
+      pe_system_client_id: session.session?.systemId ?? 0,
+      pe_organization_id: session.session?.activeOrganizationId ?? "0",
+      pe_user_id: session.user.id ?? "0",
+      pe_user_name: session.user.name ?? "",
+      pe_user_role: session.user.role ?? "admin",
+      pe_person_id: 1,
+    },
+  };
+}
+
 /**
  * Server Action - Create taxonomy relationship (category-product)
- * @param taxonomyId - Taxonomy/Category ID
- * @param productId - Product ID
- * @returns Success or error result
  */
 export async function createTaxonomyRelationship(
   taxonomyId: number,
   productId: number,
 ) {
   try {
-    // Call service to create the relationship
-    // Backend expects pe_id_record instead of pe_id_produto
-    const response = await TaxonomyServiceApi.createTaxonomyRel({
-      pe_id_taxonomy: taxonomyId,
-      pe_id_record: productId,
+    const ctx = await getSessionContext();
+    if (!ctx) {
+      return { success: false, message: "Usuário não autenticado" };
+    }
+
+    await taxonomyRelServiceApi.createTaxonomyRelation({
+      pe_taxonomy_id: taxonomyId,
+      pe_record_id: productId,
+      ...ctx.apiContext,
     });
 
-    // Validate response
-    if (!TaxonomyServiceApi.isValidRelOperationResponse(response)) {
-      throw new Error(
-        response.message || "Erro ao criar relacionamento taxonomy-produto",
-      );
-    }
-
-    // Check if operation was successful
-    if (!TaxonomyServiceApi.isRelOperationSuccessful(response)) {
-      const spResponse =
-        TaxonomyServiceApi.extractRelStoredProcedureResponse(response);
-      throw new Error(spResponse?.sp_message || "Erro ao criar relacionamento");
-    }
-
-    // Revalidate product page to reflect changes
     revalidatePath(`/dashboard/product/${productId}`);
     revalidatePath("/dashboard/product/catalog");
 
@@ -61,39 +71,23 @@ export async function createTaxonomyRelationship(
 
 /**
  * Server Action - Delete taxonomy relationship (category-product)
- * @param taxonomyId - Taxonomy/Category ID
- * @param productId - Product ID
- * @returns Success or error result
  */
 export async function deleteTaxonomyRelationship(
   taxonomyId: number,
   productId: number,
 ) {
   try {
-    // Call service to delete the relationship
-    // Backend expects pe_id_record instead of pe_id_produto
-    const response = await TaxonomyServiceApi.deleteTaxonomyRel({
-      pe_id_taxonomy: taxonomyId,
-      pe_id_record: productId,
+    const ctx = await getSessionContext();
+    if (!ctx) {
+      return { success: false, message: "Usuário não autenticado" };
+    }
+
+    await taxonomyRelServiceApi.deleteTaxonomyRelation({
+      pe_taxonomy_id: taxonomyId,
+      pe_record_id: productId,
+      ...ctx.apiContext,
     });
 
-    // Validate response
-    if (!TaxonomyServiceApi.isValidRelOperationResponse(response)) {
-      throw new Error(
-        response.message || "Erro ao deletar relacionamento taxonomy-produto",
-      );
-    }
-
-    // Check if operation was successful
-    if (!TaxonomyServiceApi.isRelOperationSuccessful(response)) {
-      const spResponse =
-        TaxonomyServiceApi.extractRelStoredProcedureResponse(response);
-      throw new Error(
-        spResponse?.sp_message || "Erro ao deletar relacionamento",
-      );
-    }
-
-    // Revalidate product page to reflect changes
     revalidatePath(`/dashboard/product/${productId}`);
     revalidatePath("/dashboard/product/catalog");
 
@@ -116,26 +110,25 @@ export async function deleteTaxonomyRelationship(
 
 /**
  * Server Action - Fetch product categories (taxonomies)
- * Retorna a hierarquia completa de categorias associadas ao produto (até 3 níveis)
- * @param productId - Product ID
- * @returns List of hierarchical product categories or error
  */
 export async function fetchProductCategories(productId: number) {
   try {
-    // Call service to fetch product categories
-    const response = await TaxonomyServiceApi.findTaxonomyRelProduto({
-      pe_id_record: productId,
-    });
-
-    // Validate response
-    if (!TaxonomyServiceApi.isValidTaxonomyProductResponse(response)) {
-      throw new Error(
-        response.message || "Erro ao buscar categorias do produto",
-      );
+    const ctx = await getSessionContext();
+    if (!ctx) {
+      return {
+        success: false,
+        data: [] as UITaxonomyRelProduct[],
+        message: "Usuário não autenticado",
+      };
     }
 
-    // Extract categories list
-    const categories = TaxonomyServiceApi.extractTaxonomyProductList(response);
+    const response = await taxonomyRelServiceApi.findAllProductsByTaxonomy({
+      pe_record_id: productId,
+      ...ctx.apiContext,
+    });
+
+    const rawItems = taxonomyRelServiceApi.extractProducts(response);
+    const categories = transformTaxonomyRelProductList(rawItems);
 
     return {
       success: true,
@@ -147,7 +140,7 @@ export async function fetchProductCategories(productId: number) {
 
     return {
       success: false,
-      data: [],
+      data: [] as UITaxonomyRelProduct[],
       message:
         error instanceof Error
           ? error.message

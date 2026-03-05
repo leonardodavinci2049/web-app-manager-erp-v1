@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { loadCategoriesMenuAction } from "@/app/actions/action-categories";
-import type { TaxonomyData } from "@/services/api/taxonomy/types/taxonomy-types";
+import type { UITaxonomyMenuItem } from "@/services/api-main/taxonomy-base/transformers/transformers";
 
 export interface CategoryOption {
   id: number;
@@ -23,40 +23,24 @@ export function useCategories() {
   // Load categories on component mount
   useEffect(() => {
     /**
-     * Flattens hierarchical taxonomy data into a single array with formatted names
-     * @param taxonomies - Array of taxonomy data with hierarchical structure
-     * @param level - Current level for formatting (1, 2, 3)
-     * @returns Flattened array of category options
+     * Converte dados flat de taxonomia em opções formatadas
      */
-    const flattenCategories = (
-      taxonomies: TaxonomyData[],
-      level: number = 1,
+    const mapCategories = (
+      taxonomies: UITaxonomyMenuItem[],
     ): CategoryOption[] => {
-      const result: CategoryOption[] = [];
+      return taxonomies.map((taxonomy) => {
+        const level = taxonomy.level || 1;
+        let displayName = taxonomy.name;
+        if (level === 2) displayName = `- ${taxonomy.name}`;
+        else if (level === 3) displayName = `-- ${taxonomy.name}`;
 
-      for (const taxonomy of taxonomies) {
-        // Format display name based on level
-        let displayName = taxonomy.TAXONOMIA;
-        if (level === 2) {
-          displayName = `- ${taxonomy.TAXONOMIA}`;
-        } else if (level === 3) {
-          displayName = `-- ${taxonomy.TAXONOMIA}`;
-        }
-
-        result.push({
-          id: taxonomy.ID_TAXONOMY,
-          name: taxonomy.TAXONOMIA,
+        return {
+          id: taxonomy.id,
+          name: taxonomy.name,
           level,
           displayName,
-        });
-
-        // Recursively add children if they exist
-        if (taxonomy.children && taxonomy.children.length > 0) {
-          result.push(...flattenCategories(taxonomy.children, level + 1));
-        }
-      }
-
-      return result;
+        };
+      });
     };
 
     /**
@@ -72,7 +56,7 @@ export function useCategories() {
         const response = await loadCategoriesMenuAction();
 
         if (response.success) {
-          const flattenedCategories = flattenCategories(response.data);
+          const flattenedCategories = mapCategories(response.data);
           setCategories(flattenedCategories);
         } else {
           throw new Error(response.message);
@@ -99,32 +83,26 @@ export function useCategories() {
       const response = await loadCategoriesMenuAction();
 
       if (response.success) {
-        // Inline flattening for refetch
-        const flatten = (
-          taxonomies: TaxonomyData[],
-          level: number = 1,
+        // Inline mapping for refetch
+        const mapItems = (
+          taxonomies: UITaxonomyMenuItem[],
         ): CategoryOption[] => {
-          const result: CategoryOption[] = [];
-          for (const taxonomy of taxonomies) {
-            let displayName = taxonomy.TAXONOMIA;
-            if (level === 2) displayName = `- ${taxonomy.TAXONOMIA}`;
-            else if (level === 3) displayName = `-- ${taxonomy.TAXONOMIA}`;
+          return taxonomies.map((taxonomy) => {
+            const level = taxonomy.level || 1;
+            let displayName = taxonomy.name;
+            if (level === 2) displayName = `- ${taxonomy.name}`;
+            else if (level === 3) displayName = `-- ${taxonomy.name}`;
 
-            result.push({
-              id: taxonomy.ID_TAXONOMY,
-              name: taxonomy.TAXONOMIA,
+            return {
+              id: taxonomy.id,
+              name: taxonomy.name,
               level,
               displayName,
-            });
-
-            if (taxonomy.children && taxonomy.children.length > 0) {
-              result.push(...flatten(taxonomy.children, level + 1));
-            }
-          }
-          return result;
+            };
+          });
         };
 
-        const flattenedCategories = flatten(response.data);
+        const flattenedCategories = mapItems(response.data);
         setCategories(flattenedCategories);
       } else {
         throw new Error(response.message);

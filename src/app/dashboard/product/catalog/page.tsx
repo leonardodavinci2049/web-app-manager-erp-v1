@@ -2,11 +2,11 @@ import { connection } from "next/server";
 import { SiteHeaderWithBreadcrumb } from "@/components/dashboard/header/site-header-with-breadcrumb";
 import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
-import { TaxonomyServiceApi } from "@/services/api/taxonomy/taxonomy-service-api";
-import type { TaxonomyData } from "@/services/api/taxonomy/types/taxonomy-types";
 import { getBrands } from "@/services/api-main/brand/brand-cached-service";
 import { getProductsPdv } from "@/services/api-main/product-pdv/product-pdv-cached-service";
 import { getPtypes } from "@/services/api-main/ptype/ptype-cached-service";
+import { getTaxonomyMenu } from "@/services/api-main/taxonomy-base/taxonomy-base-cached-service";
+import type { UITaxonomyMenuItem } from "@/services/api-main/taxonomy-base/transformers/transformers";
 import { ProductCatalogContent } from "./components/ProductCatalogContent";
 import type { CategoryOption } from "./components/ProductFiltersImproved";
 
@@ -45,40 +45,26 @@ function mapSortToApiParams(sortBy?: string): {
   }
 }
 
-function flattenCategories(
-  taxonomies: TaxonomyData[],
-  level: number = 1,
-): CategoryOption[] {
-  const result: CategoryOption[] = [];
-  for (const taxonomy of taxonomies) {
-    let displayName = taxonomy.TAXONOMIA;
-    if (level === 2) displayName = `- ${taxonomy.TAXONOMIA}`;
-    else if (level === 3) displayName = `-- ${taxonomy.TAXONOMIA}`;
+function flattenCategories(taxonomies: UITaxonomyMenuItem[]): CategoryOption[] {
+  return taxonomies.map((taxonomy) => {
+    let displayName = taxonomy.name;
+    if (taxonomy.level === 2) displayName = `- ${taxonomy.name}`;
+    else if (taxonomy.level >= 3) displayName = `-- ${taxonomy.name}`;
 
-    result.push({
-      id: taxonomy.ID_TAXONOMY,
-      name: taxonomy.TAXONOMIA,
-      level,
+    return {
+      id: taxonomy.id,
+      name: taxonomy.name,
+      level: taxonomy.level,
       displayName,
-    });
-
-    if (taxonomy.children && taxonomy.children.length > 0) {
-      result.push(...flattenCategories(taxonomy.children, level + 1));
-    }
-  }
-  return result;
+    };
+  });
 }
 
 async function getCategories(): Promise<CategoryOption[]> {
   try {
-    const response = await TaxonomyServiceApi.findTaxonomyMenu({
-      pe_id_tipo: 2,
-    });
-    if (TaxonomyServiceApi.isValidTaxonomyMenuResponse(response)) {
-      const taxonomies = TaxonomyServiceApi.extractTaxonomyMenuList(response);
-      return flattenCategories(taxonomies);
-    }
-    return [];
+    const { apiContext } = await getAuthContext();
+    const menuItems = await getTaxonomyMenu(2, 0, apiContext);
+    return flattenCategories(menuItems);
   } catch (error) {
     logger.error("Erro ao buscar categorias:", error);
     return [];

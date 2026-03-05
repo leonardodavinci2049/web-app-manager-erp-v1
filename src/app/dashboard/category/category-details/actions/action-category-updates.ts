@@ -1,9 +1,29 @@
 "use server";
 
+import { headers } from "next/headers";
+import { auth } from "@/lib/auth/auth";
 import { createLogger } from "@/lib/logger";
-import { TaxonomyServiceApi } from "@/services/api/taxonomy/taxonomy-service-api";
+import { taxonomyInlineServiceApi } from "@/services/api-main/taxonomy-inline";
 
 const logger = createLogger("CategoryUpdateActions");
+
+async function getSessionContext() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  if (!session) return null;
+  return {
+    session,
+    apiContext: {
+      pe_system_client_id: session.session?.systemId ?? 0,
+      pe_organization_id: session.session?.activeOrganizationId ?? "0",
+      pe_user_id: session.user.id ?? "0",
+      pe_user_name: session.user.name ?? "",
+      pe_user_role: session.user.role ?? "admin",
+      pe_person_id: 1,
+    },
+  };
+}
 
 /**
  * Server Action: Update category name
@@ -35,30 +55,19 @@ export async function updateCategoryName(
       };
     }
 
-    // Call API service
-    const response = await TaxonomyServiceApi.updateTaxonomyName({
-      pe_id_taxonomy: categoryId,
-      pe_taxonomia: name.trim(),
-    });
-
-    // Check if operation was successful
-    if (!TaxonomyServiceApi.isOperationSuccessful(response)) {
-      const spResponse =
-        TaxonomyServiceApi.extractStoredProcedureResponse(response);
-      const errorMessage =
-        spResponse?.sp_message || "Erro ao atualizar nome da categoria";
-
-      logger.error("API returned error:", { spResponse, errorMessage });
-
-      return {
-        success: false,
-        error: errorMessage,
-      };
+    const ctx = await getSessionContext();
+    if (!ctx) {
+      return { success: false, error: "Usuário não autenticado" };
     }
 
-    // Extract success message from API response
+    const response = await taxonomyInlineServiceApi.updateTaxonomyNameInline({
+      pe_taxonomy_id: categoryId,
+      pe_taxonomy_name: name.trim(),
+      ...ctx.apiContext,
+    });
+
     const spResponse =
-      TaxonomyServiceApi.extractStoredProcedureResponse(response);
+      taxonomyInlineServiceApi.extractStoredProcedureResult(response);
     const successMessage =
       spResponse?.sp_message || "Nome da categoria atualizado com sucesso";
 
@@ -121,30 +130,20 @@ export async function updateCategoryParent(
       };
     }
 
-    // Call API service
-    const response = await TaxonomyServiceApi.updateTaxonomyParentId({
-      pe_id_taxonomy: categoryId,
-      pe_parent_id: parentId,
-    });
-
-    // Check if operation was successful
-    if (!TaxonomyServiceApi.isOperationSuccessful(response)) {
-      const spResponse =
-        TaxonomyServiceApi.extractStoredProcedureResponse(response);
-      const errorMessage =
-        spResponse?.sp_message || "Erro ao atualizar categoria pai";
-
-      logger.error("API returned error:", { spResponse, errorMessage });
-
-      return {
-        success: false,
-        error: errorMessage,
-      };
+    const ctx = await getSessionContext();
+    if (!ctx) {
+      return { success: false, error: "Usuário não autenticado" };
     }
 
-    // Extract success message from API response
+    const response =
+      await taxonomyInlineServiceApi.updateTaxonomyParentIdInline({
+        pe_taxonomy_id: categoryId,
+        pe_parent_id: parentId,
+        ...ctx.apiContext,
+      });
+
     const spResponse =
-      TaxonomyServiceApi.extractStoredProcedureResponse(response);
+      taxonomyInlineServiceApi.extractStoredProcedureResult(response);
     const successMessage =
       spResponse?.sp_message || "Categoria pai atualizada com sucesso";
 
@@ -211,31 +210,19 @@ export async function updateCategoryOrder(
       };
     }
 
-    // Call API service
-    const response = await TaxonomyServiceApi.updateTaxonomyOrdem({
-      pe_id_taxonomy: categoryId,
-      pe_parent_id: parentId,
-      pe_ordem: order,
-    });
-
-    // Check if operation was successful
-    if (!TaxonomyServiceApi.isOperationSuccessful(response)) {
-      const spResponse =
-        TaxonomyServiceApi.extractStoredProcedureResponse(response);
-      const errorMessage =
-        spResponse?.sp_message || "Erro ao atualizar ordem da categoria";
-
-      logger.error("API returned error:", { spResponse, errorMessage });
-
-      return {
-        success: false,
-        error: errorMessage,
-      };
+    const ctx = await getSessionContext();
+    if (!ctx) {
+      return { success: false, error: "Usuário não autenticado" };
     }
 
-    // Extract success message from API response
+    const response = await taxonomyInlineServiceApi.updateTaxonomyOrderInline({
+      pe_taxonomy_id: categoryId,
+      pe_order: order,
+      ...ctx.apiContext,
+    });
+
     const spResponse =
-      TaxonomyServiceApi.extractStoredProcedureResponse(response);
+      taxonomyInlineServiceApi.extractStoredProcedureResult(response);
     const successMessage =
       spResponse?.sp_message || "Ordem da categoria atualizada com sucesso";
 
@@ -290,30 +277,20 @@ export async function updateCategoryStatus(
       };
     }
 
-    // Call API service
-    const response = await TaxonomyServiceApi.updateTaxonomyInactive({
-      pe_id_taxonomy: categoryId,
-      pe_inactive: status === 1,
-    });
-
-    // Check if operation was successful
-    if (!TaxonomyServiceApi.isOperationSuccessful(response)) {
-      const spResponse =
-        TaxonomyServiceApi.extractStoredProcedureResponse(response);
-      const errorMessage =
-        spResponse?.sp_message || "Erro ao atualizar status da categoria";
-
-      logger.error("API returned error:", { spResponse, errorMessage });
-
-      return {
-        success: false,
-        error: errorMessage,
-      };
+    const ctx = await getSessionContext();
+    if (!ctx) {
+      return { success: false, error: "Usuário não autenticado" };
     }
 
-    // Extract success message from API response
+    const response =
+      await taxonomyInlineServiceApi.updateTaxonomyInactiveInline({
+        pe_taxonomy_id: categoryId,
+        pe_inactive: status,
+        ...ctx.apiContext,
+      });
+
     const spResponse =
-      TaxonomyServiceApi.extractStoredProcedureResponse(response);
+      taxonomyInlineServiceApi.extractStoredProcedureResult(response);
     const successMessage =
       spResponse?.sp_message || "Status da categoria atualizado com sucesso";
 

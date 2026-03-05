@@ -2,50 +2,22 @@
  * Utilitários para transformar dados da API de taxonomias em estruturas hierárquicas
  */
 
-import type { TaxonomyData } from "@/services/api/taxonomy/types/taxonomy-types";
+import type {
+  UITaxonomy,
+  UITaxonomyMenuItem,
+} from "@/services/api-main/taxonomy-base/transformers/transformers";
 import type { CategoryNode } from "../_components/category-tree.types";
+
+type TaxonomyItem = UITaxonomy | UITaxonomyMenuItem;
 
 /**
  * Converte dados da API em estrutura hierárquica
- * Detecta automaticamente se os dados já vêm hierárquicos (com children) ou planos
- * @param data - Array de taxonomias da API (pode ser plano ou hierárquico)
- * @returns Array hierárquico de CategoryNode com children aninhados
+ * Os dados já vêm planos do novo serviço, necessário construir hierarquia
  */
 export function transformTaxonomyToHierarchy(
-  data: TaxonomyData[],
+  data: TaxonomyItem[],
 ): CategoryNode[] {
-  // Check if data already has hierarchical structure (children property)
-  const hasHierarchicalStructure = data.some(
-    (item) => item.children && Array.isArray(item.children),
-  );
-
-  if (hasHierarchicalStructure) {
-    // Data is already hierarchical, just convert format recursively
-    return data.map(convertHierarchicalNode);
-  }
-
-  // Data is flat, need to build hierarchy
   return buildHierarchyFromFlatData(data);
-}
-
-/**
- * Converts hierarchical API data to CategoryNode format recursively
- * @param apiItem - API item with potential children
- * @returns CategoryNode with children converted
- */
-function convertHierarchicalNode(apiItem: TaxonomyData): CategoryNode {
-  const node = apiItemToCategoryNode(apiItem);
-
-  // Recursively convert children if they exist
-  if (apiItem.children && Array.isArray(apiItem.children)) {
-    node.children = apiItem.children.map(convertHierarchicalNode);
-    // Sort children by order
-    node.children = sortNodesByOrder(node.children);
-  } else {
-    node.children = [];
-  }
-
-  return node;
 }
 
 /**
@@ -53,8 +25,7 @@ function convertHierarchicalNode(apiItem: TaxonomyData): CategoryNode {
  * @param flatData - Flat array of taxonomies
  * @returns Hierarchical array of CategoryNode
  */
-function buildHierarchyFromFlatData(flatData: TaxonomyData[]): CategoryNode[] {
-  // Convert API data to CategoryNode format
+function buildHierarchyFromFlatData(flatData: TaxonomyItem[]): CategoryNode[] {
   const nodes: CategoryNode[] = flatData.map(apiItemToCategoryNode);
 
   // Create map of nodes by ID for quick lookup
@@ -92,12 +63,13 @@ function buildHierarchyFromFlatData(flatData: TaxonomyData[]): CategoryNode[] {
         }
         parentNode.children.push(currentNode);
       } else {
-        // If parent doesn't exist, treat as root node
-        console.warn(
-          `Pai não encontrado para ID ${currentNode.id} (parentId: ${currentNode.parentId}), tratando como raiz`,
-        );
-        currentNode.parentId = null;
-        rootNodes.push(currentNode);
+        // Pai não encontrado: somente nível 1 pode ser raiz.
+        // Itens órfãos de nível 2+ são ignorados para não poluir a árvore.
+        if (currentNode.level === 1) {
+          currentNode.parentId = null;
+          rootNodes.push(currentNode);
+        }
+        // Nível 2/3 sem pai válido são descartados silenciosamente
       }
     }
   }
@@ -111,20 +83,16 @@ function buildHierarchyFromFlatData(flatData: TaxonomyData[]): CategoryNode[] {
  * @param apiItem - Item da API
  * @returns CategoryNode formatado
  */
-function apiItemToCategoryNode(apiItem: TaxonomyData): CategoryNode {
-  const id = toNumber(apiItem.ID_TAXONOMY, 0);
-  const parentId = toOptionalNumber(apiItem.PARENT_ID);
-  const level = clampLevel(toNumber(apiItem.LEVEL, 1));
-
+function apiItemToCategoryNode(apiItem: TaxonomyItem): CategoryNode {
   return {
-    id,
-    name: apiItem.TAXONOMIA,
-    slug: apiItem.SLUG || undefined,
-    level,
-    parentId: parentId === 0 ? null : parentId,
-    quantity: toOptionalNumber(apiItem.QT_RECORDS),
-    order: toOptionalNumber(apiItem.ORDEM) ?? undefined,
-    isActive: true, // Assumir ativo por padrão (dados virão apenas ativos)
+    id: apiItem.id,
+    name: apiItem.name,
+    slug: apiItem.slug || undefined,
+    level: clampLevel(apiItem.level),
+    parentId: apiItem.parentId === 0 ? null : apiItem.parentId,
+    quantity: apiItem.productCount ?? undefined,
+    order: apiItem.order ?? undefined,
+    isActive: true,
   };
 }
 
@@ -164,7 +132,7 @@ function sortNodesByOrder(nodes: CategoryNode[]): CategoryNode[] {
  * @param data - Dados para validar
  * @returns true se válidos
  */
-export function validateTaxonomyData(data: unknown): data is TaxonomyData[] {
+export function validateTaxonomyData(data: unknown): data is TaxonomyItem[] {
   if (!Array.isArray(data)) {
     return false;
   }
@@ -175,9 +143,9 @@ export function validateTaxonomyData(data: unknown): data is TaxonomyData[] {
     }
 
     const record = item as Record<string, unknown>;
-    const hasId = isNumberLike(record.ID_TAXONOMY);
-    const hasName = typeof record.TAXONOMIA === "string";
-    const hasParent = isNumberLike(record.PARENT_ID);
+    const hasId = typeof record.id === "number";
+    const hasName = typeof record.name === "string";
+    const hasParent = typeof record.parentId === "number";
 
     return hasId && hasName && hasParent;
   });
@@ -190,10 +158,10 @@ export function validateTaxonomyData(data: unknown): data is TaxonomyData[] {
  * @returns Array filtrado
  */
 export function filterTaxonomiesByLevel(
-  data: TaxonomyData[],
+  data: TaxonomyItem[],
   level: 1 | 2 | 3,
-): TaxonomyData[] {
-  return data.filter((item) => item.LEVEL === level);
+): TaxonomyItem[] {
+  return data.filter((item) => item.level === level);
 }
 
 /**
@@ -258,53 +226,6 @@ export function extractAllNodeIds(
   }
 
   return ids;
-}
-
-function isNumberLike(value: unknown): boolean {
-  if (typeof value === "number") {
-    return Number.isFinite(value);
-  }
-
-  if (typeof value === "string" && value.trim() !== "") {
-    return Number.isFinite(Number(value));
-  }
-
-  return false;
-}
-
-function toNumber(
-  value: number | string | null | undefined,
-  fallback: number,
-): number {
-  if (typeof value === "number" && Number.isFinite(value)) {
-    return value;
-  }
-
-  if (typeof value === "string") {
-    const parsed = Number(value);
-    if (Number.isFinite(parsed)) {
-      return parsed;
-    }
-  }
-
-  return fallback;
-}
-
-function toOptionalNumber(
-  value: number | string | null | undefined,
-): number | undefined {
-  if (typeof value === "number" && Number.isFinite(value)) {
-    return value;
-  }
-
-  if (typeof value === "string" && value.trim() !== "") {
-    const parsed = Number(value);
-    if (Number.isFinite(parsed)) {
-      return parsed;
-    }
-  }
-
-  return undefined;
 }
 
 function clampLevel(level: number): 1 | 2 | 3 {

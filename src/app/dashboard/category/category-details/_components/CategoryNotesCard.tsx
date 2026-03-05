@@ -13,10 +13,10 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import type { TaxonomyData } from "@/services/api/taxonomy/types/taxonomy-types";
+import type { UITaxonomy } from "@/services/api-main/taxonomy-base/transformers/transformers";
 
 interface CategoryNotesCardProps {
-  category: TaxonomyData;
+  category: UITaxonomy;
 }
 
 interface EditingState {
@@ -29,7 +29,7 @@ export function CategoryNotesCard({ category }: CategoryNotesCardProps) {
     field: null,
     value: "",
   });
-  const [notes, setNotes] = useState(category.ANOTACOES || "");
+  const [notes, setNotes] = useState(category.notes || "");
 
   // Check if a field is being edited
   const isEditing = (fieldName: string) => editingState.field === fieldName;

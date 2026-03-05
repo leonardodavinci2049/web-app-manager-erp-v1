@@ -13,7 +13,7 @@ import {
   type FindCategoriesParams,
   findCategories,
 } from "@/app/actions/action-categories";
-import type { TaxonomyData } from "@/services/api/taxonomy/types/taxonomy-types";
+import type { UITaxonomy } from "@/services/api-main/taxonomy-base/transformers/transformers";
 
 /**
  * Interface para filtros de categoria
@@ -38,7 +38,7 @@ export function useCategoryFilter() {
   });
 
   // Estado dos dados
-  const [categories, setCategories] = useState<TaxonomyData[]>([]);
+  const [categories, setCategories] = useState<UITaxonomy[]>([]);
   const [currentPage, setCurrentPage] = useState(0); // MySQL começa em 0
   const [hasMore, setHasMore] = useState(true);
   const [totalCategories, setTotalCategories] = useState(0);

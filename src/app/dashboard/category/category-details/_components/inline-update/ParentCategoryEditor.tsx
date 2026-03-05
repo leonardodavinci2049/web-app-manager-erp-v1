@@ -13,14 +13,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { TaxonomyData } from "@/services/api/taxonomy/types/taxonomy-types";
+import type { UITaxonomyMenuItem } from "@/services/api-main/taxonomy-base/transformers/transformers";
 import { updateCategoryParent } from "../../actions/action-category-updates";
 
 interface ParentCategoryEditorProps {
   categoryId: number;
   currentParentId: number;
   currentParentName: string;
-  categories: TaxonomyData[];
+  categories: UITaxonomyMenuItem[];
   onUpdate?: (newParentId: number, newParentName: string) => void;
 }
 
@@ -38,22 +38,20 @@ export function ParentCategoryEditor({
   const [isSaving, setIsSaving] = useState(false);
 
   // Filter out the current category and its descendants to prevent circular references
-  const availableCategories = categories.filter(
-    (cat) => cat.ID_TAXONOMY !== categoryId,
-  );
+  const availableCategories = categories.filter((cat) => cat.id !== categoryId);
 
   // Group categories by parent (level 1 = root, level 2 = children)
   const level1Categories = availableCategories.filter(
-    (cat) => (cat.LEVEL ?? 1) === 1,
+    (cat) => (cat.level ?? 1) === 1,
   );
   const level2Categories = availableCategories.filter(
-    (cat) => (cat.LEVEL ?? 1) === 2,
+    (cat) => (cat.level ?? 1) === 2,
   );
 
   // Create map of children by parent ID for grouping
-  const childrenByParent = new Map<number, TaxonomyData[]>();
+  const childrenByParent = new Map<number, UITaxonomyMenuItem[]>();
   for (const child of level2Categories) {
-    const parentId = child.PARENT_ID;
+    const parentId = child.parentId;
     const existing = childrenByParent.get(parentId) ?? [];
     existing.push(child);
     childrenByParent.set(parentId, existing);
@@ -88,9 +86,8 @@ export function ParentCategoryEditor({
         const newParentName =
           tempParentId === 0
             ? "Raiz"
-            : availableCategories.find(
-                (cat) => cat.ID_TAXONOMY === tempParentId,
-              )?.TAXONOMIA || `ID ${tempParentId}`;
+            : availableCategories.find((cat) => cat.id === tempParentId)
+                ?.name || `ID ${tempParentId}`;
 
         setParentId(tempParentId);
         setParentName(newParentName);
@@ -135,28 +132,28 @@ export function ParentCategoryEditor({
 
               {/* Level 1 categories (selectable) with their level 2 children grouped below */}
               {level1Categories.map((rootCategory) => {
-                const children = childrenByParent.get(rootCategory.ID_TAXONOMY);
+                const children = childrenByParent.get(rootCategory.id);
                 const hasChildren = children && children.length > 0;
 
                 if (hasChildren) {
                   return (
-                    <SelectGroup key={rootCategory.ID_TAXONOMY}>
+                    <SelectGroup key={rootCategory.id}>
                       {/* Level 1 category as selectable item */}
                       <SelectItem
-                        value={rootCategory.ID_TAXONOMY.toString()}
+                        value={rootCategory.id.toString()}
                         className="font-semibold"
                       >
-                        📁 {rootCategory.TAXONOMIA}
+                        📁 {rootCategory.name}
                       </SelectItem>
                       {/* Level 2 children indented */}
                       {children.map((childCategory) => (
                         <SelectItem
-                          key={childCategory.ID_TAXONOMY}
-                          value={childCategory.ID_TAXONOMY.toString()}
+                          key={childCategory.id}
+                          value={childCategory.id.toString()}
                           className="pl-8"
                         >
                           <span className="text-muted-foreground">└─</span>{" "}
-                          {childCategory.TAXONOMIA}
+                          {childCategory.name}
                         </SelectItem>
                       ))}
                     </SelectGroup>
@@ -166,11 +163,11 @@ export function ParentCategoryEditor({
                 // Root category without children
                 return (
                   <SelectItem
-                    key={rootCategory.ID_TAXONOMY}
-                    value={rootCategory.ID_TAXONOMY.toString()}
+                    key={rootCategory.id}
+                    value={rootCategory.id.toString()}
                     className="font-semibold"
                   >
-                    📁 {rootCategory.TAXONOMIA}
+                    📁 {rootCategory.name}
                   </SelectItem>
                 );
               })}
