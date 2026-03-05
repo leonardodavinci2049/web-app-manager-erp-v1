@@ -404,15 +404,10 @@ export function ProductImageGallery({
                   }
                 />
 
-                {/* Zoom button - appears on hover */}
-                <Button
-                  variant="secondary"
-                  size="icon"
-                  className="absolute right-3 top-3 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => openZoomModal(selectedImageIndex)}
-                >
+                {/* Zoom indicator - appears on hover */}
+                <div className="absolute right-3 top-3 opacity-0 group-hover:opacity-100 transition-opacity inline-flex items-center justify-center h-9 w-9 rounded-md bg-secondary text-secondary-foreground">
                   <ZoomIn className="h-4 w-4" />
-                </Button>
+                </div>
 
                 {/* Image counter badge */}
                 {images.length > 1 && (

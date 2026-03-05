@@ -17,14 +17,14 @@ import { useCallback, useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 import type { FindCategoriesParams } from "@/app/actions/action-categories";
 import { findCategories } from "@/app/actions/action-categories";
-import type { TaxonomyData } from "@/services/api/taxonomy/types/taxonomy-types";
+import type { UITaxonomy } from "@/services/api-main/taxonomy-base/transformers/transformers";
 import { CategoryFiltersClient } from "./_components/CategoryFiltersClient";
 import { CategoryGrid } from "./_components/CategoryGrid";
 
 type ViewMode = "grid" | "list";
 
 interface CategoryListClientProps {
-  initialCategories: TaxonomyData[];
+  initialCategories: UITaxonomy[];
   totalCategories: number;
   currentSearch: string;
   currentSort: string;
@@ -42,8 +42,7 @@ export function CategoryListClient({
   const [isPending, startTransition] = useTransition();
 
   // Estado local para paginação de load more (lista infinita)
-  const [categories, setCategories] =
-    useState<TaxonomyData[]>(initialCategories);
+  const [categories, setCategories] = useState<UITaxonomy[]>(initialCategories);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(initialCategories.length === 20);
 
@@ -219,9 +218,7 @@ export function CategoryListClient({
   const handleDelete = useCallback(
     (categoryId: number) => {
       // Remove imediatamente da lista local para feedback rápido
-      setCategories((prev) =>
-        prev.filter((cat) => cat.ID_TAXONOMY !== categoryId),
-      );
+      setCategories((prev) => prev.filter((cat) => cat.id !== categoryId));
 
       // Depois atualiza do servidor em background
       startTransition(() => {

@@ -1,13 +1,15 @@
 "use server";
 
-import { createLogger } from "@/lib/logger";
-import { ProductServiceApi } from "@/services/api/product/product-service-api";
+import { revalidateTag } from "next/cache";
+import { createLogger } from "@/core/logger";
+import { CACHE_TAGS } from "@/lib/cache-config";
+import { getAuthContext } from "@/server/auth-context";
+import { productInlineServiceApi } from "@/services/api-main/product-inline";
 
 const logger = createLogger("ProductDescriptionActions");
 
 /**
  * Update product description (ANOTACOES field)
- * Uses ENDPOINT 17 - Update product full description
  * @param productId - Product ID
  * @param description - New description text
  * @returns Success status and message
@@ -17,7 +19,6 @@ export async function updateProductDescription(
   description: string,
 ): Promise<{ success: boolean; message: string }> {
   try {
-    // Validate inputs
     if (!productId || productId <= 0) {
       return {
         success: false,
@@ -25,45 +26,31 @@ export async function updateProductDescription(
       };
     }
 
+    const { apiContext } = await getAuthContext();
+
     logger.info("Iniciando atualização de descrição", {
       productId,
       descriptionLength: description.length,
     });
 
-    // Call API service to update description
-    const response = await ProductServiceApi.updateProductDescription({
-      pe_id_produto: productId,
-      pe_produto_descricao: description,
+    await productInlineServiceApi.updateProductDescriptionInline({
+      pe_product_id: productId,
+      pe_product_description: description,
+      ...apiContext,
     });
 
-    logger.info("Resposta da API recebida", {
-      statusCode: response.statusCode,
-    });
+    logger.info(`Descrição do produto ${productId} atualizada com sucesso`);
 
-    // Check if operation was successful
-    if (ProductServiceApi.isOperationSuccessful(response)) {
-      logger.info(`Descrição do produto ${productId} atualizada com sucesso`);
-      return {
-        success: true,
-        message: "Descrição atualizada com sucesso",
-      };
-    }
-
-    // Operation failed
-    const errorMessage =
-      response.message || "Erro ao atualizar descrição do produto";
-    logger.error(`Erro ao atualizar descrição do produto ${productId}`, {
-      response,
-    });
+    revalidateTag(CACHE_TAGS.productsBase, "seconds");
+    revalidateTag(CACHE_TAGS.productBase(String(productId)), "hours");
 
     return {
-      success: false,
-      message: errorMessage,
+      success: true,
+      message: "Descrição atualizada com sucesso",
     };
   } catch (error) {
     logger.error("Erro ao atualizar descrição do produto", error);
 
-    // Handle specific error messages
     if (error instanceof Error) {
       return {
         success: false,

@@ -1,9 +1,11 @@
 "use server";
 
 import { revalidateTag } from "next/cache";
+import { createLogger } from "@/core/logger";
 import { CACHE_TAGS } from "@/lib/cache-config";
-import { createLogger } from "@/lib/logger";
-import { ProductServiceApi } from "@/services/api/product/product-service-api";
+import { getAuthContext } from "@/server/auth-context";
+import { productBaseServiceApi } from "@/services/api-main/product-base";
+import { productUpdateServiceApi } from "@/services/api-main/product-update";
 import { generateSlugFromName } from "@/utils/slug-utils";
 
 const logger = createLogger("ProductActions");
@@ -60,8 +62,6 @@ export async function createProductFromForm(formData: FormData): Promise<{
     const stock = parseInt(formData.get("stock") as string, 10) || 0;
     const brandId = parseInt(formData.get("brandId") as string, 10) || 0;
     const typeId = parseInt(formData.get("typeId") as string, 10) || 0;
-    const businessType =
-      parseInt(formData.get("businessType") as string, 10) || 1;
 
     // Auto-generate slug from product name
     const slug = generateSlugFromName(name);
@@ -83,76 +83,40 @@ export async function createProductFromForm(formData: FormData): Promise<{
       };
     }
 
-    // Prepare API request data - todos os parâmetros conforme API Reference
+    // Prepare API request data — novos nomes de parâmetros
     const apiData = {
-      // Tipo de negócio (obrigatório)
-      pe_type_business: businessType, // From FormData
-
-      // Dados básicos do produto (obrigatórios)
-      pe_nome_produto: name,
-      pe_slug: slug, // Auto-generated slug
-
-      // Dados básicos opcionais
-      pe_descricao_tab: description || "",
-      pe_etiqueta: tags || "",
+      pe_product_name: name,
+      pe_tab_description: description || "",
+      pe_label: tags || "",
       pe_ref: reference || "",
-      pe_modelo: model || "",
+      pe_model: model || "",
+      pe_product_type_id: typeId,
+      pe_brand_id: brandId,
+      pe_weight_gr: 0,
+      pe_length_mm: 0,
+      pe_width_mm: 0,
+      pe_height_mm: 0,
+      pe_diameter_mm: 0,
+      pe_warranty_period_days: 0,
+      pe_wholesale_price: wholesalePrice,
+      pe_retail_price: retailPrice,
+      pe_corporate_price: corporatePrice,
+      pe_stock_quantity: stock,
+      pe_website_off_flag: 0,
+      pe_imported_flag: 0,
+      pe_additional_info: additionalInfo || "",
+    };
 
-      // Relacionamentos opcionais
-      pe_id_fornecedor: 0, // Default: sem fornecedor
-      pe_id_tipo: typeId, // ID do Tipo do formulário
-      pe_id_marca: brandId, // ID da Marca do formulário
-      pe_id_familia: 0, // Default: sem família
-      pe_id_grupo: 0, // Default: sem grupo
-      pe_id_subgrupo: 0, // Default: sem subgrupo
+    const { apiContext } = await getAuthContext();
 
-      // Características físicas opcionais
-      pe_peso_gr: 0,
-      pe_comprimento_mm: 0,
-      pe_largura_mm: 0,
-      pe_altura_mm: 0,
-      pe_diametro_mm: 0,
-      pe_tempodegarantia_mes: 0,
+    const response = await productBaseServiceApi.createProduct({
+      ...apiData,
+      ...apiContext,
+    });
 
-      // Preços (obrigatórios no formulário)
-      pe_vl_venda_atacado: wholesalePrice, // Preço Atacado
-      pe_vl_venda_varejo: retailPrice, // Preço Varejo
-      pe_vl_corporativo: corporatePrice, // Preço Corporativo
-
-      // Estoque e flags opcionais
-      pe_qt_estoque: stock,
-      pe_flag_website_off: 0, // Default: website ativo
-      pe_flag_importado: 2, // Default: produto importado
-
-      // Informações adicionais opcionais
-      pe_info: additionalInfo || "",
-    }; // Call API service
-    const response = await ProductServiceApi.createProduct(apiData);
-
-    // Validate response
-    if (!ProductServiceApi.isValidOperationResponse(response)) {
-      logger.error("Invalid API response:", response);
-      return {
-        success: false,
-        error: "Resposta inválida da API",
-      };
-    }
-
-    // Check if operation was successful
-    if (!ProductServiceApi.isOperationSuccessful(response)) {
-      const spResponse =
-        ProductServiceApi.extractStoredProcedureResponse(response);
-      const errorMessage = spResponse?.sp_message || "Erro ao criar produto";
-      logger.error("API returned error:", { spResponse, errorMessage });
-
-      return {
-        success: false,
-        error: errorMessage,
-      };
-    }
-
-    // Extract product ID from response
-    const productId = ProductServiceApi.extractRecordId(response);
+    const spResult =
+      productBaseServiceApi.extractStoredProcedureResult(response);
+    const productId = spResult?.sp_return_id;
 
     if (!productId) {
       logger.error("No product ID returned from API:", response);
@@ -162,8 +126,8 @@ export async function createProductFromForm(formData: FormData): Promise<{
       };
     }
 
-    // Invalida o cache da listagem de produtos
     revalidateTag(CACHE_TAGS.productsPdv, "seconds");
+    revalidateTag(CACHE_TAGS.productsBase, "seconds");
 
     return {
       success: true,
@@ -213,75 +177,40 @@ export async function createProduct(data: CreateProductData): Promise<{
       };
     }
 
-    // Prepare API request data - todos os parâmetros conforme API Reference
+    // Prepare API request data — novos nomes de parâmetros
     const apiData = {
-      // Tipo de negócio (obrigatório)
-      pe_type_business: 1, // Default: 1 (venda para consumidor final) - can be made dynamic if needed
-      // Dados básicos do produto (obrigatórios)
-      pe_nome_produto: data.name,
-      pe_slug: slug, // Use auto-generated slug
-
-      // Dados básicos opcionais
-      pe_descricao_tab: data.description || "",
-      pe_etiqueta: data.tags || "",
+      pe_product_name: data.name,
+      pe_tab_description: data.description || "",
+      pe_label: data.tags || "",
       pe_ref: data.reference || "",
-      pe_modelo: data.model || "",
+      pe_model: data.model || "",
+      pe_product_type_id: data.typeId || 0,
+      pe_brand_id: data.brandId || 0,
+      pe_weight_gr: 0,
+      pe_length_mm: 0,
+      pe_width_mm: 0,
+      pe_height_mm: 0,
+      pe_diameter_mm: 0,
+      pe_warranty_period_days: 0,
+      pe_wholesale_price: data.wholesalePrice || 0,
+      pe_retail_price: data.retailPrice || 0,
+      pe_corporate_price: data.corporatePrice || 0,
+      pe_stock_quantity: data.stock || 0,
+      pe_website_off_flag: 0,
+      pe_imported_flag: 0,
+      pe_additional_info: data.additionalInfo || "",
+    };
 
-      // Relacionamentos opcionais
-      pe_id_fornecedor: 0, // Default: sem fornecedor
-      pe_id_tipo: data.typeId || 0, // ID do Tipo
-      pe_id_marca: data.brandId || 0,
-      pe_id_familia: 0, // Default: sem família
-      pe_id_grupo: 0, // Default: sem grupo
-      pe_id_subgrupo: 0, // Default: sem subgrupo
+    const { apiContext } = await getAuthContext();
 
-      // Características físicas opcionais
-      pe_peso_gr: 0,
-      pe_comprimento_mm: 0,
-      pe_largura_mm: 0,
-      pe_altura_mm: 0,
-      pe_diametro_mm: 0,
-      pe_tempodegarantia_mes: 0,
+    const response = await productBaseServiceApi.createProduct({
+      ...apiData,
+      ...apiContext,
+    });
 
-      // Preços (obrigatórios no formulário)
-      pe_vl_venda_atacado: data.wholesalePrice || 0, // Preço Atacado
-      pe_vl_venda_varejo: data.retailPrice || 0, // Preço Varejo
-      pe_vl_corporativo: data.corporatePrice || 0, // Preço Corporativo
-
-      // Estoque e flags opcionais
-      pe_qt_estoque: data.stock || 0,
-      pe_flag_website_off: 0, // Default: website ativo
-      pe_flag_importado: 2, // Default: produto importado
-
-      // Informações adicionais opcionais
-      pe_info: data.additionalInfo || "",
-    }; // Call API service
-    const response = await ProductServiceApi.createProduct(apiData);
-
-    // Validate response
-    if (!ProductServiceApi.isValidOperationResponse(response)) {
-      logger.error("Invalid API response:", response);
-      return {
-        success: false,
-        error: "Resposta inválida da API",
-      };
-    }
-
-    // Check if operation was successful
-    if (!ProductServiceApi.isOperationSuccessful(response)) {
-      const spResponse =
-        ProductServiceApi.extractStoredProcedureResponse(response);
-      const errorMessage = spResponse?.sp_message || "Erro ao criar produto";
-      logger.error("API returned error:", { spResponse, errorMessage });
-
-      return {
-        success: false,
-        error: errorMessage,
-      };
-    }
-
-    // Extract product ID from response
-    const productId = ProductServiceApi.extractRecordId(response);
+    const spResult =
+      productBaseServiceApi.extractStoredProcedureResult(response);
+    const productId = spResult?.sp_return_id;
 
     if (!productId) {
       logger.error("No product ID returned from API:", response);
@@ -291,8 +220,8 @@ export async function createProduct(data: CreateProductData): Promise<{
       };
     }
 
-    // Invalida o cache da listagem de produtos
     revalidateTag(CACHE_TAGS.productsPdv, "seconds");
+    revalidateTag(CACHE_TAGS.productsBase, "seconds");
 
     return {
       success: true,
@@ -332,35 +261,20 @@ export async function updateProductGeneral(data: {
   error?: string;
 }> {
   try {
-    const response = await ProductServiceApi.updateProductGeneral({
-      pe_id_produto: data.productId,
-      pe_nome_produto: data.productName,
+    const { apiContext } = await getAuthContext();
+
+    await productUpdateServiceApi.updateProductGeneral({
+      pe_product_id: data.productId,
+      pe_product_name: data.productName,
       pe_ref: data.reference,
-      pe_modelo: data.model,
-      pe_etiqueta: data.label,
-      pe_descricao_tab: data.descriptionTab,
+      pe_model: data.model,
+      pe_label: data.label,
+      pe_tab_description: data.descriptionTab,
+      ...apiContext,
     });
 
-    if (!ProductServiceApi.isValidOperationResponse(response)) {
-      logger.error("Invalid API response:", response);
-      return {
-        success: false,
-        error: "Resposta inválida da API",
-      };
-    }
-
-    if (!ProductServiceApi.isOperationSuccessful(response)) {
-      const spResponse =
-        ProductServiceApi.extractStoredProcedureResponse(response);
-      const errorMessage =
-        spResponse?.sp_message || "Erro ao atualizar dados gerais";
-      logger.error("API returned error:", { spResponse, errorMessage });
-
-      return {
-        success: false,
-        error: errorMessage,
-      };
-    }
+    revalidateTag(CACHE_TAGS.productsBase, "seconds");
+    revalidateTag(CACHE_TAGS.productBase(String(data.productId)), "hours");
 
     return {
       success: true,
@@ -397,37 +311,22 @@ export async function updateProductCharacteristics(data: {
   error?: string;
 }> {
   try {
-    const response = await ProductServiceApi.updateProductCharacteristics({
-      pe_id_produto: data.productId,
-      pe_peso_gr: data.weightGr,
-      pe_comprimento_mm: data.lengthMm,
-      pe_largura_mm: data.widthMm,
-      pe_altura_mm: data.heightMm,
-      pe_diametro_mm: data.diameterMm,
-      pe_tempodegarantia_dia: data.warrantyDays,
-      pe_tempodegarantia_mes: data.warrantyMonths,
+    const { apiContext } = await getAuthContext();
+
+    await productUpdateServiceApi.updateProductCharacteristics({
+      pe_product_id: data.productId,
+      pe_weight_gr: data.weightGr,
+      pe_length_mm: data.lengthMm,
+      pe_width_mm: data.widthMm,
+      pe_height_mm: data.heightMm,
+      pe_diameter_mm: data.diameterMm,
+      pe_warranty_period_days: data.warrantyDays,
+      pe_warranty_period_months: data.warrantyMonths,
+      ...apiContext,
     });
 
-    if (!ProductServiceApi.isValidOperationResponse(response)) {
-      logger.error("Invalid API response:", response);
-      return {
-        success: false,
-        error: "Resposta inválida da API",
-      };
-    }
-
-    if (!ProductServiceApi.isOperationSuccessful(response)) {
-      const spResponse =
-        ProductServiceApi.extractStoredProcedureResponse(response);
-      const errorMessage =
-        spResponse?.sp_message || "Erro ao atualizar características";
-      logger.error("API returned error:", { spResponse, errorMessage });
-
-      return {
-        success: false,
-        error: errorMessage,
-      };
-    }
+    revalidateTag(CACHE_TAGS.productsBase, "seconds");
+    revalidateTag(CACHE_TAGS.productBase(String(data.productId)), "hours");
 
     return {
       success: true,
@@ -464,8 +363,10 @@ export async function updateProductTaxValues(data: {
   error?: string;
 }> {
   try {
-    const response = await ProductServiceApi.updateProductTaxValues({
-      pe_id_produto: data.productId,
+    const { apiContext } = await getAuthContext();
+
+    await productUpdateServiceApi.updateProductTaxValues({
+      pe_product_id: data.productId,
       pe_cfop: data.cfop,
       pe_cst: data.cst,
       pe_ean: data.ean,
@@ -473,28 +374,11 @@ export async function updateProductTaxValues(data: {
       pe_ncm: data.ncm,
       pe_ppb: data.ppb,
       pe_temp: Number(data.temp),
+      ...apiContext,
     });
 
-    if (!ProductServiceApi.isValidOperationResponse(response)) {
-      logger.error("Invalid API response:", response);
-      return {
-        success: false,
-        error: "Resposta inválida da API",
-      };
-    }
-
-    if (!ProductServiceApi.isOperationSuccessful(response)) {
-      const spResponse =
-        ProductServiceApi.extractStoredProcedureResponse(response);
-      const errorMessage =
-        spResponse?.sp_message || "Erro ao atualizar valores fiscais";
-      logger.error("API returned error:", { spResponse, errorMessage });
-
-      return {
-        success: false,
-        error: errorMessage,
-      };
-    }
+    revalidateTag(CACHE_TAGS.productsBase, "seconds");
+    revalidateTag(CACHE_TAGS.productBase(String(data.productId)), "hours");
 
     return {
       success: true,
@@ -533,38 +417,24 @@ export async function updateProductFlags(data: {
   error?: string;
 }> {
   try {
-    const response = await ProductServiceApi.updateProductFlags({
-      pe_id_produto: data.productId,
-      pe_flag_controle_fisico: data.controleFisico,
-      pe_flag_controle_estoque: data.controlarEstoque,
-      pe_flag_descontinuado: data.consignado,
-      pe_flag_destaque: data.destaque,
-      pe_flag_promocao: data.promocao,
-      pe_flag_servico: data.servico,
-      pe_flag_website_off: data.websiteOff,
-      pe_flag_inativo: data.inativo,
-      pe_flag_importado: data.importado,
+    const { apiContext } = await getAuthContext();
+
+    await productUpdateServiceApi.updateProductFlags({
+      pe_product_id: data.productId,
+      pe_physical_control_flag: data.controleFisico,
+      pe_stock_control_flag: data.controlarEstoque,
+      pe_discontinued_flag: data.consignado,
+      pe_featured_flag: data.destaque,
+      pe_promotion_flag: data.promocao,
+      pe_service_flag: data.servico,
+      pe_website_off_flag: data.websiteOff,
+      pe_inactive_flag: data.inativo,
+      pe_imported_flag: data.importado,
+      ...apiContext,
     });
 
-    if (!ProductServiceApi.isValidOperationResponse(response)) {
-      logger.error("Invalid API response:", response);
-      return {
-        success: false,
-        error: "Resposta inválida da API",
-      };
-    }
-
-    if (!ProductServiceApi.isOperationSuccessful(response)) {
-      const spResponse =
-        ProductServiceApi.extractStoredProcedureResponse(response);
-      const errorMessage = spResponse?.sp_message || "Erro ao atualizar flags";
-      logger.error("API returned error:", { spResponse, errorMessage });
-
-      return {
-        success: false,
-        error: errorMessage,
-      };
-    }
+    revalidateTag(CACHE_TAGS.productsBase, "seconds");
+    revalidateTag(CACHE_TAGS.productBase(String(data.productId)), "hours");
 
     return {
       success: true,

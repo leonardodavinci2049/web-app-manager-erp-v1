@@ -6,14 +6,14 @@
  */
 
 import { Card } from "@/components/ui/card";
-import type { TaxonomyData } from "@/services/api/taxonomy/types/taxonomy-types";
+import type { UITaxonomyMenuItem } from "@/services/api-main/taxonomy-base/transformers/transformers";
 import { ParentCategoryEditor } from "./inline-update/ParentCategoryEditor";
 
 interface ParentCategoryCardProps {
   categoryId: number;
   currentParentId: number;
   currentParentName: string;
-  categories: TaxonomyData[];
+  categories: UITaxonomyMenuItem[];
 }
 
 export function ParentCategoryCard({

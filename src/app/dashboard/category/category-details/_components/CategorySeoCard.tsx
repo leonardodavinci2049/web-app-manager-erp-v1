@@ -14,10 +14,10 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import type { TaxonomyData } from "@/services/api/taxonomy/types/taxonomy-types";
+import type { UITaxonomy } from "@/services/api-main/taxonomy-base/transformers/transformers";
 
 interface CategorySeoCardProps {
-  category: TaxonomyData;
+  category: UITaxonomy;
 }
 
 interface EditingState {
@@ -30,9 +30,9 @@ export function CategorySeoCard({ category }: CategorySeoCardProps) {
     field: null,
     value: "",
   });
-  const [metaTitle, setMetaTitle] = useState(category.META_TITLE || "");
+  const [metaTitle, setMetaTitle] = useState(category.metaTitle || "");
   const [metaDescription, setMetaDescription] = useState(
-    category.META_DESCRIPTION || "",
+    category.metaDescription || "",
   );
 
   // Check if a field is being edited

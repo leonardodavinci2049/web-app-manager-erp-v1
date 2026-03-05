@@ -50,7 +50,7 @@ export function CategoryTreeItem({
   const handleToggle = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    onToggle?.(node.id, !isExpanded);
+    onToggle?.(node.id, !isExpanded, node.parentId);
   };
 
   const handleSelect = (e: React.MouseEvent<HTMLButtonElement>) => {

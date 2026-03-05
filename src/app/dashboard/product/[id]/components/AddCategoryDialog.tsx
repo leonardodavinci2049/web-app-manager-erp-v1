@@ -3,6 +3,7 @@
 import { Plus, Search } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { loadCategoriesMenuAction } from "@/app/actions/action-categories";
 import { createTaxonomyRelationship } from "@/app/actions/action-taxonomy";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,7 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-import type { TaxonomyData } from "@/services/api/taxonomy/types/taxonomy-types";
+import type { UITaxonomyMenuItem } from "@/services/api-main/taxonomy-base/transformers/transformers";
 
 interface AddCategoryDialogProps {
   productId: number;
@@ -25,44 +26,13 @@ interface AddCategoryDialogProps {
 }
 
 /**
- * Flattens hierarchical taxonomy structure into a flat list
- * preserving the hierarchy information (level)
- * @param categories - Hierarchical taxonomy array
- * @returns Flat array with all taxonomies
- */
-function flattenTaxonomyHierarchy(categories: TaxonomyData[]): TaxonomyData[] {
-  const result: TaxonomyData[] = [];
-
-  function flatten(items: TaxonomyData[]) {
-    for (const item of items) {
-      // Add the current item (without children for clean structure)
-      const { children, ...itemWithoutChildren } = item;
-      result.push(itemWithoutChildren as TaxonomyData);
-
-      // Recursively flatten children
-      if (children && children.length > 0) {
-        flatten(children);
-      }
-    }
-  }
-
-  flatten(categories);
-  return result;
-}
-
-/**
  * Get prefix dashes based on level
- * Level 1: no dashes
- * Level 2: one dash (-)
- * Level 3: two dashes (--)
- * @param level - Hierarchy level
- * @returns Prefix string with dashes
  */
 function getLevelPrefix(level: number): string {
   if (level === 1) return "";
   if (level === 2) return "- ";
   if (level === 3) return "-- ";
-  return "--- "; // Fallback for deeper levels
+  return "--- ";
 }
 
 /**
@@ -78,28 +48,20 @@ export function AddCategoryDialog({
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
-  const [categories, setCategories] = useState<TaxonomyData[]>([]);
+  const [categories, setCategories] = useState<UITaxonomyMenuItem[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
 
   // Load categories when dialog opens
   const loadCategories = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("/api/taxonomy/menu", {
-        method: "GET",
-      });
+      const response = await loadCategoriesMenuAction();
 
-      if (!response.ok) {
-        throw new Error("Erro ao carregar categorias");
+      if (response.success) {
+        setCategories(response.data);
+      } else {
+        toast.error(response.message || "Erro ao carregar categorias");
       }
-
-      const data = await response.json();
-
-      // Flatten the hierarchical structure into a flat list
-      const hierarchicalCategories = data.categories || [];
-      const flatCategories = flattenTaxonomyHierarchy(hierarchicalCategories);
-
-      setCategories(flatCategories);
     } catch (_error) {
       toast.error("Erro ao carregar categorias");
     } finally {
@@ -141,9 +103,9 @@ export function AddCategoryDialog({
 
   // Filter categories based on search only (show all categories, including existing ones)
   const filteredCategories = categories.filter((category) => {
-    const matchesSearch = category.TAXONOMIA.toLowerCase().includes(
-      searchTerm.toLowerCase(),
-    );
+    const matchesSearch = category.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
     return matchesSearch;
   });
 
@@ -191,21 +153,21 @@ export function AddCategoryDialog({
               <div className="space-y-1 p-4">
                 {filteredCategories.map((category) => (
                   <button
-                    key={category.ID_TAXONOMY}
+                    key={category.id}
                     type="button"
-                    onClick={() => handleAddCategory(category.ID_TAXONOMY)}
+                    onClick={() => handleAddCategory(category.id)}
                     disabled={isAdding}
                     className="flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-accent disabled:pointer-events-none disabled:opacity-50"
                   >
                     <span className="flex items-center gap-1">
                       <span className="text-muted-foreground">
-                        {getLevelPrefix(category.LEVEL || 1)}
+                        {getLevelPrefix(category.level || 1)}
                       </span>
-                      <span>{category.TAXONOMIA}</span>
+                      <span>{category.name}</span>
                     </span>
                     <span className="flex items-center gap-3 text-xs text-muted-foreground">
-                      <span>ID: {category.ID_TAXONOMY}</span>
-                      <span>Nível {category.LEVEL}</span>
+                      <span>ID: {category.id}</span>
+                      <span>Nível {category.level}</span>
                     </span>
                   </button>
                 ))}
