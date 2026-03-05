@@ -405,9 +405,9 @@ export function ProductFiltersImproved({
                       Filtros ativos
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      {activeFilters.map((filter, index) => (
+                      {activeFilters.map((filter) => (
                         <Badge
-                          key={`${filter.type}-${index}`}
+                          key={filter.type}
                           variant="secondary"
                           className="flex items-center gap-1.5 px-2.5 py-1 text-xs"
                         >
