@@ -41,6 +41,7 @@ yarn-error.log*
 next-env.d.ts
 
 # others
+/public/images
 ecosystem.config.js
 .well-known
 .github/
