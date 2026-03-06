@@ -52,21 +52,17 @@ const data = {
   ],
   navMain: [
     {
-      title: "Consultor ",
+      title: "Painel ",
       url: "/dashboard",
       icon: SquareTerminal,
       isActive: true,
       items: [
         {
-          title: "Vendas",
+          title: "Visão Geral",
           url: "/dashboard",
         },
         {
-          title: "Orçamentos",
-          url: "#",
-        },
-        {
-          title: "Carrinho",
+          title: "Últimas Vendas",
           url: "#",
         },
       ],
@@ -132,10 +128,6 @@ const data = {
       url: "#",
       icon: Settings2,
       items: [
-        {
-          title: "Resumo dos Pedidos",
-          url: "/dashboard/report/panel",
-        },
         {
           title: "Vendas",
           url: "/dashboard/report/sales",
