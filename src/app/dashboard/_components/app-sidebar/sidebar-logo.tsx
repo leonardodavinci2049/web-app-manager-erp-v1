@@ -9,6 +9,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { publicEnvs } from "@/core/config/envs";
 
 export function SidebarLogo() {
   const { setOpenMobile } = useSidebar();
@@ -30,7 +31,7 @@ export function SidebarLogo() {
               className="h-10 w-auto object-contain"
             />
             <span className="text-sidebar-foreground/70 truncate text-xs">
-              PDV - Sistema de Vendas
+              {publicEnvs.NEXT_PUBLIC_SIDEBAR_TITLE}
             </span>
           </Link>
         </SidebarMenuButton>

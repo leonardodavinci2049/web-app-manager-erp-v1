@@ -22,6 +22,8 @@ const publicEnvsSchema = z.object({
   NEXT_PUBLIC_COMPANY_META_DESCRIPTION: z
     .string()
     .min(1, "NEXT_PUBLIC_COMPANY_META_DESCRIPTION is required"),
+  NEXT_PUBLIC_APP_NAME: z.string().min(1),
+  NEXT_PUBLIC_SIDEBAR_TITLE: z.string().min(1),
 });
 
 // Variáveis exclusivas do servidor
@@ -68,6 +70,8 @@ const publicValidation = publicEnvsSchema.safeParse({
     process.env.NEXT_PUBLIC_COMPANY_META_TITLE_CAPTION || "",
   NEXT_PUBLIC_COMPANY_META_DESCRIPTION:
     process.env.NEXT_PUBLIC_COMPANY_META_DESCRIPTION || "",
+  NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME || "",
+  NEXT_PUBLIC_SIDEBAR_TITLE: process.env.NEXT_PUBLIC_SIDEBAR_TITLE || "",
 });
 
 if (!publicValidation.success && typeof window === "undefined") {
