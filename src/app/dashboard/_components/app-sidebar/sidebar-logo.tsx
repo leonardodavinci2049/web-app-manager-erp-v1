@@ -7,14 +7,21 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 
 export function SidebarLogo() {
+  const { setOpenMobile } = useSidebar();
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
         <SidebarMenuButton size="lg" className="!h-auto !py-3" asChild>
-          <Link href="/dashboard" className="!flex-col !items-start !gap-1">
+          <Link
+            href="/dashboard"
+            onClick={() => setOpenMobile(false)}
+            className="!flex-col !items-start !gap-1"
+          >
             <Image
               src="/images/logo/logo-sidebar.png"
               alt="Logo da Empresa"
