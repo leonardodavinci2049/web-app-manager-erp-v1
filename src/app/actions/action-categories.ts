@@ -7,9 +7,11 @@
  * seguindo os padrões de segurança e arquitetura do projeto.
  */
 
+import { revalidateTag } from "next/cache";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth/auth";
+import { CACHE_TAGS } from "@/lib/cache-config";
 import { createLogger } from "@/lib/logger";
 import { taxonomyBaseServiceApi } from "@/services/api-main/taxonomy-base";
 import {
@@ -263,6 +265,11 @@ export async function updateCategory(
       ...ctx.apiContext,
     });
 
+    // Invalida cache de taxonomias
+    revalidateTag(CACHE_TAGS.taxonomies, "seconds");
+    revalidateTag(CACHE_TAGS.taxonomiesMenu, "hours");
+    revalidateTag(CACHE_TAGS.taxonomy(String(id)), "hours");
+
     const updatedCategory = await findCategoryById(id);
     logger.info(`Categoria ${id} atualizada com sucesso`);
 
@@ -439,6 +446,10 @@ export async function createCategoryAction(formData: FormData) {
       ...ctx.apiContext,
     });
 
+    // Invalida cache de taxonomias para refletir a nova categoria
+    revalidateTag(CACHE_TAGS.taxonomies, "seconds");
+    revalidateTag(CACHE_TAGS.taxonomiesMenu, "hours");
+
     const { redirect } = await import("next/navigation");
     redirect("/dashboard/category/category-list");
   } catch (error) {
@@ -488,6 +499,10 @@ export async function createCategory(
     if (!recordId) {
       throw new Error("ID do registro criado não foi retornado");
     }
+
+    // Invalida cache de taxonomias
+    revalidateTag(CACHE_TAGS.taxonomies, "seconds");
+    revalidateTag(CACHE_TAGS.taxonomiesMenu, "hours");
 
     const createdCategory = await findCategoryById(recordId);
 
@@ -546,6 +561,11 @@ export async function deleteCategory(
       spResponse?.sp_message ||
       response.message ||
       "Categoria deletada com sucesso";
+
+    // Invalida cache de taxonomias
+    revalidateTag(CACHE_TAGS.taxonomies, "seconds");
+    revalidateTag(CACHE_TAGS.taxonomiesMenu, "hours");
+    revalidateTag(CACHE_TAGS.taxonomy(String(categoryId)), "hours");
 
     return {
       success: true,
