@@ -1,7 +1,9 @@
 "use server";
 
+import { revalidateTag } from "next/cache";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth/auth";
+import { CACHE_TAGS } from "@/lib/cache-config";
 import { createLogger } from "@/lib/logger";
 import { taxonomyInlineServiceApi } from "@/services/api-main/taxonomy-inline";
 
@@ -72,6 +74,10 @@ export async function updateCategoryName(
       spResponse?.sp_message || "Nome da categoria atualizado com sucesso";
 
     logger.info("Category name updated successfully:", { categoryId, name });
+
+    revalidateTag(CACHE_TAGS.taxonomies, "seconds");
+    revalidateTag(CACHE_TAGS.taxonomiesMenu, "hours");
+    revalidateTag(CACHE_TAGS.taxonomy(String(categoryId)), "hours");
 
     return {
       success: true,
@@ -152,6 +158,10 @@ export async function updateCategoryParent(
       parentId,
     });
 
+    revalidateTag(CACHE_TAGS.taxonomies, "seconds");
+    revalidateTag(CACHE_TAGS.taxonomiesMenu, "hours");
+    revalidateTag(CACHE_TAGS.taxonomy(String(categoryId)), "hours");
+
     return {
       success: true,
       message: successMessage,
@@ -228,6 +238,10 @@ export async function updateCategoryOrder(
 
     logger.info("Category order updated successfully:", { categoryId, order });
 
+    revalidateTag(CACHE_TAGS.taxonomies, "seconds");
+    revalidateTag(CACHE_TAGS.taxonomiesMenu, "hours");
+    revalidateTag(CACHE_TAGS.taxonomy(String(categoryId)), "hours");
+
     return {
       success: true,
       message: successMessage,
@@ -298,6 +312,10 @@ export async function updateCategoryStatus(
       categoryId,
       status,
     });
+
+    revalidateTag(CACHE_TAGS.taxonomies, "seconds");
+    revalidateTag(CACHE_TAGS.taxonomiesMenu, "hours");
+    revalidateTag(CACHE_TAGS.taxonomy(String(categoryId)), "hours");
 
     return {
       success: true,
