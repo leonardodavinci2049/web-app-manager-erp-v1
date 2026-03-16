@@ -207,5 +207,5 @@ type Statement = typeof statement;
 type Resource = keyof Statement;
 type Action<R extends Resource> = Statement[R][number];
 
-export { ac, statement };
 export type { Action, Resource, Statement };
+export { ac, statement };
