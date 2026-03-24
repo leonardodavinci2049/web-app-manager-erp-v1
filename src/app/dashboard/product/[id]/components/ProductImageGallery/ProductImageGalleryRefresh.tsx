@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { refreshProductGalleryAction } from "@/app/actions/action-product-images";
 import {
   type GalleryImageWithId,
   ProductImageGallery,
@@ -37,22 +38,8 @@ export function ProductImageGalleryRefresh({
     setIsRefreshing(true);
 
     try {
-      // Fetch updated gallery from the API
-      const response = await fetch("/api/product-gallery/refresh", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          productId: productId.toString(),
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to refresh gallery");
-      }
-
-      const data = await response.json();
+      // Call Server Action to refresh gallery
+      const data = await refreshProductGalleryAction(productId.toString());
 
       if (data.success && data.images) {
         // Update images with the new gallery
