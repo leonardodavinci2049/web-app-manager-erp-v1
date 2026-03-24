@@ -28,6 +28,8 @@ export function SidebarLogo() {
               alt="Logo da Empresa"
               width={140}
               height={40}
+              priority
+              style={{ width: "auto", height: "auto" }}
               className="h-10 w-auto object-contain"
             />
             <span className="text-sidebar-foreground/70 truncate text-xs">

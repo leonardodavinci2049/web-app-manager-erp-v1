@@ -417,11 +417,12 @@ export function ProductImageGallery({
                 )}
               </>
             ) : (
-              <div className="flex h-full items-center justify-center">
+              <div className="relative flex h-full items-center justify-center">
                 <Image
                   src="/images/product/no-image.jpeg"
                   alt="Imagem não disponível"
                   fill
+                  priority
                   className="object-cover opacity-50"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 />
@@ -600,7 +601,7 @@ export function ProductImageGallery({
                 }
               />
             ) : (
-              <div className="flex h-full items-center justify-center">
+              <div className="relative flex h-full items-center justify-center">
                 <Image
                   src="/images/product/no-image.jpeg"
                   alt="Imagem não disponível"
