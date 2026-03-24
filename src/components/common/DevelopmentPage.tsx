@@ -4,11 +4,11 @@ import {
   Code2,
   Coffee,
   Construction,
-  Github,
   Rocket,
   Zap,
 } from "lucide-react";
 import Link from "next/link";
+import { GitHubIcon } from "@/app/(auth)/components/GitHubIcon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -191,7 +191,7 @@ const DevelopmentPage = () => {
             </Link>
           </Button>
           <Button variant="default" className="group">
-            <Github className="h-4 w-4 transition-transform duration-200 group-hover:rotate-12" />
+            <GitHubIcon className="h-4 w-4 transition-transform duration-200 group-hover:rotate-12" />
             Acompanhar Progresso
           </Button>
         </div>

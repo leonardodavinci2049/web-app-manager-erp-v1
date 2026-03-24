@@ -42,6 +42,7 @@ const nextConfig: NextConfig = {
         pathname: "/**",
       },
     ],
+    dangerouslyAllowLocalIP: true,
   },
 };
 

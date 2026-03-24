@@ -13,6 +13,95 @@ import { uploadFileAction } from "./action-test-assets";
 const logger = createLogger("action-product-images");
 
 /**
+ * Response type for gallery refresh action
+ */
+interface RefreshGalleryResponse {
+  success: boolean;
+  images?: Array<{
+    id: string;
+    url: string;
+    originalUrl: string;
+    mediumUrl: string;
+    previewUrl: string;
+    isPrimary: boolean;
+  }>;
+  error?: string;
+}
+
+/**
+ * Refresh the product image gallery by re-fetching from the Assets API.
+ * Called by ProductImageGalleryRefresh after a successful image upload.
+ */
+export async function refreshProductGalleryAction(
+  productId: string,
+): Promise<RefreshGalleryResponse> {
+  try {
+    if (!productId) {
+      return { success: false, error: "ID do produto é obrigatório" };
+    }
+
+    const galleryResponse = await assetsApiService.getEntityGallery({
+      entityType: "PRODUCT",
+      entityId: productId,
+    });
+
+    if (isApiError(galleryResponse)) {
+      logger.warn(
+        `Failed to refresh gallery for product ${productId}: ${galleryResponse.message}`,
+      );
+      return {
+        success: false,
+        error: Array.isArray(galleryResponse.message)
+          ? galleryResponse.message.join(", ")
+          : galleryResponse.message || "Erro ao atualizar galeria",
+      };
+    }
+
+    // Sort images: primary first, then by displayOrder, then by upload date
+    const sortedImages = [...galleryResponse.images].sort((a, b) => {
+      if (a.isPrimary && !b.isPrimary) return -1;
+      if (!a.isPrimary && b.isPrimary) return 1;
+      if (a.displayOrder !== b.displayOrder) {
+        return a.displayOrder - b.displayOrder;
+      }
+      return (
+        new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
+      );
+    });
+
+    const images = sortedImages
+      .map((img) => ({
+        id: img.id,
+        url: img.urls.preview ?? img.urls.medium ?? img.urls.original,
+        originalUrl: img.urls.original ?? img.urls.preview,
+        mediumUrl: img.urls.medium ?? img.urls.preview ?? img.urls.original,
+        previewUrl: img.urls.preview ?? img.urls.medium ?? img.urls.original,
+        isPrimary: img.isPrimary,
+      }))
+      .filter(
+        (
+          img,
+        ): img is {
+          id: string;
+          url: string;
+          originalUrl: string;
+          mediumUrl: string;
+          previewUrl: string;
+          isPrimary: boolean;
+        } => img.url !== undefined,
+      );
+
+    return { success: true, images };
+  } catch (error) {
+    logger.error("Refresh product gallery action error:", error);
+    return {
+      success: false,
+      error: "Erro interno ao atualizar galeria",
+    };
+  }
+}
+
+/**
  * Helper: atualiza PATH_IMAGEM no produto via novo serviço inline.
  * Lança exceção em caso de erro de SP (tratado pelo serviço).
  */
