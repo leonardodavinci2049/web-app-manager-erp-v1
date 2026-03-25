@@ -43,3 +43,19 @@ export async function getOrganizationBySlug(slug: string) {
 
   return response.data;
 }
+
+export async function getMemberPersonId(
+  userId: string,
+  organizationId: string,
+): Promise<number | null> {
+  const response = await AuthService.findMemberPersonId({
+    userId,
+    organizationId,
+  });
+
+  if (!response.success || response.data === null) {
+    return null;
+  }
+
+  return response.data;
+}

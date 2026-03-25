@@ -16,8 +16,7 @@ export async function getAuthContext() {
       pe_user_id: session.user.id ?? "0",
       pe_user_name: session.user.name ?? "",
       pe_user_role: session.user.role ?? "admin",
-      // TODO: substituir por session.user.personId quando o campo existir no schema
-      pe_person_id: 1,
+      pe_person_id: session.session?.personId ?? 0,
     },
   };
 }

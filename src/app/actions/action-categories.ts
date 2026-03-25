@@ -9,10 +9,9 @@
 
 import { revalidateTag } from "next/cache";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth/auth";
 import { CACHE_TAGS } from "@/lib/cache-config";
 import { createLogger } from "@/lib/logger";
+import { getAuthContext } from "@/server/auth-context";
 import { taxonomyBaseServiceApi } from "@/services/api-main/taxonomy-base";
 import {
   transformTaxonomyDetail,
@@ -23,25 +22,6 @@ import {
 } from "@/services/api-main/taxonomy-base/transformers/transformers";
 
 const logger = createLogger("ActionCategories");
-
-// Helper para obter contexto da sessão
-async function getSessionContext() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-  if (!session) return null;
-  return {
-    session,
-    apiContext: {
-      pe_system_client_id: session.session?.systemId ?? 0,
-      pe_organization_id: session.session?.activeOrganizationId ?? "0",
-      pe_user_id: session.user.id ?? "0",
-      pe_user_name: session.user.name ?? "",
-      pe_user_role: session.user.role ?? "admin",
-      pe_person_id: 1,
-    },
-  };
-}
 
 /**
  * Interface para parâmetros de busca de categorias
@@ -75,17 +55,7 @@ export async function findCategories(
   params: FindCategoriesParams = {},
 ): Promise<FindCategoriesResponse> {
   try {
-    const ctx = await getSessionContext();
-    if (!ctx) {
-      logger.error("Usuário não autenticado");
-      return {
-        success: false,
-        data: [],
-        hasMore: false,
-        total: 0,
-        error: "Usuário não autenticado",
-      };
-    }
+    const { apiContext } = await getAuthContext();
 
     const {
       searchTerm = "",
@@ -106,7 +76,7 @@ export async function findCategories(
       pe_page_id: page,
       pe_column_id: sortColumn,
       pe_order_id: sortOrder,
-      ...ctx.apiContext,
+      ...apiContext,
     };
 
     if (searchTerm) {
@@ -156,15 +126,11 @@ export async function findCategories(
  */
 export async function findCategoryById(id: number): Promise<UITaxonomy | null> {
   try {
-    const ctx = await getSessionContext();
-    if (!ctx) {
-      logger.error("Usuário não autenticado");
-      return null;
-    }
+    const { apiContext } = await getAuthContext();
 
     const response = await taxonomyBaseServiceApi.findTaxonomyById({
       pe_taxonomy_id: id,
-      ...ctx.apiContext,
+      ...apiContext,
     });
 
     const entity = taxonomyBaseServiceApi.extractTaxonomyById(response);
@@ -227,15 +193,7 @@ export async function updateCategory(
   params: UpdateCategoryParams,
 ): Promise<UpdateCategoryResponse> {
   try {
-    const ctx = await getSessionContext();
-    if (!ctx) {
-      logger.error("Usuário não autenticado");
-      return {
-        success: false,
-        message: "Usuário não autenticado",
-        error: "Usuário não autenticado",
-      };
-    }
+    const { apiContext } = await getAuthContext();
 
     const {
       id,
@@ -262,7 +220,7 @@ export async function updateCategory(
       pe_sort_order: order,
       pe_image_path: imagePath,
       pe_inactive: status,
-      ...ctx.apiContext,
+      ...apiContext,
     });
 
     // Invalida cache de taxonomias
@@ -319,20 +277,12 @@ export interface CreateCategoryResponse {
  */
 export async function loadCategoriesMenuAction() {
   try {
-    const ctx = await getSessionContext();
-    if (!ctx) {
-      logger.error("Usuário não autenticado para carregar menu de categorias");
-      return {
-        success: false,
-        data: [] as UITaxonomyMenuItem[],
-        message: "Usuário não autenticado",
-      };
-    }
+    const { apiContext } = await getAuthContext();
 
     const response = await taxonomyBaseServiceApi.findTaxonomyMenu({
       pe_type_id: 2,
       pe_parent_id: 0,
-      ...ctx.apiContext,
+      ...apiContext,
     });
 
     if (taxonomyBaseServiceApi.isValidTaxonomyMenu(response)) {
@@ -366,16 +316,12 @@ export async function loadCategoriesMenuAction() {
  */
 export async function getCategoryOptions(): Promise<UITaxonomyMenuItem[]> {
   try {
-    const ctx = await getSessionContext();
-    if (!ctx) {
-      logger.error("Usuário não autenticado");
-      return [];
-    }
+    const { apiContext } = await getAuthContext();
 
     const response = await taxonomyBaseServiceApi.findTaxonomyMenu({
       pe_type_id: 1,
       pe_parent_id: 0,
-      ...ctx.apiContext,
+      ...apiContext,
     });
 
     if (!taxonomyBaseServiceApi.isValidTaxonomyMenu(response)) {
@@ -430,11 +376,7 @@ export async function createCategoryAction(formData: FormData) {
       throw new Error("Não foi possível gerar o slug da categoria");
     }
 
-    const ctx = await getSessionContext();
-    if (!ctx) {
-      logger.error("Usuário não autenticado");
-      throw new Error("Usuário não autenticado");
-    }
+    const { apiContext } = await getAuthContext();
 
     // Novo serviço lança exceção em caso de erro
     await taxonomyBaseServiceApi.createTaxonomy({
@@ -443,7 +385,7 @@ export async function createCategoryAction(formData: FormData) {
       pe_parent_id: validated.parentId,
       pe_level: 1,
       pe_type_id: 1,
-      ...ctx.apiContext,
+      ...apiContext,
     });
 
     // Invalida cache de taxonomias para refletir a nova categoria
@@ -471,15 +413,7 @@ export async function createCategory(
   params: CreateCategoryParams,
 ): Promise<CreateCategoryResponse> {
   try {
-    const ctx = await getSessionContext();
-    if (!ctx) {
-      logger.error("Usuário não autenticado");
-      return {
-        success: false,
-        message: "Usuário não autenticado",
-        error: "Usuário não autenticado",
-      };
-    }
+    const { apiContext } = await getAuthContext();
 
     const { name, slug, parentId = 0, level = 1, type = 2 } = params;
 
@@ -489,7 +423,7 @@ export async function createCategory(
       pe_parent_id: parentId,
       pe_level: level,
       pe_type_id: type,
-      ...ctx.apiContext,
+      ...apiContext,
     });
 
     const spResult =
@@ -541,18 +475,11 @@ export async function deleteCategory(
   categoryId: number,
 ): Promise<DeleteCategoryResponse> {
   try {
-    const ctx = await getSessionContext();
-    if (!ctx) {
-      return {
-        success: false,
-        message: "Não autorizado",
-        error: "Usuário não autenticado",
-      };
-    }
+    const { apiContext } = await getAuthContext();
 
     const response = await taxonomyBaseServiceApi.deleteTaxonomy({
       pe_taxonomy_id: categoryId,
-      ...ctx.apiContext,
+      ...apiContext,
     });
 
     const spResponse =

@@ -1,9 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth/auth";
 import { createLogger } from "@/lib/logger";
+import { getAuthContext } from "@/server/auth-context";
 import { taxonomyRelServiceApi } from "@/services/api-main/taxonomy-rel";
 import {
   transformTaxonomyRelProductList,
@@ -11,24 +10,6 @@ import {
 } from "@/services/api-main/taxonomy-rel/transformers/transformers";
 
 const logger = createLogger("TaxonomyActions");
-
-async function getSessionContext() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-  if (!session) return null;
-  return {
-    session,
-    apiContext: {
-      pe_system_client_id: session.session?.systemId ?? 0,
-      pe_organization_id: session.session?.activeOrganizationId ?? "0",
-      pe_user_id: session.user.id ?? "0",
-      pe_user_name: session.user.name ?? "",
-      pe_user_role: session.user.role ?? "admin",
-      pe_person_id: 1,
-    },
-  };
-}
 
 /**
  * Server Action - Create taxonomy relationship (category-product)
@@ -38,15 +19,12 @@ export async function createTaxonomyRelationship(
   productId: number,
 ) {
   try {
-    const ctx = await getSessionContext();
-    if (!ctx) {
-      return { success: false, message: "Usuário não autenticado" };
-    }
+    const { apiContext } = await getAuthContext();
 
     await taxonomyRelServiceApi.createTaxonomyRelation({
       pe_taxonomy_id: taxonomyId,
       pe_record_id: productId,
-      ...ctx.apiContext,
+      ...apiContext,
     });
 
     revalidatePath(`/dashboard/product/${productId}`);
@@ -77,15 +55,12 @@ export async function deleteTaxonomyRelationship(
   productId: number,
 ) {
   try {
-    const ctx = await getSessionContext();
-    if (!ctx) {
-      return { success: false, message: "Usuário não autenticado" };
-    }
+    const { apiContext } = await getAuthContext();
 
     await taxonomyRelServiceApi.deleteTaxonomyRelation({
       pe_taxonomy_id: taxonomyId,
       pe_record_id: productId,
-      ...ctx.apiContext,
+      ...apiContext,
     });
 
     revalidatePath(`/dashboard/product/${productId}`);
@@ -113,18 +88,11 @@ export async function deleteTaxonomyRelationship(
  */
 export async function fetchProductCategories(productId: number) {
   try {
-    const ctx = await getSessionContext();
-    if (!ctx) {
-      return {
-        success: false,
-        data: [] as UITaxonomyRelProduct[],
-        message: "Usuário não autenticado",
-      };
-    }
+    const { apiContext } = await getAuthContext();
 
     const response = await taxonomyRelServiceApi.findAllProductsByTaxonomy({
       pe_record_id: productId,
-      ...ctx.apiContext,
+      ...apiContext,
     });
 
     const rawItems = taxonomyRelServiceApi.extractProducts(response);

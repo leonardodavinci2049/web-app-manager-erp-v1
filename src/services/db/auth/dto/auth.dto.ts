@@ -26,6 +26,7 @@ export interface Member {
   role: string;
   createdAt: Date;
   updatedAt: Date;
+  personId: number | null;
 }
 
 /**
