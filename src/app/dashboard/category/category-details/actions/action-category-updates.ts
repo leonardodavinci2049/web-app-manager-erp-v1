@@ -1,31 +1,12 @@
 "use server";
 
 import { revalidateTag } from "next/cache";
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth/auth";
 import { CACHE_TAGS } from "@/lib/cache-config";
 import { createLogger } from "@/lib/logger";
+import { getAuthContext } from "@/server/auth-context";
 import { taxonomyInlineServiceApi } from "@/services/api-main/taxonomy-inline";
 
 const logger = createLogger("CategoryUpdateActions");
-
-async function getSessionContext() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-  if (!session) return null;
-  return {
-    session,
-    apiContext: {
-      pe_system_client_id: session.session?.systemId ?? 0,
-      pe_organization_id: session.session?.activeOrganizationId ?? "0",
-      pe_user_id: session.user.id ?? "0",
-      pe_user_name: session.user.name ?? "",
-      pe_user_role: session.user.role ?? "admin",
-      pe_person_id: 1,
-    },
-  };
-}
 
 /**
  * Server Action: Update category name
@@ -57,15 +38,12 @@ export async function updateCategoryName(
       };
     }
 
-    const ctx = await getSessionContext();
-    if (!ctx) {
-      return { success: false, error: "Usuário não autenticado" };
-    }
+    const { apiContext } = await getAuthContext();
 
     const response = await taxonomyInlineServiceApi.updateTaxonomyNameInline({
       pe_taxonomy_id: categoryId,
       pe_taxonomy_name: name.trim(),
-      ...ctx.apiContext,
+      ...apiContext,
     });
 
     const spResponse =
@@ -136,16 +114,13 @@ export async function updateCategoryParent(
       };
     }
 
-    const ctx = await getSessionContext();
-    if (!ctx) {
-      return { success: false, error: "Usuário não autenticado" };
-    }
+    const { apiContext } = await getAuthContext();
 
     const response =
       await taxonomyInlineServiceApi.updateTaxonomyParentIdInline({
         pe_taxonomy_id: categoryId,
         pe_parent_id: parentId,
-        ...ctx.apiContext,
+        ...apiContext,
       });
 
     const spResponse =
@@ -220,15 +195,12 @@ export async function updateCategoryOrder(
       };
     }
 
-    const ctx = await getSessionContext();
-    if (!ctx) {
-      return { success: false, error: "Usuário não autenticado" };
-    }
+    const { apiContext } = await getAuthContext();
 
     const response = await taxonomyInlineServiceApi.updateTaxonomyOrderInline({
       pe_taxonomy_id: categoryId,
       pe_order: order,
-      ...ctx.apiContext,
+      ...apiContext,
     });
 
     const spResponse =
@@ -291,16 +263,13 @@ export async function updateCategoryStatus(
       };
     }
 
-    const ctx = await getSessionContext();
-    if (!ctx) {
-      return { success: false, error: "Usuário não autenticado" };
-    }
+    const { apiContext } = await getAuthContext();
 
     const response =
       await taxonomyInlineServiceApi.updateTaxonomyInactiveInline({
         pe_taxonomy_id: categoryId,
         pe_inactive: status,
-        ...ctx.apiContext,
+        ...apiContext,
       });
 
     const spResponse =

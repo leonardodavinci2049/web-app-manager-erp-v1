@@ -33,5 +33,6 @@ export type Member = {
   role?: string | null;
   createdAt?: Date | null;
   metadata?: string | null;
+  personId?: number | null;
   user: User;
 };
