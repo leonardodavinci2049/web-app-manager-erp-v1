@@ -7,10 +7,7 @@ import { createPool } from "mysql2/promise";
 import { Resend } from "resend";
 import VerifyEmail from "@/components/emails/verify-email";
 import { envs } from "@/core/config/envs";
-import {
-  getActiveOrganization,
-  getMemberPersonId,
-} from "@/server/organizations";
+import { getActiveOrganization } from "@/server/organizations";
 
 const resend = new Resend(envs.RESEND_API_KEY);
 
@@ -56,20 +53,11 @@ export const auth = betterAuth({
             session.userId,
           );
 
-          let personId: number | null = null;
-          if (activeOrganization?.id) {
-            personId = await getMemberPersonId(
-              session.userId,
-              activeOrganization.id,
-            );
-          }
-
           return {
             data: {
               ...session,
               activeOrganizationId: activeOrganization?.id,
               systemId: activeOrganization?.systemId ?? 0,
-              personId: personId ?? 0,
             },
           };
         },
@@ -149,10 +137,6 @@ export const auth = betterAuth({
         type: "number",
         required: false,
       },
-      personId: {
-        type: "number",
-        required: false,
-      },
     },
   },
   rateLimit: {
@@ -212,7 +196,7 @@ export const auth = betterAuth({
         },
         member: {
           additionalFields: {
-            person_id: {
+            personId: {
               type: "number",
               required: false,
               input: false,
