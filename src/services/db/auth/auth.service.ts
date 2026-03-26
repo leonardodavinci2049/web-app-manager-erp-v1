@@ -1133,7 +1133,7 @@ async function findNonMemberUsers(params: {
  * ```
  */
 /**
- * Finds the person_id for a member by userId and organizationId
+ * Finds the personId for a member by userId and organizationId
  */
 async function findMemberPersonId(params: {
   userId: string;
@@ -1144,21 +1144,21 @@ async function findMemberPersonId(params: {
     validateId(params.organizationId, "organizationId");
 
     const query = `
-      SELECT person_id 
+      SELECT personId 
       FROM ${AUTH_TABLES.MEMBER} 
       WHERE userId = ? AND organizationId = ? 
       LIMIT 1
     `;
 
     const results = await dbService.selectExecute<
-      { person_id: number | null } & import("mysql2/promise").RowDataPacket
+      { personId: number | null } & import("mysql2/promise").RowDataPacket
     >(query, [params.userId, params.organizationId]);
 
     if (results.length === 0) {
       return { success: true, data: null, error: null };
     }
 
-    return { success: true, data: results[0].person_id, error: null };
+    return { success: true, data: results[0].personId, error: null };
   } catch (error) {
     return handleError<number | null>(error, "findMemberPersonId");
   }
