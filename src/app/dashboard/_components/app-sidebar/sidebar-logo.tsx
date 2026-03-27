@@ -35,17 +35,27 @@ export function SidebarLogo() {
             onClick={() => setOpenMobile(false)}
             className="!flex-col !items-start !gap-1"
           >
-            <Image
-              src={logoSrc}
-              alt="Logo da Empresa"
-              width={140}
-              height={40}
-              priority
-              unoptimized={isRemoteLogo}
-              onError={() => setHasImageError(true)}
-              style={{ width: "auto", height: "auto" }}
-              className="h-10 w-auto object-contain"
-            />
+            {isRemoteLogo ? (
+              // biome-ignore lint/performance/noImgElement: Using native img to avoid Node.js url.parse() deprecation warning (DEP0169) triggered by Next.js Image optimizer on remote URLs
+              <img
+                src={logoSrc}
+                alt="Logo da Empresa"
+                width={140}
+                height={40}
+                onError={() => setHasImageError(true)}
+                className="h-10 w-auto object-contain"
+              />
+            ) : (
+              <Image
+                src={LOGO_FALLBACK}
+                alt="Logo da Empresa"
+                width={140}
+                height={40}
+                priority
+                style={{ width: "auto", height: "auto" }}
+                className="h-10 w-auto object-contain"
+              />
+            )}
             <span className="text-sidebar-foreground/70 truncate text-xs">
               {companyName}
             </span>
