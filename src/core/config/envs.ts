@@ -7,6 +7,7 @@ import { z } from "zod";
 // Variáveis que podem ser expostas ao cliente (precisam do prefixo NEXT_PUBLIC_)
 const publicEnvsSchema = z.object({
   NEXT_PUBLIC_APP_URL: z.string().url(),
+  NEXT_PUBLIC_EXTERNAL_PATH_IMAGES_URL: z.string().url(),
   NEXT_PUBLIC_DEVELOPER_NAME: z.string().min(1),
   NEXT_PUBLIC_DEVELOPER_URL: z.string().url(),
   NEXT_PUBLIC_COMPANY_NAME: z.string().min(1),
@@ -39,6 +40,28 @@ const serverEnvsSchema = z.object({
   DATABASE_NAME: z.string().min(1),
   DATABASE_USER: z.string().min(1),
   DATABASE_PASSWORD: z.string().min(1),
+  // Database Pool Config
+  DB_POOL_CONNECTION_LIMIT: z
+    .string()
+    .default("5")
+    .transform((val) => parseInt(val, 10))
+    .pipe(z.number().positive()),
+  DB_POOL_MAX_IDLE: z
+    .string()
+    .default("2")
+    .transform((val) => parseInt(val, 10))
+    .pipe(z.number().nonnegative()),
+  DB_POOL_IDLE_TIMEOUT: z
+    .string()
+    .default("10000")
+    .transform((val) => parseInt(val, 10))
+    .pipe(z.number().positive()),
+  DB_POOL_QUEUE_LIMIT: z
+    .string()
+    .default("50")
+    .transform((val) => parseInt(val, 10))
+    .pipe(z.number().nonnegative()),
+
   API_KEY: z.string().min(1),
   BETTER_AUTH_URL: z.string().url(),
   BETTER_AUTH_SECRET: z.string().min(1),
@@ -58,6 +81,8 @@ const serverEnvsSchema = z.object({
 // Validação das variáveis públicas (sempre disponível)
 const publicValidation = publicEnvsSchema.safeParse({
   NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+  NEXT_PUBLIC_EXTERNAL_PATH_IMAGES_URL:
+    process.env.NEXT_PUBLIC_EXTERNAL_PATH_IMAGES_URL,
   NEXT_PUBLIC_DEVELOPER_NAME: process.env.NEXT_PUBLIC_DEVELOPER_NAME,
   NEXT_PUBLIC_DEVELOPER_URL: process.env.NEXT_PUBLIC_DEVELOPER_URL,
   NEXT_PUBLIC_COMPANY_NAME: process.env.NEXT_PUBLIC_COMPANY_NAME,
