@@ -129,6 +129,10 @@ const data = {
       icon: Settings2,
       items: [
         {
+          title: "Painel geral",
+          url: "/dashboard/report/panel",
+        },
+        {
           title: "Vendas",
           url: "/dashboard/report/sales",
         },

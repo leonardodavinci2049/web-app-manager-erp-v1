@@ -396,6 +396,58 @@ async function findMembersByUser(params: {
 }
 
 /**
+ * Finds a member by userId and organizationId
+ *
+ * Replaces: prisma.member.findFirst({ where: { userId, organizationId } })
+ *
+ * @example
+ * ```typescript
+ * const response = await AuthService.findMemberByUserAndOrganization({
+ *   userId: "user-123",
+ *   organizationId: "org-123"
+ * });
+ * ```
+ */
+async function findMemberByUserAndOrganization(params: {
+  userId: string;
+  organizationId: string;
+}): Promise<ServiceResponse<Member | null>> {
+  try {
+    validateId(params.userId, "userId");
+    validateId(params.organizationId, "organizationId");
+
+    const query = `
+      SELECT
+        id, organizationId, userId, role, personId, createdAt, updatedAt
+      FROM ${AUTH_TABLES.MEMBER}
+      WHERE userId = ? AND organizationId = ?
+      LIMIT 1
+    `;
+
+    const results = await dbService.selectExecute<MemberEntity>(query, [
+      params.userId,
+      params.organizationId,
+    ]);
+
+    if (results.length === 0) {
+      return {
+        success: true,
+        data: null,
+        error: null,
+      };
+    }
+
+    return {
+      success: true,
+      data: mapMemberEntityToDto(results[0]),
+      error: null,
+    };
+  } catch (error) {
+    return handleError<Member | null>(error, "findMemberByUserAndOrganization");
+  }
+}
+
+/**
  * Deletes a member by ID
  *
  * Replaces: prisma.member.delete({ where: { id } })
@@ -1173,6 +1225,7 @@ export const AuthService = {
   findMembersByOrganization,
   findFirstMemberByUser,
   findMembersByUser,
+  findMemberByUserAndOrganization,
   findMemberPersonId,
   deleteMember,
 

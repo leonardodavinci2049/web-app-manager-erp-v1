@@ -48,7 +48,11 @@ export function NavProjects({
           return (
             <SidebarMenuItem key={item.name}>
               <SidebarMenuButton asChild isActive={isActive}>
-                <Link href={item.url} onClick={() => setOpenMobile(false)}>
+                <Link
+                  href={item.url}
+                  prefetch={false}
+                  onClick={() => setOpenMobile(false)}
+                >
                   <item.icon />
                   <span>{item.name}</span>
                 </Link>
