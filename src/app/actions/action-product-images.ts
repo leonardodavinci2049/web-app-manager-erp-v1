@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidateTag } from "next/cache";
+import { updateTag } from "next/cache";
 import { createLogger } from "@/core/logger";
 import { CACHE_TAGS } from "@/lib/cache-config";
 import { getAuthContext } from "@/server/auth-context";
@@ -11,6 +11,14 @@ import { isApiError } from "@/types/api-assets";
 import { uploadFileAction } from "./action-test-assets";
 
 const logger = createLogger("action-product-images");
+
+function invalidateProductImageCaches(productId: number): void {
+  updateTag(CACHE_TAGS.productsBase);
+  updateTag(CACHE_TAGS.productBase(String(productId)));
+  updateTag(CACHE_TAGS.productsPdv);
+  updateTag(CACHE_TAGS.productPdv(String(productId)));
+  updateTag(CACHE_TAGS.productGallery(String(productId)));
+}
 
 /**
  * Response type for gallery refresh action
@@ -115,8 +123,7 @@ async function updateImagePath(
     pe_path_imagem: imagePath,
     ...apiContext,
   });
-  revalidateTag(CACHE_TAGS.productsBase, "seconds");
-  revalidateTag(CACHE_TAGS.productBase(String(productId)), "hours");
+  invalidateProductImageCaches(productId);
 }
 
 /**

@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidateTag } from "next/cache";
+import { revalidateTag, updateTag } from "next/cache";
 import { createLogger } from "@/core/logger";
 import { CACHE_TAGS } from "@/lib/cache-config";
 import { getAuthContext } from "@/server/auth-context";
@@ -8,6 +8,14 @@ import { productInlineServiceApi } from "@/services/api-main/product-inline";
 import { productUpdateServiceApi } from "@/services/api-main/product-update";
 
 const logger = createLogger("ProductUpdateActions");
+
+function invalidateProductImageCaches(productId: number): void {
+  updateTag(CACHE_TAGS.productsBase);
+  updateTag(CACHE_TAGS.productBase(String(productId)));
+  updateTag(CACHE_TAGS.productsPdv);
+  updateTag(CACHE_TAGS.productPdv(String(productId)));
+  updateTag(CACHE_TAGS.productGallery(String(productId)));
+}
 
 /**
  * Server Action: Update product name
@@ -230,8 +238,7 @@ export async function updateProductImagePath(
 
     logger.info("Product image path updated successfully:", { productId });
 
-    revalidateTag(CACHE_TAGS.productsBase, "seconds");
-    revalidateTag(CACHE_TAGS.productBase(String(productId)), "hours");
+    invalidateProductImageCaches(productId);
 
     return {
       success: true,
