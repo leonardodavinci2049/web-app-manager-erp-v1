@@ -40,20 +40,20 @@ export function SidebarLogo() {
               <img
                 src={logoSrc}
                 alt="Logo da Empresa"
-                width={140}
-                height={40}
+                width={300}
+                height={80}
                 onError={() => setHasImageError(true)}
-                className="h-10 w-auto object-contain"
+                className="h-auto w-[88%] max-w-[88%] object-contain object-left"
               />
             ) : (
               <Image
                 src={LOGO_FALLBACK}
                 alt="Logo da Empresa"
-                width={140}
-                height={40}
+                width={300}
+                height={80}
                 priority
                 style={{ width: "auto", height: "auto" }}
-                className="h-10 w-auto object-contain"
+                className="h-auto w-[88%] max-w-[88%] object-contain object-left"
               />
             )}
             <span className="text-sidebar-foreground/70 truncate text-xs">
