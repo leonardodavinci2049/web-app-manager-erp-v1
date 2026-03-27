@@ -59,7 +59,11 @@ export function NavMain({
                   isActive={isActive}
                   tooltip={item.title}
                 >
-                  <Link href={item.url} onClick={() => setOpenMobile(false)}>
+                  <Link
+                    href={item.url}
+                    prefetch={false}
+                    onClick={() => setOpenMobile(false)}
+                  >
                     {item.icon && <item.icon />}
                     <span>{item.title}</span>
                   </Link>
@@ -93,6 +97,7 @@ export function NavMain({
                           <SidebarMenuSubButton asChild isActive={isSubActive}>
                             <Link
                               href={subItem.url}
+                              prefetch={false}
                               onClick={() => setOpenMobile(false)}
                             >
                               <span>{subItem.title}</span>
