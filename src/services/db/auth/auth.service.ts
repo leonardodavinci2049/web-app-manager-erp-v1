@@ -4,7 +4,7 @@ import { z } from "zod";
 import dbService, {
   ErroConexaoBancoDados,
   ErroExecucaoConsulta,
-} from "@/services/db/dbConnection";
+} from "@/database/dbConnection";
 
 import {
   AUTH_TABLES,
