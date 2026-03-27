@@ -1,6 +1,5 @@
-import { redirect } from "next/navigation";
+const page = () => {
+  return <div>page</div>;
+};
 
-export default function ProductPage() {
-  // Immediately redirect to the catalog page
-  redirect("/dashboard/report/panel");
-}
+export default page;
