@@ -1,20 +1,20 @@
 import {
+  Archive,
   ArrowRight,
   BadgeCheck,
   BarChart3,
   Bolt,
-  CalendarDays,
-  ClipboardList,
+  Factory,
   LayoutGrid,
   Mail,
   PackageSearch,
-  PhoneCall,
-  Settings,
   ShieldCheck,
-  Store,
-  Target,
+  ShoppingCart,
+  Tags,
   TriangleAlert,
+  Truck,
   Users,
+  Wrench,
 } from "lucide-react";
 import Link from "next/link";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -33,73 +33,83 @@ import { SiteHeaderWithBreadcrumb } from "./_components/header/site-header-with-
 
 const modules = [
   {
-    title: "Painel de Vendas",
-    description: "Inicie novas vendas e acompanhe o fluxo de caixa.",
-    href: "/dashboard/sales-dashboard",
-    icon: Store,
+    title: "Catálogo de Produtos",
+    description: "Consulte e organize o catálogo principal de produtos.",
+    href: "/dashboard/product/catalog",
+    icon: PackageSearch,
     color: "text-blue-500",
     bgColor: "bg-blue-500/10",
     borderColor: "group-hover:border-blue-500/50",
   },
   {
-    title: "Orçamentos e Pedidos",
-    description: "Gerencie pedidos, orçamentos e status de entrega.",
-    href: "/dashboard/order/order-list",
-    icon: ClipboardList,
+    title: "Cadastro de Categorias",
+    description: "Gerencie categorias e agrupamentos usados no catálogo.",
+    href: "/dashboard/category/category-overviews",
+    icon: Tags,
+    color: "text-blue-500",
+    bgColor: "bg-blue-500/10",
+    borderColor: "group-hover:border-blue-500/50",
+  },
+  {
+    title: "Cadastro de Clientes",
+    description: "Acesse o cadastro de clientes e acompanhe o relacionamento.",
+    href: "/dashboard/customer/customer-list",
+    icon: Users,
     color: "text-amber-500",
     bgColor: "bg-amber-500/10",
     borderColor: "group-hover:border-amber-500/50",
   },
   {
-    title: "Catálogo de Produtos",
-    description: "Consulte estoque, preços e portfólio de produtos.",
-    href: "/dashboard/product/catalog",
-    icon: PackageSearch,
+    title: "Marcas",
+    description: "Área de marcas em manutenção e evolução contínua.",
+    href: "/dashboard/development",
+    icon: BadgeCheck,
     color: "text-emerald-500",
     bgColor: "bg-emerald-500/10",
     borderColor: "group-hover:border-emerald-500/50",
   },
   {
-    title: "Lista de Clientes",
-    description: "Acesse o cadastro e histórico completo de compras.",
-    href: "/dashboard/customer/customer-list",
-    icon: Users,
+    title: "Fornecedores",
+    description: "Cadastros e integrações de fornecedores em manutenção.",
+    href: "/dashboard/development",
+    icon: Factory,
     color: "text-indigo-500",
     bgColor: "bg-indigo-500/10",
     borderColor: "group-hover:border-indigo-500/50",
   },
   {
-    title: "Painel de Relatórios",
-    description: "Visualize métricas, resultados, metas e comissões.",
-    href: "/dashboard/report/panel",
-    icon: BarChart3,
+    title: "Transportadoras",
+    description:
+      "Gerencie transportadoras e entregas quando o módulo estiver disponível.",
+    href: "/dashboard/development",
+    icon: Truck,
     color: "text-purple-500",
     bgColor: "bg-purple-500/10",
     borderColor: "group-hover:border-purple-500/50",
   },
   {
-    title: "CRM",
-    description: "Gestão de relacionamento e pipeline de vendas.",
-    href: "/dashboard/crm/crm-panel",
-    icon: Target,
+    title: "Entradas de Produtos",
+    description: "Controle entradas e abastecimento com módulo em manutenção.",
+    href: "/dashboard/development",
+    icon: Archive,
     color: "text-rose-500",
     bgColor: "bg-rose-500/10",
     borderColor: "group-hover:border-rose-500/50",
   },
   {
-    title: "Agenda",
-    description: "Organize seus compromissos, visitas e retornos.",
-    href: "/dashboard/agenda/agenda-panel",
-    icon: CalendarDays,
+    title: "Compras",
+    description: "Fluxo de compras e reposição em manutenção nesta versão.",
+    href: "/dashboard/development",
+    icon: ShoppingCart,
     color: "text-sky-500",
     bgColor: "bg-sky-500/10",
     borderColor: "group-hover:border-sky-500/50",
   },
   {
-    title: "Configurações",
-    description: "Ajuste preferências e configurações da sua conta.",
-    href: "/dashboard/settings",
-    icon: Settings,
+    title: "Relatórios",
+    description: "Acompanhe indicadores, consultas e painéis analíticos.",
+    href: "/dashboard/report/panel",
+    icon: BarChart3,
     color: "text-slate-500",
     bgColor: "bg-slate-500/10",
     borderColor: "group-hover:border-slate-500/50",
@@ -108,7 +118,8 @@ const modules = [
 
 const quickInfoItems = [
   {
-    title: "Acesse o Painel de Vendas para acompanhar indicadores do dia.",
+    title:
+      "Catálogo, categorias e clientes já possuem acesso direto na área principal.",
     icon: Bolt,
     color: "text-amber-500",
   },
@@ -118,13 +129,15 @@ const quickInfoItems = [
     color: "text-emerald-500",
   },
   {
-    title: "Relatórios e metas ficam centralizados para consulta rápida.",
+    title:
+      "Relatórios ficam centralizados para consulta rápida de indicadores.",
     icon: BarChart3,
     color: "text-sky-500",
   },
   {
-    title: "Clientes e agenda ajudam a priorizar contatos e retornos.",
-    icon: PhoneCall,
+    title:
+      "Marcas, fornecedores, transportadoras, entradas e compras seguem apontando para manutenção.",
+    icon: Wrench,
     color: "text-teal-500",
   },
 ];
@@ -200,9 +213,9 @@ export default async function DashboardPage() {
                       Olá, {firstName}!
                     </h1>
                     <p className="max-w-2xl text-sm text-muted-foreground sm:text-base">
-                      Bem-vindo ao painel principal. Acesse os módulos mais
-                      importantes, acompanhe informações rápidas e entre direto
-                      nos fluxos do dia.
+                      Bem-vindo ao painel principal. Acesse catálogo,
+                      categorias, clientes, relatórios e os demais módulos
+                      centrais do sistema a partir deste índice.
                     </p>
                   </div>
 
@@ -244,7 +257,7 @@ export default async function DashboardPage() {
                       {modules.length} módulos disponíveis
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      painel inicial de navegação
+                      índice principal do sistema
                     </p>
                   </div>
                 </div>
@@ -263,7 +276,7 @@ export default async function DashboardPage() {
               Módulos principais
             </h2>
             <p className="text-sm text-muted-foreground sm:text-base">
-              Escolha um dos acessos abaixo para continuar o trabalho.
+              Escolha um dos módulos abaixo para continuar o trabalho.
             </p>
           </div>
 
@@ -316,7 +329,7 @@ export default async function DashboardPage() {
                 Informações rápidas
               </CardTitle>
               <CardDescription>
-                Resumo objetivo para facilitar sua navegação inicial.
+                Resumo objetivo sobre os acessos principais desta versão.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -343,7 +356,7 @@ export default async function DashboardPage() {
                 Acesso rápido
               </CardTitle>
               <CardDescription>
-                Os mesmos módulos principais organizados como lista de atalho.
+                Os mesmos módulos principais organizados como lista de atalhos.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-1">
