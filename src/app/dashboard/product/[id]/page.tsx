@@ -33,6 +33,9 @@ async function ProductDetailsPageContent({ productId }: { productId: number }) {
   const result = await getProductPdvById(productId, {
     ...apiContext,
     pe_type_business: 1,
+  }).catch((error) => {
+    logger.error(`Erro ao buscar produto PDV por ID ${productId}:`, error);
+    return undefined;
   });
 
   if (!result) {

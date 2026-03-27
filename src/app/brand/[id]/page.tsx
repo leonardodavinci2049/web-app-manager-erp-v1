@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
+import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
 import { getBrandById } from "@/services/api-main/brand/brand-cached-service";
 import { BrandDetail } from "./_components/brand-detail";
+
+const logger = createLogger("BrandDetailPage");
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -27,7 +30,10 @@ export default async function BrandDetailPage({ params }: Props) {
     notFound();
   }
 
-  const brand = await getBrandById(brandId, apiContext);
+  const brand = await getBrandById(brandId, apiContext).catch((error) => {
+    logger.error(`Erro ao buscar marca por ID ${brandId}:`, error);
+    return undefined;
+  });
 
   if (!brand) {
     notFound();

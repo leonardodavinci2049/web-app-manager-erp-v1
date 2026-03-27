@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidateTag } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { createLogger } from "@/core/logger";
 import { CACHE_TAGS } from "@/lib/cache-config";
 import { getAuthContext } from "@/server/auth-context";
@@ -128,6 +128,7 @@ export async function createProductFromForm(formData: FormData): Promise<{
 
     revalidateTag(CACHE_TAGS.productsPdv, "seconds");
     revalidateTag(CACHE_TAGS.productsBase, "seconds");
+    revalidatePath("/dashboard/product/catalog");
 
     return {
       success: true,
@@ -222,6 +223,7 @@ export async function createProduct(data: CreateProductData): Promise<{
 
     revalidateTag(CACHE_TAGS.productsPdv, "seconds");
     revalidateTag(CACHE_TAGS.productsBase, "seconds");
+    revalidatePath("/dashboard/product/catalog");
 
     return {
       success: true,
