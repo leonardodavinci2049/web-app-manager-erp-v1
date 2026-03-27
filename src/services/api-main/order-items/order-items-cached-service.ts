@@ -1,7 +1,6 @@
 import "server-only";
 
 import { cacheLife, cacheTag } from "next/cache";
-import { createLogger } from "@/core/logger";
 import { CACHE_TAGS } from "@/lib/cache-config";
 
 import { orderItemsServiceApi } from "./order-items-service-api";
@@ -11,8 +10,6 @@ import {
   type UIOrderItem,
   type UIOrderItemDetail,
 } from "./transformers/transformers";
-
-const logger = createLogger("order-items-cached-service");
 
 export async function getOrderItems(
   params: {
@@ -34,24 +31,19 @@ export async function getOrderItems(
     return [];
   }
 
-  try {
-    const response = await orderItemsServiceApi.findAllOrderItems({
-      pe_order_id: params.orderId,
-      pe_limit: params.limit,
-      pe_system_client_id: params.pe_system_client_id,
-      pe_organization_id: params.pe_organization_id,
-      pe_user_id: params.pe_user_id,
-      pe_user_name: params.pe_user_name,
-      pe_user_role: params.pe_user_role,
-      pe_person_id: params.pe_person_id,
-    });
+  const response = await orderItemsServiceApi.findAllOrderItems({
+    pe_order_id: params.orderId,
+    pe_limit: params.limit,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
 
-    const items = orderItemsServiceApi.extractOrderItems(response);
-    return transformOrderItemList(items);
-  } catch (error) {
-    logger.error("Erro ao buscar itens de pedido:", error);
-    return [];
-  }
+  const items = orderItemsServiceApi.extractOrderItems(response);
+  return transformOrderItemList(items);
 }
 
 export async function getOrderItemById(
@@ -73,25 +65,20 @@ export async function getOrderItemById(
     return undefined;
   }
 
-  try {
-    const response = await orderItemsServiceApi.findOrderItemById({
-      pe_order_item_id: id,
-      pe_system_client_id: params.pe_system_client_id,
-      pe_organization_id: params.pe_organization_id,
-      pe_user_id: params.pe_user_id,
-      pe_user_name: params.pe_user_name,
-      pe_user_role: params.pe_user_role,
-      pe_person_id: params.pe_person_id,
-    });
+  const response = await orderItemsServiceApi.findOrderItemById({
+    pe_order_item_id: id,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
 
-    const item = orderItemsServiceApi.extractOrderItemById(response);
-    if (!item) {
-      return undefined;
-    }
-
-    return transformOrderItemDetailEntity(item);
-  } catch (error) {
-    logger.error(`Erro ao buscar item de pedido por ID ${id}:`, error);
+  const item = orderItemsServiceApi.extractOrderItemById(response);
+  if (!item) {
     return undefined;
   }
+
+  return transformOrderItemDetailEntity(item);
 }

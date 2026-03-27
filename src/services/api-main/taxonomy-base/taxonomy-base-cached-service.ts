@@ -1,7 +1,6 @@
 import "server-only";
 
 import { cacheLife, cacheTag } from "next/cache";
-import { createLogger } from "@/core/logger";
 import { CACHE_TAGS } from "@/lib/cache-config";
 
 import { taxonomyBaseServiceApi } from "./taxonomy-base-service-api";
@@ -12,8 +11,6 @@ import {
   type UITaxonomy,
   type UITaxonomyMenuItem,
 } from "./transformers/transformers";
-
-const logger = createLogger("taxonomy-base-cached-service");
 
 export async function getTaxonomies(
   params: {
@@ -40,29 +37,24 @@ export async function getTaxonomies(
     return [];
   }
 
-  try {
-    const response = await taxonomyBaseServiceApi.findAllTaxonomies({
-      pe_parent_id: params.parentId,
-      pe_search: params.search,
-      pe_flag_inactive: params.inactive,
-      pe_records_quantity: params.recordsQuantity,
-      pe_page_id: params.pageId,
-      pe_column_id: params.columnId,
-      pe_order_id: params.orderId,
-      pe_system_client_id: params.pe_system_client_id,
-      pe_organization_id: params.pe_organization_id,
-      pe_user_id: params.pe_user_id,
-      pe_user_name: params.pe_user_name,
-      pe_user_role: params.pe_user_role,
-      pe_person_id: params.pe_person_id,
-    });
+  const response = await taxonomyBaseServiceApi.findAllTaxonomies({
+    pe_parent_id: params.parentId,
+    pe_search: params.search,
+    pe_flag_inactive: params.inactive,
+    pe_records_quantity: params.recordsQuantity,
+    pe_page_id: params.pageId,
+    pe_column_id: params.columnId,
+    pe_order_id: params.orderId,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
 
-    const taxonomies = taxonomyBaseServiceApi.extractTaxonomies(response);
-    return transformTaxonomyList(taxonomies);
-  } catch (error) {
-    logger.error("Erro ao buscar taxonomias:", error);
-    return [];
-  }
+  const taxonomies = taxonomyBaseServiceApi.extractTaxonomies(response);
+  return transformTaxonomyList(taxonomies);
 }
 
 export async function getTaxonomyById(
@@ -84,25 +76,20 @@ export async function getTaxonomyById(
     return undefined;
   }
 
-  try {
-    const response = await taxonomyBaseServiceApi.findTaxonomyById({
-      pe_taxonomy_id: id,
-      pe_system_client_id: params.pe_system_client_id,
-      pe_organization_id: params.pe_organization_id,
-      pe_user_id: params.pe_user_id,
-      pe_user_name: params.pe_user_name,
-      pe_user_role: params.pe_user_role,
-      pe_person_id: params.pe_person_id,
-    });
+  const response = await taxonomyBaseServiceApi.findTaxonomyById({
+    pe_taxonomy_id: id,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
 
-    const taxonomy = taxonomyBaseServiceApi.extractTaxonomyById(response);
-    if (!taxonomy) return undefined;
+  const taxonomy = taxonomyBaseServiceApi.extractTaxonomyById(response);
+  if (!taxonomy) return undefined;
 
-    return transformTaxonomyDetail(taxonomy);
-  } catch (error) {
-    logger.error("Erro ao buscar taxonomia por ID:", error);
-    return undefined;
-  }
+  return transformTaxonomyDetail(taxonomy);
 }
 
 export async function getTaxonomyMenu(
@@ -125,22 +112,17 @@ export async function getTaxonomyMenu(
     return [];
   }
 
-  try {
-    const response = await taxonomyBaseServiceApi.findTaxonomyMenu({
-      pe_type_id: typeId,
-      pe_parent_id: parentId,
-      pe_system_client_id: params.pe_system_client_id,
-      pe_organization_id: params.pe_organization_id,
-      pe_user_id: params.pe_user_id,
-      pe_user_name: params.pe_user_name,
-      pe_user_role: params.pe_user_role,
-      pe_person_id: params.pe_person_id,
-    });
+  const response = await taxonomyBaseServiceApi.findTaxonomyMenu({
+    pe_type_id: typeId,
+    pe_parent_id: parentId,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
 
-    const menuItems = taxonomyBaseServiceApi.extractTaxonomyMenu(response);
-    return transformTaxonomyMenuList(menuItems);
-  } catch (error) {
-    logger.error("Erro ao buscar menu de taxonomias:", error);
-    return [];
-  }
+  const menuItems = taxonomyBaseServiceApi.extractTaxonomyMenu(response);
+  return transformTaxonomyMenuList(menuItems);
 }

@@ -1,7 +1,6 @@
 import "server-only";
 
 import { cacheLife, cacheTag } from "next/cache";
-import { createLogger } from "@/core/logger";
 import { CACHE_TAGS } from "@/lib/cache-config";
 
 import { orderSalesServiceApi } from "./order-sales-service-api";
@@ -32,8 +31,6 @@ import {
   type UIOrderSeller,
 } from "./transformers/transformers";
 
-const logger = createLogger("order-sales-cached-service");
-
 interface BaseParams {
   pe_system_client_id?: number;
   pe_organization_id?: string;
@@ -56,24 +53,19 @@ export async function getOrderCarrier(
     return undefined;
   }
 
-  try {
-    const response = await orderSalesServiceApi.findCoCarrierId({
-      pe_order_id: orderId,
-      pe_type_business: params.typeBusiness,
-      pe_system_client_id: params.pe_system_client_id,
-      pe_organization_id: params.pe_organization_id,
-      pe_user_id: params.pe_user_id,
-      pe_user_name: params.pe_user_name,
-      pe_user_role: params.pe_user_role,
-      pe_person_id: params.pe_person_id,
-    });
+  const response = await orderSalesServiceApi.findCoCarrierId({
+    pe_order_id: orderId,
+    pe_type_business: params.typeBusiness,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
 
-    const entity = orderSalesServiceApi.extractCarrier(response);
-    return entity ? transformCarrierEntity(entity) : undefined;
-  } catch (error) {
-    logger.error(`Erro ao buscar transportadora do pedido ${orderId}:`, error);
-    return undefined;
-  }
+  const entity = orderSalesServiceApi.extractCarrier(response);
+  return entity ? transformCarrierEntity(entity) : undefined;
 }
 
 export async function getOrderCustomer(
@@ -88,24 +80,19 @@ export async function getOrderCustomer(
     return undefined;
   }
 
-  try {
-    const response = await orderSalesServiceApi.findCoCustomerId({
-      pe_order_id: orderId,
-      pe_type_business: params.typeBusiness,
-      pe_system_client_id: params.pe_system_client_id,
-      pe_organization_id: params.pe_organization_id,
-      pe_user_id: params.pe_user_id,
-      pe_user_name: params.pe_user_name,
-      pe_user_role: params.pe_user_role,
-      pe_person_id: params.pe_person_id,
-    });
+  const response = await orderSalesServiceApi.findCoCustomerId({
+    pe_order_id: orderId,
+    pe_type_business: params.typeBusiness,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
 
-    const entity = orderSalesServiceApi.extractCustomer(response);
-    return entity ? transformCustomerEntity(entity) : undefined;
-  } catch (error) {
-    logger.error(`Erro ao buscar cliente do pedido ${orderId}:`, error);
-    return undefined;
-  }
+  const entity = orderSalesServiceApi.extractCustomer(response);
+  return entity ? transformCustomerEntity(entity) : undefined;
 }
 
 export async function getOrderDelivery(
@@ -120,24 +107,19 @@ export async function getOrderDelivery(
     return undefined;
   }
 
-  try {
-    const response = await orderSalesServiceApi.findCoDeliveryId({
-      pe_order_id: orderId,
-      pe_type_business: params.typeBusiness,
-      pe_system_client_id: params.pe_system_client_id,
-      pe_organization_id: params.pe_organization_id,
-      pe_user_id: params.pe_user_id,
-      pe_user_name: params.pe_user_name,
-      pe_user_role: params.pe_user_role,
-      pe_person_id: params.pe_person_id,
-    });
+  const response = await orderSalesServiceApi.findCoDeliveryId({
+    pe_order_id: orderId,
+    pe_type_business: params.typeBusiness,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
 
-    const entity = orderSalesServiceApi.extractDelivery(response);
-    return entity ? transformDeliveryEntity(entity) : undefined;
-  } catch (error) {
-    logger.error(`Erro ao buscar entrega do pedido ${orderId}:`, error);
-    return undefined;
-  }
+  const entity = orderSalesServiceApi.extractDelivery(response);
+  return entity ? transformDeliveryEntity(entity) : undefined;
 }
 
 export async function getOrderHistory(
@@ -152,24 +134,19 @@ export async function getOrderHistory(
     return undefined;
   }
 
-  try {
-    const response = await orderSalesServiceApi.findCoHistoryId({
-      pe_order_id: orderId,
-      pe_type_business: params.typeBusiness,
-      pe_system_client_id: params.pe_system_client_id,
-      pe_organization_id: params.pe_organization_id,
-      pe_user_id: params.pe_user_id,
-      pe_user_name: params.pe_user_name,
-      pe_user_role: params.pe_user_role,
-      pe_person_id: params.pe_person_id,
-    });
+  const response = await orderSalesServiceApi.findCoHistoryId({
+    pe_order_id: orderId,
+    pe_type_business: params.typeBusiness,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
 
-    const entity = orderSalesServiceApi.extractHistory(response);
-    return entity ? transformHistoryEntity(entity) : undefined;
-  } catch (error) {
-    logger.error(`Erro ao buscar histórico do pedido ${orderId}:`, error);
-    return undefined;
-  }
+  const entity = orderSalesServiceApi.extractHistory(response);
+  return entity ? transformHistoryEntity(entity) : undefined;
 }
 
 export async function getOrderNf(
@@ -184,24 +161,19 @@ export async function getOrderNf(
     return undefined;
   }
 
-  try {
-    const response = await orderSalesServiceApi.findCoNfId({
-      pe_order_id: orderId,
-      pe_type_business: params.typeBusiness,
-      pe_system_client_id: params.pe_system_client_id,
-      pe_organization_id: params.pe_organization_id,
-      pe_user_id: params.pe_user_id,
-      pe_user_name: params.pe_user_name,
-      pe_user_role: params.pe_user_role,
-      pe_person_id: params.pe_person_id,
-    });
+  const response = await orderSalesServiceApi.findCoNfId({
+    pe_order_id: orderId,
+    pe_type_business: params.typeBusiness,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
 
-    const entity = orderSalesServiceApi.extractNf(response);
-    return entity ? transformNfEntity(entity) : undefined;
-  } catch (error) {
-    logger.error(`Erro ao buscar nota fiscal do pedido ${orderId}:`, error);
-    return undefined;
-  }
+  const entity = orderSalesServiceApi.extractNf(response);
+  return entity ? transformNfEntity(entity) : undefined;
 }
 
 export async function getOrderPgForma(
@@ -216,27 +188,19 @@ export async function getOrderPgForma(
     return undefined;
   }
 
-  try {
-    const response = await orderSalesServiceApi.findCoPgFormaId({
-      pe_order_id: orderId,
-      pe_type_business: params.typeBusiness,
-      pe_system_client_id: params.pe_system_client_id,
-      pe_organization_id: params.pe_organization_id,
-      pe_user_id: params.pe_user_id,
-      pe_user_name: params.pe_user_name,
-      pe_user_role: params.pe_user_role,
-      pe_person_id: params.pe_person_id,
-    });
+  const response = await orderSalesServiceApi.findCoPgFormaId({
+    pe_order_id: orderId,
+    pe_type_business: params.typeBusiness,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
 
-    const entity = orderSalesServiceApi.extractPgForma(response);
-    return entity ? transformPgFormaEntity(entity) : undefined;
-  } catch (error) {
-    logger.error(
-      `Erro ao buscar forma de pagamento do pedido ${orderId}:`,
-      error,
-    );
-    return undefined;
-  }
+  const entity = orderSalesServiceApi.extractPgForma(response);
+  return entity ? transformPgFormaEntity(entity) : undefined;
 }
 
 export async function getOrderProtocol(
@@ -251,24 +215,19 @@ export async function getOrderProtocol(
     return undefined;
   }
 
-  try {
-    const response = await orderSalesServiceApi.findCoProtocolId({
-      pe_order_id: orderId,
-      pe_type_business: params.typeBusiness,
-      pe_system_client_id: params.pe_system_client_id,
-      pe_organization_id: params.pe_organization_id,
-      pe_user_id: params.pe_user_id,
-      pe_user_name: params.pe_user_name,
-      pe_user_role: params.pe_user_role,
-      pe_person_id: params.pe_person_id,
-    });
+  const response = await orderSalesServiceApi.findCoProtocolId({
+    pe_order_id: orderId,
+    pe_type_business: params.typeBusiness,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
 
-    const entity = orderSalesServiceApi.extractProtocol(response);
-    return entity ? transformProtocolEntity(entity) : undefined;
-  } catch (error) {
-    logger.error(`Erro ao buscar protocolo do pedido ${orderId}:`, error);
-    return undefined;
-  }
+  const entity = orderSalesServiceApi.extractProtocol(response);
+  return entity ? transformProtocolEntity(entity) : undefined;
 }
 
 export async function getOrderSeller(
@@ -283,24 +242,19 @@ export async function getOrderSeller(
     return undefined;
   }
 
-  try {
-    const response = await orderSalesServiceApi.findCoSellerId({
-      pe_order_id: orderId,
-      pe_type_business: params.typeBusiness,
-      pe_system_client_id: params.pe_system_client_id,
-      pe_organization_id: params.pe_organization_id,
-      pe_user_id: params.pe_user_id,
-      pe_user_name: params.pe_user_name,
-      pe_user_role: params.pe_user_role,
-      pe_person_id: params.pe_person_id,
-    });
+  const response = await orderSalesServiceApi.findCoSellerId({
+    pe_order_id: orderId,
+    pe_type_business: params.typeBusiness,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
 
-    const entity = orderSalesServiceApi.extractSeller(response);
-    return entity ? transformSellerEntity(entity) : undefined;
-  } catch (error) {
-    logger.error(`Erro ao buscar vendedor do pedido ${orderId}:`, error);
-    return undefined;
-  }
+  const entity = orderSalesServiceApi.extractSeller(response);
+  return entity ? transformSellerEntity(entity) : undefined;
 }
 
 export async function getOrderSummary(
@@ -315,24 +269,19 @@ export async function getOrderSummary(
     return undefined;
   }
 
-  try {
-    const response = await orderSalesServiceApi.findCoSummaryId({
-      pe_order_id: orderId,
-      pe_type_business: params.typeBusiness,
-      pe_system_client_id: params.pe_system_client_id,
-      pe_organization_id: params.pe_organization_id,
-      pe_user_id: params.pe_user_id,
-      pe_user_name: params.pe_user_name,
-      pe_user_role: params.pe_user_role,
-      pe_person_id: params.pe_person_id,
-    });
+  const response = await orderSalesServiceApi.findCoSummaryId({
+    pe_order_id: orderId,
+    pe_type_business: params.typeBusiness,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
 
-    const entity = orderSalesServiceApi.extractSummary(response);
-    return entity ? transformSummaryEntity(entity) : undefined;
-  } catch (error) {
-    logger.error(`Erro ao buscar resumo do pedido ${orderId}:`, error);
-    return undefined;
-  }
+  const entity = orderSalesServiceApi.extractSummary(response);
+  return entity ? transformSummaryEntity(entity) : undefined;
 }
 
 export interface UIOrderDashboard {
@@ -354,34 +303,29 @@ export async function getOrderDashboard(
     return undefined;
   }
 
-  try {
-    const response = await orderSalesServiceApi.findDashboardId({
-      pe_order_id: orderId,
-      pe_id_seller: params.sellerId,
-      pe_type_business: params.typeBusiness,
-      pe_system_client_id: params.pe_system_client_id,
-      pe_organization_id: params.pe_organization_id,
-      pe_user_id: params.pe_user_id,
-      pe_user_name: params.pe_user_name,
-      pe_user_role: params.pe_user_role,
-      pe_person_id: params.pe_person_id,
-    });
+  const response = await orderSalesServiceApi.findDashboardId({
+    pe_order_id: orderId,
+    pe_id_seller: params.sellerId,
+    pe_type_business: params.typeBusiness,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
 
-    const summary = orderSalesServiceApi.extractDashboardSummary(response);
-    const details = orderSalesServiceApi.extractDashboardDetails(response);
-    const items = orderSalesServiceApi.extractDashboardItems(response);
-    const customer = orderSalesServiceApi.extractDashboardCustomer(response);
+  const summary = orderSalesServiceApi.extractDashboardSummary(response);
+  const details = orderSalesServiceApi.extractDashboardDetails(response);
+  const items = orderSalesServiceApi.extractDashboardItems(response);
+  const customer = orderSalesServiceApi.extractDashboardCustomer(response);
 
-    return {
-      summary: summary ? transformSummaryEntity(summary) : null,
-      details: details ? transformDashboardDetailsEntity(details) : null,
-      items: items.map(transformDashboardItemEntity),
-      customer: customer ? transformCustomerEntity(customer) : null,
-    };
-  } catch (error) {
-    logger.error(`Erro ao buscar dashboard do pedido ${orderId}:`, error);
-    return undefined;
-  }
+  return {
+    summary: summary ? transformSummaryEntity(summary) : null,
+    details: details ? transformDashboardDetailsEntity(details) : null,
+    items: items.map(transformDashboardItemEntity),
+    customer: customer ? transformCustomerEntity(customer) : null,
+  };
 }
 
 export async function getOrderEquipment(
@@ -396,22 +340,17 @@ export async function getOrderEquipment(
     return undefined;
   }
 
-  try {
-    const response = await orderSalesServiceApi.findEquipmentId({
-      pe_order_id: orderId,
-      pe_type_business: params.typeBusiness,
-      pe_system_client_id: params.pe_system_client_id,
-      pe_organization_id: params.pe_organization_id,
-      pe_user_id: params.pe_user_id,
-      pe_user_name: params.pe_user_name,
-      pe_user_role: params.pe_user_role,
-      pe_person_id: params.pe_person_id,
-    });
+  const response = await orderSalesServiceApi.findEquipmentId({
+    pe_order_id: orderId,
+    pe_type_business: params.typeBusiness,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
 
-    const entity = orderSalesServiceApi.extractEquipment(response);
-    return entity ? transformEquipmentEntity(entity) : undefined;
-  } catch (error) {
-    logger.error(`Erro ao buscar equipamento do pedido ${orderId}:`, error);
-    return undefined;
-  }
+  const entity = orderSalesServiceApi.extractEquipment(response);
+  return entity ? transformEquipmentEntity(entity) : undefined;
 }

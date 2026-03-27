@@ -93,10 +93,19 @@ export default async function CatalogoPage(props: CatalogoPageProps) {
       columnId: sort.columnId,
       orderId: sort.orderId,
       ...apiContext,
+    }).catch((error) => {
+      logger.error("Erro ao buscar produtos PDV:", error);
+      return [] as Awaited<ReturnType<typeof getProductsPdv>>;
     }),
-    getBrands({ limit: 100, ...apiContext }),
+    getBrands({ limit: 100, ...apiContext }).catch((error) => {
+      logger.error("Erro ao buscar marcas:", error);
+      return [] as Awaited<ReturnType<typeof getBrands>>;
+    }),
     getCategories(),
-    getPtypes({ limit: 100, ...apiContext }),
+    getPtypes({ limit: 100, ...apiContext }).catch((error) => {
+      logger.error("Erro ao buscar tipos:", error);
+      return [] as Awaited<ReturnType<typeof getPtypes>>;
+    }),
   ]);
 
   return (
