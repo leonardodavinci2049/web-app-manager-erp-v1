@@ -1,7 +1,6 @@
 import "server-only";
 
 import { cacheLife, cacheTag } from "next/cache";
-import { createLogger } from "@/core/logger";
 import { CACHE_TAGS } from "@/lib/cache-config";
 
 import { customerGeneralServiceApi } from "./customer-general-service-api";
@@ -15,8 +14,6 @@ import {
   type UICustomerListItem,
   type UISellerInfo,
 } from "./transformers/transformers";
-
-const logger = createLogger("customer-general-cached-service");
 
 export async function getCustomers(
   params: {
@@ -41,27 +38,22 @@ export async function getCustomers(
     return [];
   }
 
-  try {
-    const response = await customerGeneralServiceApi.findAllCustomers({
-      pe_search: params.search,
-      pe_qt_registros: params.qtRegistros,
-      pe_page_id: params.pageId,
-      pe_column_id: params.columnId,
-      pe_order_id: params.orderId,
-      pe_system_client_id: params.pe_system_client_id,
-      pe_organization_id: params.pe_organization_id,
-      pe_user_id: params.pe_user_id,
-      pe_user_name: params.pe_user_name,
-      pe_user_role: params.pe_user_role,
-      pe_person_id: params.pe_person_id,
-    });
+  const response = await customerGeneralServiceApi.findAllCustomers({
+    pe_search: params.search,
+    pe_qt_registros: params.qtRegistros,
+    pe_page_id: params.pageId,
+    pe_column_id: params.columnId,
+    pe_order_id: params.orderId,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
 
-    const customers = customerGeneralServiceApi.extractCustomers(response);
-    return transformCustomerList(customers);
-  } catch (error) {
-    logger.error("Erro ao buscar clientes:", error);
-    return [];
-  }
+  const customers = customerGeneralServiceApi.extractCustomers(response);
+  return transformCustomerList(customers);
 }
 
 export async function getCustomerById(
@@ -85,33 +77,28 @@ export async function getCustomerById(
     return undefined;
   }
 
-  try {
-    const response = await customerGeneralServiceApi.findCustomerById({
-      pe_customer_id: customerId,
-      pe_system_client_id: params.pe_system_client_id,
-      pe_organization_id: params.pe_organization_id,
-      pe_user_id: params.pe_user_id,
-      pe_user_name: params.pe_user_name,
-      pe_user_role: params.pe_user_role,
-      pe_person_id: params.pe_person_id,
-    });
+  const response = await customerGeneralServiceApi.findCustomerById({
+    pe_customer_id: customerId,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
 
-    const customerEntity =
-      customerGeneralServiceApi.extractCustomerById(response);
-    if (!customerEntity) {
-      return undefined;
-    }
-
-    const sellerEntity = customerGeneralServiceApi.extractSellerInfo(response);
-
-    return {
-      customer: transformCustomerDetail(customerEntity),
-      seller: sellerEntity ? transformSellerInfo(sellerEntity) : null,
-    };
-  } catch (error) {
-    logger.error(`Erro ao buscar cliente por ID ${customerId}:`, error);
+  const customerEntity =
+    customerGeneralServiceApi.extractCustomerById(response);
+  if (!customerEntity) {
     return undefined;
   }
+
+  const sellerEntity = customerGeneralServiceApi.extractSellerInfo(response);
+
+  return {
+    customer: transformCustomerDetail(customerEntity),
+    seller: sellerEntity ? transformSellerInfo(sellerEntity) : null,
+  };
 }
 
 export async function getCustomerLatestProducts(
@@ -137,25 +124,17 @@ export async function getCustomerLatestProducts(
     return [];
   }
 
-  try {
-    const response = await customerGeneralServiceApi.findLatestProducts({
-      pe_customer_id: customerId,
-      pe_limit: params.limit,
-      pe_system_client_id: params.pe_system_client_id,
-      pe_organization_id: params.pe_organization_id,
-      pe_user_id: params.pe_user_id,
-      pe_user_name: params.pe_user_name,
-      pe_user_role: params.pe_user_role,
-      pe_person_id: params.pe_person_id,
-    });
+  const response = await customerGeneralServiceApi.findLatestProducts({
+    pe_customer_id: customerId,
+    pe_limit: params.limit,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
 
-    const products = customerGeneralServiceApi.extractLatestProducts(response);
-    return transformCustomerLatestProductList(products);
-  } catch (error) {
-    logger.error(
-      `Erro ao buscar últimos produtos do cliente ${customerId}:`,
-      error,
-    );
-    return [];
-  }
+  const products = customerGeneralServiceApi.extractLatestProducts(response);
+  return transformCustomerLatestProductList(products);
 }

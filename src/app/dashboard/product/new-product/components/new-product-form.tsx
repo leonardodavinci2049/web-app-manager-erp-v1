@@ -157,9 +157,8 @@ export function NewProductForm() {
 
     if (result.success && result.productId) {
       toast.success("Produto criado com sucesso!");
-      setTimeout(() => {
-        router.push("/dashboard/product/catalog");
-      }, 1000);
+      router.refresh();
+      router.push("/dashboard/product/catalog");
     } else if (result.error) {
       toast.error(result.error);
     }

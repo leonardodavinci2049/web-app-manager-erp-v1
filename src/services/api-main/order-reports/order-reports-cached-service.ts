@@ -1,7 +1,6 @@
 import "server-only";
 
 import { cacheLife, cacheTag } from "next/cache";
-import { createLogger } from "@/core/logger";
 import { CACHE_TAGS } from "@/lib/cache-config";
 
 import { orderReportsServiceApi } from "./order-reports-service-api";
@@ -27,8 +26,6 @@ import {
   type UIOrderSummary,
   type UIOrderTradingInfo,
 } from "./transformers/transformers";
-
-const logger = createLogger("order-reports-cached-service");
 
 interface BaseParams {
   pe_system_client_id?: number;
@@ -62,31 +59,26 @@ export async function getCustomerOrders(
     return [];
   }
 
-  try {
-    const response = await orderReportsServiceApi.findCustomerAll({
-      pe_order_id: params.orderId,
-      pe_customer_id: params.customerId,
-      pe_seller_id: params.sellerId,
-      pe_order_status_id: params.orderStatusId,
-      pe_financial_status_id: params.financialStatusId,
-      pe_location_id: params.locationId,
-      pe_initial_date: params.initialDate,
-      pe_final_date: params.finalDate,
-      pe_limit: params.limit,
-      pe_system_client_id: params.pe_system_client_id,
-      pe_organization_id: params.pe_organization_id,
-      pe_user_id: params.pe_user_id,
-      pe_user_name: params.pe_user_name,
-      pe_user_role: params.pe_user_role,
-      pe_person_id: params.pe_person_id,
-    });
+  const response = await orderReportsServiceApi.findCustomerAll({
+    pe_order_id: params.orderId,
+    pe_customer_id: params.customerId,
+    pe_seller_id: params.sellerId,
+    pe_order_status_id: params.orderStatusId,
+    pe_financial_status_id: params.financialStatusId,
+    pe_location_id: params.locationId,
+    pe_initial_date: params.initialDate,
+    pe_final_date: params.finalDate,
+    pe_limit: params.limit,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
 
-    const items = orderReportsServiceApi.extractCustomerAll(response);
-    return transformCustomerAllList(items);
-  } catch (error) {
-    logger.error("Erro ao buscar pedidos por cliente:", error);
-    return [];
-  }
+  const items = orderReportsServiceApi.extractCustomerAll(response);
+  return transformCustomerAllList(items);
 }
 
 export interface UICustomerOrderDetail {
@@ -109,37 +101,32 @@ export async function getCustomerOrderById(
     return undefined;
   }
 
-  try {
-    const response = await orderReportsServiceApi.findCustomerId({
-      pe_order_id: orderId,
-      pe_type_business: params.typeBusiness,
-      pe_system_client_id: params.pe_system_client_id,
-      pe_organization_id: params.pe_organization_id,
-      pe_user_id: params.pe_user_id,
-      pe_user_name: params.pe_user_name,
-      pe_user_role: params.pe_user_role,
-      pe_person_id: params.pe_person_id,
-    });
+  const response = await orderReportsServiceApi.findCustomerId({
+    pe_order_id: orderId,
+    pe_type_business: params.typeBusiness,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
 
-    const summary = orderReportsServiceApi.extractCustomerIdSummary(response);
-    const items = orderReportsServiceApi.extractCustomerIdItems(response);
-    const history =
-      orderReportsServiceApi.extractCustomerIdStatusHistory(response);
-    const customer =
-      orderReportsServiceApi.extractCustomerIdCustomerInfo(response);
-    const seller = orderReportsServiceApi.extractCustomerIdSellerInfo(response);
+  const summary = orderReportsServiceApi.extractCustomerIdSummary(response);
+  const items = orderReportsServiceApi.extractCustomerIdItems(response);
+  const history =
+    orderReportsServiceApi.extractCustomerIdStatusHistory(response);
+  const customer =
+    orderReportsServiceApi.extractCustomerIdCustomerInfo(response);
+  const seller = orderReportsServiceApi.extractCustomerIdSellerInfo(response);
 
-    return {
-      summary: summary ? transformSummaryEntity(summary) : null,
-      items: items.map(transformReportItemEntity),
-      statusHistory: history ? transformStatusHistoryEntity(history) : null,
-      customerInfo: customer ? transformCustomerInfoEntity(customer) : null,
-      sellerInfo: seller ? transformSellerInfoEntity(seller) : null,
-    };
-  } catch (error) {
-    logger.error(`Erro ao buscar pedido do cliente por ID ${orderId}:`, error);
-    return undefined;
-  }
+  return {
+    summary: summary ? transformSummaryEntity(summary) : null,
+    items: items.map(transformReportItemEntity),
+    statusHistory: history ? transformStatusHistoryEntity(history) : null,
+    customerInfo: customer ? transformCustomerInfoEntity(customer) : null,
+    sellerInfo: seller ? transformSellerInfoEntity(seller) : null,
+  };
 }
 
 export async function getLatestOrders(
@@ -153,31 +140,26 @@ export async function getLatestOrders(
     return [];
   }
 
-  try {
-    const response = await orderReportsServiceApi.findLatestAll({
-      pe_order_id: params.orderId,
-      pe_customer_id: params.customerId,
-      pe_seller_id: params.sellerId,
-      pe_order_status_id: params.orderStatusId,
-      pe_financial_status_id: params.financialStatusId,
-      pe_location_id: params.locationId,
-      pe_initial_date: params.initialDate,
-      pe_final_date: params.finalDate,
-      pe_limit: params.limit,
-      pe_system_client_id: params.pe_system_client_id,
-      pe_organization_id: params.pe_organization_id,
-      pe_user_id: params.pe_user_id,
-      pe_user_name: params.pe_user_name,
-      pe_user_role: params.pe_user_role,
-      pe_person_id: params.pe_person_id,
-    });
+  const response = await orderReportsServiceApi.findLatestAll({
+    pe_order_id: params.orderId,
+    pe_customer_id: params.customerId,
+    pe_seller_id: params.sellerId,
+    pe_order_status_id: params.orderStatusId,
+    pe_financial_status_id: params.financialStatusId,
+    pe_location_id: params.locationId,
+    pe_initial_date: params.initialDate,
+    pe_final_date: params.finalDate,
+    pe_limit: params.limit,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
 
-    const items = orderReportsServiceApi.extractLatestAll(response);
-    return transformReportList(items);
-  } catch (error) {
-    logger.error("Erro ao buscar últimos pedidos:", error);
-    return [];
-  }
+  const items = orderReportsServiceApi.extractLatestAll(response);
+  return transformReportList(items);
 }
 
 export interface UILatestOrderDetail {
@@ -200,37 +182,30 @@ export async function getLatestOrderById(
     return undefined;
   }
 
-  try {
-    const response = await orderReportsServiceApi.findLatestId({
-      pe_order_id: orderId,
-      pe_type_business: params.typeBusiness,
-      pe_system_client_id: params.pe_system_client_id,
-      pe_organization_id: params.pe_organization_id,
-      pe_user_id: params.pe_user_id,
-      pe_user_name: params.pe_user_name,
-      pe_user_role: params.pe_user_role,
-      pe_person_id: params.pe_person_id,
-    });
+  const response = await orderReportsServiceApi.findLatestId({
+    pe_order_id: orderId,
+    pe_type_business: params.typeBusiness,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
 
-    const summary = orderReportsServiceApi.extractLatestIdSummary(response);
-    const items = orderReportsServiceApi.extractLatestIdItems(response);
-    const history =
-      orderReportsServiceApi.extractLatestIdStatusHistory(response);
-    const customer =
-      orderReportsServiceApi.extractLatestIdCustomerInfo(response);
-    const seller = orderReportsServiceApi.extractLatestIdSellerInfo(response);
+  const summary = orderReportsServiceApi.extractLatestIdSummary(response);
+  const items = orderReportsServiceApi.extractLatestIdItems(response);
+  const history = orderReportsServiceApi.extractLatestIdStatusHistory(response);
+  const customer = orderReportsServiceApi.extractLatestIdCustomerInfo(response);
+  const seller = orderReportsServiceApi.extractLatestIdSellerInfo(response);
 
-    return {
-      summary: summary ? transformSummaryEntity(summary) : null,
-      items: items.map(transformReportItemEntity),
-      statusHistory: history ? transformStatusHistoryEntity(history) : null,
-      customerInfo: customer ? transformCustomerInfoEntity(customer) : null,
-      sellerInfo: seller ? transformSellerInfoEntity(seller) : null,
-    };
-  } catch (error) {
-    logger.error(`Erro ao buscar último pedido por ID ${orderId}:`, error);
-    return undefined;
-  }
+  return {
+    summary: summary ? transformSummaryEntity(summary) : null,
+    items: items.map(transformReportItemEntity),
+    statusHistory: history ? transformStatusHistoryEntity(history) : null,
+    customerInfo: customer ? transformCustomerInfoEntity(customer) : null,
+    sellerInfo: seller ? transformSellerInfoEntity(seller) : null,
+  };
 }
 
 export async function getSaleOrders(
@@ -244,31 +219,26 @@ export async function getSaleOrders(
     return [];
   }
 
-  try {
-    const response = await orderReportsServiceApi.findSaleAll({
-      pe_order_id: params.orderId,
-      pe_customer_id: params.customerId,
-      pe_seller_id: params.sellerId,
-      pe_order_status_id: params.orderStatusId,
-      pe_financial_status_id: params.financialStatusId,
-      pe_location_id: params.locationId,
-      pe_initial_date: params.initialDate,
-      pe_final_date: params.finalDate,
-      pe_limit: params.limit,
-      pe_system_client_id: params.pe_system_client_id,
-      pe_organization_id: params.pe_organization_id,
-      pe_user_id: params.pe_user_id,
-      pe_user_name: params.pe_user_name,
-      pe_user_role: params.pe_user_role,
-      pe_person_id: params.pe_person_id,
-    });
+  const response = await orderReportsServiceApi.findSaleAll({
+    pe_order_id: params.orderId,
+    pe_customer_id: params.customerId,
+    pe_seller_id: params.sellerId,
+    pe_order_status_id: params.orderStatusId,
+    pe_financial_status_id: params.financialStatusId,
+    pe_location_id: params.locationId,
+    pe_initial_date: params.initialDate,
+    pe_final_date: params.finalDate,
+    pe_limit: params.limit,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
 
-    const items = orderReportsServiceApi.extractSaleAll(response);
-    return transformReportList(items);
-  } catch (error) {
-    logger.error("Erro ao buscar todas as vendas:", error);
-    return [];
-  }
+  const items = orderReportsServiceApi.extractSaleAll(response);
+  return transformReportList(items);
 }
 
 export interface UISaleOrderDetail {
@@ -292,37 +262,32 @@ export async function getSaleOrderById(
     return undefined;
   }
 
-  try {
-    const response = await orderReportsServiceApi.findSaleId({
-      pe_order_id: orderId,
-      pe_type_business: params.typeBusiness,
-      pe_system_client_id: params.pe_system_client_id,
-      pe_organization_id: params.pe_organization_id,
-      pe_user_id: params.pe_user_id,
-      pe_user_name: params.pe_user_name,
-      pe_user_role: params.pe_user_role,
-      pe_person_id: params.pe_person_id,
-    });
+  const response = await orderReportsServiceApi.findSaleId({
+    pe_order_id: orderId,
+    pe_type_business: params.typeBusiness,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
 
-    const summary = orderReportsServiceApi.extractSaleIdSummary(response);
-    const items = orderReportsServiceApi.extractSaleIdItems(response);
-    const customer = orderReportsServiceApi.extractSaleIdCustomerInfo(response);
-    const seller = orderReportsServiceApi.extractSaleIdSellerInfo(response);
-    const trading = orderReportsServiceApi.extractSaleIdTradingInfo(response);
-    const shipping = orderReportsServiceApi.extractSaleIdShippingInfo(response);
+  const summary = orderReportsServiceApi.extractSaleIdSummary(response);
+  const items = orderReportsServiceApi.extractSaleIdItems(response);
+  const customer = orderReportsServiceApi.extractSaleIdCustomerInfo(response);
+  const seller = orderReportsServiceApi.extractSaleIdSellerInfo(response);
+  const trading = orderReportsServiceApi.extractSaleIdTradingInfo(response);
+  const shipping = orderReportsServiceApi.extractSaleIdShippingInfo(response);
 
-    return {
-      summary: summary ? transformSummaryEntity(summary) : null,
-      orderDetail: items[0] ? transformSaleDetailEntity(items[0]) : null,
-      customerInfo: customer ? transformCustomerInfoEntity(customer) : null,
-      sellerInfo: seller ? transformSellerInfoEntity(seller) : null,
-      tradingInfo: trading ? transformTradingInfoEntity(trading) : null,
-      shippingInfo: shipping ? transformShippingInfoEntity(shipping) : null,
-    };
-  } catch (error) {
-    logger.error(`Erro ao buscar venda por ID ${orderId}:`, error);
-    return undefined;
-  }
+  return {
+    summary: summary ? transformSummaryEntity(summary) : null,
+    orderDetail: items[0] ? transformSaleDetailEntity(items[0]) : null,
+    customerInfo: customer ? transformCustomerInfoEntity(customer) : null,
+    sellerInfo: seller ? transformSellerInfoEntity(seller) : null,
+    tradingInfo: trading ? transformTradingInfoEntity(trading) : null,
+    shippingInfo: shipping ? transformShippingInfoEntity(shipping) : null,
+  };
 }
 
 export async function getSellerOrders(
@@ -336,29 +301,24 @@ export async function getSellerOrders(
     return [];
   }
 
-  try {
-    const response = await orderReportsServiceApi.findSellerAll({
-      pe_order_id: params.orderId,
-      pe_customer_id: params.customerId,
-      pe_seller_id: params.sellerId,
-      pe_order_status_id: params.orderStatusId,
-      pe_financial_status_id: params.financialStatusId,
-      pe_location_id: params.locationId,
-      pe_initial_date: params.initialDate,
-      pe_final_date: params.finalDate,
-      pe_limit: params.limit,
-      pe_system_client_id: params.pe_system_client_id,
-      pe_organization_id: params.pe_organization_id,
-      pe_user_id: params.pe_user_id,
-      pe_user_name: params.pe_user_name,
-      pe_user_role: params.pe_user_role,
-      pe_person_id: params.pe_person_id,
-    });
+  const response = await orderReportsServiceApi.findSellerAll({
+    pe_order_id: params.orderId,
+    pe_customer_id: params.customerId,
+    pe_seller_id: params.sellerId,
+    pe_order_status_id: params.orderStatusId,
+    pe_financial_status_id: params.financialStatusId,
+    pe_location_id: params.locationId,
+    pe_initial_date: params.initialDate,
+    pe_final_date: params.finalDate,
+    pe_limit: params.limit,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
 
-    const items = orderReportsServiceApi.extractSellerAll(response);
-    return transformReportList(items);
-  } catch (error) {
-    logger.error("Erro ao buscar pedidos por vendedor:", error);
-    return [];
-  }
+  const items = orderReportsServiceApi.extractSellerAll(response);
+  return transformReportList(items);
 }

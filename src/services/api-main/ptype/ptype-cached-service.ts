@@ -1,7 +1,6 @@
 import "server-only";
 
 import { cacheLife, cacheTag } from "next/cache";
-import { createLogger } from "@/core/logger";
 import { CACHE_TAGS } from "@/lib/cache-config";
 
 import { ptypeServiceApi } from "./ptype-service-api";
@@ -10,8 +9,6 @@ import {
   transformPtypeList,
   type UIPtype,
 } from "./transformers/transformers";
-
-const logger = createLogger("ptype-cached-service");
 
 export async function getPtypes(
   params: {
@@ -33,24 +30,19 @@ export async function getPtypes(
     return [];
   }
 
-  try {
-    const response = await ptypeServiceApi.findAllPtypes({
-      pe_search: params.search,
-      pe_limit: params.limit,
-      pe_system_client_id: params.pe_system_client_id,
-      pe_organization_id: params.pe_organization_id,
-      pe_user_id: params.pe_user_id,
-      pe_user_name: params.pe_user_name,
-      pe_user_role: params.pe_user_role,
-      pe_person_id: params.pe_person_id,
-    });
+  const response = await ptypeServiceApi.findAllPtypes({
+    pe_search: params.search,
+    pe_limit: params.limit,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
 
-    const ptypes = ptypeServiceApi.extractPtypes(response);
-    return transformPtypeList(ptypes);
-  } catch (error) {
-    logger.error("Erro ao buscar tipos:", error);
-    return [];
-  }
+  const ptypes = ptypeServiceApi.extractPtypes(response);
+  return transformPtypeList(ptypes);
 }
 
 export async function getPtypeById(
@@ -72,25 +64,20 @@ export async function getPtypeById(
     return undefined;
   }
 
-  try {
-    const response = await ptypeServiceApi.findPtypeById({
-      pe_type_id: id,
-      pe_system_client_id: params.pe_system_client_id,
-      pe_organization_id: params.pe_organization_id,
-      pe_user_id: params.pe_user_id,
-      pe_user_name: params.pe_user_name,
-      pe_user_role: params.pe_user_role,
-      pe_person_id: params.pe_person_id,
-    });
+  const response = await ptypeServiceApi.findPtypeById({
+    pe_type_id: id,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
 
-    const ptype = ptypeServiceApi.extractPtypeById(response);
-    if (!ptype) {
-      return undefined;
-    }
-
-    return transformPtype(ptype) ?? undefined;
-  } catch (error) {
-    logger.error(`Erro ao buscar tipo por ID ${id}:`, error);
+  const ptype = ptypeServiceApi.extractPtypeById(response);
+  if (!ptype) {
     return undefined;
   }
+
+  return transformPtype(ptype) ?? undefined;
 }
