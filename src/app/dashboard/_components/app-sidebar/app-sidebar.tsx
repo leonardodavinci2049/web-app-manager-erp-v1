@@ -112,13 +112,27 @@ const data = {
       icon: Bot,
       items: [
         {
-          title: "Cadastros",
-          url: "#",
+          title: "Lista de Clientes",
+          url: "/dashboard/customer/customer-list",
         },
 
         {
           title: "Novo Cadastro",
-          url: "#",
+          url: "/dashboard/customer/add-customer",
+        },
+
+        {
+          title: "Clientes Premium",
+          url: "/dashboard/customer/premium-customers",
+        },
+
+        {
+          title: "Clientes Inativos",
+          url: "/dashboard/customer/inactive-customers",
+        },
+        {
+          title: "Cadastro Pendente",
+          url: "/dashboard/customer/pending-registrations",
         },
       ],
     },
@@ -128,6 +142,10 @@ const data = {
       url: "#",
       icon: Settings2,
       items: [
+        {
+          title: "Painel geral",
+          url: "/dashboard/report/panel",
+        },
         {
           title: "Vendas",
           url: "/dashboard/report/sales",
