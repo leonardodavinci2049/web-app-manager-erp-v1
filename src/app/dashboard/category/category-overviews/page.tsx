@@ -24,7 +24,7 @@ import {
   validateTaxonomyData,
 } from "./utils/taxonomy-transform";
 
-const PRODUCT_CATEGORY_TAXONOMY_TYPE_ID = 2;
+const PRODUCT_CATEGORY_TAXONOMY_TYPE_ID = 1;
 
 /**
  * Página de visualização hierárquica de categorias
@@ -89,6 +89,18 @@ export default async function CategoryOverviewsPage() {
                   <li>
                     <strong>Quantidade:</strong> O número entre parênteses
                     indica a quantidade de produtos relacionados
+                  </li>
+                  <li>
+                    <strong>Adicionar:</strong> Use o botão com ícone de mais
+                    para criar categorias filhas em cada nó permitido
+                  </li>
+                  <li>
+                    <strong>Excluir:</strong> Use o botão com ícone de lixeira
+                    para excluir categorias sem filhos e sem produtos
+                  </li>
+                  <li>
+                    <strong>Confirmação:</strong> A exclusão sempre solicita
+                    confirmação antes de prosseguir
                   </li>
                 </ul>
 
