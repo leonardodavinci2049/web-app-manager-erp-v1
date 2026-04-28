@@ -25,7 +25,7 @@ export function SidebarLogo() {
   const logoSrc = isRemoteLogo ? `${imageBaseUrl}/${imagePath}` : LOGO_FALLBACK;
   const companyName =
     meta.COMMERCIAL_NAME || publicEnvs.NEXT_PUBLIC_COMPANY_NAME;
-    // console.log("🚀 ~ logoSrc:", logoSrc);
+  // console.log("🚀 ~ logoSrc:", logoSrc);
   return (
     <SidebarMenu>
       <SidebarMenuItem>
