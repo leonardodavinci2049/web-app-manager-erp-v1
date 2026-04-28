@@ -20,6 +20,21 @@ export function transformTaxonomyToHierarchy(
   return buildHierarchyFromFlatData(data);
 }
 
+export function resolveCategoryQuantities(
+  nodes: CategoryNode[],
+  quantitySource: Pick<UITaxonomy, "id" | "productCount">[] = [],
+): CategoryNode[] {
+  const quantityById = new Map<string | number, number>();
+
+  for (const item of quantitySource) {
+    if (typeof item.productCount === "number") {
+      quantityById.set(item.id, item.productCount);
+    }
+  }
+
+  return nodes.map((node) => resolveCategoryNodeQuantity(node, quantityById));
+}
+
 /**
  * Builds hierarchy from flat data
  * @param flatData - Flat array of taxonomies
@@ -94,6 +109,37 @@ function apiItemToCategoryNode(apiItem: TaxonomyItem): CategoryNode {
     order: apiItem.order ?? undefined,
     isActive: true,
   };
+}
+
+function resolveCategoryNodeQuantity(
+  node: CategoryNode,
+  quantityById: Map<string | number, number>,
+): CategoryNode {
+  const children = (node.children ?? []).map((child) =>
+    resolveCategoryNodeQuantity(child, quantityById),
+  );
+  const directQuantity = normalizeQuantity(
+    node.quantity ?? quantityById.get(node.id),
+  );
+  const childrenQuantity = children.reduce(
+    (total, child) => total + (child.quantity ?? 0),
+    0,
+  );
+
+  return {
+    ...node,
+    quantity:
+      directQuantity ?? (childrenQuantity > 0 ? childrenQuantity : undefined),
+    children,
+  };
+}
+
+function normalizeQuantity(value: number | undefined): number | undefined {
+  if (typeof value !== "number" || Number.isNaN(value)) {
+    return undefined;
+  }
+
+  return value;
 }
 
 /**

@@ -97,7 +97,7 @@ export function CategoryTreeItem({
           <button
             onClick={handleToggle}
             className={cn(
-              "flex items-center justify-center w-5 h-5 flex-shrink-0",
+              "flex items-center justify-center w-5 h-5 shrink-0",
               "transition-transform duration-300 ease-out",
               isExpanded && "rotate-180",
             )}
@@ -108,13 +108,13 @@ export function CategoryTreeItem({
             <ChevronDown className="w-4 h-4 text-muted-foreground" />
           </button>
         ) : (
-          <div className="w-5 h-5 flex-shrink-0" />
+          <div className="w-5 h-5 shrink-0" />
         )}
 
         {/* Conteúdo do item com ícone hierárquico */}
         <div className="flex-1 flex items-center gap-2">
           {/* Ícone do nível hierárquico */}
-          <div className="flex items-center justify-center flex-shrink-0">
+          <div className="flex items-center justify-center shrink-0">
             {getLevelIcon()}
           </div>
 
@@ -131,14 +131,12 @@ export function CategoryTreeItem({
             <span className="text-muted-foreground">{node.id}</span>
             <span className="mx-1.5">-</span>
             {node.name}
+            {node.quantity !== undefined && (
+              <span className="ml-1 text-muted-foreground">
+                ({node.quantity})
+              </span>
+            )}
           </button>
-
-          {/* Indicador de quantidade */}
-          {node.quantity !== undefined && (
-            <span className="text-xs text-muted-foreground ml-2">
-              ({node.quantity})
-            </span>
-          )}
         </div>
       </div>
 
