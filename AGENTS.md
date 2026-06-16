@@ -1,133 +1,111 @@
-# Agent Guidelines for web-app-pdv-v1
+# Agent Guidelines for Manager ERP
 
-This document provides conventions and guidelines for agentic coding in this repository.
+Operational guide for agents working in `web-app-manager-erp-v1`. Be concise, follow existing patterns, and prefer editing only what is necessary.
 
-## Build & Development Commands
+## Product and Stack
+
+- Manager ERP: admin dashboard for catalog, products, brands, categories, customers, orders, reports, CRM, authentication, and multi-organization support.
+- Main stack: Next.js 16.2, React 19.2, App Router, React Compiler, Cache Components, strict TypeScript, Biome, Better Auth, mysql2, and HTTP integrations.
+- Sources of truth: `package.json`, `next.config.ts`, `tsconfig.json`, `biome.json`, `README.md`, `src/lib/cache-config.ts`, and local Next.js docs.
+- If there is an `AGENTS.md` closer to the file being edited, it complements or specializes this guide.
+
+## Commands
 
 ```bash
-pnpm dev              # Start dev server with dotenv (required for DB)
-pnpm build            # Production build
-pnpm start            # Start production server with dotenv
-pnpm lint             # Run Biome linter/checker
-pnpm format           # Format code with Biome (auto-fixes)
+pnpm dev      # dotenv -e .env -- next dev; dev server on port 5581
+pnpm lint     # biome check
+pnpm format   # biome format --write
+pnpm build    # production build
+pnpm start    # production start with dotenv
 ```
 
-**Principais Tecnologias:**
-- **Next.js 16+**: Utiliza as versões mais recentes com **React Compiler** (cache component) ativado.
-- **Server Components**: Preferência absoluta por componentes do lado do servidor para performance e SEO.
-- **Server Actions**: Utilizados **exclusivamente** para mutações de dados (mutations).
+This project does not currently use automated tests. Do not invent or suggest test commands; if tests are added in the future, update this file.
 
-## Project Structure
+## Architecture
 
-```
-src/
-├── app/           # Next.js App Router pages and API routes
-├── components/    # React components (client and server)
-├── core/          # Core utilities (config, constants, logger)
-├── db/            # Database schema definitions
-├── hooks/         # React hooks
-├── lib/           # Shared utilities (cn helper, auth config)
-├── server/        # Server actions (apenas para mutations)
-├── services/      # Database and API services
-└── types/         # TypeScript type definitions
-```
+- `src/app`: App Router routes, layouts, pages, route handlers, and special files.
+- `src/app/actions`: global Server Actions.
+- `src/app/**/_actions`: feature/route Server Actions.
+- `src/app/**/_components`: feature/route colocated UI; follow the existing local pattern.
+- `src/components`: shared components; `src/components/ui` for base/design system components.
+- `src/services/api-main/*`: main API integration by module. Read the local `AGENTS.md` before changing anything.
+- `src/services/api-assets` and `src/services/api-cep`: specific external integrations.
+- `src/services/db/*`: DB/server-only access with mysql2.
+- `src/core` and `src/lib`: shared config, logger, auth, helpers, cache, and utilities.
+- `src/types` or module-level `types/`: shared types.
 
-## Code Style Guidelines
+## Next.js and React
 
-### Componentes e Interatividade
-- **Server First**: Desenvolva sempre como Server Component por padrão.
-- **Componentes de Rota**: Páginas (`page.tsx`) e Layouts (`layout.tsx`) devem ser **obrigatoriamente** Server Components.
-- **Isolamento de Client Components**: Se precisar de interatividade (hooks, event listeners), isole essa lógica em um componente separado.
-- **Localização de Client Components**: Coloque o componente de cliente em uma pasta `components/` dentro do diretório do componente pai (ex: se o pai está em `src/app/page.tsx`, o componente de cliente fica em `src/app/components/client-component.tsx`).
+- Server Components by default. `page.tsx` and `layout.tsx` should remain server-side unless there is a real framework exception.
+- Use Client Components only for interactive state, events, browser APIs, providers, and client-only libraries. Isolate `"use client"` in the smallest possible component.
+- `error.tsx` and `global-error.tsx` are Client Components by App Router convention.
+- Data reads belong in Server Components, services, or cached services. Mutations belong in Server Actions.
+- Create Route Handlers only when there is a real need for an HTTP endpoint.
+- Use absolute imports with `@/` for files inside `src`.
+- Default exports are required in App Router special files; otherwise, prefer named exports when they make sense.
 
-### Formatting & Linting
-- **Biome** for all formatting (2 space indentation).
-- Imports organized automatically on save.
-- No trailing semicolons.
+## Data, Services, and Mutations
 
-### Imports
-- Path alias `@/` for internal imports (`@/components/ui/button`).
-- Order: external libraries, internal modules, styles.
-- Absolute imports only - no relative imports for src files.
-- Named exports preferred for multiple exports.
+- In `src/services/api-main/*`, preserve the local separation between `*-service-api.ts`, `*-cached-service.ts`, `types`, `validation`, and `transformers`.
+- In server-only services, use `import "server-only"` when accessing secrets, the DB, internal APIs, or user context.
+- Validate inputs with Zod or an existing schema. Avoid `any`; use `unknown` or specific types.
+- Return minimal DTOs to UI and Client Components. Do not expose raw entities, secrets, tokens, or internal errors.
+- Server Actions must revalidate authentication and resource/organization authorization, even if the screen has already checked the session.
+- Use `createLogger("context")` instead of `console.error` for relevant errors.
 
-### TypeScript
-- **Strict mode enabled** - all types must be defined.
-- `type` for type aliases, `interface` for object shapes.
-- Use `unknown` instead of `any`, `Record<string, unknown>` for dynamic objects.
-- `as const` for readonly constant arrays/objects.
+## Cache Components
 
-### Naming Conventions
-- **Files:** kebab-case (`submit-button.tsx`, `auth.service.ts`).
-- **Components:** PascalCase (`SubmitButton`, `ThemeProvider`).
-- **Functions:** camelCase (`useIsMobile`, `findUserById`).
-- **Constants:** UPPER_SNAKE_CASE (`API_TIMEOUTS`, `AUTH_TABLES`).
+- `cacheComponents: true` and `reactCompiler: true` are enabled in `next.config.ts`.
+- Use `"use cache"` only in deterministic functions/components that are safe to cache.
+- Use `cacheLife` with the profiles defined in `next.config.ts`.
+- Use `cacheTag` with `CACHE_TAGS` from `src/lib/cache-config.ts`.
+- After mutations, invalidate with `updateTag`, `revalidateTag`, or `revalidatePath`, depending on the expected effect.
+- Do not cache private data without an appropriate key by user, organization, or resource.
+- For `cookies()`, `headers()`, `params`, `searchParams`, runtime data, or uncached data, consult the local docs and use `Suspense` when necessary.
 
-### Server Actions
-```typescript
-"use server";
-// Use APENAS para mutações (POST, PUT, DELETE)
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth/auth";
+## Security and Env
 
-export async function myAction(params: { id: string }) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) redirect("/sign-in");
-  try {
-    // Lógica de mutação
-    return { success: true, data: result };
-  } catch (error) {
-    console.error(error);
-    return { success: false, error: "Error message" };
-  }
-}
-```
+- Never read private variables in Client Components; on the client, use only `NEXT_PUBLIC_*`.
+- `.env` and `.env.local` are secrets. Do not log, copy, or expose values.
+- Authentication does not replace authorization. Verify ownership, organization, and permissions in actions/services that mutate or return sensitive data.
+- Do not import server-only modules in Client Components.
+- Client-facing messages must be safe and generic; internal details belong in logs.
 
-### Database Services
-Services in `src/services/db/` use raw SQL with mysql2 and Entity → DTO pattern:
+## Styling & Components
 
-```typescript
-import "server-only";
-import { z } from "zod";
-import dbService from "@/services/db/dbConnection";
+- **Tailwind CSS 4** via `@tailwindcss/postcss` (no tailwind.config.js)
+- **shadcn/ui** components configured in `components.json`:
+  - Style: "new-york"
+  - Base color: "stone"
+  - CSS variables: enabled
+  - Icon library: lucide
+- Biome configuration (`biome.json`):
+  - 2-space indentation
+  - Recommended rules + Next.js + React domains
+  - `noUnknownAtRules` off (for Tailwind)
 
-const IdSchema = z.string().min(1).max(128);
+## Style
 
-async function findById(params: { id: string }): Promise<ServiceResponse<User>> {
-  try {
-    IdSchema.parse(params.id);
-    const query = "SELECT id, name FROM user WHERE id = ? LIMIT 1";
-    const results = await dbService.selectExecute<UserEntity>(query, [params.id]);
-    return { success: true, data: mapEntityToDto(results[0]), error: null };
-  } catch (error) {
-    return handleError<User>(error, "findById");
-  }
-}
-export const MyService = { findById } as const;
-```
+- Use Biome for formatting and import organization. Do not change lint/format config unless necessary.
+- Files in kebab-case; components in PascalCase; functions in camelCase; global constants in UPPER_SNAKE_CASE.
+- Keep TypeScript strict and local models. Avoid out-of-scope refactors.
 
-### Error Handling
-- Always wrap async operations in try-catch.
-- Return standardized: `{ success: boolean, data?: T, error?: string }`.
-- Use custom error classes for domain errors.
-- Never expose database errors/stack traces to clients.
-- Log with `createLogger("context")` from `@/core/logger`.
+## Language
 
-### Configuration
-- Environment vars in `.env` and `.env.local` (don't commit secrets).
-- Load with `envs` from `@/core/config/envs`.
-- React Compiler enabled in next.config.ts.
-- TypeScript strict mode, ES2017 target.
+- The default development language is US English. Code comments, error messages, documentation, and file names should use English.
+- User-facing output messages, labels, and interface text should use Brazilian Portuguese because the project is intended for a Brazilian audience.
 
-### Comments
-- Write in Portuguese for domain concepts (as per existing codebase).
-- Keep brief and focused on "why" not "what".
-- Don't comment obvious code.
+## Naming conventions
 
-## Before Making Changes
-1. Run `pnpm lint` to check code quality.
-2. Follow existing patterns in similar files.
-3. Use `pnpm format` to auto-format.
-4. No relative imports for src files.
-5. Ensure all new code is properly typed (no `any`).
+- **Files and folders**: kebab-case (e.g., `app-sidebar.tsx`, `user-profile/`)
+- **Component exports**: **ALWAYS PascalCase** — every React component must be named and exported in PascalCase (e.g., `export function AppSidebar()`, `export function UserProfileCard()`).
+- **Functions/hooks**: camelCase with `use` prefix for hooks
+- **Types/Interfaces**: PascalCase, no `I` prefix
+
+## Verification
+
+- Documentation change: review Markdown; run `pnpm lint` if the change touches code examples or config.
+- TS/React change: run `pnpm lint`.
+- Route, build, Server Action, cache, config, or integration change: run `pnpm build` when viable.
+- Visual/interactive change: validate in the browser/dev server; if the Next.js MCP is available, use it for errors, routes, and logs.
+- If you cannot run an expected verification, state the reason in the final summary.
