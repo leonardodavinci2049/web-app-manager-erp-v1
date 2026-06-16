@@ -148,11 +148,18 @@ export function CategoryTree({
   };
 
   const openCreateDialog = (node: CategoryNode) => {
+    if (node.level === 3) {
+      toast.error("Não é possível adicionar subcategorias no nível 3.");
+      return;
+    }
+
+    const parentLevel = node.level;
+
     setCreateName("");
     setCreateTarget({
       parentId: Number(node.id),
       parentName: node.name,
-      parentLevel: node.level,
+      parentLevel,
     });
   };
 
@@ -326,7 +333,7 @@ export function CategoryTree({
               <Button
                 type="button"
                 variant="outline"
-                onClick={closeCreateDialog}
+                onClick={() => closeCreateDialog()}
                 disabled={isCreating}
               >
                 Cancelar
