@@ -31,7 +31,7 @@ export async function updateCategoryName(
       };
     }
 
-    if (!name || !name.trim()) {
+    if (!name?.trim()) {
       return {
         success: false,
         error: "Nome da categoria não pode ser vazio",

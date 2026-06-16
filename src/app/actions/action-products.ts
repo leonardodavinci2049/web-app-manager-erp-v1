@@ -67,7 +67,7 @@ export async function createProductFromForm(formData: FormData): Promise<{
     const slug = generateSlugFromName(name);
 
     // Validate that we have a name to work with
-    if (!name || !name.trim()) {
+    if (!name?.trim()) {
       return {
         success: false,
         error: "Nome do produto é obrigatório",
@@ -162,7 +162,7 @@ export async function createProduct(data: CreateProductData): Promise<{
     const slug = data.slug || generateSlugFromName(data.name);
 
     // Validate that we have a name to work with
-    if (!data.name || !data.name.trim()) {
+    if (!data.name?.trim()) {
       return {
         success: false,
         error: "Nome do produto é obrigatório",

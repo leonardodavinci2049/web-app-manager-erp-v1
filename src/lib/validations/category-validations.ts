@@ -78,7 +78,7 @@ export function calculateLevelFromParent(
   }
 
   const parent = categories.find((cat) => cat.ID_TAXONOMY === parentId);
-  if (!parent || !parent.LEVEL) {
+  if (!parent?.LEVEL) {
     return 1; // Fallback para categoria raiz
   }
 
