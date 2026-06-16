@@ -5,6 +5,7 @@
  * Implementação otimizada seguindo Next.js 15 e diretrizes do projeto
  */
 
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 import Form from "next/form";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -47,8 +48,10 @@ export function NewCategoryForm({ categories }: NewCategoryFormProps) {
   async function handleFormAction(formData: FormData) {
     try {
       await createCategoryAction(formData);
-      // Se chegou aqui, houve erro (o sucesso redireciona automaticamente)
     } catch (error) {
+      if (isRedirectError(error)) {
+        throw error;
+      }
       console.error("Erro ao criar categoria:", error);
       const errorMessage =
         error instanceof Error ? error.message : "Erro inesperado";

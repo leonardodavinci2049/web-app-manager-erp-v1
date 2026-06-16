@@ -9,6 +9,14 @@
 
 import { revalidateTag } from "next/cache";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
+import { z } from "zod";
+import type { CategoryNode } from "@/app/dashboard/category/category-overviews/_components/category-tree.types";
+import {
+  findNodeById as findHierarchyNodeById,
+  resolveCategoryQuantities,
+  transformTaxonomyToHierarchy,
+  validateTaxonomyData,
+} from "@/app/dashboard/category/category-overviews/utils/taxonomy-transform";
 import { CACHE_TAGS } from "@/lib/cache-config";
 import { createLogger } from "@/lib/logger";
 import { getAuthContext } from "@/server/auth-context";
@@ -22,6 +30,21 @@ import {
 } from "@/services/api-main/taxonomy-base/transformers/transformers";
 
 const logger = createLogger("ActionCategories");
+const PRODUCT_CATEGORY_TAXONOMY_TYPE_ID = 1;
+
+const CreateCategoryFromMenuSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(2, "Nome deve ter pelo menos 2 caracteres")
+    .max(100, "Nome não pode ter mais de 100 caracteres"),
+  parentId: z.number().int().min(0),
+  parentLevel: z.union([z.literal(0), z.literal(1), z.literal(2)]),
+});
+
+const DeleteCategoryFromMenuSchema = z.object({
+  categoryId: z.number().int().positive(),
+});
 
 /**
  * Interface para parâmetros de busca de categorias
@@ -271,16 +294,33 @@ export interface CreateCategoryResponse {
   error?: string;
 }
 
+export interface CreateCategoryFromMenuInput {
+  name: string;
+  parentId: number;
+  parentLevel: 0 | 1 | 2;
+}
+
+export interface CreateCategoryFromMenuResponse {
+  success: boolean;
+  message: string;
+  recordId?: number;
+  error?: string;
+}
+
+export interface DeleteCategoryFromMenuInput {
+  categoryId: number;
+}
+
 /**
  * Server Action to load categories menu for client components
- * Uses pe_type_id = 2 for product categories as per API documentation
+ * Uses the default taxonomy type configured for product categories
  */
 export async function loadCategoriesMenuAction() {
   try {
     const { apiContext } = await getAuthContext();
 
     const response = await taxonomyBaseServiceApi.findTaxonomyMenu({
-      pe_type_id: 2,
+      pe_type_id: PRODUCT_CATEGORY_TAXONOMY_TYPE_ID,
       pe_parent_id: 0,
       ...apiContext,
     });
@@ -415,7 +455,13 @@ export async function createCategory(
   try {
     const { apiContext } = await getAuthContext();
 
-    const { name, slug, parentId = 0, level = 1, type = 2 } = params;
+    const {
+      name,
+      slug,
+      parentId = 0,
+      level = 1,
+      type = PRODUCT_CATEGORY_TAXONOMY_TYPE_ID,
+    } = params;
 
     const response = await taxonomyBaseServiceApi.createTaxonomy({
       pe_taxonomy_name: name,
@@ -468,6 +514,12 @@ export interface DeleteCategoryResponse {
   error?: string;
 }
 
+export interface DeleteCategoryFromMenuResponse {
+  success: boolean;
+  message: string;
+  error?: string;
+}
+
 /**
  * Deleta uma categoria (soft delete)
  */
@@ -509,4 +561,256 @@ export async function deleteCategory(
           : "Erro desconhecido ao deletar categoria",
     };
   }
+}
+
+export async function createCategoryFromMenuAction(
+  input: CreateCategoryFromMenuInput,
+): Promise<CreateCategoryFromMenuResponse> {
+  try {
+    const validatedInput = CreateCategoryFromMenuSchema.parse(input);
+    const { apiContext } = await getAuthContext();
+
+    let level: 1 | 2 | 3 = 1;
+
+    if (validatedInput.parentId === 0) {
+      if (validatedInput.parentLevel !== 0) {
+        return {
+          success: false,
+          message: "Nível da categoria raiz inválido.",
+          error: "Nível da categoria raiz inválido.",
+        };
+      }
+    } else {
+      const categories = await loadCategoryHierarchyForMutations(apiContext);
+      const parentNode = findHierarchyNodeById(
+        categories,
+        validatedInput.parentId,
+      );
+
+      if (!parentNode) {
+        return {
+          success: false,
+          message: "Categoria pai não encontrada.",
+          error: "Categoria pai não encontrada.",
+        };
+      }
+
+      if (parentNode.level >= 3) {
+        return {
+          success: false,
+          message: "Não é possível adicionar subcategorias no nível 3.",
+          error: "Não é possível adicionar subcategorias no nível 3.",
+        };
+      }
+
+      level = (parentNode.level + 1) as 2 | 3;
+    }
+
+    const { generateSlugFromName } = await import(
+      "@/lib/validations/category-validations"
+    );
+
+    const slug = generateSlugFromName(validatedInput.name);
+    if (!slug) {
+      return {
+        success: false,
+        message: "Não foi possível gerar o slug da categoria.",
+        error: "Não foi possível gerar o slug da categoria.",
+      };
+    }
+
+    const response = await taxonomyBaseServiceApi.createTaxonomy({
+      pe_taxonomy_name: validatedInput.name,
+      pe_slug: slug,
+      pe_parent_id: validatedInput.parentId,
+      pe_level: level,
+      pe_type_id: PRODUCT_CATEGORY_TAXONOMY_TYPE_ID,
+      ...apiContext,
+    });
+
+    const spResult =
+      taxonomyBaseServiceApi.extractStoredProcedureResult(response);
+    const recordId = spResult?.sp_return_id ?? response.recordId;
+    const message =
+      spResult?.sp_message ||
+      response.message ||
+      "Categoria criada com sucesso.";
+
+    revalidateTag(CACHE_TAGS.taxonomies, "seconds");
+    revalidateTag(CACHE_TAGS.taxonomiesMenu, "hours");
+    revalidateTag(
+      CACHE_TAGS.taxonomyMenu(String(PRODUCT_CATEGORY_TAXONOMY_TYPE_ID)),
+      "hours",
+    );
+
+    return {
+      success: true,
+      message,
+      recordId,
+    };
+  } catch (error) {
+    logger.error("Erro ao criar categoria pelo menu", error);
+
+    const message =
+      error instanceof Error ? error.message : "Erro ao criar categoria.";
+
+    return {
+      success: false,
+      message,
+      error: message,
+    };
+  }
+}
+
+export async function deleteCategoryFromMenuAction(
+  input: DeleteCategoryFromMenuInput,
+): Promise<DeleteCategoryFromMenuResponse> {
+  try {
+    const validatedInput = DeleteCategoryFromMenuSchema.parse(input);
+    const { apiContext } = await getAuthContext();
+    const categories = await loadCategoryHierarchyForMutations(apiContext);
+    const node = findHierarchyNodeById(categories, validatedInput.categoryId);
+
+    if (!node) {
+      return {
+        success: false,
+        message: "Categoria não encontrada.",
+        error: "Categoria não encontrada.",
+      };
+    }
+
+    if ((node.children?.length ?? 0) > 0) {
+      return {
+        success: false,
+        message: "Não é possível excluir categoria com subcategorias.",
+        error: "Não é possível excluir categoria com subcategorias.",
+      };
+    }
+
+    if ((node.quantity ?? 0) > 0) {
+      return {
+        success: false,
+        message: "Não é possível excluir categoria com produtos.",
+        error: "Não é possível excluir categoria com produtos.",
+      };
+    }
+
+    const response = await taxonomyBaseServiceApi.deleteTaxonomy({
+      pe_taxonomy_id: validatedInput.categoryId,
+      ...apiContext,
+    });
+
+    const spResponse =
+      taxonomyBaseServiceApi.extractStoredProcedureResult(response);
+    const message =
+      spResponse?.sp_message ||
+      response.message ||
+      "Categoria excluída com sucesso.";
+
+    revalidateTag(CACHE_TAGS.taxonomies, "seconds");
+    revalidateTag(CACHE_TAGS.taxonomiesMenu, "hours");
+    revalidateTag(
+      CACHE_TAGS.taxonomy(String(validatedInput.categoryId)),
+      "hours",
+    );
+    revalidateTag(
+      CACHE_TAGS.taxonomyMenu(String(PRODUCT_CATEGORY_TAXONOMY_TYPE_ID)),
+      "hours",
+    );
+
+    return {
+      success: true,
+      message,
+    };
+  } catch (error) {
+    logger.error("Erro ao excluir categoria pelo menu", error);
+
+    const message =
+      error instanceof Error ? error.message : "Erro ao excluir categoria.";
+
+    return {
+      success: false,
+      message,
+      error: message,
+    };
+  }
+}
+
+async function loadCategoryHierarchyForMutations(
+  apiContext: Awaited<ReturnType<typeof getAuthContext>>["apiContext"],
+): Promise<CategoryNode[]> {
+  const [menuItems, quantitySource] = await Promise.all([
+    loadTaxonomyMenuForMutations(apiContext),
+    loadCategoryQuantitySourceForMutations(apiContext),
+  ]);
+
+  if (menuItems.length > 0 && validateTaxonomyData(menuItems)) {
+    return resolveCategoryQuantities(
+      transformTaxonomyToHierarchy(menuItems),
+      quantitySource,
+    );
+  }
+
+  if (validateTaxonomyData(quantitySource)) {
+    return resolveCategoryQuantities(
+      transformTaxonomyToHierarchy(quantitySource),
+      quantitySource,
+    );
+  }
+
+  return [];
+}
+
+async function loadTaxonomyMenuForMutations(
+  apiContext: Awaited<ReturnType<typeof getAuthContext>>["apiContext"],
+): Promise<UITaxonomyMenuItem[]> {
+  const response = await taxonomyBaseServiceApi.findTaxonomyMenu({
+    pe_type_id: PRODUCT_CATEGORY_TAXONOMY_TYPE_ID,
+    pe_parent_id: 0,
+    ...apiContext,
+  });
+
+  if (!taxonomyBaseServiceApi.isValidTaxonomyMenu(response)) {
+    return [];
+  }
+
+  return transformTaxonomyMenuList(
+    taxonomyBaseServiceApi.extractTaxonomyMenu(response),
+  );
+}
+
+async function loadCategoryQuantitySourceForMutations(
+  apiContext: Awaited<ReturnType<typeof getAuthContext>>["apiContext"],
+): Promise<UITaxonomy[]> {
+  const recordsPerPage = 100;
+  const maxPages = 10;
+  const taxonomies: UITaxonomy[] = [];
+
+  for (let pageId = 0; pageId < maxPages; pageId += 1) {
+    const response = await taxonomyBaseServiceApi.findAllTaxonomies({
+      pe_parent_id: -1,
+      pe_flag_inactive: 0,
+      pe_records_quantity: recordsPerPage,
+      pe_page_id: pageId,
+      pe_column_id: 2,
+      pe_order_id: 1,
+      ...apiContext,
+    });
+
+    const pageData = transformTaxonomyList(
+      taxonomyBaseServiceApi.extractTaxonomies(response),
+    );
+
+    if (pageData.length === 0) {
+      break;
+    }
+
+    taxonomies.push(...pageData);
+
+    if (pageData.length < recordsPerPage) {
+      break;
+    }
+  }
+
+  return taxonomies;
 }

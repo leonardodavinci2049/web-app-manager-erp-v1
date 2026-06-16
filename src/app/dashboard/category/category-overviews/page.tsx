@@ -8,18 +8,23 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import type { AuthContext } from "@/server/auth-context";
 import { getAuthContext } from "@/server/auth-context";
 import {
   getTaxonomies,
   getTaxonomyMenu,
 } from "@/services/api-main/taxonomy-base/taxonomy-base-cached-service";
+import type { UITaxonomy } from "@/services/api-main/taxonomy-base/transformers/transformers";
 import { CategoryTree } from "./_components/CategoryTree";
 import { CategoryOverviewsHeaderClient } from "./_components/category-overviews-header";
 import type { CategoryNode } from "./_components/category-tree.types";
 import {
+  resolveCategoryQuantities,
   transformTaxonomyToHierarchy,
   validateTaxonomyData,
 } from "./utils/taxonomy-transform";
+
+const PRODUCT_CATEGORY_TAXONOMY_TYPE_ID = 1;
 
 /**
  * Página de visualização hierárquica de categorias
@@ -84,6 +89,18 @@ export default async function CategoryOverviewsPage() {
                   <li>
                     <strong>Quantidade:</strong> O número entre parênteses
                     indica a quantidade de produtos relacionados
+                  </li>
+                  <li>
+                    <strong>Adicionar:</strong> Use o botão com ícone de mais
+                    para criar categorias filhas em cada nó permitido
+                  </li>
+                  <li>
+                    <strong>Excluir:</strong> Use o botão com ícone de lixeira
+                    para excluir categorias sem filhos e sem produtos
+                  </li>
+                  <li>
+                    <strong>Confirmação:</strong> A exclusão sempre solicita
+                    confirmação antes de prosseguir
                   </li>
                 </ul>
 
@@ -155,8 +172,10 @@ async function fetchCategoryHierarchy(): Promise<{
   categories: CategoryNode[];
   error: string | null;
 }> {
+  const { apiContext } = await getAuthContext();
+
   try {
-    const menuHierarchy = await tryBuildHierarchyFromMenu();
+    const menuHierarchy = await tryBuildHierarchyFromMenu(apiContext);
     if (menuHierarchy.length > 0) {
       return { categories: menuHierarchy, error: null };
     }
@@ -165,7 +184,7 @@ async function fetchCategoryHierarchy(): Promise<{
   }
 
   try {
-    const fallbackHierarchy = await tryBuildHierarchyFromList();
+    const fallbackHierarchy = await tryBuildHierarchyFromList(apiContext);
     if (fallbackHierarchy.length > 0) {
       return { categories: fallbackHierarchy, error: null };
     }
@@ -182,9 +201,13 @@ async function fetchCategoryHierarchy(): Promise<{
   }
 }
 
-async function tryBuildHierarchyFromMenu(): Promise<CategoryNode[]> {
-  const { apiContext } = await getAuthContext();
-  const menuItems = await getTaxonomyMenu(1, 0, apiContext);
+async function tryBuildHierarchyFromMenu(
+  apiContext: AuthContext["apiContext"],
+): Promise<CategoryNode[]> {
+  const [menuItems, quantitySource] = await Promise.all([
+    getTaxonomyMenu(PRODUCT_CATEGORY_TAXONOMY_TYPE_ID, 0, apiContext),
+    loadCategoryQuantitySource(apiContext).catch(() => []),
+  ]);
 
   if (menuItems.length === 0) {
     return [];
@@ -194,20 +217,16 @@ async function tryBuildHierarchyFromMenu(): Promise<CategoryNode[]> {
     return [];
   }
 
-  return transformTaxonomyToHierarchy(menuItems);
+  return resolveCategoryQuantities(
+    transformTaxonomyToHierarchy(menuItems),
+    quantitySource,
+  );
 }
 
-async function tryBuildHierarchyFromList(): Promise<CategoryNode[]> {
-  const { apiContext } = await getAuthContext();
-  const taxonomies = await getTaxonomies({
-    parentId: -1,
-    inactive: 0,
-    recordsQuantity: 500,
-    pageId: 0,
-    columnId: 2,
-    orderId: 1,
-    ...apiContext,
-  });
+async function tryBuildHierarchyFromList(
+  apiContext: AuthContext["apiContext"],
+): Promise<CategoryNode[]> {
+  const taxonomies = await loadCategoryQuantitySource(apiContext);
 
   if (taxonomies.length === 0) {
     return [];
@@ -217,7 +236,42 @@ async function tryBuildHierarchyFromList(): Promise<CategoryNode[]> {
     return [];
   }
 
-  return transformTaxonomyToHierarchy(taxonomies);
+  return resolveCategoryQuantities(
+    transformTaxonomyToHierarchy(taxonomies),
+    taxonomies,
+  );
+}
+
+async function loadCategoryQuantitySource(
+  apiContext: AuthContext["apiContext"],
+): Promise<UITaxonomy[]> {
+  const recordsPerPage = 100;
+  const maxPages = 10;
+  const taxonomies: UITaxonomy[] = [];
+
+  for (let pageId = 0; pageId < maxPages; pageId += 1) {
+    const pageData = await getTaxonomies({
+      parentId: -1,
+      inactive: 0,
+      recordsQuantity: recordsPerPage,
+      pageId,
+      columnId: 2,
+      orderId: 1,
+      ...apiContext,
+    });
+
+    if (pageData.length === 0) {
+      break;
+    }
+
+    taxonomies.push(...pageData);
+
+    if (pageData.length < recordsPerPage) {
+      break;
+    }
+  }
+
+  return taxonomies;
 }
 
 /** Componente async que busca e renderiza a árvore de categorias (dinâmico, dentro do Suspense) */

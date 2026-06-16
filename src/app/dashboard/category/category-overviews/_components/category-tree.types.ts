@@ -45,6 +45,12 @@ export interface CategoryTreeProps {
   selectedId?: string | number | null;
 }
 
+export interface CreateCategoryTarget {
+  parentId: number;
+  parentName: string;
+  parentLevel: 0 | 1 | 2;
+}
+
 export interface CategoryTreeItemProps {
   /** Nó de categoria */
   node: CategoryNode;
@@ -61,6 +67,15 @@ export interface CategoryTreeItemProps {
 
   /** Callback quando selecionar categoria */
   onSelect?: (id: string | number) => void;
+
+  /** Callback para adicionar categoria filha */
+  onAddChild?: (node: CategoryNode) => void;
+
+  /** Callback para excluir categoria */
+  onDelete?: (node: CategoryNode) => void;
+
+  /** Estado de mutação em andamento */
+  isMutating?: boolean;
 
   /** ID selecionado atualmente */
   selectedId?: string | number | null;

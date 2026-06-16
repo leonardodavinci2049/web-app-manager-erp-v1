@@ -1,7 +1,20 @@
 "use client";
 
-import { ChevronDown, FolderOpen, Package, Tag } from "lucide-react";
+import {
+  ChevronDown,
+  FolderOpen,
+  Package,
+  Plus,
+  Tag,
+  Trash2,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import type { CategoryTreeItemProps } from "./category-tree.types";
 
@@ -13,12 +26,18 @@ export function CategoryTreeItem({
   onToggle,
   expandedIds = new Set(),
   onSelect,
+  onAddChild,
+  onDelete,
+  isMutating = false,
   selectedId,
 }: CategoryTreeItemProps) {
   const router = useRouter();
   const hasChildren = node.children && node.children.length > 0;
   const isExpanded = expandedIds.has(node.id);
   const isSelected = selectedId === node.id;
+  const hasProducts = (node.quantity ?? 0) > 0;
+  const canAddChild = node.level < 3 && !isMutating;
+  const canDelete = !hasChildren && !hasProducts && !isMutating;
 
   // Calcula indentação baseada no nível (para o container principal)
   const indentationMap: Record<number, string> = {
@@ -79,6 +98,32 @@ export function CategoryTreeItem({
     router.push(`/dashboard/category/category-details?id=${node.id}`);
   };
 
+  const handleAddChild = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!canAddChild) {
+      return;
+    }
+    onAddChild?.(node);
+  };
+
+  const handleDelete = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!canDelete) {
+      return;
+    }
+    onDelete?.(node);
+  };
+
+  const addTooltip =
+    node.level >= 3 ? "Limite de níveis atingido" : "Adicionar subcategoria";
+  const deleteTooltip = hasChildren
+    ? "Não é possível excluir categoria com subcategorias"
+    : hasProducts
+      ? "Não é possível excluir categoria com produtos"
+      : "Excluir categoria";
+
   const children = node.children ?? [];
 
   return (
@@ -97,7 +142,7 @@ export function CategoryTreeItem({
           <button
             onClick={handleToggle}
             className={cn(
-              "flex items-center justify-center w-5 h-5 flex-shrink-0",
+              "flex items-center justify-center w-5 h-5 shrink-0",
               "transition-transform duration-300 ease-out",
               isExpanded && "rotate-180",
             )}
@@ -108,13 +153,13 @@ export function CategoryTreeItem({
             <ChevronDown className="w-4 h-4 text-muted-foreground" />
           </button>
         ) : (
-          <div className="w-5 h-5 flex-shrink-0" />
+          <div className="w-5 h-5 shrink-0" />
         )}
 
         {/* Conteúdo do item com ícone hierárquico */}
         <div className="flex-1 flex items-center gap-2">
           {/* Ícone do nível hierárquico */}
-          <div className="flex items-center justify-center flex-shrink-0">
+          <div className="flex items-center justify-center shrink-0">
             {getLevelIcon()}
           </div>
 
@@ -131,14 +176,53 @@ export function CategoryTreeItem({
             <span className="text-muted-foreground">{node.id}</span>
             <span className="mx-1.5">-</span>
             {node.name}
+            {node.quantity !== undefined && (
+              <span className="ml-1 text-muted-foreground">
+                ({node.quantity})
+              </span>
+            )}
           </button>
+        </div>
 
-          {/* Indicador de quantidade */}
-          {node.quantity !== undefined && (
-            <span className="text-xs text-muted-foreground ml-2">
-              ({node.quantity})
-            </span>
-          )}
+        <div className="flex items-center gap-1 shrink-0">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-xs"
+                  onClick={handleAddChild}
+                  disabled={!canAddChild}
+                  aria-label={addTooltip}
+                  title={addTooltip}
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                </Button>
+              </span>
+            </TooltipTrigger>
+            <TooltipContent side="top">{addTooltip}</TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-xs"
+                  onClick={handleDelete}
+                  disabled={!canDelete}
+                  aria-label={deleteTooltip}
+                  title={deleteTooltip}
+                  className="text-muted-foreground hover:text-destructive"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </span>
+            </TooltipTrigger>
+            <TooltipContent side="top">{deleteTooltip}</TooltipContent>
+          </Tooltip>
         </div>
       </div>
 
@@ -152,6 +236,9 @@ export function CategoryTreeItem({
               onToggle={onToggle}
               expandedIds={expandedIds}
               onSelect={onSelect}
+              onAddChild={onAddChild}
+              onDelete={onDelete}
+              isMutating={isMutating}
               selectedId={selectedId}
             />
           ))}
