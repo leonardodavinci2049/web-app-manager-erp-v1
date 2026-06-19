@@ -15,6 +15,7 @@ interface ProductGridProps {
   hasMore?: boolean;
   onLoadMore?: () => void;
   onViewDetails?: (productId: number) => void;
+  productDetailsHrefs?: ReadonlyMap<number, string>;
   onImageUploadSuccess?: () => void;
 }
 
@@ -26,6 +27,7 @@ export function ProductGrid({
   hasMore = false,
   onLoadMore,
   onViewDetails,
+  productDetailsHrefs,
   onImageUploadSuccess,
 }: ProductGridProps) {
   // Initial Loading State
@@ -65,6 +67,7 @@ export function ProductGrid({
             product={product}
             viewMode={viewMode}
             onViewDetails={onViewDetails}
+            productDetailsHref={productDetailsHrefs?.get(product.id)}
             onImageUploadSuccess={onImageUploadSuccess}
           />
         ))}

@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 interface InlineNameEditorProps {
   productId: number;
   productName: string;
+  productDetailsHref?: string;
   onNameUpdated?: (newName: string) => void;
   className?: string;
 }
@@ -18,6 +19,7 @@ interface InlineNameEditorProps {
 export function InlineNameEditor({
   productId,
   productName,
+  productDetailsHref,
   onNameUpdated,
   className = "",
 }: InlineNameEditorProps) {
@@ -202,7 +204,9 @@ export function InlineNameEditor({
         <div className="flex items-start gap-2">
           <Type className="h-4 w-4 flex-shrink-0 text-muted-foreground mt-0.5" />
           <div className="flex-1 min-w-0">
-            <Link href={`/dashboard/product/${productId}`}>
+            <Link
+              href={productDetailsHref ?? `/dashboard/product/${productId}`}
+            >
               <h3 className="line-clamp-2 text-base font-semibold leading-tight hover:underline hover:text-primary transition-colors">
                 {productName}
               </h3>
