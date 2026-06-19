@@ -1,25 +1,44 @@
 "use client";
 
 import { ArrowLeft } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
+
+const CATALOG_HREF = "/dashboard/product/catalog";
+
+function getSafeCatalogHref(returnTo: string | null): string {
+  if (!returnTo) {
+    return CATALOG_HREF;
+  }
+
+  try {
+    const url = new URL(returnTo, window.location.origin);
+
+    if (
+      url.origin !== window.location.origin ||
+      url.pathname !== CATALOG_HREF
+    ) {
+      return CATALOG_HREF;
+    }
+
+    return `${url.pathname}${url.search}${url.hash}`;
+  } catch {
+    return CATALOG_HREF;
+  }
+}
 
 /**
  * BackToCatalogButton Component (Client Component)
  *
- * Navigates back to the product catalog while preserving filter state.
- * The catalog page uses sessionStorage to restore the previous filter state,
- * including search terms, selected categories, and sorting options.
- *
- * This provides a better user experience as users don't lose their search
- * context when navigating between product details and catalog.
+ * Navigates back to the product catalog while preserving URL filters when the
+ * user came from a filtered catalog listing.
  */
 export function BackToCatalogButton() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const handleBackToCatalog = () => {
-    // Navigate to catalog - filters will be restored from sessionStorage
-    router.push("/dashboard/product/catalog");
+    router.push(getSafeCatalogHref(searchParams.get("returnTo")));
   };
 
   return (

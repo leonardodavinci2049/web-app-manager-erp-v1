@@ -39,7 +39,7 @@ export async function updateProductName(
       };
     }
 
-    if (!name || !name.trim()) {
+    if (!name?.trim()) {
       return {
         success: false,
         error: "Nome do produto não pode ser vazio",
@@ -99,7 +99,7 @@ export async function updateProductShortDescription(
       };
     }
 
-    if (!shortDescription || !shortDescription.trim()) {
+    if (!shortDescription?.trim()) {
       return {
         success: false,
         error: "Descrição curta não pode ser vazia",
@@ -161,7 +161,7 @@ export async function updateProductDescription(
       };
     }
 
-    if (!description || !description.trim()) {
+    if (!description?.trim()) {
       return {
         success: false,
         error: "Descrição não pode ser vazia",
@@ -221,7 +221,7 @@ export async function updateProductImagePath(
       };
     }
 
-    if (!imagePath || !imagePath.trim()) {
+    if (!imagePath?.trim()) {
       return {
         success: false,
         error: "Caminho da imagem não pode ser vazio",

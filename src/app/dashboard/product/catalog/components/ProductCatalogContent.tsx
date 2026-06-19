@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useState, useTransition } from "react";
+import { useCallback, useMemo, useState, useTransition } from "react";
 import type { UIBrand } from "@/services/api-main/brand/transformers/transformers";
 import type { UIProductPdv } from "@/services/api-main/product-pdv/transformers/transformers";
 import type { UIPtype } from "@/services/api-main/ptype/transformers/transformers";
@@ -30,6 +30,10 @@ export function ProductCatalogContent({
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
 
   const currentLimit = Number(searchParams.get("limit")) || 20;
+  const currentSearch = searchParams.toString();
+  const catalogReturnTo = currentSearch
+    ? `${pathname}?${currentSearch}`
+    : pathname;
 
   const filters: FilterOptions = {
     searchTerm: searchParams.get("search") || "",
@@ -83,8 +87,36 @@ export function ProductCatalogContent({
     updateUrl(params);
   }, [searchParams, currentLimit, updateUrl]);
 
+  const getProductDetailsHref = useCallback(
+    (productId: number) => {
+      const detailsHref = `/dashboard/product/${productId}`;
+
+      if (!currentSearch) {
+        return detailsHref;
+      }
+
+      const params = new URLSearchParams({
+        returnTo: catalogReturnTo,
+      });
+
+      return `${detailsHref}?${params.toString()}`;
+    },
+    [catalogReturnTo, currentSearch],
+  );
+
+  const productDetailsHrefs = useMemo(
+    () =>
+      new Map(
+        products.map((product) => [
+          product.id,
+          getProductDetailsHref(product.id),
+        ]),
+      ),
+    [products, getProductDetailsHref],
+  );
+
   const handleViewDetails = (productId: number) => {
-    window.location.href = `/dashboard/product/${productId}`;
+    router.push(getProductDetailsHref(productId));
   };
 
   const handleImageUploadSuccess = () => {
@@ -134,6 +166,7 @@ export function ProductCatalogContent({
               hasMore={hasMore}
               onLoadMore={loadMore}
               onViewDetails={handleViewDetails}
+              productDetailsHrefs={productDetailsHrefs}
               onImageUploadSuccess={handleImageUploadSuccess}
             />
           </div>
@@ -149,6 +182,7 @@ export function ProductCatalogContent({
           hasMore={hasMore}
           onLoadMore={loadMore}
           onViewDetails={handleViewDetails}
+          productDetailsHrefs={productDetailsHrefs}
           onImageUploadSuccess={handleImageUploadSuccess}
         />
       )}
