@@ -15,6 +15,7 @@ import { ProductImageUpload } from "./ProductImageUpload";
 interface ProductCardClientProps {
   product: UIProductPdv;
   viewMode: "grid" | "list";
+  productDetailsHref?: string;
   onImageUploadSuccess?: () => void;
   hasPromotion?: boolean;
 }
@@ -22,6 +23,7 @@ interface ProductCardClientProps {
 interface ProductImageSectionProps {
   product: UIProductPdv;
   viewMode: "grid" | "list";
+  productDetailsHref?: string;
   onImageUploadSuccess?: () => void;
   hasPromotion?: boolean;
 }
@@ -29,6 +31,7 @@ interface ProductImageSectionProps {
 function ProductImageSection({
   product,
   viewMode,
+  productDetailsHref,
   onImageUploadSuccess,
   hasPromotion = false,
 }: ProductImageSectionProps) {
@@ -37,6 +40,7 @@ function ProductImageSection({
 
   const imageUrl = getValidImageUrl(product.imagePath);
   const imageErrorHandler = createImageErrorHandler();
+  const detailsHref = productDetailsHref ?? `/dashboard/product/${product.id}`;
 
   const hasRealImage =
     product.imagePath &&
@@ -81,9 +85,7 @@ function ProductImageSection({
       </div>
     );
 
-    return (
-      <Link href={`/dashboard/product/${product.id}`}>{imageContent}</Link>
-    );
+    return <Link href={detailsHref}>{imageContent}</Link>;
   }
 
   const gridImageContent = (
@@ -130,14 +132,13 @@ function ProductImageSection({
     </div>
   );
 
-  return (
-    <Link href={`/dashboard/product/${product.id}`}>{gridImageContent}</Link>
-  );
+  return <Link href={detailsHref}>{gridImageContent}</Link>;
 }
 
 export function ProductCardClient({
   product,
   viewMode,
+  productDetailsHref,
   onImageUploadSuccess,
   hasPromotion,
 }: ProductCardClientProps) {
@@ -145,6 +146,7 @@ export function ProductCardClient({
     <ProductImageSection
       product={product}
       viewMode={viewMode}
+      productDetailsHref={productDetailsHref}
       onImageUploadSuccess={onImageUploadSuccess}
       hasPromotion={hasPromotion}
     />

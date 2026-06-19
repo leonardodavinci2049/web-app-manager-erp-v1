@@ -18,6 +18,7 @@ interface ProductCardProps {
   product: UIProductPdv;
   viewMode: "grid" | "list";
   onViewDetails?: (productId: number) => void;
+  productDetailsHref?: string;
   onImageUploadSuccess?: () => void;
 }
 
@@ -25,6 +26,7 @@ export function ProductCard({
   product,
   viewMode,
   onViewDetails,
+  productDetailsHref,
   onImageUploadSuccess,
 }: ProductCardProps) {
   const retailPrice = Number(product.retailPrice) || 0;
@@ -85,6 +87,7 @@ export function ProductCard({
               <ProductCardClient
                 product={product}
                 viewMode={viewMode}
+                productDetailsHref={productDetailsHref}
                 onImageUploadSuccess={onImageUploadSuccess}
               />
             </div>
@@ -96,6 +99,7 @@ export function ProductCard({
                     <InlineNameEditor
                       productId={product.id}
                       productName={currentName}
+                      productDetailsHref={productDetailsHref}
                       onNameUpdated={handleNameUpdated}
                     />
                     <div className="flex flex-wrap items-center gap-4 text-sm">
@@ -182,6 +186,7 @@ export function ProductCard({
         <ProductCardClient
           product={product}
           viewMode={viewMode}
+          productDetailsHref={productDetailsHref}
           onImageUploadSuccess={onImageUploadSuccess}
           hasPromotion={hasPromotion}
         />
@@ -191,6 +196,7 @@ export function ProductCard({
             <InlineNameEditor
               productId={product.id}
               productName={currentName}
+              productDetailsHref={productDetailsHref}
               onNameUpdated={handleNameUpdated}
               className="text-sm"
             />
