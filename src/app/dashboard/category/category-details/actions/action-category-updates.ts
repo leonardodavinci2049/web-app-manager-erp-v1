@@ -1,12 +1,25 @@
 "use server";
 
-import { revalidateTag } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { CACHE_TAGS } from "@/lib/cache-config";
 import { createLogger } from "@/lib/logger";
 import { getAuthContext } from "@/server/auth-context";
 import { taxonomyInlineServiceApi } from "@/services/api-main/taxonomy-inline";
 
 const logger = createLogger("CategoryUpdateActions");
+const PRODUCT_CATEGORY_TAXONOMY_TYPE_ID = 1;
+const CATEGORY_LIST_PATH = "/dashboard/category/category-list";
+const CATEGORY_OVERVIEWS_PATH = "/dashboard/category/category-overviews";
+
+function invalidateCategoryCaches(categoryId: number): void {
+  updateTag(CACHE_TAGS.taxonomies);
+  updateTag(CACHE_TAGS.taxonomiesMenu);
+  updateTag(CACHE_TAGS.taxonomyMenu(String(PRODUCT_CATEGORY_TAXONOMY_TYPE_ID)));
+  updateTag(CACHE_TAGS.taxonomy(String(categoryId)));
+
+  revalidatePath(CATEGORY_LIST_PATH);
+  revalidatePath(CATEGORY_OVERVIEWS_PATH);
+}
 
 /**
  * Server Action: Update category name
@@ -53,9 +66,7 @@ export async function updateCategoryName(
 
     logger.info("Category name updated successfully:", { categoryId, name });
 
-    revalidateTag(CACHE_TAGS.taxonomies, "seconds");
-    revalidateTag(CACHE_TAGS.taxonomiesMenu, "hours");
-    revalidateTag(CACHE_TAGS.taxonomy(String(categoryId)), "hours");
+    invalidateCategoryCaches(categoryId);
 
     return {
       success: true,
@@ -133,9 +144,7 @@ export async function updateCategoryParent(
       parentId,
     });
 
-    revalidateTag(CACHE_TAGS.taxonomies, "seconds");
-    revalidateTag(CACHE_TAGS.taxonomiesMenu, "hours");
-    revalidateTag(CACHE_TAGS.taxonomy(String(categoryId)), "hours");
+    invalidateCategoryCaches(categoryId);
 
     return {
       success: true,
@@ -210,9 +219,7 @@ export async function updateCategoryOrder(
 
     logger.info("Category order updated successfully:", { categoryId, order });
 
-    revalidateTag(CACHE_TAGS.taxonomies, "seconds");
-    revalidateTag(CACHE_TAGS.taxonomiesMenu, "hours");
-    revalidateTag(CACHE_TAGS.taxonomy(String(categoryId)), "hours");
+    invalidateCategoryCaches(categoryId);
 
     return {
       success: true,
@@ -282,9 +289,7 @@ export async function updateCategoryStatus(
       status,
     });
 
-    revalidateTag(CACHE_TAGS.taxonomies, "seconds");
-    revalidateTag(CACHE_TAGS.taxonomiesMenu, "hours");
-    revalidateTag(CACHE_TAGS.taxonomy(String(categoryId)), "hours");
+    invalidateCategoryCaches(categoryId);
 
     return {
       success: true,

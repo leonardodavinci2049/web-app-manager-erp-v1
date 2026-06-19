@@ -7,7 +7,7 @@
  * seguindo os padrões de segurança e arquitetura do projeto.
  */
 
-import { revalidateTag } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { z } from "zod";
 import type { CategoryNode } from "@/app/dashboard/category/category-overviews/_components/category-tree.types";
@@ -31,6 +31,27 @@ import {
 
 const logger = createLogger("ActionCategories");
 const PRODUCT_CATEGORY_TAXONOMY_TYPE_ID = 1;
+const CATEGORY_LIST_PATH = "/dashboard/category/category-list";
+const CATEGORY_OVERVIEWS_PATH = "/dashboard/category/category-overviews";
+
+function invalidateCategoryCaches({
+  categoryId,
+  taxonomyTypeId = PRODUCT_CATEGORY_TAXONOMY_TYPE_ID,
+}: {
+  categoryId?: number;
+  taxonomyTypeId?: number;
+} = {}) {
+  updateTag(CACHE_TAGS.taxonomies);
+  updateTag(CACHE_TAGS.taxonomiesMenu);
+  updateTag(CACHE_TAGS.taxonomyMenu(String(taxonomyTypeId)));
+
+  if (categoryId && categoryId > 0) {
+    updateTag(CACHE_TAGS.taxonomy(String(categoryId)));
+  }
+
+  revalidatePath(CATEGORY_LIST_PATH);
+  revalidatePath(CATEGORY_OVERVIEWS_PATH);
+}
 
 const CreateCategoryFromMenuSchema = z.object({
   name: z
@@ -246,10 +267,7 @@ export async function updateCategory(
       ...apiContext,
     });
 
-    // Invalida cache de taxonomias
-    revalidateTag(CACHE_TAGS.taxonomies, "seconds");
-    revalidateTag(CACHE_TAGS.taxonomiesMenu, "hours");
-    revalidateTag(CACHE_TAGS.taxonomy(String(id)), "hours");
+    invalidateCategoryCaches({ categoryId: id });
 
     const updatedCategory = await findCategoryById(id);
     logger.info(`Categoria ${id} atualizada com sucesso`);
@@ -428,9 +446,7 @@ export async function createCategoryAction(formData: FormData) {
       ...apiContext,
     });
 
-    // Invalida cache de taxonomias para refletir a nova categoria
-    revalidateTag(CACHE_TAGS.taxonomies, "seconds");
-    revalidateTag(CACHE_TAGS.taxonomiesMenu, "hours");
+    invalidateCategoryCaches();
 
     const { redirect } = await import("next/navigation");
     redirect("/dashboard/category/category-list");
@@ -480,9 +496,7 @@ export async function createCategory(
       throw new Error("ID do registro criado não foi retornado");
     }
 
-    // Invalida cache de taxonomias
-    revalidateTag(CACHE_TAGS.taxonomies, "seconds");
-    revalidateTag(CACHE_TAGS.taxonomiesMenu, "hours");
+    invalidateCategoryCaches({ taxonomyTypeId: type });
 
     const createdCategory = await findCategoryById(recordId);
 
@@ -541,10 +555,7 @@ export async function deleteCategory(
       response.message ||
       "Categoria deletada com sucesso";
 
-    // Invalida cache de taxonomias
-    revalidateTag(CACHE_TAGS.taxonomies, "seconds");
-    revalidateTag(CACHE_TAGS.taxonomiesMenu, "hours");
-    revalidateTag(CACHE_TAGS.taxonomy(String(categoryId)), "hours");
+    invalidateCategoryCaches({ categoryId });
 
     return {
       success: true,
@@ -636,12 +647,7 @@ export async function createCategoryFromMenuAction(
       response.message ||
       "Categoria criada com sucesso.";
 
-    revalidateTag(CACHE_TAGS.taxonomies, "seconds");
-    revalidateTag(CACHE_TAGS.taxonomiesMenu, "hours");
-    revalidateTag(
-      CACHE_TAGS.taxonomyMenu(String(PRODUCT_CATEGORY_TAXONOMY_TYPE_ID)),
-      "hours",
-    );
+    invalidateCategoryCaches();
 
     return {
       success: true,
@@ -707,16 +713,7 @@ export async function deleteCategoryFromMenuAction(
       response.message ||
       "Categoria excluída com sucesso.";
 
-    revalidateTag(CACHE_TAGS.taxonomies, "seconds");
-    revalidateTag(CACHE_TAGS.taxonomiesMenu, "hours");
-    revalidateTag(
-      CACHE_TAGS.taxonomy(String(validatedInput.categoryId)),
-      "hours",
-    );
-    revalidateTag(
-      CACHE_TAGS.taxonomyMenu(String(PRODUCT_CATEGORY_TAXONOMY_TYPE_ID)),
-      "hours",
-    );
+    invalidateCategoryCaches({ categoryId: validatedInput.categoryId });
 
     return {
       success: true,
