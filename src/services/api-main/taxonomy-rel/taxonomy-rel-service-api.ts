@@ -3,6 +3,7 @@ import "server-only";
 import { envs } from "@/core/config";
 import {
   API_STATUS_CODES,
+  isApiError,
   isApiSuccess,
   TAXONOMY_REL_ENDPOINTS,
 } from "@/core/constants/api-constants";
@@ -101,8 +102,25 @@ export class TaxonomyRelServiceApi extends BaseApiService {
   private checkStoredProcedureError(
     response: TaxonomyRelCreateResponse | TaxonomyRelDeleteResponse,
   ): void {
-    const spResponse = response.data?.[0] as StoredProcedureResponse;
-    if (spResponse && spResponse.sp_error_id !== 0) {
+    if (isApiError(response.statusCode)) {
+      throw new TaxonomyRelError(
+        response.message || "Erro na operação de relação taxonomia-produto",
+        "TAXONOMY_REL_OPERATION_ERROR",
+        response.statusCode,
+      );
+    }
+
+    const spResponse = this.extractStoredProcedureResult(response);
+
+    if (!spResponse) {
+      throw new TaxonomyRelError(
+        "A API não confirmou a operação de relação taxonomia-produto",
+        "TAXONOMY_REL_INVALID_RESPONSE",
+        response.statusCode,
+      );
+    }
+
+    if (spResponse.sp_error_id !== 0) {
       throw new TaxonomyRelError(
         spResponse.sp_message ||
           "Erro na operação de relação taxonomia-produto",
@@ -123,9 +141,7 @@ export class TaxonomyRelServiceApi extends BaseApiService {
         ...response,
         statusCode: API_STATUS_CODES.SUCCESS,
         quantity: 0,
-        data: {
-          "Brand find All": [],
-        },
+        data: {},
       };
     }
     return response;
@@ -134,20 +150,30 @@ export class TaxonomyRelServiceApi extends BaseApiService {
   extractProducts(
     response: TaxonomyRelFindAllProductsResponse,
   ): TaxonomyRelProductItem[] {
-    return response.data?.["Brand find All"] ?? [];
+    if (!response.data) return [];
+
+    const products = Object.values(response.data).find(Array.isArray);
+    return products ?? [];
   }
 
   extractStoredProcedureResult(
     response: TaxonomyRelCreateResponse | TaxonomyRelDeleteResponse,
   ): StoredProcedureResponse | null {
-    return (response.data?.[0] as StoredProcedureResponse) ?? null;
+    const firstResult: unknown = response.data?.[0];
+
+    // Keep compatibility with responses that still wrap result sets.
+    if (Array.isArray(firstResult)) {
+      return (firstResult[0] as StoredProcedureResponse | undefined) ?? null;
+    }
+
+    return (firstResult as StoredProcedureResponse | undefined) ?? null;
   }
 
   isValidProductList(response: TaxonomyRelFindAllProductsResponse): boolean {
     return (
       isApiSuccess(response.statusCode) &&
       response.data != null &&
-      Array.isArray(response.data["Brand find All"])
+      Object.values(response.data).some(Array.isArray)
     );
   }
 }
