@@ -55,7 +55,6 @@ src/core/config-tenant
 # agent files
 .agents/
 .codex/
-AGENTS.md
 
 # project generated files
 /scripts
