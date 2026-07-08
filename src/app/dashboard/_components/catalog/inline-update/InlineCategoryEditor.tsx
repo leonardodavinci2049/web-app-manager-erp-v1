@@ -36,7 +36,7 @@ import {
 } from "@/components/ui/table";
 import type { UITaxonomyRelProduct } from "@/services/api-main/taxonomy-rel/transformers/transformers";
 import type { ProductCategory } from "@/types/types";
-import { AddCategoryInlineDialog } from "./AddCategoryInlineDialog";
+import { AddCategoryInlineDialog } from "../AddCategoryInlineDialog";
 
 interface InlineCategoryEditorProps {
   productId: number;
