@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
-import { getBrandById } from "@/services/api-main/brand/brand-cached-service";
+import { getBrandById } from "@/services/api-main/brand/brand-service-api";
 import { BrandDetail } from "./_components/brand-detail";
 
 const logger = createLogger("BrandDetailPage");

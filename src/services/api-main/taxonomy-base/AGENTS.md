@@ -8,8 +8,7 @@ O módulo segue um padrão de **camadas** (CRUD completo) para integração com 
 
 ```
 taxonomy-base/
-├── taxonomy-base-service-api.ts       # Classe principal - integração direta com API
-├── taxonomy-base-cached-service.ts    # Funções com cache para Server Components (apenas leitura)
+├── taxonomy-base-service-api.ts       # Classe principal (integração direta) + funções de leitura (sem cache)
 ├── index.ts                           # Exportações públicas
 ├── types/
 │   └── taxonomy-base-types.ts         # Interfaces TypeScript (API response, errors)
@@ -18,6 +17,8 @@ taxonomy-base/
 └── transformers/
     └── transformers.ts                # Entity → DTO (API response → UI models)
 ```
+
+> **Sem cache**: aplicação admin que exige dados em tempo real. As funções de leitura (`getTaxonomies`, `getTaxonomyById`, `getTaxonomyMenu`) chamam a API diretamente a cada requisição, sem `"use cache"`, `cacheLife` ou `cacheTag`.
 
 ## Endpoints
 
@@ -33,7 +34,7 @@ taxonomy-base/
 
 ## Responsabilidades
 
-### 1. `taxonomy-base-service-api.ts` (Camada de Integração)
+### 1. `taxonomy-base-service-api.ts` (Camada de Integração + Leitura)
 - **Extende** `BaseApiService` para comunicação HTTP
 - **Valida** todos os parâmetros de entrada com Zod
 - **Constrói** payload base com context IDs (app, store, organization, user)
@@ -43,39 +44,28 @@ taxonomy-base/
 - **Lança** erros específicos (`TaxonomyBaseError`, `TaxonomyNotFoundError`)
 - **Verifica** erros de stored procedures (`checkStoredProcedureError`)
 - **Exporta** singleton `taxonomyBaseServiceApi`
-
-### 2. `taxonomy-base-cached-service.ts` (Camada de Cache - Apenas Leitura)
-- **`getTaxonomies`**: Lista com `cacheLife("seconds")`, tag `CACHE_TAGS.taxonomies`
-- **`getTaxonomyById`**: Detalhe com `cacheLife("hours")`, tags `CACHE_TAGS.taxonomy(id)` + `CACHE_TAGS.taxonomies`
-- **`getTaxonomyMenu`**: Menu com `cacheLife("hours")`, tags `CACHE_TAGS.taxonomyMenu(typeId)` + `CACHE_TAGS.taxonomiesMenu`
+- **Fornece** funções de leitura para Server Components (`getTaxonomies`, `getTaxonomyById`, `getTaxonomyMenu`) **sem cache** — transformam entidades → DTOs UI via `transformers`
 - **Guard check**: retorna `[]` ou `undefined` se `pe_system_client_id` não for fornecido
-- **Transforma** entidades → DTOs UI via `transformers`
 
-### 3. `types/taxonomy-base-types.ts`
+### 2. `types/taxonomy-base-types.ts`
 - Request interfaces: FindAll (com paginação/filtros), FindById, FindMenu, Create, Update, Delete, UpdateMetadata
 - Entities: `TaxonomyListItem` (12 campos), `TaxonomyDetail` (16 campos), `TaxonomyMenuItem` (9 campos)
 - Responses: 7 response interfaces
 - Erros: `TaxonomyBaseError`, `TaxonomyNotFoundError`, `TaxonomyValidationError`
 
-### 4. `validation/taxonomy-base-schemas.ts`
+### 3. `validation/taxonomy-base-schemas.ts`
 - 7 Zod schemas (FindAll, FindById, FindMenu, Create, Update, Delete, UpdateMetadata)
 - Context params são `.optional()`
 - Constraints: `pe_taxonomy_name` max 100, `pe_slug` max 300, `pe_meta_description`/`pe_meta_keywords` max 500
 
-### 5. `transformers/transformers.ts`
+### 4. `transformers/transformers.ts`
 - `UITaxonomy`: DTO para lista e detalhe (id, parentId, name, slug, imagePath, level, order, metaTitle, metaDescription, inactive, createdAt, updatedAt)
 - `UITaxonomyMenuItem`: DTO para menu (id, parentId, name, slug, imagePath, level, order, productCount)
 - Funções: transformTaxonomyListItem, transformTaxonomyList, transformTaxonomyDetail, transformTaxonomyDetailList, transformTaxonomyMenuItem, transformTaxonomyMenuList, transformTaxonomy (polymorphic)
 
-### 6. `index.ts`
+### 5. `index.ts`
 - Exporta classe, singleton, todos os types e error classes
-- Funções de `taxonomy-base-cached-service.ts` devem ser importadas diretamente
-
-## Cache Tags
-- `CACHE_TAGS.taxonomies` — tag estática para lista
-- `CACHE_TAGS.taxonomy(id)` — tag dinâmica por taxonomia
-- `CACHE_TAGS.taxonomiesMenu` — tag estática para menus
-- `CACHE_TAGS.taxonomyMenu(typeId)` — tag dinâmica por tipo de menu
+- As funções de leitura devem ser importadas diretamente de `taxonomy-base-service-api.ts`
 
 ## Data Keys da API
 - findAll: `"Taxonomy find All"`

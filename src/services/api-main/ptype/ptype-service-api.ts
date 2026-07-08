@@ -9,7 +9,11 @@ import {
 } from "@/core/constants/api-constants";
 import { createLogger } from "@/core/logger";
 import { BaseApiService } from "@/lib/axios/base-api-service";
-
+import {
+  transformPtype,
+  transformPtypeList,
+  type UIPtype,
+} from "./transformers/transformers";
 import type {
   PtypeCreateRequest,
   PtypeCreateResponse,
@@ -225,3 +229,67 @@ export class PtypeServiceApi extends BaseApiService {
 }
 
 export const ptypeServiceApi = new PtypeServiceApi();
+
+export async function getPtypes(
+  params: {
+    search?: string;
+    limit?: number;
+    pe_system_client_id?: number;
+    pe_organization_id?: string;
+    pe_user_id?: string;
+    pe_user_name?: string;
+    pe_user_role?: string;
+    pe_person_id?: number;
+  } = {},
+): Promise<UIPtype[]> {
+  if (!params.pe_system_client_id) {
+    return [];
+  }
+
+  const response = await ptypeServiceApi.findAllPtypes({
+    pe_search: params.search,
+    pe_limit: params.limit,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
+
+  const ptypes = ptypeServiceApi.extractPtypes(response);
+  return transformPtypeList(ptypes);
+}
+
+export async function getPtypeById(
+  id: number,
+  params: {
+    pe_system_client_id?: number;
+    pe_organization_id?: string;
+    pe_user_id?: string;
+    pe_user_name?: string;
+    pe_user_role?: string;
+    pe_person_id?: number;
+  } = {},
+): Promise<UIPtype | undefined> {
+  if (!params.pe_system_client_id) {
+    return undefined;
+  }
+
+  const response = await ptypeServiceApi.findPtypeById({
+    pe_type_id: id,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
+
+  const ptype = ptypeServiceApi.extractPtypeById(response);
+  if (!ptype) {
+    return undefined;
+  }
+
+  return transformPtype(ptype) ?? undefined;
+}

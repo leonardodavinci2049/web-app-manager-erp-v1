@@ -8,8 +8,7 @@ O módulo segue um padrão de **camadas** para integração com API externa:
 
 ```
 product-pdv/
-├── product-pdv-service-api.ts       # Classe principal - integração direta com API
-├── product-pdv-cached-service.ts    # Funções com cache para Server Components (apenas leitura)
+├── product-pdv-service-api.ts       # Classe principal (integração direta) + funções de leitura (sem cache)
 ├── index.ts                         # Exportações públicas
 ├── types/
 │   └── product-pdv-types.ts         # Interfaces TypeScript (API response, errors)
@@ -19,9 +18,11 @@ product-pdv/
     └── transformers.ts              # Entity → DTO (API response → UI models)
 ```
 
+> **Sem cache**: aplicação admin que exige dados em tempo real. As funções de leitura (`getProductsPdv`, `getProductPdvById`, `searchProductsPdv`) chamam a API diretamente a cada requisição, sem `"use cache"`, `cacheLife` ou `cacheTag`.
+
 ## Responsabilidades
 
-### 1. `product-pdv-service-api.ts` (Camada de Integração)
+### 1. `product-pdv-service-api.ts` (Camada de Integração + Leitura)
 - **Extende** `BaseApiService` para comunicação HTTP
 - **Valida** todos os parâmetros de entrada com Zod
 - **Constrói** payload base com context IDs (app, store)
@@ -29,20 +30,11 @@ product-pdv/
 - **Extrai** dados da estrutura de resposta da API (`extractProductsPdv`, `extractProductPdvById`, `extractRelatedCategories`, `extractRelatedProducts`, `extractProductsPdvSearch`)
 - **Valida** respostas da API (`isValidProductPdvList`, `isValidProductPdvDetail`, `isValidProductPdvSearchList`)
 - **Lança** erros específicos (`ProductPdvError`, `ProductPdvNotFoundError`)
-- **Não usa cache** - apenas comunicação direta
 - **Exporta** instância singleton `productPdvServiceApi`
+- **Fornece** funções de leitura para Server Components (`getProductsPdv`, `getProductPdvById`, `searchProductsPdv`) **sem cache** — transformam entidades API → DTOs UI via `transformers` e retornam `UIProductPdv[]` / `{ product, relatedCategories } | undefined`
+- **Guard check**: retorna `[]` ou `undefined` se `pe_system_client_id` não for fornecido
 
-### 2. `product-pdv-cached-service.ts` (Camada de Cache - Apenas Leitura)
-- **Fornece** funções de leitura para Server Components (`getProductsPdv`, `getProductPdvById`, `searchProductsPdv`)
-- **Usa** Next.js Cache com `cacheLife` e `cacheTag`
-- **Transforma** entidades API → DTOs UI via `transformers`
-- **Retorna** estruturas simplificadas (`UIProductPdv[]`, `UIProductPdv | undefined`)
-- **Trata erros** silenciosamente (return `[]` ou `undefined`)
-- **Usa** tags de cache para invalidação: `CACHE_TAGS.productsPdv`, `CACHE_TAGS.productPdv(id)`
-- **Guard check**: retorna `[]` imediatamente se `pe_system_client_id` não for fornecido em `getProductsPdv` e `searchProductsPdv`
-- **Guard check**: retorna `undefined` imediatamente se `pe_system_client_id` não for fornecido em `getProductPdvById`
-
-### 3. `types/product-pdv-types.ts`
+### 2. `types/product-pdv-types.ts`
 - Define interfaces base (`ProductPdvBaseRequest`, `ProductPdvBaseResponse` com `recordId: string`)
 - Define interfaces para **requests** (`ProductPdvFindAllRequest`, `ProductPdvFindByIdRequest`, `ProductPdvFindSearchRequest`)
 - Define interfaces para **responses** com chaves tipadas nos dados:
@@ -54,13 +46,13 @@ product-pdv/
 - Define tipos para **entidades relacionadas** (`ProductPdvRelatedCategory`, `ProductPdvRelatedProduct`)
 - Define classes de erro customizadas (`ProductPdvError`, `ProductPdvNotFoundError`, `ProductPdvValidationError`)
 
-### 4. `validation/product-pdv-schemas.ts`
+### 3. `validation/product-pdv-schemas.ts`
 - **Valida** entrada de dados com Zod
 - Exporta tipos inferidos (`ProductPdvFindAllInput`, `ProductPdvFindByIdInput`, `ProductPdvFindSearchInput`)
 - Define constraints específicas da API (max length, min values, int)
 - Parâmetros de contexto são `.optional()` nos schemas
 
-### 5. `transformers/transformers.ts`
+### 4. `transformers/transformers.ts`
 - Define interface `UIProductPdv` para uso no front-end (inclui campos `valueType` e `productValue` específicos do search)
 - Define interface `UIProductPdvRelatedCategory` para categorias relacionadas
 - Define interface `UIProductPdvRelatedProduct` para produtos relacionados
@@ -74,10 +66,10 @@ product-pdv/
 - **Handle** campos opcionais/null
 - Funções: `transformProductPdvListItem`, `transformProductPdvDetail`, `transformProductPdvSearchItem`, `transformProductPdvList`, `transformProductPdvDetailList`, `transformProductPdvSearchList`, `transformProductPdv`, `transformRelatedCategory`, `transformRelatedCategories`, `transformRelatedProduct`, `transformRelatedProducts`
 
-### 6. `index.ts` (Exportações Públicas)
+### 5. `index.ts` (Exportações Públicas)
 - Exporta `ProductPdvServiceApi` classe e instância singleton
 - Exporta todos os tipos de `product-pdv-types.ts` (requests, responses, entities, related entities, errors)
-- **Nota**: Funções do `product-pdv-cached-service.ts` devem ser importadas diretamente do arquivo
+- **Nota**: As funções de leitura devem ser importadas diretamente de `product-pdv-service-api.ts`
 
 ## Padrões de Código
 
@@ -154,19 +146,6 @@ pe_limit: number             // Limite de registros retornados
   errorId: number,
   info1?: string
 }
-```
-
-### Cache Configuration
-```typescript
-// Leitura de lista - cache de segundos
-"use cache"
-cacheLife("seconds")
-cacheTag(CACHE_TAGS.productsPdv)
-
-// Leitura por ID - cache de horas
-"use cache"
-cacheLife("hours")
-cacheTag(CACHE_TAGS.productPdv(String(id)), CACHE_TAGS.productsPdv)
 ```
 
 ### Endpoints

@@ -8,8 +8,7 @@ O módulo segue um padrão **misto** (1 leitura + 2 mutations) para integração
 
 ```
 taxonomy-rel/
-├── taxonomy-rel-service-api.ts       # Classe principal - integração direta com API
-├── taxonomy-rel-cached-service.ts    # Função com cache para leitura (apenas getProductsByTaxonomy)
+├── taxonomy-rel-service-api.ts       # Classe principal (integração direta) + função de leitura (sem cache)
 ├── index.ts                          # Exportações públicas
 ├── types/
 │   └── taxonomy-rel-types.ts         # Interfaces TypeScript (API response, errors)
@@ -18,6 +17,8 @@ taxonomy-rel/
 └── transformers/
     └── transformers.ts               # Entity → DTO (API response → UI models)
 ```
+
+> **Sem cache**: aplicação admin que exige dados em tempo real. A função de leitura (`getProductsByTaxonomy`) chama a API diretamente a cada requisição, sem `"use cache"`, `cacheLife` ou `cacheTag`.
 
 ## Endpoints
 
@@ -29,7 +30,7 @@ taxonomy-rel/
 
 ## Responsabilidades
 
-### 1. `taxonomy-rel-service-api.ts` (Camada de Integração)
+### 1. `taxonomy-rel-service-api.ts` (Camada de Integração + Leitura)
 - **Extende** `BaseApiService` para comunicação HTTP
 - **Valida** parâmetros de entrada com Zod
 - **Constrói** payload base com context IDs (app, store)
@@ -37,32 +38,24 @@ taxonomy-rel/
 - **Extrai** dados da estrutura de resposta (`extractProducts`)
 - **Verifica** erros de stored procedures para mutations (`checkStoredProcedureError`)
 - **Exporta** singleton `taxonomyRelServiceApi`
-
-### 2. `taxonomy-rel-cached-service.ts` (Camada de Cache)
-- **Fornece** `getProductsByTaxonomy` para Server Components
-- **Usa** `cacheLife("seconds")` e `cacheTag` para invalidação
-- **Transforma** entidades → DTOs via `transformTaxonomyRelProductList`
+- **Fornece** `getProductsByTaxonomy` para Server Components **sem cache** — transforma entidades → DTOs via `transformTaxonomyRelProductList` (`UITaxonomyRelProduct[]`)
 - **Guard check**: retorna `[]` se `pe_system_client_id` não fornecido
 
-### 3. `types/taxonomy-rel-types.ts`
+### 2. `types/taxonomy-rel-types.ts`
 - Define interfaces para requests (FindAllProducts, Create, Delete)
 - Define entity `TaxonomyRelProductItem` (ID_TAXONOMY, TAXONOMIA, CREATEDAT)
 - Define responses com `StoredProcedureResponse` para mutations
 - Define classes de erro customizadas
 
-### 4. `validation/taxonomy-rel-schemas.ts`
+### 3. `validation/taxonomy-rel-schemas.ts`
 - 3 schemas Zod: FindAllProducts, Create, Delete
 - Context params são `.optional()`
 - `pe_record_id` e `pe_taxonomy_id` são `z.number().int().positive()`
 
-### 5. `transformers/transformers.ts`
+### 4. `transformers/transformers.ts`
 - Define `UITaxonomyRelProduct` (taxonomyId, name, createdAt)
 - Converte `TaxonomyRelProductItem` → `UITaxonomyRelProduct`
 
-### 6. `index.ts`
+### 5. `index.ts`
 - Exporta classe, singleton, types e error classes
-- Funções de `taxonomy-rel-cached-service.ts` devem ser importadas diretamente
-
-## Cache Tags
-- `CACHE_TAGS.taxonomyRelProducts` — tag estática para lista
-- `CACHE_TAGS.taxonomyRelProducts(taxonomyId)` — tag dinâmica por taxonomia
+- A função de leitura (`getProductsByTaxonomy`) deve ser importada diretamente de `taxonomy-rel-service-api.ts`

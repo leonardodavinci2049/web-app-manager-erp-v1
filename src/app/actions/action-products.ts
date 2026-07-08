@@ -1,8 +1,7 @@
 "use server";
 
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 import { createLogger } from "@/core/logger";
-import { CACHE_TAGS } from "@/lib/cache-config";
 import { getAuthContext } from "@/server/auth-context";
 import { productBaseServiceApi } from "@/services/api-main/product-base";
 import { productUpdateServiceApi } from "@/services/api-main/product-update";
@@ -126,8 +125,6 @@ export async function createProductFromForm(formData: FormData): Promise<{
       };
     }
 
-    revalidateTag(CACHE_TAGS.productsPdv, "seconds");
-    revalidateTag(CACHE_TAGS.productsBase, "seconds");
     revalidatePath("/dashboard/product/catalog");
 
     return {
@@ -221,8 +218,6 @@ export async function createProduct(data: CreateProductData): Promise<{
       };
     }
 
-    revalidateTag(CACHE_TAGS.productsPdv, "seconds");
-    revalidateTag(CACHE_TAGS.productsBase, "seconds");
     revalidatePath("/dashboard/product/catalog");
 
     return {
@@ -275,9 +270,6 @@ export async function updateProductGeneral(data: {
       ...apiContext,
     });
 
-    revalidateTag(CACHE_TAGS.productsBase, "seconds");
-    revalidateTag(CACHE_TAGS.productBase(String(data.productId)), "hours");
-
     return {
       success: true,
     };
@@ -327,9 +319,6 @@ export async function updateProductCharacteristics(data: {
       ...apiContext,
     });
 
-    revalidateTag(CACHE_TAGS.productsBase, "seconds");
-    revalidateTag(CACHE_TAGS.productBase(String(data.productId)), "hours");
-
     return {
       success: true,
     };
@@ -378,9 +367,6 @@ export async function updateProductTaxValues(data: {
       pe_temp: Number(data.temp),
       ...apiContext,
     });
-
-    revalidateTag(CACHE_TAGS.productsBase, "seconds");
-    revalidateTag(CACHE_TAGS.productBase(String(data.productId)), "hours");
 
     return {
       success: true,
@@ -434,9 +420,6 @@ export async function updateProductFlags(data: {
       pe_imported_flag: data.importado,
       ...apiContext,
     });
-
-    revalidateTag(CACHE_TAGS.productsBase, "seconds");
-    revalidateTag(CACHE_TAGS.productBase(String(data.productId)), "hours");
 
     return {
       success: true,
