@@ -22,24 +22,21 @@ import {
 import { Switch } from "@/components/ui/switch";
 import type { UIBrand } from "@/services/api-main/brand/transformers/transformers";
 import type { UIPtype } from "@/services/api-main/ptype/transformers/transformers";
-import type { FilterOptions, SortOption } from "@/types/types";
-import type { CategoryOption, PanelFilterType } from "./ProductFiltersImproved";
-
-const sortOptions = [
-  { value: "name-asc" as SortOption, label: "Nome A-Z" },
-  { value: "name-desc" as SortOption, label: "Nome Z-A" },
-  { value: "newest" as SortOption, label: "Mais Recentes" },
-  { value: "price-asc" as SortOption, label: "Menor Preço" },
-  { value: "price-desc" as SortOption, label: "Maior Preço" },
-];
+import { SORT_OPTIONS } from "../../lib/search-params";
+import type {
+  CatalogFilters,
+  CategoryOption,
+  PanelFilterType,
+  SortOption,
+} from "../../types/catalog-types";
 
 interface PanelActiveFilter {
   type: PanelFilterType;
   label: string;
 }
 
-interface FloatingProductFiltersPanelProps {
-  filters: FilterOptions;
+interface FilterPanelProps {
+  filters: CatalogFilters;
   categories: CategoryOption[];
   brands: UIBrand[];
   ptypes: UIPtype[];
@@ -57,7 +54,11 @@ interface FloatingProductFiltersPanelProps {
   onRemovePanelFilter: (filterType: PanelFilterType) => void;
 }
 
-export function FloatingProductFiltersPanel({
+/**
+ * Painel lateral (Sheet) com os filtros avancados: categoria, marca, tipo,
+ * estoque e ordenacao.
+ */
+export function FilterPanel({
   filters,
   categories,
   brands,
@@ -74,20 +75,20 @@ export function FloatingProductFiltersPanel({
   onSortChange,
   onClearPanelFilters,
   onRemovePanelFilter,
-}: FloatingProductFiltersPanelProps) {
+}: FilterPanelProps) {
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetTrigger asChild>
         <Button
           type="button"
           variant={panelFilterCount > 0 ? "default" : "outline"}
-          className="h-11 px-3 sm:px-4 shrink-0 gap-1.5 shadow-sm"
+          className="h-11 shrink-0 gap-1.5 px-3 shadow-sm sm:px-4"
           disabled={isLoading}
         >
           <Filter className="h-4 w-4" />
-          <span className="hidden sm:inline text-sm">Filtros</span>
+          <span className="hidden text-sm sm:inline">Filtros</span>
           {panelFilterCount > 0 && (
-            <Badge className="h-5 min-w-5 px-1.5 text-xs justify-center">
+            <Badge className="h-5 min-w-5 justify-center px-1.5 text-xs">
               {panelFilterCount}
             </Badge>
           )}
@@ -95,7 +96,7 @@ export function FloatingProductFiltersPanel({
       </SheetTrigger>
       <SheetContent
         side="right"
-        className="w-full sm:max-w-md gap-0 p-0 flex flex-col"
+        className="flex w-full flex-col gap-0 p-0 sm:max-w-md"
       >
         <SheetHeader className="space-y-1 border-b p-4 pr-12">
           <SheetTitle className="flex items-center gap-2 text-base">
@@ -108,9 +109,9 @@ export function FloatingProductFiltersPanel({
           </SheetDescription>
         </SheetHeader>
 
-        <div className="flex-1 overflow-y-auto p-4 space-y-5">
+        <div className="flex-1 space-y-5 overflow-y-auto p-4">
           <div className="space-y-2">
-            <div className="text-sm font-medium text-muted-foreground">
+            <div className="text-muted-foreground text-sm font-medium">
               Categoria
             </div>
             <Select
@@ -133,7 +134,7 @@ export function FloatingProductFiltersPanel({
           </div>
 
           <div className="space-y-2">
-            <div className="text-sm font-medium text-muted-foreground">
+            <div className="text-muted-foreground text-sm font-medium">
               Marca
             </div>
             <Select
@@ -156,7 +157,7 @@ export function FloatingProductFiltersPanel({
           </div>
 
           <div className="space-y-2">
-            <div className="text-sm font-medium text-muted-foreground">
+            <div className="text-muted-foreground text-sm font-medium">
               Tipo
             </div>
             <Select
@@ -179,7 +180,7 @@ export function FloatingProductFiltersPanel({
           </div>
 
           <div className="space-y-2 pt-2">
-            <div className="text-sm font-medium text-muted-foreground">
+            <div className="text-muted-foreground text-sm font-medium">
               Estoque
             </div>
             <div className="flex items-center justify-between rounded-md border px-3 py-2.5">
@@ -199,7 +200,7 @@ export function FloatingProductFiltersPanel({
           </div>
 
           <div className="space-y-2">
-            <div className="text-sm font-medium text-muted-foreground">
+            <div className="text-muted-foreground text-sm font-medium">
               Ordenação
             </div>
             <Select
@@ -211,7 +212,7 @@ export function FloatingProductFiltersPanel({
                 <SelectValue placeholder="Ordenar" />
               </SelectTrigger>
               <SelectContent>
-                {sortOptions.map((option) => (
+                {SORT_OPTIONS.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
                   </SelectItem>
@@ -221,8 +222,8 @@ export function FloatingProductFiltersPanel({
           </div>
 
           {panelFilterCount > 0 && (
-            <div className="space-y-2 pt-4 border-t">
-              <div className="text-sm font-medium text-muted-foreground">
+            <div className="space-y-2 border-t pt-4">
+              <div className="text-muted-foreground text-sm font-medium">
                 Filtros ativos
               </div>
               <div className="flex flex-wrap gap-2">
@@ -248,7 +249,7 @@ export function FloatingProductFiltersPanel({
           )}
         </div>
 
-        <SheetFooter className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 p-4 sticky bottom-0">
+        <SheetFooter className="supports-[backdrop-filter]:bg-background/80 sticky bottom-0 border-t bg-background/95 p-4 backdrop-blur">
           <Button
             variant="outline"
             onClick={onClearPanelFilters}

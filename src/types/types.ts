@@ -68,14 +68,3 @@ export interface Brand {
   name: string;
   slug: string;
 }
-
-export interface FilterOptions {
-  searchTerm: string;
-  selectedCategory: string;
-  selectedSubcategory?: string;
-  selectedSubgroup?: string;
-  selectedBrand?: string;
-  selectedPtype?: string;
-  onlyInStock: boolean;
-  sortBy: SortOption;
-}

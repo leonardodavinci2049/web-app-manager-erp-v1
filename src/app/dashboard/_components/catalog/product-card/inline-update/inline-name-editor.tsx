@@ -2,6 +2,7 @@
 
 import { Check, Edit2, Type, X } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { updateProductName } from "@/app/actions/action-product-updates";
@@ -12,7 +13,6 @@ interface InlineNameEditorProps {
   productId: number;
   productName: string;
   productDetailsHref?: string;
-  onNameUpdated?: (newName: string) => void;
   className?: string;
 }
 
@@ -20,24 +20,24 @@ export function InlineNameEditor({
   productId,
   productName,
   productDetailsHref,
-  onNameUpdated,
   className = "",
 }: InlineNameEditorProps) {
+  const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [tempName, setTempName] = useState(productName);
+  const [displayName, setDisplayName] = useState(productName);
 
-  // Validation constants
   const MIN_LENGTH = 3;
   const MAX_LENGTH = 255;
 
   const handleEdit = () => {
-    setTempName(productName);
+    setTempName(displayName);
     setIsEditing(true);
   };
 
   const handleCancel = () => {
-    setTempName(productName);
+    setTempName(displayName);
     setIsEditing(false);
   };
 
@@ -45,10 +45,7 @@ export function InlineNameEditor({
     const trimmedName = tempName.trim();
 
     if (!trimmedName) {
-      return {
-        valid: false,
-        error: "Nome do produto não pode ser vazio",
-      };
+      return { valid: false, error: "Nome do produto não pode ser vazio" };
     }
 
     if (trimmedName.length < MIN_LENGTH) {
@@ -69,7 +66,6 @@ export function InlineNameEditor({
   };
 
   const handleSave = async () => {
-    // Validate name
     const validation = validateName();
     if (!validation.valid) {
       toast.error(validation.error);
@@ -78,8 +74,7 @@ export function InlineNameEditor({
 
     const trimmedName = tempName.trim();
 
-    // Check if name changed
-    if (trimmedName === productName) {
+    if (trimmedName === displayName) {
       setIsEditing(false);
       return;
     }
@@ -87,15 +82,13 @@ export function InlineNameEditor({
     try {
       setIsSaving(true);
 
-      // Call Server Action
       const result = await updateProductName(productId, trimmedName);
 
       if (result.success) {
         toast.success("Nome do produto atualizado com sucesso!");
         setIsEditing(false);
-
-        // Notify parent component about the update
-        onNameUpdated?.(trimmedName);
+        setDisplayName(trimmedName);
+        router.refresh();
       } else {
         toast.error(result.error || "Erro ao atualizar nome do produto");
       }
@@ -108,7 +101,6 @@ export function InlineNameEditor({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // Save with Enter
     if (e.key === "Enter" && !isSaving) {
       e.preventDefault();
       handleSave();
@@ -124,11 +116,10 @@ export function InlineNameEditor({
   if (isEditing) {
     return (
       <div className={`space-y-3 ${className}`}>
-        {/* Input Section */}
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <Type className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
-            <span className="text-sm font-medium text-muted-foreground">
+            <Type className="h-4 w-4 shrink-0 text-muted-foreground" />
+            <span className="text-muted-foreground text-sm font-medium">
               Editando Nome
             </span>
           </div>
@@ -141,13 +132,13 @@ export function InlineNameEditor({
             className="text-sm font-semibold"
             placeholder="Nome do produto"
             autoFocus
-            maxLength={MAX_LENGTH + 10} // Allow a bit over for validation
+            maxLength={MAX_LENGTH + 10}
           />
           <div className="flex items-center justify-between text-xs">
             <span
               className={`${
                 isOverLimit
-                  ? "text-destructive font-medium"
+                  ? "font-medium text-destructive"
                   : remainingChars < 50
                     ? "text-yellow-600 dark:text-yellow-500"
                     : "text-muted-foreground"
@@ -163,16 +154,14 @@ export function InlineNameEditor({
           </div>
         </div>
 
-        {/* Hint Message */}
-        <p className="text-xs text-muted-foreground">
+        <p className="text-muted-foreground text-xs">
           ℹ️ Pressione{" "}
-          <kbd className="px-1 py-0.5 rounded bg-muted text-xs">Enter</kbd> para
+          <kbd className="rounded bg-muted px-1 py-0.5 text-xs">Enter</kbd> para
           salvar ou{" "}
-          <kbd className="px-1 py-0.5 rounded bg-muted text-xs">Esc</kbd> para
+          <kbd className="rounded bg-muted px-1 py-0.5 text-xs">Esc</kbd> para
           cancelar
         </p>
 
-        {/* Action Buttons */}
         <div className="flex gap-2">
           <Button
             variant="outline"
@@ -202,23 +191,23 @@ export function InlineNameEditor({
     <div className={`text-left w-full ${className}`}>
       <div className="group/name-editor">
         <div className="flex items-start gap-2">
-          <Type className="h-4 w-4 flex-shrink-0 text-muted-foreground mt-0.5" />
+          <Type className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
           <div className="flex-1 min-w-0">
             <Link
               href={productDetailsHref ?? `/dashboard/product/${productId}`}
             >
-              <h3 className="line-clamp-2 text-base font-semibold leading-tight hover:underline hover:text-primary transition-colors">
-                {productName}
+              <h3 className="line-clamp-2 text-base font-semibold leading-tight transition-colors hover:text-primary hover:underline">
+                {displayName}
               </h3>
             </Link>
           </div>
           <button
             type="button"
             onClick={handleEdit}
-            className="opacity-0 group-hover/name-editor:opacity-100 transition-opacity"
+            className="opacity-0 transition-opacity group-hover/name-editor:opacity-100"
             title="Editar nome do produto"
           >
-            <Edit2 className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+            <Edit2 className="h-3 w-3 shrink-0 text-muted-foreground" />
           </button>
         </div>
       </div>

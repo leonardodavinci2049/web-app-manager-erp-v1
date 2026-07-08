@@ -21,21 +21,17 @@ export function ProductImageUpload({
   const [isUploading, setIsUploading] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
 
-  // Handle image upload
   const handleImageUpload = useCallback(
     async (files: FileList | null) => {
       if (!files || files.length === 0) return;
 
-      // Take only first file for inline upload
       const file = files[0];
 
-      // Validate file type
       if (!file.type.startsWith("image/")) {
         toast.error("Por favor, selecione apenas arquivos de imagem");
         return;
       }
 
-      // Validate file size (10MB limit)
       if (file.size > 10 * 1024 * 1024) {
         toast.error("Arquivo muito grande. Limite: 10MB");
         return;
@@ -44,23 +40,17 @@ export function ProductImageUpload({
       setIsUploading(true);
 
       try {
-        // Create FormData for upload
         const formData = new FormData();
         formData.append("file", file);
         formData.append("productId", productId);
         formData.append("description", `${productName} - Imagem principal`);
         formData.append("altText", `Imagem do produto ${productName}`);
 
-        // Call server action to upload
         const result = await uploadProductImageAction(formData);
 
         if (result.success) {
           toast.success("Imagem enviada com sucesso!");
-
-          // Trigger refresh callback
-          if (onUploadSuccess) {
-            await onUploadSuccess();
-          }
+          await onUploadSuccess?.();
         } else {
           toast.error(result.error || "Erro ao enviar imagem");
         }
@@ -74,7 +64,6 @@ export function ProductImageUpload({
     [productId, productName, onUploadSuccess],
   );
 
-  // Handle drag events
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -92,26 +81,19 @@ export function ProductImageUpload({
       e.preventDefault();
       e.stopPropagation();
       setIsDragOver(false);
-
-      const files = e.dataTransfer.files;
-      handleImageUpload(files);
+      handleImageUpload(e.dataTransfer.files);
     },
     [handleImageUpload],
   );
 
-  // Handle file input change
   const handleFileInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const files = e.target.files;
-      handleImageUpload(files);
-
-      // Reset input value so the same file can be selected again
+      handleImageUpload(e.target.files);
       e.target.value = "";
     },
     [handleImageUpload],
   );
 
-  // Grid mode styles
   if (viewMode === "grid") {
     return (
       <button
@@ -136,7 +118,7 @@ export function ProductImageUpload({
           type="file"
           accept="image/*"
           onChange={handleFileInputChange}
-          className="absolute inset-0 w-full h-full opacity-0 pointer-events-none"
+          className="pointer-events-none absolute inset-0 h-full w-full opacity-0"
           disabled={isUploading}
           aria-label="Enviar imagem do produto"
         />
@@ -145,24 +127,24 @@ export function ProductImageUpload({
           {isUploading ? (
             <>
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <span className="text-xs font-medium text-muted-foreground">
+              <span className="text-muted-foreground text-xs font-medium">
                 Enviando...
               </span>
             </>
           ) : isDragOver ? (
             <>
               <Package className="h-8 w-8 text-primary" />
-              <span className="text-xs font-medium text-primary">
+              <span className="text-primary text-xs font-medium">
                 Soltar aqui
               </span>
             </>
           ) : (
             <>
-              <Upload className="h-8 w-8 text-muted-foreground group-hover:text-primary transition-colors" />
-              <span className="text-xs font-medium text-muted-foreground">
+              <Upload className="group-hover:text-primary h-8 w-8 text-muted-foreground transition-colors" />
+              <span className="text-muted-foreground text-xs font-medium">
                 Adicionar Imagem
               </span>
-              <span className="text-xs text-muted-foreground/70">
+              <span className="text-muted-foreground/70 text-xs">
                 Clique ou arraste
               </span>
             </>
@@ -172,7 +154,6 @@ export function ProductImageUpload({
     );
   }
 
-  // List mode styles
   return (
     <button
       type="button"
@@ -196,7 +177,7 @@ export function ProductImageUpload({
         type="file"
         accept="image/*"
         onChange={handleFileInputChange}
-        className="absolute inset-0 w-full h-full opacity-0 pointer-events-none"
+        className="pointer-events-none absolute inset-0 h-full w-full opacity-0"
         disabled={isUploading}
         aria-label="Enviar imagem do produto"
       />
@@ -205,21 +186,21 @@ export function ProductImageUpload({
         {isUploading ? (
           <>
             <Loader2 className="h-5 w-5 animate-spin text-primary" />
-            <span className="text-xs font-medium text-muted-foreground">
+            <span className="text-muted-foreground text-xs font-medium">
               Enviando...
             </span>
           </>
         ) : isDragOver ? (
           <>
             <Package className="h-5 w-5 text-primary" />
-            <span className="text-xs font-medium text-primary">
+            <span className="text-primary text-xs font-medium">
               Soltar aqui
             </span>
           </>
         ) : (
           <>
-            <Upload className="h-5 w-5 text-muted-foreground hover:text-primary transition-colors" />
-            <span className="text-xs font-medium text-muted-foreground text-center leading-tight">
+            <Upload className="h-5 w-5 text-muted-foreground transition-colors hover:text-primary" />
+            <span className="text-muted-foreground text-center text-xs font-medium leading-tight">
               Adicionar Imagem
             </span>
           </>

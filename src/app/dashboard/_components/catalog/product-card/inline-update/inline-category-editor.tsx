@@ -1,6 +1,7 @@
 "use client";
 
 import { Edit2, Loader2, Plus, Tag, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
@@ -35,22 +36,20 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { UITaxonomyRelProduct } from "@/services/api-main/taxonomy-rel/transformers/transformers";
-import type { ProductCategory } from "@/types/types";
-import { AddCategoryInlineDialog } from "../AddCategoryInlineDialog";
+import { AddCategoryInlineDialog } from "../../add-category-inline-dialog";
 
 interface InlineCategoryEditorProps {
   productId: number;
   productSku?: string;
   productName?: string;
-  onCategoriesUpdated?: (categories: ProductCategory[]) => void;
 }
 
 export function InlineCategoryEditor({
   productId,
   productSku,
   productName,
-  onCategoriesUpdated,
 }: InlineCategoryEditorProps) {
+  const router = useRouter();
   const [categories, setCategories] = useState<UITaxonomyRelProduct[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -61,7 +60,6 @@ export function InlineCategoryEditor({
   const [categoryToDelete, setCategoryToDelete] =
     useState<UITaxonomyRelProduct | null>(null);
 
-  // Load categories only when Sheet is opened
   const loadCategories = async () => {
     setIsLoading(true);
     setError(null);
@@ -72,13 +70,6 @@ export function InlineCategoryEditor({
       if (result.success) {
         setCategories(result.data);
         setHasLoadedOnce(true);
-        // Notify parent about updated categories (map to ProductCategory for compatibility)
-        onCategoriesUpdated?.(
-          result.data.map((c) => ({
-            ID_TAXONOMY: c.taxonomyId,
-            TAXONOMIA: c.name,
-          })),
-        );
       } else {
         setError(result.message);
         setCategories([]);
@@ -91,37 +82,26 @@ export function InlineCategoryEditor({
     }
   };
 
-  // Handle Sheet open state change
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
-
-    // Load categories when opening the sheet for the first time
     if (open && !hasLoadedOnce) {
       loadCategories();
     }
   };
 
-  const handleAddCategory = () => {
-    setIsAddDialogOpen(true);
-  };
-
-  // Callback when a category is added successfully
   const handleAddCategorySuccess = () => {
-    // Reload categories to show the new one
     loadCategories();
+    router.refresh();
   };
 
-  // Open confirmation dialog for delete
   const handleDeleteClick = (category: UITaxonomyRelProduct) => {
     setCategoryToDelete(category);
   };
 
-  // Close confirmation dialog
   const handleCancelDelete = () => {
     setCategoryToDelete(null);
   };
 
-  // Confirm and execute delete
   const handleConfirmDelete = async () => {
     if (!categoryToDelete?.taxonomyId) return;
 
@@ -135,8 +115,8 @@ export function InlineCategoryEditor({
 
       if (result.success) {
         toast.success(result.message);
-        // Reload categories to reflect the change
         loadCategories();
+        router.refresh();
       } else {
         toast.error(result.message);
       }
@@ -153,18 +133,18 @@ export function InlineCategoryEditor({
       <SheetTrigger asChild>
         <button
           type="button"
-          className="flex items-center gap-2 mt-2 group/category-editor cursor-pointer hover:bg-accent/50 p-1 -ml-1 rounded-md transition-colors text-left"
+          className="group/category-editor hover:bg-accent/50 -ml-1 mt-2 flex cursor-pointer items-center gap-2 rounded-md p-1 text-left transition-colors"
         >
           <Tag className="h-4 w-4 shrink-0" />
-          <span className="font-medium text-muted-foreground">Categorias:</span>
-          <Edit2 className="h-3 w-3 opacity-0 group-hover/category-editor:opacity-100 transition-opacity text-muted-foreground" />
+          <span className="text-muted-foreground font-medium">Categorias:</span>
+          <Edit2 className="group-hover/category-editor:opacity-100 h-3 w-3 text-muted-foreground opacity-0 transition-opacity" />
         </button>
       </SheetTrigger>
       <SheetContent className="w-[400px] sm:w-[540px]">
-        <SheetHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b">
+        <SheetHeader className="flex flex-row items-center justify-between space-y-0 border-b pb-4">
           <div className="space-y-1">
             {(productSku || productName) && (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 {productSku && <span>SKU: {productSku}</span>}
                 {productSku && productName && <span> • </span>}
                 {productName && <span>{productName}</span>}
@@ -174,15 +154,19 @@ export function InlineCategoryEditor({
           </div>
         </SheetHeader>
 
-        <div className="py-6 space-y-6">
+        <div className="space-y-6 py-6">
           <div className="flex justify-end">
-            <Button size="sm" className="gap-2" onClick={handleAddCategory}>
+            <Button
+              size="sm"
+              className="gap-2"
+              onClick={() => setIsAddDialogOpen(true)}
+            >
               <Plus className="h-4 w-4" />
               Adicionar Categoria
             </Button>
           </div>
 
-          <div className="border rounded-md">
+          <div className="rounded-md border">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -194,7 +178,6 @@ export function InlineCategoryEditor({
               </TableHeader>
               <TableBody>
                 {isLoading ? (
-                  // Loading skeleton
                   [1, 2, 3].map((skeletonId) => (
                     <TableRow key={`skeleton-${skeletonId}`}>
                       <TableCell>
@@ -207,16 +190,15 @@ export function InlineCategoryEditor({
                         <Skeleton className="h-4 w-8" />
                       </TableCell>
                       <TableCell className="text-right">
-                        <Skeleton className="h-8 w-8 ml-auto" />
+                        <Skeleton className="ml-auto h-8 w-8" />
                       </TableCell>
                     </TableRow>
                   ))
                 ) : error ? (
-                  // Error state
                   <TableRow>
                     <TableCell
                       colSpan={4}
-                      className="text-center text-destructive h-24"
+                      className="text-destructive h-24 text-center"
                     >
                       {error}
                       <Button
@@ -230,17 +212,15 @@ export function InlineCategoryEditor({
                     </TableCell>
                   </TableRow>
                 ) : categories.length === 0 ? (
-                  // Empty state
                   <TableRow>
                     <TableCell
                       colSpan={4}
-                      className="text-center text-muted-foreground h-24"
+                      className="text-muted-foreground h-24 text-center"
                     >
                       Nenhuma categoria vinculada
                     </TableCell>
                   </TableRow>
                 ) : (
-                  // Categories list
                   categories.map((category) => (
                     <TableRow key={category.taxonomyId}>
                       <TableCell className="font-medium">
@@ -252,7 +232,7 @@ export function InlineCategoryEditor({
                         </div>
                       </TableCell>
                       <TableCell>
-                        <span className="text-xs text-muted-foreground">
+                        <span className="text-muted-foreground text-xs">
                           ---
                         </span>
                       </TableCell>
@@ -260,7 +240,7 @@ export function InlineCategoryEditor({
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 text-destructive hover:text-destructive/90"
+                          className="text-destructive h-8 w-8 hover:text-destructive/90"
                           onClick={() => handleDeleteClick(category)}
                           disabled={isDeleting}
                         >
@@ -276,7 +256,6 @@ export function InlineCategoryEditor({
           </div>
         </div>
 
-        {/* Add Category Dialog */}
         <AddCategoryInlineDialog
           productId={productId}
           open={isAddDialogOpen}
@@ -284,7 +263,6 @@ export function InlineCategoryEditor({
           onSuccess={handleAddCategorySuccess}
         />
 
-        {/* Delete Confirmation Dialog */}
         <AlertDialog
           open={!!categoryToDelete}
           onOpenChange={(open) => !open && handleCancelDelete()}
