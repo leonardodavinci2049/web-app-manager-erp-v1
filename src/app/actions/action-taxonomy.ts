@@ -1,8 +1,7 @@
 "use server";
 
-import { revalidatePath, updateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 import { createLogger } from "@/core/logger";
-import { CACHE_TAGS } from "@/lib/cache-config";
 import { getAuthContext } from "@/server/auth-context";
 import { taxonomyRelServiceApi } from "@/services/api-main/taxonomy-rel";
 import {
@@ -12,15 +11,7 @@ import {
 
 const logger = createLogger("TaxonomyActions");
 
-function invalidateTaxonomyRelationshipCaches(
-  taxonomyId: number,
-  productId: number,
-): void {
-  updateTag(CACHE_TAGS.taxonomyRelProducts);
-  updateTag(CACHE_TAGS.taxonomyRelProduct(String(taxonomyId)));
-  updateTag(CACHE_TAGS.productsPdv);
-  updateTag(CACHE_TAGS.productPdv(String(productId)));
-
+function revalidateProductPaths(productId: number): void {
   revalidatePath(`/dashboard/product/${productId}`);
   revalidatePath("/dashboard/product/catalog");
 }
@@ -41,7 +32,7 @@ export async function createTaxonomyRelationship(
       ...apiContext,
     });
 
-    invalidateTaxonomyRelationshipCaches(taxonomyId, productId);
+    revalidateProductPaths(productId);
 
     return {
       success: true,
@@ -76,7 +67,7 @@ export async function deleteTaxonomyRelationship(
       ...apiContext,
     });
 
-    invalidateTaxonomyRelationshipCaches(taxonomyId, productId);
+    revalidateProductPaths(productId);
 
     return {
       success: true,

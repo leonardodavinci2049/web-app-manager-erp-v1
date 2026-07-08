@@ -7,7 +7,7 @@
  * seguindo os padrões de segurança e arquitetura do projeto.
  */
 
-import { revalidatePath, updateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { z } from "zod";
 import type { CategoryNode } from "@/app/dashboard/category/category-overviews/_components/category-tree.types";
@@ -17,7 +17,6 @@ import {
   transformTaxonomyToHierarchy,
   validateTaxonomyData,
 } from "@/app/dashboard/category/category-overviews/utils/taxonomy-transform";
-import { CACHE_TAGS } from "@/lib/cache-config";
 import { createLogger } from "@/lib/logger";
 import { getAuthContext } from "@/server/auth-context";
 import { taxonomyBaseServiceApi } from "@/services/api-main/taxonomy-base";
@@ -34,21 +33,7 @@ const PRODUCT_CATEGORY_TAXONOMY_TYPE_ID = 1;
 const CATEGORY_LIST_PATH = "/dashboard/category/category-list";
 const CATEGORY_OVERVIEWS_PATH = "/dashboard/category/category-overviews";
 
-function invalidateCategoryCaches({
-  categoryId,
-  taxonomyTypeId = PRODUCT_CATEGORY_TAXONOMY_TYPE_ID,
-}: {
-  categoryId?: number;
-  taxonomyTypeId?: number;
-} = {}) {
-  updateTag(CACHE_TAGS.taxonomies);
-  updateTag(CACHE_TAGS.taxonomiesMenu);
-  updateTag(CACHE_TAGS.taxonomyMenu(String(taxonomyTypeId)));
-
-  if (categoryId && categoryId > 0) {
-    updateTag(CACHE_TAGS.taxonomy(String(categoryId)));
-  }
-
+function revalidateCategoryPaths(): void {
   revalidatePath(CATEGORY_LIST_PATH);
   revalidatePath(CATEGORY_OVERVIEWS_PATH);
 }
@@ -267,7 +252,7 @@ export async function updateCategory(
       ...apiContext,
     });
 
-    invalidateCategoryCaches({ categoryId: id });
+    revalidateCategoryPaths();
 
     const updatedCategory = await findCategoryById(id);
     logger.info(`Categoria ${id} atualizada com sucesso`);
@@ -446,7 +431,7 @@ export async function createCategoryAction(formData: FormData) {
       ...apiContext,
     });
 
-    invalidateCategoryCaches();
+    revalidateCategoryPaths();
 
     const { redirect } = await import("next/navigation");
     redirect("/dashboard/category/category-list");
@@ -496,7 +481,7 @@ export async function createCategory(
       throw new Error("ID do registro criado não foi retornado");
     }
 
-    invalidateCategoryCaches({ taxonomyTypeId: type });
+    revalidateCategoryPaths();
 
     const createdCategory = await findCategoryById(recordId);
 
@@ -555,7 +540,7 @@ export async function deleteCategory(
       response.message ||
       "Categoria deletada com sucesso";
 
-    invalidateCategoryCaches({ categoryId });
+    revalidateCategoryPaths();
 
     return {
       success: true,
@@ -647,7 +632,7 @@ export async function createCategoryFromMenuAction(
       response.message ||
       "Categoria criada com sucesso.";
 
-    invalidateCategoryCaches();
+    revalidateCategoryPaths();
 
     return {
       success: true,
@@ -713,7 +698,7 @@ export async function deleteCategoryFromMenuAction(
       response.message ||
       "Categoria excluída com sucesso.";
 
-    invalidateCategoryCaches({ categoryId: validatedInput.categoryId });
+    revalidateCategoryPaths();
 
     return {
       success: true,

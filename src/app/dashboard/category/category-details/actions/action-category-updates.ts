@@ -1,22 +1,15 @@
 "use server";
 
-import { revalidatePath, updateTag } from "next/cache";
-import { CACHE_TAGS } from "@/lib/cache-config";
+import { revalidatePath } from "next/cache";
 import { createLogger } from "@/lib/logger";
 import { getAuthContext } from "@/server/auth-context";
 import { taxonomyInlineServiceApi } from "@/services/api-main/taxonomy-inline";
 
 const logger = createLogger("CategoryUpdateActions");
-const PRODUCT_CATEGORY_TAXONOMY_TYPE_ID = 1;
 const CATEGORY_LIST_PATH = "/dashboard/category/category-list";
 const CATEGORY_OVERVIEWS_PATH = "/dashboard/category/category-overviews";
 
-function invalidateCategoryCaches(categoryId: number): void {
-  updateTag(CACHE_TAGS.taxonomies);
-  updateTag(CACHE_TAGS.taxonomiesMenu);
-  updateTag(CACHE_TAGS.taxonomyMenu(String(PRODUCT_CATEGORY_TAXONOMY_TYPE_ID)));
-  updateTag(CACHE_TAGS.taxonomy(String(categoryId)));
-
+function revalidateCategoryPaths(): void {
   revalidatePath(CATEGORY_LIST_PATH);
   revalidatePath(CATEGORY_OVERVIEWS_PATH);
 }
@@ -66,7 +59,7 @@ export async function updateCategoryName(
 
     logger.info("Category name updated successfully:", { categoryId, name });
 
-    invalidateCategoryCaches(categoryId);
+    revalidateCategoryPaths();
 
     return {
       success: true,
@@ -144,7 +137,7 @@ export async function updateCategoryParent(
       parentId,
     });
 
-    invalidateCategoryCaches(categoryId);
+    revalidateCategoryPaths();
 
     return {
       success: true,
@@ -219,7 +212,7 @@ export async function updateCategoryOrder(
 
     logger.info("Category order updated successfully:", { categoryId, order });
 
-    invalidateCategoryCaches(categoryId);
+    revalidateCategoryPaths();
 
     return {
       success: true,
@@ -289,7 +282,7 @@ export async function updateCategoryStatus(
       status,
     });
 
-    invalidateCategoryCaches(categoryId);
+    revalidateCategoryPaths();
 
     return {
       success: true,

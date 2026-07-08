@@ -1,21 +1,11 @@
 "use server";
 
-import { revalidateTag, updateTag } from "next/cache";
 import { createLogger } from "@/core/logger";
-import { CACHE_TAGS } from "@/lib/cache-config";
 import { getAuthContext } from "@/server/auth-context";
 import { productInlineServiceApi } from "@/services/api-main/product-inline";
 import { productUpdateServiceApi } from "@/services/api-main/product-update";
 
 const logger = createLogger("ProductUpdateActions");
-
-function invalidateProductImageCaches(productId: number): void {
-  updateTag(CACHE_TAGS.productsBase);
-  updateTag(CACHE_TAGS.productBase(String(productId)));
-  updateTag(CACHE_TAGS.productsPdv);
-  updateTag(CACHE_TAGS.productPdv(String(productId)));
-  updateTag(CACHE_TAGS.productGallery(String(productId)));
-}
 
 /**
  * Server Action: Update product name
@@ -55,9 +45,6 @@ export async function updateProductName(
     });
 
     logger.info("Product name updated successfully:", { productId, name });
-
-    revalidateTag(CACHE_TAGS.productsBase, "seconds");
-    revalidateTag(CACHE_TAGS.productBase(String(productId)), "hours");
 
     return {
       success: true,
@@ -118,9 +105,6 @@ export async function updateProductShortDescription(
       productId,
     });
 
-    revalidateTag(CACHE_TAGS.productsBase, "seconds");
-    revalidateTag(CACHE_TAGS.productBase(String(productId)), "hours");
-
     return {
       success: true,
     };
@@ -178,9 +162,6 @@ export async function updateProductDescription(
 
     logger.info("Product description updated successfully:", { productId });
 
-    revalidateTag(CACHE_TAGS.productsBase, "seconds");
-    revalidateTag(CACHE_TAGS.productBase(String(productId)), "hours");
-
     return {
       success: true,
     };
@@ -237,8 +218,6 @@ export async function updateProductImagePath(
     });
 
     logger.info("Product image path updated successfully:", { productId });
-
-    invalidateProductImageCaches(productId);
 
     return {
       success: true,
@@ -305,9 +284,6 @@ export async function updateProductStock(
 
     logger.info("Product stock updated successfully:", { productId, stock });
 
-    revalidateTag(CACHE_TAGS.productsBase, "seconds");
-    revalidateTag(CACHE_TAGS.productBase(String(productId)), "hours");
-
     return {
       success: true,
     };
@@ -371,9 +347,6 @@ export async function updateProductPrice(
 
     logger.info("Product prices updated successfully:", { productId });
 
-    revalidateTag(CACHE_TAGS.productsBase, "seconds");
-    revalidateTag(CACHE_TAGS.productBase(String(productId)), "hours");
-
     return {
       success: true,
     };
@@ -429,9 +402,6 @@ export async function updateProductType(
       pe_type_id: typeId,
       ...apiContext,
     });
-
-    revalidateTag(CACHE_TAGS.productsBase, "seconds");
-    revalidateTag(CACHE_TAGS.productBase(String(productId)), "hours");
 
     return {
       success: true,
@@ -489,9 +459,6 @@ export async function updateProductBrand(
       pe_brand_id: brandId,
       ...apiContext,
     });
-
-    revalidateTag(CACHE_TAGS.productsBase, "seconds");
-    revalidateTag(CACHE_TAGS.productBase(String(productId)), "hours");
 
     return {
       success: true,

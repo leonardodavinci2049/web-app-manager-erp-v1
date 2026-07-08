@@ -8,8 +8,7 @@ O módulo segue um padrão de **camadas** para integração com API externa:
 
 ```
 ptype/
-├── ptype-service-api.ts       # Classe principal - integração direta com API
-├── ptype-cached-service.ts    # Funções com cache para Server Components (apenas leitura)
+├── ptype-service-api.ts       # Classe principal (integração direta) + funções de leitura (sem cache)
 ├── index.ts                   # Exportações públicas
 ├── types/
 │   └── ptype-types.ts         # Interfaces TypeScript (API response, errors)
@@ -19,27 +18,27 @@ ptype/
     └── transformers.ts        # Entity → DTO (API response → UI models)
 ```
 
+> **Sem cache**: aplicação admin que exige dados em tempo real. As funções de leitura (`getPtypes`, `getPtypeById`) chamam a API diretamente a cada requisição, sem `"use cache"`, `cacheLife` ou `cacheTag`.
+
 ## Responsabilidades
 
-### 1. `ptype-service-api.ts` (Camada de Integração)
+### 1. `ptype-service-api.ts` (Camada de Integração + Leitura)
 - **Extende** `BaseApiService` para comunicação HTTP
 - **Valida** todos os parâmetros de entrada com Zod
 - **Métodos de leitura**: `findAllPtypes`, `findPtypeById`
 - **Métodos de mutação**: `createPtype`, `updatePtype`, `deletePtype`
 - **Helpers**: `extractPtypes`, `extractPtypeById`
 - **Exporta** instância singleton `ptypeServiceApi`
+- **Fornece** funções de leitura para Server Components (`getPtypes`, `getPtypeById`) **sem cache** — transformam entidades API → DTOs UI (`UIPtype[]` / `UIPtype | undefined`)
+- **Guard check**: `getPtypes` retorna `[]` e `getPtypeById` retorna `undefined` se `pe_system_client_id` não for fornecido
 
-### 2. `ptype-cached-service.ts` (Camada de Cache - Apenas Leitura)
-- `getPtypes`: cache `seconds` + tag `ptypes`
-- `getPtypeById`: cache `hours` + tags `ptype(id)`, `ptypes`
-
-### 3. `types/ptype-types.ts`
+### 2. `types/ptype-types.ts`
 - Interfaces para requests, responses, entidades da API e classes de erro (`PtypeError`, `PtypeNotFoundError`)
 
-### 4. `validation/ptype-schemas.ts`
+### 3. `validation/ptype-schemas.ts`
 - Schemas Zod para todas as operações (find all, find by id, create, update, delete)
 
-### 5. `transformers/transformers.ts`
+### 4. `transformers/transformers.ts`
 - `UIPtype` para front-end
 - Funções de transformação Entity→DTO (`transformPtype`, `transformPtypeList`)
 

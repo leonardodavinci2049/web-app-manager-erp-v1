@@ -9,7 +9,7 @@ import {
 import { SiteHeaderWithBreadcrumb } from "@/components/dashboard/header/site-header-with-breadcrumb";
 import { createLogger } from "@/lib/logger";
 import { getAuthContext } from "@/server/auth-context";
-import { getProductPdvById } from "@/services/api-main/product-pdv/product-pdv-cached-service";
+import { getProductPdvById } from "@/services/api-main/product-pdv/product-pdv-service-api";
 
 const logger = createLogger("ProductDetailsPageV2");
 

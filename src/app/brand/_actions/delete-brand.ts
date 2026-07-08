@@ -1,8 +1,6 @@
 "use server";
 
-import { revalidateTag } from "next/cache";
 import { createLogger } from "@/core/logger";
-import { CACHE_TAGS } from "@/lib/cache-config";
 import { getAuthContext } from "@/server/auth-context";
 import { brandServiceApi } from "@/services/api-main/brand";
 import type { ActionState } from "@/types/action-types";
@@ -37,9 +35,6 @@ export async function deleteBrandAction(
         message: result?.sp_message || "Erro ao deletar marca",
       };
     }
-
-    revalidateTag(CACHE_TAGS.brands, "seconds");
-    revalidateTag(CACHE_TAGS.brand(String(brandId)), "hours");
 
     return {
       success: true,

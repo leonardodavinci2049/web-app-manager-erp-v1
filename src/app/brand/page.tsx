@@ -1,7 +1,7 @@
 import { connection } from "next/server";
 import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
-import { getBrands } from "@/services/api-main/brand/brand-cached-service";
+import { getBrands } from "@/services/api-main/brand/brand-service-api";
 import { BrandList } from "./_components/brand-list";
 
 const logger = createLogger("BrandPage");

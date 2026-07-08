@@ -13,7 +13,7 @@ import { getAuthContext } from "@/server/auth-context";
 import {
   getTaxonomies,
   getTaxonomyMenu,
-} from "@/services/api-main/taxonomy-base/taxonomy-base-cached-service";
+} from "@/services/api-main/taxonomy-base/taxonomy-base-service-api";
 import type { UITaxonomy } from "@/services/api-main/taxonomy-base/transformers/transformers";
 import { CategoryTree } from "./_components/CategoryTree";
 import { CategoryOverviewsHeaderClient } from "./_components/category-overviews-header";

@@ -9,8 +9,7 @@ O módulo segue um padrão de **camadas** para integração com API externa (mes
 ```
 product-base/
 ├── AGENTS.md                          # Documentação da arquitetura
-├── product-base-service-api.ts        # Classe principal - integração direta com API
-├── product-base-cached-service.ts     # Funções com cache para Server Components
+├── product-base-service-api.ts        # Classe principal (integração direta) + funções de leitura (sem cache)
 ├── index.ts                           # Exportações públicas
 ├── types/
 │   └── product-base-types.ts          # Interfaces TypeScript
@@ -20,14 +19,16 @@ product-base/
     └── transformers.ts                # Entity → DTO (API → UIProduct/UIProductDetail)
 ```
 
+> **Sem cache**: aplicação admin que exige dados em tempo real. As funções de leitura (`getProducts`, `searchProducts`, `getProductById`) chamam a API diretamente a cada requisição, sem `"use cache"`, `cacheLife` ou `cacheTag`.
+
 ## Endpoints Suportados
 
-| Método                  | Endpoint                              | Tipo    | Cache   |
-|-------------------------|---------------------------------------|---------|---------|
-| `findAllProducts()`     | `/product-base/v3/product-find-all`   | Leitura | seconds |
-| `findProductById()`     | `/product-base/v3/product-find-id`    | Leitura | hours   |
-| `searchAllProducts()`   | `/product-base/v3/product-search-all` | Leitura | seconds |
-| `createProduct()`       | `/product-base/v3/product-create`     | Mutação | —       |
+| Método                  | Endpoint                              | Tipo    |
+|-------------------------|---------------------------------------|---------|
+| `findAllProducts()`     | `/product-base/v3/product-find-all`   | Leitura |
+| `findProductById()`     | `/product-base/v3/product-find-id`    | Leitura |
+| `searchAllProducts()`   | `/product-base/v3/product-search-all` | Leitura |
+| `createProduct()`       | `/product-base/v3/product-create`     | Mutação |
 
 ## Constantes
 
@@ -37,11 +38,6 @@ PRODUCT_BASE_ENDPOINTS = {
   FIND_BY_ID: "/product-base/v3/product-find-id",
   SEARCH_ALL: "/product-base/v3/product-search-all",
   CREATE: "/product-base/v3/product-create",
-}
-
-CACHE_TAGS = {
-  productsBase: "products-base",
-  productBase: (id: string) => `product-base-${id}`,
 }
 ```
 

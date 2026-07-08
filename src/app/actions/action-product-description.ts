@@ -1,8 +1,6 @@
 "use server";
 
-import { revalidateTag } from "next/cache";
 import { createLogger } from "@/core/logger";
-import { CACHE_TAGS } from "@/lib/cache-config";
 import { getAuthContext } from "@/server/auth-context";
 import { productInlineServiceApi } from "@/services/api-main/product-inline";
 
@@ -40,9 +38,6 @@ export async function updateProductDescription(
     });
 
     logger.info(`Descrição do produto ${productId} atualizada com sucesso`);
-
-    revalidateTag(CACHE_TAGS.productsBase, "seconds");
-    revalidateTag(CACHE_TAGS.productBase(String(productId)), "hours");
 
     return {
       success: true,

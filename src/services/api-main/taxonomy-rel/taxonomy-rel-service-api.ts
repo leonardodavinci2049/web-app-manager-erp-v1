@@ -9,7 +9,10 @@ import {
 } from "@/core/constants/api-constants";
 import { createLogger } from "@/core/logger";
 import { BaseApiService } from "@/lib/axios/base-api-service";
-
+import {
+  transformTaxonomyRelProductList,
+  type UITaxonomyRelProduct,
+} from "./transformers/transformers";
 import type {
   StoredProcedureResponse,
   TaxonomyRelCreateRequest,
@@ -179,3 +182,32 @@ export class TaxonomyRelServiceApi extends BaseApiService {
 }
 
 export const taxonomyRelServiceApi = new TaxonomyRelServiceApi();
+
+export async function getProductsByTaxonomy(
+  taxonomyId: number,
+  params: {
+    pe_system_client_id?: number;
+    pe_organization_id?: string;
+    pe_user_id?: string;
+    pe_user_name?: string;
+    pe_user_role?: string;
+    pe_person_id?: number;
+  } = {},
+): Promise<UITaxonomyRelProduct[]> {
+  if (!params.pe_system_client_id) {
+    return [];
+  }
+
+  const response = await taxonomyRelServiceApi.findAllProductsByTaxonomy({
+    pe_record_id: taxonomyId,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
+
+  const products = taxonomyRelServiceApi.extractProducts(response);
+  return transformTaxonomyRelProductList(products);
+}
