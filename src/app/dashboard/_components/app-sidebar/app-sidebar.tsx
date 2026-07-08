@@ -8,10 +8,11 @@ import {
   Frame,
   GalleryVerticalEnd,
   Handshake,
+  House,
   LayoutDashboard,
-  Map as MapIcon,
   Package,
   PieChart,
+  Settings,
   ShoppingCart,
   Tags,
   Truck,
@@ -251,6 +252,11 @@ const data = {
   ],
   projects: [
     {
+      name: "Home",
+      url: "/dashboard",
+      icon: House,
+    },
+    {
       name: "Agenda",
       url: "/dashboard/development",
       icon: Frame,
@@ -261,9 +267,15 @@ const data = {
       icon: PieChart,
     },
     {
+      name: "Welcome",
+      url: "/dashboard/welcome",
+      icon: House,
+    },
+
+    {
       name: "Configurações",
-      url: "/dashboard/development",
-      icon: MapIcon,
+      url: "/dashboard/settings/",
+      icon: Settings,
     },
   ],
 };
