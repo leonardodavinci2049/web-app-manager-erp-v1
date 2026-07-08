@@ -13,7 +13,7 @@ const logger = createLogger("TaxonomyActions");
 
 function revalidateProductPaths(productId: number): void {
   revalidatePath(`/dashboard/product/${productId}`);
-  revalidatePath("/dashboard/product/catalog");
+  revalidatePath("/dashboard");
 }
 
 /**
