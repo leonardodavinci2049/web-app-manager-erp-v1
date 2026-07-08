@@ -125,7 +125,7 @@ export async function createProductFromForm(formData: FormData): Promise<{
       };
     }
 
-    revalidatePath("/dashboard/product/catalog");
+    revalidatePath("/dashboard");
 
     return {
       success: true,
@@ -218,7 +218,7 @@ export async function createProduct(data: CreateProductData): Promise<{
       };
     }
 
-    revalidatePath("/dashboard/product/catalog");
+    revalidatePath("/dashboard");
 
     return {
       success: true,

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import type { UIProductPdv } from "@/services/api-main/product-pdv/transformers/transformers";
 import type { ProductCategory } from "@/types/types";
-import { formatCurrency } from "../../../../../utils/common-utils";
+import { formatCurrency } from "@/utils/common-utils";
 import { CategoryTags } from "./CategoryTags";
 import { InlineCategoryEditor } from "./InlineCategoryEditor";
 import { InlineNameEditor } from "./InlineNameEditor";
