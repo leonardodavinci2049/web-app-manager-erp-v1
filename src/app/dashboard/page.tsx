@@ -6,11 +6,16 @@ import { getBrands } from "@/services/api-main/brand/brand-service-api";
 import { getProductsPdv } from "@/services/api-main/product-pdv/product-pdv-service-api";
 import { getPtypes } from "@/services/api-main/ptype/ptype-service-api";
 import { getTaxonomyMenu } from "@/services/api-main/taxonomy-base/taxonomy-base-service-api";
-import type { UITaxonomyMenuItem } from "@/services/api-main/taxonomy-base/transformers/transformers";
-import { ProductCatalogContent } from "./_components/catalog/ProductCatalogContent";
-import type { CategoryOption } from "./_components/catalog/ProductFiltersImproved";
+import {
+  buildCatalogReturnTo,
+  CatalogShell,
+  flattenCategories,
+  mapSortToApiParams,
+  parseViewMode,
+} from "./_components/catalog";
 
 const logger = createLogger("DashboardPage");
+const CATALOG_PATHNAME = "/dashboard";
 
 interface DashboardPageProps {
   searchParams: Promise<{
@@ -22,53 +27,8 @@ interface DashboardPageProps {
     sort?: string;
     limit?: string;
     page?: string;
+    view?: string;
   }>;
-}
-
-function mapSortToApiParams(sortBy?: string): {
-  columnId: number;
-  orderId: number;
-} {
-  switch (sortBy) {
-    case "name-asc":
-      return { columnId: 1, orderId: 1 };
-    case "name-desc":
-      return { columnId: 1, orderId: 2 };
-    case "newest":
-      return { columnId: 2, orderId: 2 };
-    case "price-asc":
-      return { columnId: 3, orderId: 1 };
-    case "price-desc":
-      return { columnId: 3, orderId: 2 };
-    default:
-      return { columnId: 2, orderId: 2 };
-  }
-}
-
-function flattenCategories(taxonomies: UITaxonomyMenuItem[]): CategoryOption[] {
-  return taxonomies.map((taxonomy) => {
-    let displayName = taxonomy.name;
-    if (taxonomy.level === 2) displayName = `- ${taxonomy.name}`;
-    else if (taxonomy.level >= 3) displayName = `-- ${taxonomy.name}`;
-
-    return {
-      id: taxonomy.id,
-      name: taxonomy.name,
-      level: taxonomy.level,
-      displayName,
-    };
-  });
-}
-
-async function getCategories(): Promise<CategoryOption[]> {
-  try {
-    const { apiContext } = await getAuthContext();
-    const menuItems = await getTaxonomyMenu(2, 0, apiContext);
-    return flattenCategories(menuItems);
-  } catch (error) {
-    logger.error("Erro ao buscar categorias:", error);
-    return [];
-  }
 }
 
 export default async function DashboardPage(props: DashboardPageProps) {
@@ -78,6 +38,8 @@ export default async function DashboardPage(props: DashboardPageProps) {
 
   const sort = mapSortToApiParams(searchParams.sort);
   const limit = Number(searchParams.limit) || 20;
+  const viewMode = parseViewMode(searchParams.view);
+  const catalogReturnTo = buildCatalogReturnTo(searchParams, CATALOG_PATHNAME);
 
   const [products, brands, categories, ptypes] = await Promise.all([
     getProductsPdv({
@@ -101,7 +63,12 @@ export default async function DashboardPage(props: DashboardPageProps) {
       logger.error("Erro ao buscar marcas:", error);
       return [] as Awaited<ReturnType<typeof getBrands>>;
     }),
-    getCategories(),
+    getTaxonomyMenu(2, 0, apiContext)
+      .then((menuItems) => flattenCategories(menuItems))
+      .catch((error) => {
+        logger.error("Erro ao buscar categorias:", error);
+        return [];
+      }),
     getPtypes({ limit: 100, ...apiContext }).catch((error) => {
       logger.error("Erro ao buscar tipos:", error);
       return [] as Awaited<ReturnType<typeof getPtypes>>;
@@ -127,11 +94,14 @@ export default async function DashboardPage(props: DashboardPageProps) {
                   </p>
                 </div>
 
-                <ProductCatalogContent
+                <CatalogShell
                   products={products}
                   brands={brands}
                   categories={categories}
                   ptypes={ptypes}
+                  viewMode={viewMode}
+                  catalogReturnTo={catalogReturnTo}
+                  limit={limit}
                 />
               </div>
             </div>

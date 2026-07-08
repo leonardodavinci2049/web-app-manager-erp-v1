@@ -1,5 +1,3 @@
-"use client";
-
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -7,6 +5,9 @@ interface ProductSkeletonProps {
   viewMode: "grid" | "list";
 }
 
+/**
+ * Skeleton de um unico card (Server Component apresentacional).
+ */
 export function ProductSkeleton({ viewMode }: ProductSkeletonProps) {
   if (viewMode === "list") {
     return (
@@ -58,6 +59,9 @@ interface ProductGridSkeletonProps {
   count?: number;
 }
 
+/**
+ * Skeleton do grid completo (Server Component).
+ */
 export function ProductGridSkeleton({
   viewMode,
   count = 8,

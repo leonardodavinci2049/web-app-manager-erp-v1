@@ -3,35 +3,32 @@
 import { Plane, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import type { UIProductPdv } from "@/services/api-main/product-pdv/transformers/transformers";
 import { createImageErrorHandler, getValidImageUrl } from "@/utils/image-utils";
-import { ProductImageUpload } from "./ProductImageUpload";
-
-interface ProductCardClientProps {
-  product: UIProductPdv;
-  viewMode: "grid" | "list";
-  productDetailsHref?: string;
-  onImageUploadSuccess?: () => void;
-  hasPromotion?: boolean;
-}
+import { ProductImageUpload } from "../product-image-upload";
 
 interface ProductImageSectionProps {
   product: UIProductPdv;
   viewMode: "grid" | "list";
   productDetailsHref?: string;
-  onImageUploadSuccess?: () => void;
   hasPromotion?: boolean;
 }
 
-function ProductImageSection({
+/**
+ * Secao de imagem do card (Client): exibe a imagem do produto ou o uploader,
+ * com badges de estado (promocao/novo/importado/esgotado). Dispara
+ * `router.refresh()` apos upload para refletir a nova imagem.
+ */
+export function ProductImageSection({
   product,
   viewMode,
   productDetailsHref,
-  onImageUploadSuccess,
   hasPromotion = false,
 }: ProductImageSectionProps) {
+  const router = useRouter();
   const [imageError, setImageError] = useState(false);
   const isOutOfStock = product.storeStock === 0;
 
@@ -51,7 +48,7 @@ function ProductImageSection({
         productId={String(product.id)}
         productName={product.name}
         viewMode={viewMode}
-        onUploadSuccess={onImageUploadSuccess}
+        onUploadSuccess={() => router.refresh()}
       />
     );
   }
@@ -109,13 +106,13 @@ function ProductImageSection({
         )}
         {product.launch && (
           <Badge className="bg-blue-500 text-xs hover:bg-blue-600">
-            <Star className="h-3 w-3 mr-1" />
+            <Star className="mr-1 h-3 w-3" />
             Novo
           </Badge>
         )}
         {product.imported && (
           <Badge variant="secondary" className="text-xs">
-            <Plane className="h-3 w-3 mr-1" />
+            <Plane className="mr-1 h-3 w-3" />
             Importado
           </Badge>
         )}
@@ -130,22 +127,4 @@ function ProductImageSection({
   );
 
   return <Link href={detailsHref}>{gridImageContent}</Link>;
-}
-
-export function ProductCardClient({
-  product,
-  viewMode,
-  productDetailsHref,
-  onImageUploadSuccess,
-  hasPromotion,
-}: ProductCardClientProps) {
-  return (
-    <ProductImageSection
-      product={product}
-      viewMode={viewMode}
-      productDetailsHref={productDetailsHref}
-      onImageUploadSuccess={onImageUploadSuccess}
-      hasPromotion={hasPromotion}
-    />
-  );
 }

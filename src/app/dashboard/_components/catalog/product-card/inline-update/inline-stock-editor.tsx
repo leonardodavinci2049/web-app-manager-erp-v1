@@ -1,6 +1,7 @@
 "use client";
 
 import { Check, Edit2, Package, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { updateProductStock } from "@/app/actions/action-product-updates";
@@ -11,7 +12,6 @@ interface InlineStockEditorProps {
   productId: number;
   productName: string;
   currentStock: number;
-  onStockUpdated?: (newStock: number) => void;
   className?: string;
 }
 
@@ -19,31 +19,30 @@ export function InlineStockEditor({
   productId,
   productName,
   currentStock,
-  onStockUpdated,
   className = "",
 }: InlineStockEditorProps) {
+  const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [tempStock, setTempStock] = useState(currentStock.toString());
+  const [displayStock, setDisplayStock] = useState(currentStock);
 
-  // Validation constants
   const MIN_STOCK = 0;
   const MAX_STOCK = 1000000;
 
   const handleEdit = () => {
-    setTempStock(currentStock.toString());
+    setTempStock(displayStock.toString());
     setIsEditing(true);
   };
 
   const handleCancel = () => {
-    setTempStock(currentStock.toString());
+    setTempStock(displayStock.toString());
     setIsEditing(false);
   };
 
   const validateStock = (): { valid: boolean; error?: string } => {
     const stock = Number.parseInt(tempStock, 10);
 
-    // Check if value is a valid integer
     if (
       Number.isNaN(stock) ||
       !Number.isInteger(Number.parseFloat(tempStock))
@@ -54,15 +53,10 @@ export function InlineStockEditor({
       };
     }
 
-    // Check if value is negative
     if (stock < MIN_STOCK) {
-      return {
-        valid: false,
-        error: "Estoque não pode ser negativo",
-      };
+      return { valid: false, error: "Estoque não pode ser negativo" };
     }
 
-    // Check maximum value
     if (stock > MAX_STOCK) {
       return {
         valid: false,
@@ -74,7 +68,6 @@ export function InlineStockEditor({
   };
 
   const handleSave = async () => {
-    // Validate stock
     const validation = validateStock();
     if (!validation.valid) {
       toast.error(validation.error);
@@ -83,8 +76,7 @@ export function InlineStockEditor({
 
     const stock = Number.parseInt(tempStock, 10);
 
-    // Check if value changed
-    if (stock === currentStock) {
+    if (stock === displayStock) {
       setIsEditing(false);
       return;
     }
@@ -92,15 +84,13 @@ export function InlineStockEditor({
     try {
       setIsSaving(true);
 
-      // Call Server Action - minStock default is 0
       const result = await updateProductStock(productId, stock, 0);
 
       if (result.success) {
         toast.success(`Estoque de "${productName}" atualizado com sucesso!`);
         setIsEditing(false);
-
-        // Notify parent component about the update
-        onStockUpdated?.(stock);
+        setDisplayStock(stock);
+        router.refresh();
       } else {
         toast.error(result.error || "Erro ao atualizar estoque");
       }
@@ -113,7 +103,6 @@ export function InlineStockEditor({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // Save with Enter
     if (e.key === "Enter" && !isSaving) {
       e.preventDefault();
       handleSave();
@@ -126,7 +115,6 @@ export function InlineStockEditor({
   if (isEditing) {
     return (
       <div className={`space-y-3 ${className}`}>
-        {/* Input Section */}
         <div className="flex items-center gap-2">
           <Package className="h-4 w-4 shrink-0 text-muted-foreground" />
           <div className="flex items-center gap-2">
@@ -139,26 +127,24 @@ export function InlineStockEditor({
               onChange={(e) => setTempStock(e.target.value)}
               onKeyDown={handleKeyDown}
               disabled={isSaving}
-              className="w-24 h-8 text-sm font-mono"
+              className="h-8 w-24 text-sm font-mono"
               placeholder="0"
               autoFocus
             />
-            <span className="text-sm text-muted-foreground whitespace-nowrap">
+            <span className="text-muted-foreground text-sm whitespace-nowrap">
               unidades
             </span>
           </div>
         </div>
 
-        {/* Hint Message */}
-        <p className="text-xs text-muted-foreground">
+        <p className="text-muted-foreground text-xs">
           Pressione{" "}
-          <kbd className="px-1 py-0.5 rounded bg-muted text-xs">Enter</kbd> para
+          <kbd className="rounded bg-muted px-1 py-0.5 text-xs">Enter</kbd> para
           salvar ou{" "}
-          <kbd className="px-1 py-0.5 rounded bg-muted text-xs">Esc</kbd> para
+          <kbd className="rounded bg-muted px-1 py-0.5 text-xs">Esc</kbd> para
           cancelar
         </p>
 
-        {/* Action Buttons */}
         <div className="flex gap-2">
           <Button
             variant="outline"
@@ -187,7 +173,7 @@ export function InlineStockEditor({
   return (
     <button
       type="button"
-      className={`flex items-center gap-2 group/stock-editor cursor-pointer text-left ${className}`}
+      className={`group/stock-editor flex cursor-pointer items-center gap-2 text-left ${className}`}
       onClick={handleEdit}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
@@ -200,14 +186,14 @@ export function InlineStockEditor({
       <Package className="h-4 w-4 shrink-0" />
       <span
         className={`font-medium ${
-          currentStock === 0
+          displayStock === 0
             ? "text-red-600 dark:text-red-400"
             : "text-muted-foreground"
         }`}
       >
-        Estoque: {currentStock}
+        Estoque: {displayStock}
       </span>
-      <Edit2 className="h-3 w-3 opacity-0 group-hover/stock-editor:opacity-100 transition-opacity text-muted-foreground" />
+      <Edit2 className="group-hover/stock-editor:opacity-100 h-3 w-3 text-muted-foreground opacity-0 transition-opacity" />
     </button>
   );
 }

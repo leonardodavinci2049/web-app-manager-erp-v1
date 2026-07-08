@@ -16,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { UITaxonomyMenuItem } from "@/services/api-main/taxonomy-base/transformers/transformers";
+import { getLevelPrefix } from "./lib/category-helpers";
 
 interface AddCategoryInlineDialogProps {
   productId: number;
@@ -25,20 +26,8 @@ interface AddCategoryInlineDialogProps {
 }
 
 /**
- * Get prefix dashes based on level
- */
-function getLevelPrefix(level: number): string {
-  if (level === 1) return "";
-  if (level === 2) return "- ";
-  if (level === 3) return "-- ";
-  return "--- ";
-}
-
-/**
- * AddCategoryInlineDialog Component
- *
- * Dialog to add a category relationship to a product from the inline editor.
- * Allows searching and selecting from available categories.
+ * Dialog para adicionar um relacionamento de categoria ao produto a partir
+ * do editor inline. Permite buscar e selecionar categorias disponiveis.
  */
 export function AddCategoryInlineDialog({
   productId,
@@ -51,7 +40,6 @@ export function AddCategoryInlineDialog({
   const [categories, setCategories] = useState<UITaxonomyMenuItem[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Load categories when dialog opens
   const loadCategories = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -75,7 +63,6 @@ export function AddCategoryInlineDialog({
     }
   }, [open, loadCategories]);
 
-  // Handle dialog close - reset state
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
       setSearchTerm("");
@@ -94,7 +81,6 @@ export function AddCategoryInlineDialog({
         handleOpenChange(false);
         onSuccess?.();
       } else {
-        // Check if it's a duplicate category message (not an error, just information)
         if (result.message.includes("já existe")) {
           toast.info(result.message);
         } else {
@@ -108,7 +94,6 @@ export function AddCategoryInlineDialog({
     }
   }
 
-  // Filter categories based on search
   const filteredCategories = categories.filter((category) => {
     const matchesSearch = category.name
       .toLowerCase()
@@ -118,7 +103,7 @@ export function AddCategoryInlineDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
+      <DialogContent className="flex max-h-[90vh] max-w-2xl flex-col">
         <DialogHeader>
           <DialogTitle>Adicionar Categoria ao Produto</DialogTitle>
           <DialogDescription>
@@ -126,10 +111,9 @@ export function AddCategoryInlineDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
-          {/* Search Input */}
+        <div className="flex-1 flex flex-col space-y-4 overflow-hidden">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Pesquisar categorias..."
               value={searchTerm}
@@ -138,19 +122,18 @@ export function AddCategoryInlineDialog({
             />
           </div>
 
-          {/* Categories List */}
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
-              <p className="text-sm text-muted-foreground">Carregando...</p>
+              <p className="text-muted-foreground text-sm">Carregando...</p>
             </div>
           ) : filteredCategories.length === 0 ? (
             <div className="flex items-center justify-center py-8">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Nenhuma categoria encontrada
               </p>
             </div>
           ) : (
-            <ScrollArea className="h-[350px] sm:h-[400px] rounded-md border flex-1">
+            <ScrollArea className="flex-1 h-[350px] rounded-md border sm:h-[400px]">
               <div className="space-y-1 p-4">
                 {filteredCategories.map((category) => (
                   <button
@@ -158,7 +141,7 @@ export function AddCategoryInlineDialog({
                     type="button"
                     onClick={() => handleAddCategory(category.id)}
                     disabled={isAdding}
-                    className="flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-accent disabled:pointer-events-none disabled:opacity-50"
+                    className="disabled:pointer-events-none flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-accent disabled:opacity-50"
                   >
                     <span className="flex items-center gap-1">
                       <span className="text-muted-foreground">
@@ -166,7 +149,7 @@ export function AddCategoryInlineDialog({
                       </span>
                       <span>{category.name}</span>
                     </span>
-                    <span className="flex items-center gap-3 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-3 text-muted-foreground text-xs">
                       <span>ID: {category.id}</span>
                       <span>Nível {category.level}</span>
                     </span>
@@ -177,7 +160,7 @@ export function AddCategoryInlineDialog({
           )}
         </div>
 
-        <div className="flex justify-end pt-4 border-t">
+        <div className="flex justify-end border-t pt-4">
           <Button
             variant="outline"
             onClick={() => handleOpenChange(false)}
