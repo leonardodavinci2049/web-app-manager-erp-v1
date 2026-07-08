@@ -79,3 +79,4 @@ export interface FilterOptions {
   onlyInStock: boolean;
   sortBy: SortOption;
 }
+
