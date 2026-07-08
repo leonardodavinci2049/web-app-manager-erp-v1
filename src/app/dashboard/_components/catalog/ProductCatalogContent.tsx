@@ -75,12 +75,6 @@ export function ProductCatalogContent({
     [updateUrl],
   );
 
-  const resetFilters = useCallback(() => {
-    startTransition(() => {
-      router.replace(pathname);
-    });
-  }, [pathname, router]);
-
   const loadMore = useCallback(() => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("limit", String(currentLimit + 20));
@@ -136,7 +130,6 @@ export function ProductCatalogContent({
         viewMode={viewMode}
         onFiltersChange={updateFilters}
         onViewModeChange={setViewMode}
-        onResetFilters={resetFilters}
         totalProducts={products.length}
         displayedProducts={products.length}
         isLoading={isPending}

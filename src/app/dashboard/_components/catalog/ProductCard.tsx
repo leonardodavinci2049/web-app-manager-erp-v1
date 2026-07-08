@@ -8,10 +8,10 @@ import type { UIProductPdv } from "@/services/api-main/product-pdv/transformers/
 import type { ProductCategory } from "@/types/types";
 import { formatCurrency } from "@/utils/common-utils";
 import { CategoryTags } from "./CategoryTags";
-import { InlineCategoryEditor } from "./InlineCategoryEditor";
-import { InlineNameEditor } from "./InlineNameEditor";
-import { InlinePriceEditor } from "./InlinePriceEditor";
-import { InlineStockEditor } from "./InlineStockEditor";
+import { InlineCategoryEditor } from "./inline-update/InlineCategoryEditor";
+import { InlineNameEditor } from "./inline-update/InlineNameEditor";
+import { InlinePriceEditor } from "./inline-update/InlinePriceEditor";
+import { InlineStockEditor } from "./inline-update/InlineStockEditor";
 import { ProductCardClient } from "./ProductCardClient";
 
 interface ProductCardProps {
