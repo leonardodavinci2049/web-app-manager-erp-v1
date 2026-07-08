@@ -6,10 +6,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import type { UIProductPdv } from "@/services/api-main/product-pdv/transformers/transformers";
-import {
-  createImageErrorHandler,
-  getValidImageUrl,
-} from "../../../../../utils/image-utils";
+import { createImageErrorHandler, getValidImageUrl } from "@/utils/image-utils";
 import { ProductImageUpload } from "./ProductImageUpload";
 
 interface ProductCardClientProps {
