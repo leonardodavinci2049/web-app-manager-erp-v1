@@ -13,15 +13,20 @@ export function getLevelPrefix(level: number): string {
 }
 
 /**
- * Achata a arvore de taxonomias em uma lista plana de opcoes com displayName.
+ * Achata a arvore de taxonomias em uma lista plana de opcoes com displayName,
+ * preservando os campos de hierarquia (parentId, order, productCount) para
+ * permitir a montagem de menus navegaveis.
  */
 export function flattenCategories(
   taxonomies: UITaxonomyMenuItem[],
 ): CategoryOption[] {
   return taxonomies.map((taxonomy) => ({
     id: taxonomy.id,
+    parentId: taxonomy.parentId,
     name: taxonomy.name,
     level: taxonomy.level,
+    order: taxonomy.order,
+    productCount: taxonomy.productCount,
     displayName: `${getLevelPrefix(taxonomy.level)}${taxonomy.name}`,
   }));
 }
