@@ -88,13 +88,7 @@ export default async function DashboardPage(props: DashboardPageProps) {
           <div className="flex flex-col gap-6 py-6">
             <div className="px-4 lg:px-6">
               <div className="space-y-6">
-                <div>
-                  <h1 className="text-3xl font-bold">Catálogo de Produtos</h1>
-                  <p className="text-muted-foreground mt-2">
-                    Gerencie e visualize todos os produtos do seu catálogo com
-                    filtros avançados.
-                  </p>
-                </div>
+      
 
                 <CatalogShell
                   products={products}

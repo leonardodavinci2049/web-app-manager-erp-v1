@@ -66,10 +66,7 @@ export function ProductGridSkeleton({
   viewMode,
   count = 8,
 }: ProductGridSkeletonProps) {
-  const items = Array.from(
-    { length: count },
-    (_, i) => `skeleton-${Date.now()}-${i}-${Math.random()}`,
-  );
+  const items = Array.from({ length: count }, (_, i) => `skeleton-${i}`);
 
   return (
     <div
