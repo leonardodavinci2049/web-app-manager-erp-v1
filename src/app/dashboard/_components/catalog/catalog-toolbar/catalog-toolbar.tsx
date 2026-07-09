@@ -37,6 +37,8 @@ interface ActiveFilter {
 
 interface CatalogToolbarProps {
   products: UIProductPdv[];
+  /** Total de produtos que correspondem aos filtros (paginacao). */
+  total: number;
   brands: UIBrand[];
   categories: CategoryOption[];
   ptypes: UIPtype[];
@@ -57,6 +59,7 @@ interface CatalogToolbarProps {
  */
 export function CatalogToolbar({
   products,
+  total,
   brands,
   categories,
   ptypes,
@@ -287,7 +290,7 @@ export function CatalogToolbar({
             <div className="space-y-2 sm:flex sm:items-center sm:justify-between sm:space-y-0">
               <div className="flex flex-col gap-1 sm:flex-1">
                 <span className="text-sm font-medium">
-                  {products.length} de {products.length} produtos
+                  {products.length} de {total} produtos
                 </span>
                 {hasActiveFilters && (
                   <span className="text-muted-foreground text-xs">

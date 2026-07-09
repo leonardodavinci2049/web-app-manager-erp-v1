@@ -38,7 +38,7 @@ export default async function DashboardPage(props: DashboardPageProps) {
   const limit = Number(searchParams.limit) || 20;
   const catalogReturnTo = buildCatalogReturnTo(searchParams, CATALOG_PATHNAME);
 
-  const [products, brands, categories, ptypes] = await Promise.all([
+  const [productsResult, brands, categories, ptypes] = await Promise.all([
     getProductsPdv({
       search: searchParams.search,
       taxonomyId: searchParams.category
@@ -54,7 +54,10 @@ export default async function DashboardPage(props: DashboardPageProps) {
       ...apiContext,
     }).catch((error) => {
       logger.error("Erro ao buscar produtos PDV:", error);
-      return [] as Awaited<ReturnType<typeof getProductsPdv>>;
+      return {
+        products: [],
+        total: 0,
+      } as Awaited<ReturnType<typeof getProductsPdv>>;
     }),
     getBrands({ limit: 100, ...apiContext }).catch((error) => {
       logger.error("Erro ao buscar marcas:", error);
@@ -71,6 +74,8 @@ export default async function DashboardPage(props: DashboardPageProps) {
       return [] as Awaited<ReturnType<typeof getPtypes>>;
     }),
   ]);
+
+  const { products, total } = productsResult;
 
   return (
     <>
@@ -93,6 +98,7 @@ export default async function DashboardPage(props: DashboardPageProps) {
 
                 <CatalogShell
                   products={products}
+                  total={total}
                   brands={brands}
                   categories={categories}
                   ptypes={ptypes}

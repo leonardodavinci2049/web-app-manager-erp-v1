@@ -7,6 +7,7 @@ import type { CategoryOption } from "./types/catalog-types";
 
 interface CatalogShellProps {
   products: UIProductPdv[];
+  total: number;
   brands: UIBrand[];
   categories: CategoryOption[];
   ptypes: UIPtype[];
@@ -22,6 +23,7 @@ interface CatalogShellProps {
  */
 export function CatalogShell({
   products,
+  total,
   brands,
   categories,
   ptypes,
@@ -31,6 +33,7 @@ export function CatalogShell({
   return (
     <CatalogToolbar
       products={products}
+      total={total}
       brands={brands}
       categories={categories}
       ptypes={ptypes}
