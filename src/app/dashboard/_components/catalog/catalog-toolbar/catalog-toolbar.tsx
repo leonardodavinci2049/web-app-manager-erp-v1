@@ -22,6 +22,7 @@ import type {
   PanelFilterType,
   ViewMode,
 } from "../types/catalog-types";
+import { CatalogActiveFiltersPanel } from "./catalog-active-filters-panel";
 import { CatalogSearch } from "./catalog-search";
 import { FilterPanel } from "./filter-panel/filter-panel";
 import { ViewModeToggle } from "./view-mode-toggle";
@@ -33,6 +34,7 @@ type ActiveFilterType = PanelFilterType | "search";
 interface ActiveFilter {
   type: ActiveFilterType;
   label: string;
+  value: string;
 }
 
 interface CatalogToolbarProps {
@@ -101,6 +103,7 @@ export function CatalogToolbar({
 
   const handleCategoryChange = useCallback(
     (categoryId: string) => {
+      setIsFilterOpenState(false);
       updateFilters({ ...filters, selectedCategory: categoryId });
     },
     [filters, updateFilters],
@@ -108,6 +111,7 @@ export function CatalogToolbar({
 
   const handleBrandChange = useCallback(
     (brandId: string) => {
+      setIsFilterOpenState(false);
       updateFilters({
         ...filters,
         selectedBrand: brandId === "all" ? undefined : brandId,
@@ -118,6 +122,7 @@ export function CatalogToolbar({
 
   const handlePtypeChange = useCallback(
     (ptypeId: string) => {
+      setIsFilterOpenState(false);
       updateFilters({
         ...filters,
         selectedPtype: ptypeId === "all" ? undefined : ptypeId,
@@ -126,7 +131,24 @@ export function CatalogToolbar({
     [filters, updateFilters],
   );
 
+  const handleOnlyInStockChange = useCallback(
+    (checked: boolean) => {
+      setIsFilterOpenState(false);
+      updateFilter("onlyInStock", checked);
+    },
+    [updateFilter],
+  );
+
+  const handleSortChange = useCallback(
+    (sortBy: CatalogFilters["sortBy"]) => {
+      setIsFilterOpenState(false);
+      updateFilter("sortBy", sortBy);
+    },
+    [updateFilter],
+  );
+
   const handleClearPanelFilters = useCallback(() => {
+    setIsFilterOpenState(false);
     updateFilters({
       ...filters,
       selectedCategory: "all",
@@ -136,8 +158,20 @@ export function CatalogToolbar({
     });
   }, [filters, updateFilters]);
 
+  const handleClearSearchAndFilters = useCallback(() => {
+    updateFilters({
+      ...filters,
+      searchTerm: "",
+      selectedCategory: "all",
+      selectedBrand: undefined,
+      selectedPtype: undefined,
+      onlyInStock: false,
+    });
+  }, [filters, updateFilters]);
+
   const removePanelFilter = useCallback(
     (filterType: PanelFilterType) => {
+      setIsFilterOpenState(false);
       switch (filterType) {
         case "category":
           updateFilters({ ...filters, selectedCategory: "all" });
@@ -160,7 +194,11 @@ export function CatalogToolbar({
     const result: ActiveFilter[] = [];
 
     if (filters.searchTerm.trim() !== "") {
-      result.push({ type: "search", label: `Busca: "${filters.searchTerm}"` });
+      result.push({
+        type: "search",
+        label: "Pesquisa",
+        value: filters.searchTerm,
+      });
     }
 
     if (filters.selectedCategory && filters.selectedCategory !== "all") {
@@ -169,7 +207,8 @@ export function CatalogToolbar({
       );
       result.push({
         type: "category",
-        label: `Categoria: ${selectedCategory?.name || filters.selectedCategory}`,
+        label: "Categoria",
+        value: selectedCategory?.name || filters.selectedCategory,
       });
     }
 
@@ -179,7 +218,8 @@ export function CatalogToolbar({
       );
       result.push({
         type: "brand",
-        label: `Marca: ${selectedBrand?.name || filters.selectedBrand}`,
+        label: "Marca",
+        value: selectedBrand?.name || filters.selectedBrand,
       });
     }
 
@@ -189,12 +229,17 @@ export function CatalogToolbar({
       );
       result.push({
         type: "ptype",
-        label: `Tipo: ${selectedPtype?.name || filters.selectedPtype}`,
+        label: "Tipo",
+        value: selectedPtype?.name || filters.selectedPtype,
       });
     }
 
     if (filters.onlyInStock) {
-      result.push({ type: "stock", label: "Apenas em Estoque" });
+      result.push({
+        type: "stock",
+        label: "Estoque",
+        value: "Apenas em estoque",
+      });
     }
 
     return result;
@@ -246,8 +291,8 @@ export function CatalogToolbar({
   return (
     <>
       <div className="space-y-6">
-        <div className="flex w-full items-center justify-center">
-          <div className="flex w-full max-w-xl items-center gap-2 lg:max-w-2xl">
+        <div className="flex w-full justify-center">
+          <div className="flex w-full max-w-xl flex-col gap-2 lg:max-w-2xl">
             <CatalogSearch
               searchTerm={filters.searchTerm}
               isLoading={isPending}
@@ -267,10 +312,8 @@ export function CatalogToolbar({
                     onCategoryChange={handleCategoryChange}
                     onBrandChange={handleBrandChange}
                     onPtypeChange={handlePtypeChange}
-                    onOnlyInStockChange={(checked) =>
-                      updateFilter("onlyInStock", checked)
-                    }
-                    onSortChange={(value) => updateFilter("sortBy", value)}
+                    onOnlyInStockChange={handleOnlyInStockChange}
+                    onSortChange={handleSortChange}
                     onClearPanelFilters={handleClearPanelFilters}
                     onRemovePanelFilter={removePanelFilter}
                   />
@@ -282,25 +325,16 @@ export function CatalogToolbar({
                 </>
               }
             />
-          </div>
-        </div>
 
-        <div className="supports-[backdrop-filter]:bg-background/60 bg-background/95 rounded-lg border p-4 backdrop-blur sm:relative">
-          <div className="flex flex-col gap-4 sm:gap-0">
-            <div className="space-y-2 sm:flex sm:items-center sm:justify-between sm:space-y-0">
-              <div className="flex flex-col gap-1 sm:flex-1">
-                <span className="text-sm font-medium">
-                  {products.length} de {total} produtos
-                </span>
-                {hasActiveFilters && (
-                  <span className="text-muted-foreground text-xs">
-                    {activeFilters.length} filtro
-                    {activeFilters.length !== 1 ? "s" : ""} ativo
-                    {activeFilters.length !== 1 ? "s" : ""}
-                  </span>
-                )}
-              </div>
-            </div>
+            {hasActiveFilters && (
+              <CatalogActiveFiltersPanel
+                activeFilters={activeFilters}
+                productsCount={products.length}
+                total={total}
+                isLoading={isPending}
+                onClear={handleClearSearchAndFilters}
+              />
+            )}
           </div>
         </div>
       </div>
