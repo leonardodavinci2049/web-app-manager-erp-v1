@@ -6,7 +6,7 @@ Operational guide for agents editing the product catalog on the `/dashboard` rou
 
 This folder groups **all the components of the product catalog screen**. The page (`page.tsx`) only fetches data (Server) and renders the [`CatalogShell`](./catalog-shell.tsx). The entire UI — toolbar, filters, grid, cards, and inline editors — lives here.
 
-The core philosophy is **URL as the single source of truth** and **Server Components by default, Client Components isolated to the smallest possible scope**.
+The core philosophy is **URL as the single source of truth for data filters** and **Server Components by default, Client Components isolated to the smallest possible scope**. The **view mode** (grid/list) is an exception: it is a display preference stored in `localStorage` (client-side), never in the URL, so toggling it is instant and does not trigger a data refetch.
 
 ## File Structure
 
@@ -23,9 +23,9 @@ catalog/
 ├── types/
 │   └── catalog-types.ts             # CatalogFilters, CategoryOption, etc.
 ├── catalog-toolbar/
-│   ├── catalog-toolbar.tsx          # Orchestrator (Client): URL + overlay
+│   ├── catalog-toolbar.tsx          # Orchestrator (Client): URL filters + view mode (localStorage)
 │   ├── catalog-search.tsx           # Search input (Client)
-│   ├── view-mode-toggle.tsx         # Grid/list toggle (Client)
+│   ├── view-mode-toggle.tsx         # Grid/list toggle (Client, instant — no URL)
 │   └── filter-panel/
 │       └── filter-panel.tsx         # Advanced filters sheet (Client)
 ├── product-grid/
@@ -48,20 +48,22 @@ catalog/
 ```
 page.tsx (Server)
   ├── reads searchParams + calls services (api-main/*)
-  ├── mapSortToApiParams / parseViewMode / buildCatalogReturnTo  (lib/)
+  ├── mapSortToApiParams / buildCatalogReturnTo  (lib/)
   └── <CatalogShell>
-        ├── <CatalogToolbar> (Client) ──> reads/writes searchParams via router.replace()
-        │     ├── <CatalogSearch>      ─> `search` searchParam
-        │     ├── <FilterPanel>        ─> category / brand / type / stock / sort
-        │     └── <ViewModeToggle>     ─> `view` searchParam (grid|list)
-        └── <ProductGrid> (Server) as `children` of the toolbar
-              ├── <ProductCard> (Server)
-              │     ├── <ProductImageSection> (Client) ─> upload or display
-              │     ├── <InlineNameEditor>    (Client) ─> action-product-updates
-              │     ├── <InlinePriceEditor>   (Client) ─> action-product-updates
-              │     ├── <InlineStockEditor>   (Client) ─> action-product-updates
-              │     └── <InlineCategoryEditor>(Client) ─> action-taxonomy
-              └── <LoadMoreButton> (Client)   ─> `limit` searchParam (+20)
+        ├── renders <ProductGrid> (Server) twice: grid + list variants
+        └── <CatalogToolbar> (Client)
+              ├── reads/writes searchParams via router.replace() (data filters only)
+              │     ├── <CatalogSearch>      ─> `search` searchParam
+              │     ├── <FilterPanel>        ─> category / brand / type / stock / sort
+              │     └── <ViewModeToggle>     ─> client state (localStorage) — grid|list, instant
+              └── renders grid OR list variant based on client viewMode (no refetch on toggle)
+                    ├── <ProductCard> (Server)
+                    │     ├── <ProductImageSection> (Client) ─> upload or display
+                    │     ├── <InlineNameEditor>    (Client) ─> action-product-updates
+                    │     ├── <InlinePriceEditor>   (Client) ─> action-product-updates
+                    │     ├── <InlineStockEditor>   (Client) ─> action-product-updates
+                    │     └── <InlineCategoryEditor>(Client) ─> action-taxonomy
+                    └── <LoadMoreButton> (Client)   ─> `limit` searchParam (+20)
 ```
 
 ### Supported searchParams
@@ -74,17 +76,18 @@ page.tsx (Server)
 | `type`     | `FilterPanel`          | omitted   |
 | `stock`    | `FilterPanel`          | omitted   |
 | `sort`     | `FilterPanel`          | `"newest"`|
-| `view`     | `ViewModeToggle`       | `"grid"`  |
 | `limit`    | `LoadMoreButton`       | `20`      |
 | `page`     | `page.tsx`             | `0`       |
 
-The object <-> URL mapping is **always** handled in [`lib/search-params.ts`](./lib/search-params.ts) (`parseCatalogSearchParams`, `buildCatalogUrl`, `buildCatalogReturnTo`, `buildProductDetailsHref`, `mapSortToApiParams`, `parseViewMode`, `SORT_OPTIONS`). Do not reimplement this logic elsewhere.
+> **Note:** `view` (grid|list) is **not** a searchParam. It is a display preference kept in `localStorage` (key `catalog:product-view-mode`) and managed inside `CatalogToolbar`. Only data-affecting filters go through the URL.
+
+The object <-> URL mapping is **always** handled in [`lib/search-params.ts`](./lib/search-params.ts) (`parseCatalogSearchParams`, `buildCatalogUrl`, `buildCatalogReturnTo`, `buildProductDetailsHref`, `mapSortToApiParams`, `SORT_OPTIONS`). Do not reimplement this logic elsewhere.
 
 ## Server / Client Boundaries
 
 - **Server Components (default):** `catalog-shell`, `product-grid`, `product-grid-skeleton`, `product-card`, `product-card-fields`, `category-tags`. They only read props and render — no `useState`, no `useRouter`.
 - **Client Components (`"use client"`):** reserved for actual interactivity — toolbar (URL/overlay), toggles, inline editors, uploaders. Keep `"use client"` in the **smallest component possible** and receive data via props.
-- Why is the grid passed as `children` to the toolbar? So that the `isPending` overlay (URL transition state) wraps a single React tree without duplicating logic.
+- Why are the grid and list variants both passed to the toolbar? The toolbar (Client) renders only one based on the client-side `viewMode`, so toggling is instant (no URL navigation, no data refetch). Both variants are Server Component subtrees built by `CatalogShell`.
 
 ## Inline Editors (Mutations)
 
@@ -109,7 +112,7 @@ Actions consumed: `action-product-updates` (name, price, stock), `action-product
 - **Public exports** from the folder are exposed via the [`index.ts`](./index.ts) barrel. Internal components can import each other directly.
 - **Naming:** Files in kebab-case; components in PascalCase; pure functions in camelCase.
 - **Component comments** in pt-BR, explaining the Server/Client role and component responsibility — follow the pattern of existing docblocks.
-- **No global state**: Everything is managed via the URL (`searchParams`). Do not introduce React contexts or state stores for filters/view.
+- **No global state**: All **data filters** are managed via the URL (`searchParams`). Do not introduce React contexts or state stores for filters. The **view mode** (grid|list) is the only exception: it is a display preference kept in `localStorage`, not a filter, so it stays client-side and never triggers a refetch.
 - **Pagination** is heuristic via `limit` (+20), not via `page`. Although `page` is forwarded to the API, the UI uses the `LoadMoreButton`.
 - **Currency/price** use Brazilian formatting (decimal comma) in inputs; `formatCurrency` handles the display.
 

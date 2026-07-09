@@ -6,7 +6,6 @@ export {
   buildProductDetailsHref,
   mapSortToApiParams,
   parseCatalogSearchParams,
-  parseViewMode,
   SORT_OPTIONS,
 } from "./lib/search-params";
 export type {

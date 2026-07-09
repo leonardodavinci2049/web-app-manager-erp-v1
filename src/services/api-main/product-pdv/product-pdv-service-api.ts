@@ -266,9 +266,9 @@ export async function getProductsPdv(
     pe_user_role?: string;
     pe_person_id?: number;
   } = {},
-): Promise<UIProductPdv[]> {
+): Promise<{ products: UIProductPdv[]; total: number }> {
   if (!params.pe_system_client_id) {
-    return [];
+    return { products: [], total: 0 };
   }
 
   const response = await productPdvServiceApi.findAllProductsPdv({
@@ -291,7 +291,10 @@ export async function getProductsPdv(
   });
 
   const products = productPdvServiceApi.extractProductsPdv(response);
-  return transformProductPdvList(products);
+  return {
+    products: transformProductPdvList(products),
+    total: response.quantity ?? products.length,
+  };
 }
 
 export async function getProductPdvById(

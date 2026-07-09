@@ -31,8 +31,8 @@ product-pdv/
 - **Valida** respostas da API (`isValidProductPdvList`, `isValidProductPdvDetail`, `isValidProductPdvSearchList`)
 - **Lança** erros específicos (`ProductPdvError`, `ProductPdvNotFoundError`)
 - **Exporta** instância singleton `productPdvServiceApi`
-- **Fornece** funções de leitura para Server Components (`getProductsPdv`, `getProductPdvById`, `searchProductsPdv`) **sem cache** — transformam entidades API → DTOs UI via `transformers` e retornam `UIProductPdv[]` / `{ product, relatedCategories } | undefined`
-- **Guard check**: retorna `[]` ou `undefined` se `pe_system_client_id` não for fornecido
+- **Fornece** funções de leitura para Server Components (`getProductsPdv`, `getProductPdvById`, `searchProductsPdv`) **sem cache** — transformam entidades API → DTOs UI via `transformers` e retornam `{ products: UIProductPdv[], total: number }` (`getProductsPdv`, onde `total` vem de `response.quantity`) / `UIProductPdv[]` (`searchProductsPdv`) / `{ product, relatedCategories } | undefined` (`getProductPdvById`)
+- **Guard check**: retorna `{ products: [], total: 0 }` (`getProductsPdv`) ou `undefined` (`getProductPdvById`) se `pe_system_client_id` não for fornecido
 
 ### 2. `types/product-pdv-types.ts`
 - Define interfaces base (`ProductPdvBaseRequest`, `ProductPdvBaseResponse` com `recordId: string`)
