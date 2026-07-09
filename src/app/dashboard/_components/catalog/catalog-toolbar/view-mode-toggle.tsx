@@ -6,18 +6,14 @@ import type { ViewMode } from "../types/catalog-types";
 
 interface ViewModeToggleProps {
   viewMode: ViewMode;
-  isLoading: boolean;
   onChange: (mode: ViewMode) => void;
 }
 
 /**
- * Toggle grid/list. Alterna o modo de visualizacao no searchParam `view`.
+ * Toggle grid/list. Alterna o modo de visualizacao instantaneamente via
+ * estado client-side (sem URL, sem refetch, sem travamento).
  */
-export function ViewModeToggle({
-  viewMode,
-  isLoading,
-  onChange,
-}: ViewModeToggleProps) {
+export function ViewModeToggle({ viewMode, onChange }: ViewModeToggleProps) {
   const nextViewMode = viewMode === "grid" ? "list" : "grid";
   const label =
     viewMode === "grid"
@@ -31,7 +27,6 @@ export function ViewModeToggle({
       size="icon"
       onClick={() => onChange(nextViewMode)}
       className="h-11 w-11 shrink-0 shadow-sm"
-      disabled={isLoading}
       aria-label={label}
       title={label}
     >

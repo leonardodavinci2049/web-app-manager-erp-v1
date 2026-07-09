@@ -26,8 +26,9 @@ import { CatalogSearch } from "./catalog-search";
 import { FilterPanel } from "./filter-panel/filter-panel";
 import { ViewModeToggle } from "./view-mode-toggle";
 
+const VIEW_MODE_STORAGE_KEY = "catalog:product-view-mode";
+
 type ActiveFilterType = PanelFilterType | "search";
-type PendingNavigationType = "data" | "view" | null;
 
 interface ActiveFilter {
   type: ActiveFilterType;
@@ -36,67 +37,52 @@ interface ActiveFilter {
 
 interface CatalogToolbarProps {
   products: UIProductPdv[];
+  /** Total de produtos que correspondem aos filtros (paginacao). */
+  total: number;
   brands: UIBrand[];
   categories: CategoryOption[];
   ptypes: UIPtype[];
-  viewMode: ViewMode;
-  /** Grid de produtos (Server Component) renderizado como children. */
-  children: ReactNode;
+  /** Variante do grid (Server) em modo grade. */
+  grid: ReactNode;
+  /** Variante do grid (Server) em modo lista. */
+  list: ReactNode;
 }
 
 /**
- * Toolbar do catalogo (Client). Orquestra leitura/escrita de searchParams,
- * transicoes de URL e o overlay de carregamento sobre o grid (children).
+ * Toolbar do catalogo (Client). Orquestra leitura/escrita de searchParams
+ * (filtros de dados) e o modo de visualizacao (preferencia client-side).
  *
- * O grid e passado como `children` (Server Component) para que o overlay de
- * `isPending` envolva uma unica arvore, evitando a duplicacao anterior.
+ * O modo de visualizacao (grid/list) e' apenas apresentacao: fica no
+ * localStorage e NUNCA na URL, evitando refetch ao alternar. As variantes
+ * `grid`/`list` (Server Components) sao passadas pelo parent e apenas uma e
+ * renderizada por vez — toggle instantaneo, sem travamento.
  */
 export function CatalogToolbar({
   products,
+  total,
   brands,
   categories,
   ptypes,
-  viewMode,
-  children,
+  grid,
+  list,
 }: CatalogToolbarProps) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [pendingNavigationType, setPendingNavigationType] =
-    useState<PendingNavigationType>(null);
 
   const filters = useMemo(
     () => parseCatalogSearchParams(searchParams),
     [searchParams],
   );
 
-  const navigate = useCallback(
-    (url: string, type: Exclude<PendingNavigationType, null> = "data") => {
-      setPendingNavigationType(type);
-      startTransition(() => router.replace(url));
-    },
-    [router],
-  );
-
-  useEffect(() => {
-    if (!isPending) {
-      setPendingNavigationType(null);
-    }
-  }, [isPending]);
-
   const updateFilters = useCallback(
     (newFilters: CatalogFilters) => {
-      navigate(buildCatalogUrl(newFilters, viewMode, pathname));
+      startTransition(() => {
+        router.replace(buildCatalogUrl(newFilters, pathname));
+      });
     },
-    [navigate, viewMode, pathname],
-  );
-
-  const handleViewModeChange = useCallback(
-    (mode: ViewMode) => {
-      navigate(buildCatalogUrl(filters, mode, pathname), "view");
-    },
-    [navigate, filters, pathname],
+    [router, pathname],
   );
 
   const updateFilter = useCallback(
@@ -231,7 +217,31 @@ export function CatalogToolbar({
     setIsFilterOpenState(open);
   }, []);
 
-  const isDataPending = isPending && pendingNavigationType !== "view";
+  // Modo de visualizacao: preferencia client-side persistida no localStorage.
+  // Sincroniza apenas apos hidratacao para evitar mismatch SSR.
+  const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem(VIEW_MODE_STORAGE_KEY);
+      if (stored === "list" || stored === "grid") {
+        setViewMode(stored);
+      }
+    } catch {
+      // ignora erros de acesso ao storage (modo privado, etc.)
+    }
+    setHydrated(true);
+  }, []);
+
+  const handleViewModeChange = useCallback((mode: ViewMode) => {
+    setViewMode(mode);
+    try {
+      window.localStorage.setItem(VIEW_MODE_STORAGE_KEY, mode);
+    } catch {
+      // ignora
+    }
+  }, []);
 
   return (
     <>
@@ -240,7 +250,7 @@ export function CatalogToolbar({
           <div className="flex w-full max-w-xl items-center gap-2 lg:max-w-2xl">
             <CatalogSearch
               searchTerm={filters.searchTerm}
-              isLoading={isDataPending}
+              isLoading={isPending}
               onSearch={handleSearch}
               actions={
                 <>
@@ -250,7 +260,7 @@ export function CatalogToolbar({
                     brands={brands}
                     ptypes={ptypes}
                     isOpen={isFilterOpen}
-                    isLoading={isDataPending}
+                    isLoading={isPending}
                     panelActiveFilters={panelActiveFilters}
                     panelFilterCount={panelFilterCount}
                     onOpenChange={setIsFilterOpen}
@@ -267,7 +277,6 @@ export function CatalogToolbar({
 
                   <ViewModeToggle
                     viewMode={viewMode}
-                    isLoading={isPending}
                     onChange={handleViewModeChange}
                   />
                 </>
@@ -281,7 +290,7 @@ export function CatalogToolbar({
             <div className="space-y-2 sm:flex sm:items-center sm:justify-between sm:space-y-0">
               <div className="flex flex-col gap-1 sm:flex-1">
                 <span className="text-sm font-medium">
-                  {products.length} de {products.length} produtos
+                  {products.length} de {total} produtos
                 </span>
                 {hasActiveFilters && (
                   <span className="text-muted-foreground text-xs">
@@ -297,7 +306,7 @@ export function CatalogToolbar({
       </div>
 
       <div className="relative">
-        {isDataPending && (
+        {isPending && (
           <div className="bg-background/80 absolute inset-0 z-10 flex items-center justify-center backdrop-blur-sm">
             <div className="flex flex-col items-center gap-4">
               <div className="flex items-center gap-3">
@@ -312,8 +321,8 @@ export function CatalogToolbar({
             </div>
           </div>
         )}
-        <div className={isDataPending ? "opacity-50" : undefined}>
-          {children}
+        <div className={isPending ? "opacity-50" : undefined}>
+          {hydrated && viewMode === "list" ? list : grid}
         </div>
       </div>
     </>

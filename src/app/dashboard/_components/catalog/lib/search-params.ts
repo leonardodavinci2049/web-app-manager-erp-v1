@@ -1,12 +1,7 @@
-import type {
-  CatalogFilters,
-  SortOption,
-  ViewMode,
-} from "../types/catalog-types";
+import type { CatalogFilters, SortOption } from "../types/catalog-types";
 
 const DEFAULT_SORT: SortOption = "newest";
 const DEFAULT_CATEGORY = "all";
-const DEFAULT_VIEW: ViewMode = "grid";
 
 type SearchParamValue = string | string[] | undefined;
 
@@ -81,19 +76,12 @@ export function parseCatalogSearchParams(
 }
 
 /**
- * Interpreta o searchParam `view` em um ViewMode valido.
- */
-export function parseViewMode(value?: string | null): ViewMode {
-  return value === "list" ? "list" : DEFAULT_VIEW;
-}
-
-/**
- * Monta a URL do catalogo a partir dos filtros + modo de visualizacao.
- * Fonte unica de verdade para a escrita objeto -> URL.
+ * Monta a URL do catalogo a partir dos filtros. Fonte unica de verdade para a
+ * escrita objeto -> URL. O modo de visualizacao (grid/list) nao entra na URL:
+ * e' uma preferencia de exibicao gerada no cliente (localStorage).
  */
 export function buildCatalogUrl(
   filters: CatalogFilters,
-  viewMode: ViewMode,
   pathname: string,
 ): string {
   const params = new URLSearchParams();
@@ -106,7 +94,6 @@ export function buildCatalogUrl(
   if (filters.onlyInStock) params.set("stock", "1");
   if (filters.sortBy && filters.sortBy !== DEFAULT_SORT)
     params.set("sort", filters.sortBy);
-  if (viewMode !== DEFAULT_VIEW) params.set("view", viewMode);
 
   const qs = params.toString();
   return qs ? `${pathname}?${qs}` : pathname;
