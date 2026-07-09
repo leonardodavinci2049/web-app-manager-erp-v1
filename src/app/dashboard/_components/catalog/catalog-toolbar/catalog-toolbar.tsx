@@ -4,6 +4,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   type ReactNode,
   useCallback,
+  useEffect,
   useMemo,
   useState,
   useTransition,
@@ -26,6 +27,7 @@ import { FilterPanel } from "./filter-panel/filter-panel";
 import { ViewModeToggle } from "./view-mode-toggle";
 
 type ActiveFilterType = PanelFilterType | "search";
+type PendingNavigationType = "data" | "view" | null;
 
 interface ActiveFilter {
   type: ActiveFilterType;
@@ -61,6 +63,8 @@ export function CatalogToolbar({
   const pathname = usePathname();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [pendingNavigationType, setPendingNavigationType] =
+    useState<PendingNavigationType>(null);
 
   const filters = useMemo(
     () => parseCatalogSearchParams(searchParams),
@@ -68,11 +72,18 @@ export function CatalogToolbar({
   );
 
   const navigate = useCallback(
-    (url: string) => {
+    (url: string, type: Exclude<PendingNavigationType, null> = "data") => {
+      setPendingNavigationType(type);
       startTransition(() => router.replace(url));
     },
     [router],
   );
+
+  useEffect(() => {
+    if (!isPending) {
+      setPendingNavigationType(null);
+    }
+  }, [isPending]);
 
   const updateFilters = useCallback(
     (newFilters: CatalogFilters) => {
@@ -83,7 +94,7 @@ export function CatalogToolbar({
 
   const handleViewModeChange = useCallback(
     (mode: ViewMode) => {
-      navigate(buildCatalogUrl(filters, mode, pathname));
+      navigate(buildCatalogUrl(filters, mode, pathname), "view");
     },
     [navigate, filters, pathname],
   );
@@ -220,6 +231,8 @@ export function CatalogToolbar({
     setIsFilterOpenState(open);
   }, []);
 
+  const isDataPending = isPending && pendingNavigationType !== "view";
+
   return (
     <>
       <div className="space-y-6">
@@ -227,29 +240,38 @@ export function CatalogToolbar({
           <div className="flex w-full max-w-xl items-center gap-2 lg:max-w-2xl">
             <CatalogSearch
               searchTerm={filters.searchTerm}
-              isLoading={isPending}
+              isLoading={isDataPending}
               onSearch={handleSearch}
-            />
+              actions={
+                <>
+                  <FilterPanel
+                    filters={filters}
+                    categories={categories}
+                    brands={brands}
+                    ptypes={ptypes}
+                    isOpen={isFilterOpen}
+                    isLoading={isDataPending}
+                    panelActiveFilters={panelActiveFilters}
+                    panelFilterCount={panelFilterCount}
+                    onOpenChange={setIsFilterOpen}
+                    onCategoryChange={handleCategoryChange}
+                    onBrandChange={handleBrandChange}
+                    onPtypeChange={handlePtypeChange}
+                    onOnlyInStockChange={(checked) =>
+                      updateFilter("onlyInStock", checked)
+                    }
+                    onSortChange={(value) => updateFilter("sortBy", value)}
+                    onClearPanelFilters={handleClearPanelFilters}
+                    onRemovePanelFilter={removePanelFilter}
+                  />
 
-            <FilterPanel
-              filters={filters}
-              categories={categories}
-              brands={brands}
-              ptypes={ptypes}
-              isOpen={isFilterOpen}
-              isLoading={isPending}
-              panelActiveFilters={panelActiveFilters}
-              panelFilterCount={panelFilterCount}
-              onOpenChange={setIsFilterOpen}
-              onCategoryChange={handleCategoryChange}
-              onBrandChange={handleBrandChange}
-              onPtypeChange={handlePtypeChange}
-              onOnlyInStockChange={(checked) =>
-                updateFilter("onlyInStock", checked)
+                  <ViewModeToggle
+                    viewMode={viewMode}
+                    isLoading={isPending}
+                    onChange={handleViewModeChange}
+                  />
+                </>
               }
-              onSortChange={(value) => updateFilter("sortBy", value)}
-              onClearPanelFilters={handleClearPanelFilters}
-              onRemovePanelFilter={removePanelFilter}
             />
           </div>
         </div>
@@ -269,21 +291,13 @@ export function CatalogToolbar({
                   </span>
                 )}
               </div>
-
-              <div className="flex items-center justify-end">
-                <ViewModeToggle
-                  viewMode={viewMode}
-                  isLoading={isPending}
-                  onChange={handleViewModeChange}
-                />
-              </div>
             </div>
           </div>
         </div>
       </div>
 
       <div className="relative">
-        {isPending && (
+        {isDataPending && (
           <div className="bg-background/80 absolute inset-0 z-10 flex items-center justify-center backdrop-blur-sm">
             <div className="flex flex-col items-center gap-4">
               <div className="flex items-center gap-3">
@@ -298,7 +312,9 @@ export function CatalogToolbar({
             </div>
           </div>
         )}
-        <div className={isPending ? "opacity-50" : undefined}>{children}</div>
+        <div className={isDataPending ? "opacity-50" : undefined}>
+          {children}
+        </div>
       </div>
     </>
   );
