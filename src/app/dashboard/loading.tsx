@@ -1,9 +1,45 @@
-import { Spinner } from "@/components/ui/spinner";
+import { SiteHeaderWithBreadcrumb } from "@/components/dashboard/header/site-header-with-breadcrumb";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ProductGridSkeleton } from "./_components/catalog/product-grid/product-grid-skeleton";
 
 export default function DashboardLoading() {
   return (
-    <div className="flex min-h-svh items-center justify-center">
-      <Spinner className="size-8" />
-    </div>
+    <>
+      <SiteHeaderWithBreadcrumb
+        title="Catálogo"
+        breadcrumbItems={[{ label: "Início", isActive: true }]}
+      />
+      <div className="flex flex-1 flex-col">
+        <div className="@container/main flex flex-1 flex-col gap-6">
+          <div className="flex flex-col gap-6 py-6">
+            <div className="px-4 lg:px-6">
+              <div className="space-y-6">   
+
+                <div className="space-y-6">
+                  <div className="flex w-full justify-center">
+                    <div className="flex w-full max-w-xl flex-col gap-2 lg:max-w-2xl">
+                      <div className="flex min-w-0 flex-1 items-center gap-2">
+                        <div className="flex min-w-0 flex-1 items-center">
+                          <div className="relative flex-1">
+                            <Skeleton className="h-11 w-full rounded-l-md rounded-r-none" />
+                          </div>
+                          <Skeleton className="h-11 w-11 shrink-0 rounded-l-none rounded-r-md sm:w-[110px]" />
+                        </div>
+                        <Skeleton className="h-11 w-11 shrink-0 rounded-md sm:w-[100px]" />
+                        <Skeleton className="h-11 w-11 shrink-0 rounded-md" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="relative">
+                    <ProductGridSkeleton viewMode="grid" count={8} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
