@@ -11,7 +11,6 @@ import {
   CatalogShell,
   flattenCategories,
   mapSortToApiParams,
-  parseViewMode,
 } from "./_components/catalog";
 
 const logger = createLogger("DashboardPage");
@@ -27,7 +26,6 @@ interface DashboardPageProps {
     sort?: string;
     limit?: string;
     page?: string;
-    view?: string;
   }>;
 }
 
@@ -38,7 +36,6 @@ export default async function DashboardPage(props: DashboardPageProps) {
 
   const sort = mapSortToApiParams(searchParams.sort);
   const limit = Number(searchParams.limit) || 20;
-  const viewMode = parseViewMode(searchParams.view);
   const catalogReturnTo = buildCatalogReturnTo(searchParams, CATALOG_PATHNAME);
 
   const [products, brands, categories, ptypes] = await Promise.all([
@@ -99,7 +96,6 @@ export default async function DashboardPage(props: DashboardPageProps) {
                   brands={brands}
                   categories={categories}
                   ptypes={ptypes}
-                  viewMode={viewMode}
                   catalogReturnTo={catalogReturnTo}
                   limit={limit}
                 />

@@ -3,29 +3,28 @@ import type { UIProductPdv } from "@/services/api-main/product-pdv/transformers/
 import type { UIPtype } from "@/services/api-main/ptype/transformers/transformers";
 import { CatalogToolbar } from "./catalog-toolbar/catalog-toolbar";
 import { ProductGrid } from "./product-grid/product-grid";
-import type { CategoryOption, ViewMode } from "./types/catalog-types";
+import type { CategoryOption } from "./types/catalog-types";
 
 interface CatalogShellProps {
   products: UIProductPdv[];
   brands: UIBrand[];
   categories: CategoryOption[];
   ptypes: UIPtype[];
-  viewMode: ViewMode;
   catalogReturnTo: string;
   limit: number;
 }
 
 /**
  * Casca do catalogo (Server Component). Apenas compoe a toolbar (Client) e o
- * grid (Server). O grid e passado como `children` da toolbar para que o
- * overlay de `isPending` envolva uma unica arvore.
+ * grid (Server) nas duas variantes (grade/lista). A toolbar decide qual
+ * variante exibir conforme o modo de visualizacao escolhido pelo usuario
+ * (preferencia client-side, sem refetch).
  */
 export function CatalogShell({
   products,
   brands,
   categories,
   ptypes,
-  viewMode,
   catalogReturnTo,
   limit,
 }: CatalogShellProps) {
@@ -35,14 +34,22 @@ export function CatalogShell({
       brands={brands}
       categories={categories}
       ptypes={ptypes}
-      viewMode={viewMode}
-    >
-      <ProductGrid
-        products={products}
-        viewMode={viewMode}
-        catalogReturnTo={catalogReturnTo}
-        limit={limit}
-      />
-    </CatalogToolbar>
+      grid={
+        <ProductGrid
+          products={products}
+          viewMode="grid"
+          catalogReturnTo={catalogReturnTo}
+          limit={limit}
+        />
+      }
+      list={
+        <ProductGrid
+          products={products}
+          viewMode="list"
+          catalogReturnTo={catalogReturnTo}
+          limit={limit}
+        />
+      }
+    />
   );
 }
