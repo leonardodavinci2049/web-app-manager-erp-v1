@@ -29,6 +29,7 @@ import type {
   PanelFilterType,
   SortOption,
 } from "../../types/catalog-types";
+import { CategoryMenu } from "./category-menu";
 
 interface PanelActiveFilter {
   type: PanelFilterType;
@@ -114,23 +115,12 @@ export function FilterPanel({
             <div className="text-muted-foreground text-sm font-medium">
               Categoria
             </div>
-            <Select
-              value={filters.selectedCategory}
-              onValueChange={onCategoryChange}
-              disabled={isLoading}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Selecione uma categoria" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas as Categorias</SelectItem>
-                {categories.map((category) => (
-                  <SelectItem key={category.id} value={category.id.toString()}>
-                    {category.displayName}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <CategoryMenu
+              categories={categories}
+              selectedCategoryId={filters.selectedCategory}
+              isLoading={isLoading}
+              onCategoryChange={onCategoryChange}
+            />
           </div>
 
           <div className="space-y-2">
