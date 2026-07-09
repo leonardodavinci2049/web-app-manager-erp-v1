@@ -97,7 +97,7 @@ export function FilterPanel({
       </SheetTrigger>
       <SheetContent
         side="right"
-        className="flex w-full flex-col gap-0 p-0 sm:max-w-md"
+        className="flex w-[80vw] flex-col gap-0 p-0 sm:w-full sm:max-w-md"
       >
         <SheetHeader className="space-y-1 border-b p-4 pr-12">
           <SheetTitle className="flex items-center gap-2 text-base">
