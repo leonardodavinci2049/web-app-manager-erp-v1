@@ -10,12 +10,11 @@ export default function DashboardLoading() {
         breadcrumbItems={[{ label: "Início", isActive: true }]}
       />
       <div className="flex flex-1 flex-col">
-        <div className="@container/main flex flex-1 flex-col gap-6">
-          <div className="flex flex-col gap-6 py-6">
-            <div className="px-4 lg:px-6">
-              <div className="space-y-6">   
-
-                <div className="space-y-6">
+        <div className="@container/main flex flex-1 flex-col gap-4">
+          <div className="flex flex-col gap-4 py-3">
+            <div className="px-3 lg:px-6">
+              <div className="space-y-4">
+                <div className="space-y-4">
                   <div className="flex w-full justify-center">
                     <div className="flex w-full max-w-xl flex-col gap-2 lg:max-w-2xl">
                       <div className="flex min-w-0 flex-1 items-center gap-2">

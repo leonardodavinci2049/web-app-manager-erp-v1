@@ -190,13 +190,13 @@ export function InlineNameEditor({
   return (
     <div className={`text-left w-full ${className}`}>
       <div className="group/name-editor">
-        <div className="flex items-start gap-2">
-          <Type className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+        <div className="flex items-start gap-1.5">
+          <Type className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
           <div className="flex-1 min-w-0">
             <Link
               href={productDetailsHref ?? `/dashboard/product/${productId}`}
             >
-              <h3 className="line-clamp-2 text-base font-semibold leading-tight transition-colors hover:text-primary hover:underline">
+              <h3 className="line-clamp-2 text-sm font-semibold leading-tight transition-colors hover:text-primary hover:underline sm:text-base">
                 {displayName}
               </h3>
             </Link>

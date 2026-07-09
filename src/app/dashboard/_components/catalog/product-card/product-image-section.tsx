@@ -55,13 +55,13 @@ export function ProductImageSection({
 
   if (viewMode === "list") {
     const imageContent = (
-      <div className="relative h-24 w-24 flex-shrink-0">
+      <div className="relative h-16 w-16 flex-shrink-0 sm:h-20 sm:w-20">
         <Image
           src={imageUrl}
           alt={`Imagem do produto ${product.name}`}
           fill
           className="rounded-md object-cover"
-          sizes="(max-width: 96px) 100vw, 96px"
+          sizes="80px"
           loading="lazy"
           onError={(e) => {
             setImageError(true);
@@ -83,13 +83,13 @@ export function ProductImageSection({
   }
 
   const gridImageContent = (
-    <div className="relative aspect-square overflow-hidden rounded-md">
+    <div className="relative aspect-[4/3] overflow-hidden rounded-md">
       <Image
         src={imageUrl}
         alt={`Imagem do produto ${product.name}`}
         fill
         className="object-cover transition-transform duration-200 group-hover:scale-105"
-        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+        sizes="(max-width: 640px) 45vw, (max-width: 768px) 30vw, (max-width: 1200px) 25vw, 20vw"
         loading="lazy"
         onError={(e) => {
           setImageError(true);

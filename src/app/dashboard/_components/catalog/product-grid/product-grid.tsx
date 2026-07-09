@@ -11,8 +11,9 @@ interface ProductGridProps {
   limit: number;
 }
 
-const GRID_CLASS = "grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-6";
-const LIST_CLASS = "space-y-4";
+const GRID_CLASS =
+  "grid grid-cols-2 gap-2 sm:grid-cols-[repeat(auto-fill,minmax(190px,1fr))] sm:gap-3 lg:gap-4";
+const LIST_CLASS = "space-y-2 sm:space-y-3";
 
 /**
  * Grid de produtos (Server Component). Apenas layout + .map() + empty state.
@@ -42,7 +43,7 @@ export function ProductGrid({
   const hasMore = products.length >= limit;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className={viewMode === "grid" ? GRID_CLASS : LIST_CLASS}>
         {products.map((product) => (
           <ProductCard
@@ -55,11 +56,11 @@ export function ProductGrid({
       </div>
 
       {hasMore ? (
-        <div className="flex justify-center pt-6">
+        <div className="flex justify-center pt-4">
           <LoadMoreButton />
         </div>
       ) : (
-        <div className="py-6 text-center">
+        <div className="py-4 text-center">
           <p className="text-muted-foreground text-sm">
             Todos os produtos foram carregados
           </p>
