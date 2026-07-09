@@ -3,12 +3,17 @@ import type { SortOption, ViewMode } from "@/types/types";
 export type { SortOption, ViewMode };
 
 /**
- * Opcao de categoria plana utilizada pelos filtros do catalogo.
+ * Opcao de categoria utilizada pelos filtros do catalogo. Mantem os campos de
+ * hierarquia (parentId, order, productCount) para permitir a montagem de um
+ * menu navegavel em arvore, alem do displayName para listas planas.
  */
 export interface CategoryOption {
   id: number;
+  parentId: number;
   name: string;
   level: number;
+  order: number;
+  productCount?: number;
   displayName: string;
 }
 
