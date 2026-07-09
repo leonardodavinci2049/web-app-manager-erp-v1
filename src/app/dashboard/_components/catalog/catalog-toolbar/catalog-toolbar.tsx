@@ -6,6 +6,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   useTransition,
 } from "react";
@@ -78,8 +79,22 @@ export function CatalogToolbar({
     [searchParams],
   );
 
+  // Ref that always holds the latest intended filters, updated synchronously.
+  // Prevents stale closure reads during pending transitions: useSearchParams
+  // returns the committed (old) value while startTransition is in flight, so
+  // callbacks that spread `filters` would lose pending filter changes.
+  const latestFiltersRef = useRef(filters);
+
+  // Sync the ref whenever committed filters change (URL navigation settled).
+  useEffect(() => {
+    latestFiltersRef.current = filters;
+  }, [filters]);
+
   const updateFilters = useCallback(
     (newFilters: CatalogFilters) => {
+      // Update ref synchronously so subsequent callbacks see the latest state
+      // even before the transition commits.
+      latestFiltersRef.current = newFilters;
       startTransition(() => {
         router.replace(buildCatalogUrl(newFilters, pathname));
       });
@@ -89,46 +104,49 @@ export function CatalogToolbar({
 
   const updateFilter = useCallback(
     <K extends keyof CatalogFilters>(key: K, value: CatalogFilters[K]) => {
-      updateFilters({ ...filters, [key]: value });
+      updateFilters({ ...latestFiltersRef.current, [key]: value });
     },
-    [filters, updateFilters],
+    [updateFilters],
   );
 
   const handleSearch = useCallback(
     (term: string) => {
-      updateFilters({ ...filters, searchTerm: term });
+      updateFilters({ ...latestFiltersRef.current, searchTerm: term });
     },
-    [filters, updateFilters],
+    [updateFilters],
   );
 
   const handleCategoryChange = useCallback(
     (categoryId: string) => {
       setIsFilterOpenState(false);
-      updateFilters({ ...filters, selectedCategory: categoryId });
+      updateFilters({
+        ...latestFiltersRef.current,
+        selectedCategory: categoryId,
+      });
     },
-    [filters, updateFilters],
+    [updateFilters],
   );
 
   const handleBrandChange = useCallback(
     (brandId: string) => {
       setIsFilterOpenState(false);
       updateFilters({
-        ...filters,
+        ...latestFiltersRef.current,
         selectedBrand: brandId === "all" ? undefined : brandId,
       });
     },
-    [filters, updateFilters],
+    [updateFilters],
   );
 
   const handlePtypeChange = useCallback(
     (ptypeId: string) => {
       setIsFilterOpenState(false);
       updateFilters({
-        ...filters,
+        ...latestFiltersRef.current,
         selectedPtype: ptypeId === "all" ? undefined : ptypeId,
       });
     },
-    [filters, updateFilters],
+    [updateFilters],
   );
 
   const handleOnlyInStockChange = useCallback(
@@ -150,44 +168,45 @@ export function CatalogToolbar({
   const handleClearPanelFilters = useCallback(() => {
     setIsFilterOpenState(false);
     updateFilters({
-      ...filters,
+      ...latestFiltersRef.current,
       selectedCategory: "all",
       selectedBrand: undefined,
       selectedPtype: undefined,
       onlyInStock: false,
     });
-  }, [filters, updateFilters]);
+  }, [updateFilters]);
 
   const handleClearSearchAndFilters = useCallback(() => {
     updateFilters({
-      ...filters,
+      ...latestFiltersRef.current,
       searchTerm: "",
       selectedCategory: "all",
       selectedBrand: undefined,
       selectedPtype: undefined,
       onlyInStock: false,
     });
-  }, [filters, updateFilters]);
+  }, [updateFilters]);
 
   const removePanelFilter = useCallback(
     (filterType: PanelFilterType) => {
       setIsFilterOpenState(false);
+      const current = latestFiltersRef.current;
       switch (filterType) {
         case "category":
-          updateFilters({ ...filters, selectedCategory: "all" });
+          updateFilters({ ...current, selectedCategory: "all" });
           break;
         case "brand":
-          updateFilters({ ...filters, selectedBrand: undefined });
+          updateFilters({ ...current, selectedBrand: undefined });
           break;
         case "ptype":
-          updateFilters({ ...filters, selectedPtype: undefined });
+          updateFilters({ ...current, selectedPtype: undefined });
           break;
         case "stock":
-          updateFilters({ ...filters, onlyInStock: false });
+          updateFilters({ ...current, onlyInStock: false });
           break;
       }
     },
-    [filters, updateFilters],
+    [updateFilters],
   );
 
   const activeFilters = useMemo(() => {
