@@ -291,34 +291,38 @@ export function InlinePriceEditor({
       }}
       title="Clique para editar os preços"
     >
-      <div className="space-y-2">
-        <div className="group/price-editor flex items-center gap-2">
-          <DollarSign className="h-4 w-4 shrink-0 text-muted-foreground" />
-          <span className="text-muted-foreground text-sm font-medium">
+      <div className="space-y-0.5">
+        <div className="group/price-editor flex items-center gap-1.5">
+          <DollarSign className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+          <span className="text-muted-foreground text-xs font-medium">
             Preços
           </span>
           <Edit2 className="group-hover/price-editor:opacity-100 h-3 w-3 text-muted-foreground opacity-0 transition-opacity" />
         </div>
 
-        <div className="space-y-1 text-xs">
-          <div className="grid grid-cols-3 gap-2">
-            <div>
-              <div className="text-muted-foreground text-xs">Vare</div>
-              <div className="font-medium text-orange-600 dark:text-orange-400">
-                {formatCurrency(displayRetail)}
-              </div>
+        <div className="grid grid-cols-3 gap-1.5 text-xs">
+          <div>
+            <div className="text-muted-foreground text-[10px] leading-tight">
+              Vare
             </div>
-            <div>
-              <div className="text-muted-foreground text-xs">Atac</div>
-              <div className="font-medium text-green-600 dark:text-green-400">
-                {formatCurrency(displayWholesale)}
-              </div>
+            <div className="font-medium text-orange-600 dark:text-orange-400">
+              {formatCurrency(displayRetail)}
             </div>
-            <div>
-              <div className="text-muted-foreground text-xs">Corp</div>
-              <div className="font-medium text-blue-600 dark:text-blue-400">
-                {formatCurrency(displayCorporate)}
-              </div>
+          </div>
+          <div>
+            <div className="text-muted-foreground text-[10px] leading-tight">
+              Atac
+            </div>
+            <div className="font-medium text-green-600 dark:text-green-400">
+              {formatCurrency(displayWholesale)}
+            </div>
+          </div>
+          <div>
+            <div className="text-muted-foreground text-[10px] leading-tight">
+              Corp
+            </div>
+            <div className="font-medium text-blue-600 dark:text-blue-400">
+              {formatCurrency(displayCorporate)}
             </div>
           </div>
         </div>

@@ -133,7 +133,7 @@ export function InlineCategoryEditor({
       <SheetTrigger asChild>
         <button
           type="button"
-          className="group/category-editor hover:bg-accent/50 -ml-1 mt-2 flex cursor-pointer items-center gap-2 rounded-md p-1 text-left transition-colors"
+          className="group/category-editor hover:bg-accent/50 -ml-1 flex cursor-pointer items-center gap-1.5 rounded-md p-0.5 text-left text-xs transition-colors"
         >
           <Tag className="h-4 w-4 shrink-0" />
           <span className="text-muted-foreground font-medium">Categorias:</span>

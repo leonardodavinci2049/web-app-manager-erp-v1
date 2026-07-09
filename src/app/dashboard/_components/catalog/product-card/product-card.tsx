@@ -58,8 +58,8 @@ export function ProductCard({
   if (viewMode === "list") {
     return (
       <Card className="transition-all duration-200 hover:shadow-md">
-        <CardContent className="p-4">
-          <div className="flex flex-col gap-4 md:flex-row md:gap-6">
+        <CardContent className="p-2 sm:p-3">
+          <div className="flex gap-2 sm:gap-3">
             <div className="flex-shrink-0">
               <ProductImageSection
                 product={product}
@@ -69,28 +69,17 @@ export function ProductCard({
               />
             </div>
 
-            <div className="flex flex-1 flex-col gap-4">
-              <div className="space-y-2">
+            <div className="flex flex-1 flex-col gap-1.5 min-w-0">
+              <div className="space-y-0.5">
                 <InlineNameEditor
                   productId={product.id}
                   productName={product.name}
                   productDetailsHref={productDetailsHref}
                 />
-                <ProductCardFields
-                  product={product}
-                  textSize="sm"
-                  gap="gap-4"
-                />
+                <ProductCardFields product={product} textSize="xs" />
               </div>
 
-              <div className="md:max-w-xs">
-                {hasPromotion && (
-                  <div className="mb-2">
-                    <p className="text-muted-foreground text-xs line-through md:text-sm">
-                      Preço original: {formatCurrency(retailPrice)}
-                    </p>
-                  </div>
-                )}
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                 <InlinePriceEditor
                   productId={product.id}
                   productName={product.name}
@@ -98,38 +87,42 @@ export function ProductCard({
                   wholesalePrice={wholesalePrice}
                   corporatePrice={corporatePrice}
                 />
-              </div>
-
-              <div className="flex flex-wrap gap-4 text-sm">
+                {hasPromotion && (
+                  <span className="text-muted-foreground text-xs line-through">
+                    {formatCurrency(retailPrice)}
+                  </span>
+                )}
                 <InlineStockEditor
                   productId={product.id}
                   productName={product.name}
                   currentStock={product.storeStock}
-                  className="font-medium"
+                  className="text-sm font-medium"
                 />
                 {product.warrantyDays > 0 && (
-                  <div className="text-muted-foreground flex items-center gap-1 text-xs md:text-sm">
-                    <Shield className="h-4 w-4 flex-shrink-0" />
-                    <span>{product.warrantyDays} dias</span>
+                  <div className="text-muted-foreground flex items-center gap-0.5 text-xs">
+                    <Shield className="h-3 w-3" />
+                    <span>{product.warrantyDays}d</span>
                   </div>
                 )}
               </div>
 
-              <InlineCategoryEditor
-                productId={product.id}
-                productSku={String(product.sku)}
-                productName={product.name}
-              />
-              <CategoryTags categories={categories} />
-
-              <div className="flex">
-                <Button asChild size="sm" className="w-full gap-2 md:w-auto">
-                  <Link href={productDetailsHref}>
-                    <Eye className="h-4 w-4" />
-                    Ver detalhes
-                  </Link>
-                </Button>
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <InlineCategoryEditor
+                  productId={product.id}
+                  productSku={String(product.sku)}
+                  productName={product.name}
+                />
+                <CategoryTags categories={categories} />
               </div>
+            </div>
+
+            <div className="flex flex-shrink-0 items-center self-center">
+              <Button asChild size="sm" variant="ghost" className="gap-1 px-2">
+                <Link href={productDetailsHref}>
+                  <Eye className="h-4 w-4" />
+                  <span className="hidden md:inline">Ver detalhes</span>
+                </Link>
+              </Button>
             </div>
           </div>
         </CardContent>
@@ -138,8 +131,8 @@ export function ProductCard({
   }
 
   return (
-    <Card className="group mx-auto w-full max-w-[360px] transition-all duration-200 hover:-translate-y-1 hover:shadow-lg sm:mx-0 sm:max-w-[500px]">
-      <CardContent className="flex h-full flex-col p-4">
+    <Card className="group h-full transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+      <CardContent className="flex h-full flex-col p-2 sm:p-2.5">
         <ProductImageSection
           product={product}
           viewMode={viewMode}
@@ -147,21 +140,18 @@ export function ProductCard({
           hasPromotion={hasPromotion}
         />
 
-        <div className="mt-4 flex flex-1 flex-col gap-3">
-          <div className="space-y-2">
-            <InlineNameEditor
-              productId={product.id}
-              productName={product.name}
-              productDetailsHref={productDetailsHref}
-              className="text-sm"
-            />
-            <ProductCardFields product={product} textSize="xs" />
-          </div>
+        <div className="mt-2 flex flex-1 flex-col gap-1.5">
+          <InlineNameEditor
+            productId={product.id}
+            productName={product.name}
+            productDetailsHref={productDetailsHref}
+          />
+          <ProductCardFields product={product} textSize="xs" />
 
-          <div className="space-y-1">
+          <div>
             {hasPromotion && (
-              <span className="text-muted-foreground block text-xs line-through">
-                Preço original: {formatCurrency(retailPrice)}
+              <span className="text-muted-foreground block text-xs leading-tight line-through">
+                {formatCurrency(retailPrice)}
               </span>
             )}
             <InlinePriceEditor
@@ -173,17 +163,17 @@ export function ProductCard({
             />
           </div>
 
-          <div className="space-y-1">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <InlineStockEditor
               productId={product.id}
               productName={product.name}
               currentStock={product.storeStock}
-              className="text-sm font-medium"
+              className="text-xs font-medium"
             />
             {product.warrantyDays > 0 && (
-              <div className="text-muted-foreground flex items-center gap-1 text-xs">
+              <div className="text-muted-foreground flex items-center gap-0.5 text-xs">
                 <Shield className="h-3 w-3" />
-                <span>{product.warrantyDays} dias de garantia</span>
+                <span>{product.warrantyDays}d</span>
               </div>
             )}
           </div>
@@ -197,10 +187,11 @@ export function ProductCard({
 
           <div className="flex-1" />
 
-          <Button asChild size="sm" className="mt-auto w-full gap-2">
+          <Button asChild size="sm" className="mt-1 w-full gap-1">
             <Link href={productDetailsHref}>
-              <Eye className="h-4 w-4" />
-              Ver detalhes
+              <Eye className="h-3.5 w-3.5" />
+              <span className="sm:hidden">Detalhes</span>
+              <span className="hidden sm:inline">Ver detalhes</span>
             </Link>
           </Button>
         </div>

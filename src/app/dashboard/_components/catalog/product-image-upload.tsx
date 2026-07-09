@@ -99,7 +99,7 @@ export function ProductImageUpload({
       <button
         type="button"
         className={`
-          relative aspect-square rounded-md overflow-hidden cursor-pointer transition-all duration-200
+          relative aspect-[4/3] rounded-md overflow-hidden cursor-pointer transition-all duration-200
           border-2 border-dashed border-muted-foreground/30 hover:border-primary/50
           bg-muted/50 hover:bg-muted/80 w-full
           ${isDragOver ? "border-primary bg-primary/10" : ""}
@@ -158,9 +158,9 @@ export function ProductImageUpload({
     <button
       type="button"
       className={`
-        relative h-24 w-24 flex-shrink-0 rounded-md overflow-hidden cursor-pointer transition-all duration-200
+        relative h-16 w-16 flex-shrink-0 rounded-md overflow-hidden cursor-pointer transition-all duration-200
         border-2 border-dashed border-muted-foreground/30 hover:border-primary/50
-        bg-muted/50 hover:bg-muted/80
+        bg-muted/50 hover:bg-muted/80 sm:h-20 sm:w-20
         ${isDragOver ? "border-primary bg-primary/10" : ""}
         ${isUploading ? "pointer-events-none opacity-60" : ""}
       `}

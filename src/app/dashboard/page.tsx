@@ -84,12 +84,10 @@ export default async function DashboardPage(props: DashboardPageProps) {
         breadcrumbItems={[{ label: "Início", isActive: true }]}
       />
       <div className="flex flex-1 flex-col">
-        <div className="@container/main flex flex-1 flex-col gap-6">
-          <div className="flex flex-col gap-6 py-6">
-            <div className="px-4 lg:px-6">
-              <div className="space-y-6">
-      
-
+        <div className="@container/main flex flex-1 flex-col gap-4">
+          <div className="flex flex-col gap-4 py-3">
+            <div className="px-3 lg:px-6">
+              <div className="space-y-4">
                 <CatalogShell
                   products={products}
                   total={total}

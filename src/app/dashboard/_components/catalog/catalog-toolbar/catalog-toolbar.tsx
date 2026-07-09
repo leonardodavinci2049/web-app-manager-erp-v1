@@ -309,7 +309,7 @@ export function CatalogToolbar({
 
   return (
     <>
-      <div className="space-y-6">
+      <div className="space-y-4">
         <div className="flex w-full justify-center">
           <div className="flex w-full max-w-xl flex-col gap-2 lg:max-w-2xl">
             <CatalogSearch
