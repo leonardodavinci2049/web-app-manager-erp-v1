@@ -1,6 +1,7 @@
 import { Package } from "lucide-react";
 import type { UIProductPdv } from "@/services/api-main/product-pdv/transformers/transformers";
 import { ProductCard } from "../product-card/product-card";
+import { ProductTable } from "../product-table";
 import type { ViewMode } from "../types/catalog-types";
 import { LoadMoreButton } from "./load-more-button";
 
@@ -44,17 +45,39 @@ export function ProductGrid({
 
   return (
     <div className="space-y-4">
-      <div className={viewMode === "grid" ? GRID_CLASS : LIST_CLASS}>
-        {products.map((product, index) => (
-          <ProductCard
-            key={product.id}
-            product={product}
-            viewMode={viewMode}
-            catalogReturnTo={catalogReturnTo}
-            eagerImage={index === 0}
-          />
-        ))}
-      </div>
+      {viewMode === "grid" ? (
+        <div className={GRID_CLASS}>
+          {products.map((product, index) => (
+            <ProductCard
+              key={product.id}
+              product={product}
+              viewMode="grid"
+              catalogReturnTo={catalogReturnTo}
+              eagerImage={index === 0}
+            />
+          ))}
+        </div>
+      ) : (
+        <>
+          <div className={`${LIST_CLASS} lg:hidden`}>
+            {products.map((product, index) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                viewMode="list"
+                catalogReturnTo={catalogReturnTo}
+                eagerImage={index === 0}
+              />
+            ))}
+          </div>
+          <div className="hidden lg:block">
+            <ProductTable
+              products={products}
+              catalogReturnTo={catalogReturnTo}
+            />
+          </div>
+        </>
+      )}
 
       {hasMore ? (
         <div className="flex justify-center pt-4">
