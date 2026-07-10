@@ -1,6 +1,13 @@
 "use client";
 
-import { Check, Edit2, PackageCheck, ShoppingBag, X } from "lucide-react";
+import {
+  Building2,
+  Check,
+  Edit2,
+  PackageCheck,
+  ShoppingBag,
+  X,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -16,6 +23,7 @@ interface InlinePriceEditorProps {
   retailPrice: number;
   wholesalePrice: number;
   corporatePrice: number;
+  visiblePrice?: "all" | "wholesale" | "retail";
   className?: string;
 }
 
@@ -25,6 +33,7 @@ export function InlinePriceEditor({
   retailPrice,
   wholesalePrice,
   corporatePrice,
+  visiblePrice = "all",
   className = "",
 }: InlinePriceEditorProps) {
   const router = useRouter();
@@ -293,17 +302,40 @@ export function InlinePriceEditor({
       <div>
         <Edit2 className="group-hover/price-editor:opacity-100 absolute top-0 right-0 h-3 w-3 text-muted-foreground opacity-0 transition-opacity" />
 
-        <div className="grid grid-cols-2 gap-2 text-sm">
-          <div className="flex items-center gap-1">
-            <ShoppingBag className="h-3.5 w-3.5 shrink-0 text-blue-600 dark:text-blue-400" />
-            <div className="font-semibold text-blue-600 dark:text-blue-400">
-              {formatCurrency(displayRetail)}
+        <div
+          className={`grid gap-2 text-sm ${visiblePrice === "all" ? "grid-cols-2" : "grid-cols-1"}`}
+        >
+          <div
+            className={`${visiblePrice === "retail" ? "hidden" : "flex"} items-center gap-1`}
+          >
+            <PackageCheck className="h-3.5 w-3.5 shrink-0 text-green-600 dark:text-green-400" />
+            <div
+              className="font-semibold text-green-600 dark:text-green-400"
+              title="Preço de atacado"
+            >
+              {formatCurrency(displayWholesale)}
             </div>
           </div>
-          <div className="flex items-center gap-1">
-            <PackageCheck className="h-3.5 w-3.5 shrink-0 text-green-600 dark:text-green-400" />
-            <div className="font-semibold text-green-600 dark:text-green-400">
-              {formatCurrency(displayWholesale)}
+
+          <div className="hidden items-center gap-1">
+            <Building2 className="h-3.5 w-3.5 shrink-0 text-purple-600 dark:text-purple-400" />
+            <div
+              className="font-semibold text-purple-600 dark:text-purple-400"
+              title="Preço corporativo"
+            >
+              {formatCurrency(displayCorporate)}
+            </div>
+          </div>
+
+          <div
+            className={`${visiblePrice === "wholesale" ? "hidden" : "flex"} items-center gap-1`}
+          >
+            <ShoppingBag className="h-3.5 w-3.5 shrink-0 text-blue-600 dark:text-blue-400" />
+            <div
+              className="font-semibold text-blue-600 dark:text-blue-400"
+              title="Preço de varejo"
+            >
+              {formatCurrency(displayRetail)}
             </div>
           </div>
         </div>

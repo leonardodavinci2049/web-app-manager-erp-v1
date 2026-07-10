@@ -49,7 +49,8 @@ export function ProductTable({ products, catalogReturnTo }: ProductTableProps) {
             <TableHead className="w-[40%] min-w-72">Produto</TableHead>
             <TableHead className="min-w-36">Marca e tipo</TableHead>
             <TableHead className="min-w-36">Estoque</TableHead>
-            <TableHead className="min-w-48">Preços</TableHead>
+            <TableHead className="min-w-28">Atacado</TableHead>
+            <TableHead className="min-w-28">Varejo</TableHead>
             <TableHead className="min-w-52">Categorias</TableHead>
             <TableHead className="w-16 text-right">
               <span className="sr-only">Ações</span>
@@ -126,6 +127,18 @@ export function ProductTable({ products, catalogReturnTo }: ProductTableProps) {
                     retailPrice={retailPrice}
                     wholesalePrice={wholesalePrice}
                     corporatePrice={corporatePrice}
+                    visiblePrice="wholesale"
+                    className="w-full"
+                  />
+                </TableCell>
+                <TableCell className="whitespace-normal">
+                  <InlinePriceEditor
+                    productId={product.id}
+                    productName={product.name}
+                    retailPrice={retailPrice}
+                    wholesalePrice={wholesalePrice}
+                    corporatePrice={corporatePrice}
+                    visiblePrice="retail"
                     className="w-full"
                   />
                   {hasPromotion && (
