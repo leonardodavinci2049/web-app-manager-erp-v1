@@ -216,30 +216,12 @@ export function ProductPricingCard({
       <CardContent>
         {isEditing ? (
           <div className="space-y-4">
-            {/* Retail Price */}
-            <div className="space-y-2">
-              <Label htmlFor="retail-price" className="text-sm font-medium">
-                Preço Varejo
-              </Label>
-              <Input
-                id="retail-price"
-                type="text"
-                value={tempRetailPrice}
-                onChange={(e) =>
-                  setTempRetailPrice(formatBrazilianInput(e.target.value))
-                }
-                disabled={isSaving}
-                className="font-mono"
-                placeholder="0,00"
-              />
-              <p className="text-xs text-muted-foreground">
-                Valor formatado: {formatCurrency(tempRetailPrice)}
-              </p>
-            </div>
-
             {/* Wholesale Price */}
             <div className="space-y-2">
-              <Label htmlFor="wholesale-price" className="text-sm font-medium">
+              <Label
+                htmlFor="wholesale-price"
+                className="text-sm font-medium text-green-600 dark:text-green-400"
+              >
                 Preço Atacado
               </Label>
               <Input
@@ -253,14 +235,17 @@ export function ProductPricingCard({
                 className="font-mono"
                 placeholder="0,00"
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-green-600 dark:text-green-400">
                 Valor formatado: {formatCurrency(tempWholesalePrice)}
               </p>
             </div>
 
             {/* Corporate Price */}
             <div className="space-y-2">
-              <Label htmlFor="corporate-price" className="text-sm font-medium">
+              <Label
+                htmlFor="corporate-price"
+                className="text-sm font-medium text-purple-600 dark:text-purple-400"
+              >
                 Preço Corporativo
               </Label>
               <Input
@@ -274,8 +259,32 @@ export function ProductPricingCard({
                 className="font-mono"
                 placeholder="0,00"
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-purple-600 dark:text-purple-400">
                 Valor formatado: {formatCurrency(tempCorporatePrice)}
+              </p>
+            </div>
+
+            {/* Retail Price */}
+            <div className="space-y-2">
+              <Label
+                htmlFor="retail-price"
+                className="text-sm font-medium text-blue-600 dark:text-blue-400"
+              >
+                Preço Varejo
+              </Label>
+              <Input
+                id="retail-price"
+                type="text"
+                value={tempRetailPrice}
+                onChange={(e) =>
+                  setTempRetailPrice(formatBrazilianInput(e.target.value))
+                }
+                disabled={isSaving}
+                className="font-mono"
+                placeholder="0,00"
+              />
+              <p className="text-xs text-blue-600 dark:text-blue-400">
+                Valor formatado: {formatCurrency(tempRetailPrice)}
               </p>
             </div>
 
@@ -313,22 +322,12 @@ export function ProductPricingCard({
           <div className="space-y-2">
             {/* Table-like layout aligned to left */}
             <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
-              {retailPrice && (
-                <>
-                  <span className="text-muted-foreground font-medium">
-                    Preço Varejo:
-                  </span>
-                  <span className="text-lg font-bold text-green-600">
-                    {retailPrice}
-                  </span>
-                </>
-              )}
               {wholesalePrice && (
                 <>
                   <span className="text-muted-foreground font-medium">
                     Preço Atacado:
                   </span>
-                  <span className="text-lg font-bold text-blue-600">
+                  <span className="text-lg font-bold text-green-600 dark:text-green-400">
                     {wholesalePrice}
                   </span>
                 </>
@@ -338,8 +337,18 @@ export function ProductPricingCard({
                   <span className="text-muted-foreground font-medium">
                     Preço Corporativo:
                   </span>
-                  <span className="text-lg font-bold text-purple-600">
+                  <span className="text-lg font-bold text-purple-600 dark:text-purple-400">
                     {corporatePrice}
+                  </span>
+                </>
+              )}
+              {retailPrice && (
+                <>
+                  <span className="text-muted-foreground font-medium">
+                    Preço Varejo:
+                  </span>
+                  <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                    {retailPrice}
                   </span>
                 </>
               )}
