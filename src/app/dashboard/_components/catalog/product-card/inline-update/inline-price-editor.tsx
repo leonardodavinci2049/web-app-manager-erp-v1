@@ -300,7 +300,7 @@ export function InlinePriceEditor({
       title="Clique para editar os preços"
     >
       <div>
-        <Edit2 className="group-hover/price-editor:opacity-100 absolute top-0 right-0 h-3 w-3 text-muted-foreground opacity-0 transition-opacity" />
+        <Edit2 className="absolute top-0 right-0 h-3 w-3 text-muted-foreground transition-opacity md:opacity-0 md:group-hover/price-editor:opacity-100 md:group-focus-visible/price-editor:opacity-100" />
 
         <div
           className={`grid gap-2 text-sm ${visiblePrice === "all" ? "grid-cols-2" : "grid-cols-1"}`}

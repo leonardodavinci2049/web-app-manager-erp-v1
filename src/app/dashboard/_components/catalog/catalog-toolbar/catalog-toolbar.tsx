@@ -308,55 +308,57 @@ export function CatalogToolbar({
   }, []);
 
   return (
-    <>
-      <div className="space-y-4">
-        <div className="flex w-full justify-center">
-          <div className="flex w-full max-w-xl flex-col gap-2 lg:max-w-2xl">
-            <CatalogSearch
-              searchTerm={filters.searchTerm}
-              isLoading={isPending}
-              onSearch={handleSearch}
-              actions={
-                <>
-                  <FilterPanel
-                    filters={filters}
-                    categories={categories}
-                    brands={brands}
-                    ptypes={ptypes}
-                    isOpen={isFilterOpen}
-                    isLoading={isPending}
-                    panelActiveFilters={panelActiveFilters}
-                    panelFilterCount={panelFilterCount}
-                    onOpenChange={setIsFilterOpen}
-                    onCategoryChange={handleCategoryChange}
-                    onBrandChange={handleBrandChange}
-                    onPtypeChange={handlePtypeChange}
-                    onOnlyInStockChange={handleOnlyInStockChange}
-                    onSortChange={handleSortChange}
-                    onClearPanelFilters={handleClearPanelFilters}
-                    onRemovePanelFilter={removePanelFilter}
-                  />
+    <div className="space-y-4">
+      <div className="bg-background/95 supports-[backdrop-filter]:bg-background/80 sticky top-0 z-20 -mx-3 flex justify-center border-b px-3 py-3 shadow-sm backdrop-blur lg:-mx-6 lg:px-6">
+        <div className="flex w-full max-w-xl flex-col gap-2 lg:max-w-2xl">
+          <CatalogSearch
+            searchTerm={filters.searchTerm}
+            isLoading={isPending}
+            onSearch={handleSearch}
+            actions={
+              <>
+                <FilterPanel
+                  filters={filters}
+                  categories={categories}
+                  brands={brands}
+                  ptypes={ptypes}
+                  isOpen={isFilterOpen}
+                  isLoading={isPending}
+                  panelActiveFilters={panelActiveFilters}
+                  panelFilterCount={panelFilterCount}
+                  onOpenChange={setIsFilterOpen}
+                  onCategoryChange={handleCategoryChange}
+                  onBrandChange={handleBrandChange}
+                  onPtypeChange={handlePtypeChange}
+                  onOnlyInStockChange={handleOnlyInStockChange}
+                  onSortChange={handleSortChange}
+                  onClearPanelFilters={handleClearPanelFilters}
+                  onRemovePanelFilter={removePanelFilter}
+                />
 
-                  <ViewModeToggle
-                    viewMode={viewMode}
-                    onChange={handleViewModeChange}
-                  />
-                </>
-              }
-            />
-
-            {hasActiveFilters && (
-              <CatalogActiveFiltersPanel
-                activeFilters={activeFilters}
-                productsCount={products.length}
-                total={total}
-                isLoading={isPending}
-                onClear={handleClearSearchAndFilters}
-              />
-            )}
-          </div>
+                <ViewModeToggle
+                  viewMode={viewMode}
+                  onChange={handleViewModeChange}
+                />
+              </>
+            }
+          />
         </div>
       </div>
+
+      {hasActiveFilters && (
+        <div className="flex w-full justify-center">
+          <div className="w-full max-w-xl lg:max-w-2xl">
+            <CatalogActiveFiltersPanel
+              activeFilters={activeFilters}
+              productsCount={products.length}
+              total={total}
+              isLoading={isPending}
+              onClear={handleClearSearchAndFilters}
+            />
+          </div>
+        </div>
+      )}
 
       <div className="relative">
         {isPending && (
@@ -378,6 +380,6 @@ export function CatalogToolbar({
           {hydrated && viewMode === "list" ? list : grid}
         </div>
       </div>
-    </>
+    </div>
   );
 }

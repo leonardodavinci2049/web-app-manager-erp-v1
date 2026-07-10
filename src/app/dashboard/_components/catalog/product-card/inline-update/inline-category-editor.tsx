@@ -137,7 +137,7 @@ export function InlineCategoryEditor({
         >
           <Tag className="h-4 w-4 shrink-0" />
           <span className="text-muted-foreground font-medium">Categorias:</span>
-          <Edit2 className="group-hover/category-editor:opacity-100 h-3 w-3 text-muted-foreground opacity-0 transition-opacity" />
+          <Edit2 className="h-3 w-3 text-muted-foreground transition-opacity md:opacity-0 md:group-hover/category-editor:opacity-100 md:group-focus-visible/category-editor:opacity-100" />
         </button>
       </SheetTrigger>
       <SheetContent className="w-[400px] sm:w-[540px]">

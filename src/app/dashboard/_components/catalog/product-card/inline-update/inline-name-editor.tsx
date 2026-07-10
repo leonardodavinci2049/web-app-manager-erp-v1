@@ -202,8 +202,9 @@ export function InlineNameEditor({
           <button
             type="button"
             onClick={handleEdit}
-            className="opacity-0 transition-opacity group-hover/name-editor:opacity-100"
+            className="flex size-6 shrink-0 items-center justify-center transition-opacity md:size-auto md:opacity-0 md:group-hover/name-editor:opacity-100 md:focus-visible:opacity-100"
             title="Editar nome do produto"
+            aria-label="Editar nome do produto"
           >
             <Edit2 className="h-3 w-3 shrink-0 text-muted-foreground" />
           </button>
