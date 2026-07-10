@@ -16,8 +16,8 @@ export function LoadMoreButton() {
 
   const handleClick = () => {
     const params = new URLSearchParams(searchParams.toString());
-    const currentLimit = Number(params.get("limit")) || 20;
-    params.set("limit", String(currentLimit + 20));
+    const currentLimit = Number(params.get("limit")) || 50;
+    params.set("limit", String(currentLimit + 50));
     startTransition(() => router.replace(`${pathname}?${params.toString()}`));
   };
 
