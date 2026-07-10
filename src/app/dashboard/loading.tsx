@@ -1,6 +1,6 @@
 import { SiteHeaderWithBreadcrumb } from "@/components/dashboard/header/site-header-with-breadcrumb";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ProductGridSkeleton } from "./_components/catalog/product-grid/product-grid-skeleton";
+import { CatalogLoadingProducts } from "./_components/catalog/catalog-loading-products";
 
 export default function DashboardLoading() {
   return (
@@ -30,9 +30,7 @@ export default function DashboardLoading() {
                     </div>
                   </div>
 
-                  <div className="relative">
-                    <ProductGridSkeleton viewMode="grid" count={8} />
-                  </div>
+                  <CatalogLoadingProducts />
                 </div>
               </div>
             </div>
