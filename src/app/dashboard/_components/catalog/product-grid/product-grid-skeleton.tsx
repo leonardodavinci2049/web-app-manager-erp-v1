@@ -1,5 +1,13 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 interface ProductSkeletonProps {
   viewMode: "grid" | "list";
@@ -83,16 +91,78 @@ export function ProductGridSkeleton({
 }: ProductGridSkeletonProps) {
   const items = Array.from({ length: count }, (_, i) => `skeleton-${i}`);
 
+  if (viewMode === "list") {
+    return (
+      <>
+        <div className="space-y-2 sm:space-y-3 lg:hidden">
+          {items.map((key) => (
+            <ProductSkeleton key={key} viewMode="list" />
+          ))}
+        </div>
+
+        <div className="hidden overflow-hidden rounded-lg border lg:block">
+          <Table>
+            <TableHeader className="bg-muted/50">
+              <TableRow>
+                <TableHead className="w-[40%] min-w-72">Produto</TableHead>
+                <TableHead className="min-w-36">Marca e tipo</TableHead>
+                <TableHead className="min-w-36">Estoque</TableHead>
+                <TableHead className="min-w-48">Preços</TableHead>
+                <TableHead className="min-w-52">Categorias</TableHead>
+                <TableHead className="w-16">
+                  <span className="sr-only">Ações</span>
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {items.map((key) => (
+                <TableRow key={key}>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="size-20 shrink-0 rounded-md" />
+                      <div className="w-full space-y-2">
+                        <Skeleton className="h-4 w-4/5" />
+                        <Skeleton className="h-3 w-2/5" />
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="space-y-2">
+                      <Skeleton className="h-3 w-24" />
+                      <Skeleton className="h-3 w-20" />
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-5 w-20" />
+                  </TableCell>
+                  <TableCell>
+                    <div className="space-y-2">
+                      <Skeleton className="h-5 w-24" />
+                      <Skeleton className="h-3 w-20" />
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="space-y-2">
+                      <Skeleton className="h-8 w-28" />
+                      <Skeleton className="h-5 w-24 rounded-full" />
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="size-8" />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </>
+    );
+  }
+
   return (
-    <div
-      className={
-        viewMode === "grid"
-          ? "grid grid-cols-2 gap-2 sm:grid-cols-[repeat(auto-fill,minmax(190px,1fr))] sm:gap-3 lg:gap-4"
-          : "space-y-2 sm:space-y-3"
-      }
-    >
+    <div className="grid grid-cols-2 gap-2 sm:grid-cols-[repeat(auto-fill,minmax(190px,1fr))] sm:gap-3 lg:gap-4">
       {items.map((key) => (
-        <ProductSkeleton key={key} viewMode={viewMode} />
+        <ProductSkeleton key={key} viewMode="grid" />
       ))}
     </div>
   );
