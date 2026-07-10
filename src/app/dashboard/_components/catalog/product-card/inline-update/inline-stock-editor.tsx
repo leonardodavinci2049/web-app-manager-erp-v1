@@ -191,7 +191,7 @@ export function InlineStockEditor({
       >
         Estoque: {displayStock}
       </span>
-      <Edit2 className="group-hover/stock-editor:opacity-100 h-3 w-3 text-muted-foreground opacity-0 transition-opacity" />
+      <Edit2 className="h-3 w-3 text-muted-foreground transition-opacity md:opacity-0 md:group-hover/stock-editor:opacity-100 md:group-focus-visible/stock-editor:opacity-100" />
     </button>
   );
 }

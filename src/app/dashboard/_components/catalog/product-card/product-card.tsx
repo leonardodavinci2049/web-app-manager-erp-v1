@@ -78,7 +78,7 @@ export function ProductCard({
                   productId={product.id}
                   productName={product.name}
                   productDetailsHref={productDetailsHref}
-                  className="[&_h3]:text-xs [&_h3]:sm:text-sm"
+                  className="border-b pb-1 [&_h3]:text-[11px] [&_h3]:sm:text-xs"
                 />
                 <ProductCardFields
                   product={product}
@@ -152,7 +152,7 @@ export function ProductCard({
             productId={product.id}
             productName={product.name}
             productDetailsHref={productDetailsHref}
-            className="[&_h3]:text-xs [&_h3]:sm:text-sm"
+            className="border-b pb-1 [&_h3]:text-[11px] [&_h3]:sm:text-xs"
           />
           <ProductCardFields product={product} textSize="xs" />
 
