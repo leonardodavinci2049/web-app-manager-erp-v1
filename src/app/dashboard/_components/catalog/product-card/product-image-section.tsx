@@ -15,6 +15,7 @@ interface ProductImageSectionProps {
   viewMode: "grid" | "list";
   productDetailsHref?: string;
   hasPromotion?: boolean;
+  eager?: boolean;
 }
 
 /**
@@ -27,6 +28,7 @@ export function ProductImageSection({
   viewMode,
   productDetailsHref,
   hasPromotion = false,
+  eager = false,
 }: ProductImageSectionProps) {
   const router = useRouter();
   const [imageError, setImageError] = useState(false);
@@ -62,7 +64,7 @@ export function ProductImageSection({
           fill
           className="rounded-md object-cover"
           sizes="80px"
-          loading="lazy"
+          loading={eager ? "eager" : "lazy"}
           onError={(e) => {
             setImageError(true);
             imageErrorHandler.onError(e);
@@ -90,7 +92,7 @@ export function ProductImageSection({
         fill
         className="object-cover transition-transform duration-200 group-hover:scale-105"
         sizes="(max-width: 640px) 45vw, (max-width: 768px) 30vw, (max-width: 1200px) 25vw, 20vw"
-        loading="lazy"
+        loading={eager ? "eager" : "lazy"}
         onError={(e) => {
           setImageError(true);
           imageErrorHandler.onError(e);

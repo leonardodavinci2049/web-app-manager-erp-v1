@@ -63,7 +63,7 @@ page.tsx (Server)
                     │     ├── <InlinePriceEditor>   (Client) ─> action-product-updates
                     │     ├── <InlineStockEditor>   (Client) ─> action-product-updates
                     │     └── <InlineCategoryEditor>(Client) ─> action-taxonomy
-                    └── <LoadMoreButton> (Client)   ─> `limit` searchParam (+20)
+                    └── <LoadMoreButton> (Client)   ─> `limit` searchParam (+50)
 ```
 
 ### Supported searchParams
@@ -76,7 +76,7 @@ page.tsx (Server)
 | `type`     | `FilterPanel`          | omitted   |
 | `stock`    | `FilterPanel`          | omitted   |
 | `sort`     | `FilterPanel`          | `"newest"`|
-| `limit`    | `LoadMoreButton`       | `20`      |
+| `limit`    | `LoadMoreButton`       | `50`      |
 | `page`     | `page.tsx`             | `0`       |
 
 > **Note:** `view` (grid|list) is **not** a searchParam. It is a display preference kept in `localStorage` (key `catalog:product-view-mode`) and managed inside `CatalogToolbar`. Only data-affecting filters go through the URL.
@@ -113,7 +113,7 @@ Actions consumed: `action-product-updates` (name, price, stock), `action-product
 - **Naming:** Files in kebab-case; components in PascalCase; pure functions in camelCase.
 - **Component comments** in pt-BR, explaining the Server/Client role and component responsibility — follow the pattern of existing docblocks.
 - **No global state**: All **data filters** are managed via the URL (`searchParams`). Do not introduce React contexts or state stores for filters. The **view mode** (grid|list) is the only exception: it is a display preference kept in `localStorage`, not a filter, so it stays client-side and never triggers a refetch.
-- **Pagination** is heuristic via `limit` (+20), not via `page`. Although `page` is forwarded to the API, the UI uses the `LoadMoreButton`.
+- **Pagination** is heuristic via `limit` (+50), not via `page`. Although `page` is forwarded to the API, the UI uses the `LoadMoreButton`.
 - **Currency/price** use Brazilian formatting (decimal comma) in inputs; `formatCurrency` handles the display.
 
 ## Post-change Verification

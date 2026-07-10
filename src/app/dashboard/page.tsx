@@ -35,7 +35,7 @@ export default async function DashboardPage(props: DashboardPageProps) {
   const { apiContext } = await getAuthContext();
 
   const sort = mapSortToApiParams(searchParams.sort);
-  const limit = Number(searchParams.limit) || 20;
+  const limit = Number(searchParams.limit) || 50;
   const catalogReturnTo = buildCatalogReturnTo(searchParams, CATALOG_PATHNAME);
 
   const [productsResult, brands, categories, ptypes] = await Promise.all([

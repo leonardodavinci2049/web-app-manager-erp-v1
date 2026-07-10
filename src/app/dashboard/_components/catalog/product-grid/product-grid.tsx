@@ -45,12 +45,13 @@ export function ProductGrid({
   return (
     <div className="space-y-4">
       <div className={viewMode === "grid" ? GRID_CLASS : LIST_CLASS}>
-        {products.map((product) => (
+        {products.map((product, index) => (
           <ProductCard
             key={product.id}
             product={product}
             viewMode={viewMode}
             catalogReturnTo={catalogReturnTo}
+            eagerImage={index === 0}
           />
         ))}
       </div>

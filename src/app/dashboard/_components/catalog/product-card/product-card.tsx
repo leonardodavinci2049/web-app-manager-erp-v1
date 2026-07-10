@@ -19,6 +19,7 @@ interface ProductCardProps {
   product: UIProductPdv;
   viewMode: ViewMode;
   catalogReturnTo: string;
+  eagerImage?: boolean;
 }
 
 function parseCategories(raw?: string): ProductCategory[] {
@@ -40,6 +41,7 @@ export function ProductCard({
   product,
   viewMode,
   catalogReturnTo,
+  eagerImage = false,
 }: ProductCardProps) {
   const retailPrice = Number(product.retailPrice) || 0;
   const wholesalePrice = Number(product.wholesalePrice) || 0;
@@ -57,8 +59,8 @@ export function ProductCard({
 
   if (viewMode === "list") {
     return (
-      <Card className="transition-all duration-200 hover:shadow-md">
-        <CardContent className="p-1.5 sm:p-2">
+      <Card className="gap-0 py-0 transition-all duration-200 hover:shadow-md">
+        <CardContent className="p-1 sm:p-1.5">
           <div className="flex gap-2">
             <div className="flex-shrink-0">
               <ProductImageSection
@@ -66,6 +68,7 @@ export function ProductCard({
                 viewMode={viewMode}
                 productDetailsHref={productDetailsHref}
                 hasPromotion={hasPromotion}
+                eager={eagerImage}
               />
             </div>
 
@@ -76,15 +79,19 @@ export function ProductCard({
                   productName={product.name}
                   productDetailsHref={productDetailsHref}
                 />
-                <ProductCardFields product={product} textSize="xs" />
+                <ProductCardFields
+                  product={product}
+                  textSize="xs"
+                  listStock={
+                    <InlineStockEditor
+                      productId={product.id}
+                      productName={product.name}
+                      currentStock={product.storeStock}
+                      className="min-w-0 text-xs font-medium"
+                    />
+                  }
+                />
               </div>
-
-              <InlineStockEditor
-                productId={product.id}
-                productName={product.name}
-                currentStock={product.storeStock}
-                className="text-sm font-medium"
-              />
 
               <div className="border-y py-1">
                 <InlinePriceEditor
@@ -109,16 +116,18 @@ export function ProductCard({
                   productName={product.name}
                 />
                 <CategoryTags categories={categories} />
+                <Button
+                  asChild
+                  size="sm"
+                  variant="ghost"
+                  className="ml-auto gap-1 px-2"
+                >
+                  <Link href={productDetailsHref}>
+                    <Eye className="h-4 w-4" />
+                    <span className="hidden md:inline">Ver detalhes</span>
+                  </Link>
+                </Button>
               </div>
-            </div>
-
-            <div className="flex flex-shrink-0 items-center self-center">
-              <Button asChild size="sm" variant="ghost" className="gap-1 px-2">
-                <Link href={productDetailsHref}>
-                  <Eye className="h-4 w-4" />
-                  <span className="hidden md:inline">Ver detalhes</span>
-                </Link>
-              </Button>
             </div>
           </div>
         </CardContent>
@@ -134,6 +143,7 @@ export function ProductCard({
           viewMode={viewMode}
           productDetailsHref={productDetailsHref}
           hasPromotion={hasPromotion}
+          eager={eagerImage}
         />
 
         <div className="mt-1 flex flex-1 flex-col gap-1">

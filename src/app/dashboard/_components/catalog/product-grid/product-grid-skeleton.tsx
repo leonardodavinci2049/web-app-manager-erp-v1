@@ -11,24 +11,30 @@ interface ProductSkeletonProps {
 export function ProductSkeleton({ viewMode }: ProductSkeletonProps) {
   if (viewMode === "list") {
     return (
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex gap-4">
-            <Skeleton className="h-24 w-24 rounded-md" />
-            <div className="flex-1 space-y-2">
-              <div className="flex items-start justify-between">
-                <div className="flex-1 space-y-2">
-                  <Skeleton className="h-5 w-3/4" />
-                  <Skeleton className="h-4 w-1/2" />
+      <Card className="gap-0 py-0">
+        <CardContent className="p-1 sm:p-1.5">
+          <div className="flex gap-2">
+            <Skeleton className="h-16 w-16 shrink-0 rounded-md sm:h-20 sm:w-20" />
+
+            <div className="flex min-w-0 flex-1 flex-col gap-1">
+              <div className="space-y-0.5">
+                <Skeleton className="h-5 w-3/4" />
+                <div className="grid grid-cols-2 gap-x-3 gap-y-0.5">
+                  <Skeleton className="h-3 w-3/4" />
+                  <Skeleton className="h-3 w-2/3" />
+                  <Skeleton className="h-3 w-1/2" />
+                  <Skeleton className="h-3 w-3/4" />
                 </div>
-                <Skeleton className="h-6 w-24" />
               </div>
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <Skeleton className="h-6 w-20" />
-                  <Skeleton className="h-4 w-24" />
-                </div>
-                <Skeleton className="h-9 w-24" />
+
+              <div className="border-y py-1">
+                <Skeleton className="h-5 w-24" />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-8 w-24" />
+                <Skeleton className="h-5 w-16 rounded-full" />
+                <Skeleton className="ml-auto h-8 w-8 md:w-24" />
               </div>
             </div>
           </div>
@@ -38,17 +44,26 @@ export function ProductSkeleton({ viewMode }: ProductSkeletonProps) {
   }
 
   return (
-    <Card className="mx-auto w-full max-w-[360px] sm:max-w-none">
-      <CardContent className="space-y-4 p-4">
-        <Skeleton className="aspect-square w-full rounded-md" />
-        <Skeleton className="h-6 w-20" />
-        <div className="space-y-2">
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-3 w-2/3" />
+    <Card className="h-full">
+      <CardContent className="flex h-full flex-col p-1.5 sm:p-2">
+        <Skeleton className="aspect-[4/3] w-full rounded-md" />
+
+        <div className="mt-1 flex flex-1 flex-col gap-1">
+          <Skeleton className="h-5 w-full" />
+          <div className="space-y-0.5">
+            <Skeleton className="h-3 w-2/3" />
+            <Skeleton className="h-3 w-3/4" />
+            <Skeleton className="h-3 w-1/2" />
+          </div>
+          <Skeleton className="h-4 w-20" />
+          <div className="border-y py-1">
+            <Skeleton className="h-5 w-24" />
+          </div>
+          <Skeleton className="h-8 w-full" />
+          <Skeleton className="h-4 w-2/3" />
+          <div className="min-h-0 flex-1" />
+          <Skeleton className="mt-0.5 h-8 w-full" />
         </div>
-        <Skeleton className="h-6 w-24" />
-        <Skeleton className="h-4 w-20" />
-        <Skeleton className="h-9 w-full" />
       </CardContent>
     </Card>
   );
@@ -72,8 +87,8 @@ export function ProductGridSkeleton({
     <div
       className={
         viewMode === "grid"
-          ? "grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-6"
-          : "space-y-4"
+          ? "grid grid-cols-2 gap-2 sm:grid-cols-[repeat(auto-fill,minmax(190px,1fr))] sm:gap-3 lg:gap-4"
+          : "space-y-2 sm:space-y-3"
       }
     >
       {items.map((key) => (
