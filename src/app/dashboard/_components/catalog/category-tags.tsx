@@ -26,7 +26,7 @@ export function CategoryTags({ categories, className }: CategoryTagsProps) {
           <Badge
             key={category.ID_TAXONOMY}
             variant="secondary"
-            className="bg-slate-100 text-slate-700 text-xs hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+            className="bg-slate-100 text-[8px] text-slate-700  leading-tight hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
           >
             {category.TAXONOMIA}
           </Badge>

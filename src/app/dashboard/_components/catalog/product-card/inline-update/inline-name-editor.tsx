@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Edit2, Type, X } from "lucide-react";
+import { Check, Edit2, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -118,7 +118,6 @@ export function InlineNameEditor({
       <div className={`space-y-3 ${className}`}>
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <Type className="h-4 w-4 shrink-0 text-muted-foreground" />
             <span className="text-muted-foreground text-sm font-medium">
               Editando Nome
             </span>
@@ -191,12 +190,11 @@ export function InlineNameEditor({
     <div className={`text-left w-full ${className}`}>
       <div className="group/name-editor">
         <div className="flex items-start gap-1.5">
-          <Type className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
           <div className="flex-1 min-w-0">
             <Link
               href={productDetailsHref ?? `/dashboard/product/${productId}`}
             >
-              <h3 className="line-clamp-2 text-sm font-semibold leading-tight transition-colors hover:text-primary hover:underline sm:text-base">
+              <h3 className="text-wrap break-words text-sm font-semibold leading-tight transition-colors hover:text-primary hover:underline sm:text-base">
                 {displayName}
               </h3>
             </Link>

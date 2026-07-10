@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, DollarSign, Edit2, X } from "lucide-react";
+import { Check, Edit2, PackageCheck, ShoppingBag, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -183,7 +183,6 @@ export function InlinePriceEditor({
     return (
       <div className={`space-y-3 ${className}`}>
         <div className="flex items-center gap-2">
-          <DollarSign className="h-4 w-4 shrink-0 text-muted-foreground" />
           <span className="text-muted-foreground text-sm font-medium">
             Editando Preços
           </span>
@@ -281,7 +280,7 @@ export function InlinePriceEditor({
   return (
     <button
       type="button"
-      className={`text-left ${className}`}
+      className={`group/price-editor relative text-left ${className}`}
       onClick={handleEdit}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
@@ -291,38 +290,20 @@ export function InlinePriceEditor({
       }}
       title="Clique para editar os preços"
     >
-      <div className="space-y-0.5">
-        <div className="group/price-editor flex items-center gap-1.5">
-          <DollarSign className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-          <span className="text-muted-foreground text-xs font-medium">
-            Preços
-          </span>
-          <Edit2 className="group-hover/price-editor:opacity-100 h-3 w-3 text-muted-foreground opacity-0 transition-opacity" />
-        </div>
+      <div>
+        <Edit2 className="group-hover/price-editor:opacity-100 absolute top-0 right-0 h-3 w-3 text-muted-foreground opacity-0 transition-opacity" />
 
-        <div className="grid grid-cols-3 gap-1.5 text-xs">
-          <div>
-            <div className="text-muted-foreground text-[10px] leading-tight">
-              Vare
-            </div>
-            <div className="font-medium text-orange-600 dark:text-orange-400">
+        <div className="grid grid-cols-2 gap-2 text-sm">
+          <div className="flex items-center gap-1">
+            <ShoppingBag className="h-3.5 w-3.5 shrink-0 text-blue-600 dark:text-blue-400" />
+            <div className="font-semibold text-blue-600 dark:text-blue-400">
               {formatCurrency(displayRetail)}
             </div>
           </div>
-          <div>
-            <div className="text-muted-foreground text-[10px] leading-tight">
-              Atac
-            </div>
-            <div className="font-medium text-green-600 dark:text-green-400">
+          <div className="flex items-center gap-1">
+            <PackageCheck className="h-3.5 w-3.5 shrink-0 text-green-600 dark:text-green-400" />
+            <div className="font-semibold text-green-600 dark:text-green-400">
               {formatCurrency(displayWholesale)}
-            </div>
-          </div>
-          <div>
-            <div className="text-muted-foreground text-[10px] leading-tight">
-              Corp
-            </div>
-            <div className="font-medium text-blue-600 dark:text-blue-400">
-              {formatCurrency(displayCorporate)}
             </div>
           </div>
         </div>

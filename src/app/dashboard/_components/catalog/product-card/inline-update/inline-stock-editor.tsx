@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Edit2, Package, X } from "lucide-react";
+import { Check, Edit2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -116,7 +116,6 @@ export function InlineStockEditor({
     return (
       <div className={`space-y-3 ${className}`}>
         <div className="flex items-center gap-2">
-          <Package className="h-4 w-4 shrink-0 text-muted-foreground" />
           <div className="flex items-center gap-2">
             <Input
               type="number"
@@ -183,7 +182,6 @@ export function InlineStockEditor({
       }}
       title="Clique para editar o estoque"
     >
-      <Package className="h-4 w-4 shrink-0" />
       <span
         className={`font-medium ${
           displayStock === 0
