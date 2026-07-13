@@ -8,12 +8,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { UIProductPdvRelatedCategory } from "@/services/api-main/product-pdv/transformers/transformers";
+import type { UIProductManagerRelatedCategory } from "@/services/api-main/product-manager/transformers/transformers";
 import { AddCategoryDialog } from "./AddCategoryDialog";
 import { DeleteCategoryButton } from "./DeleteCategoryButton";
 
 interface ProductCategoriesCardProps {
-  relatedCategories: UIProductPdvRelatedCategory[];
+  relatedCategories: UIProductManagerRelatedCategory[];
   productId: number;
 }
 

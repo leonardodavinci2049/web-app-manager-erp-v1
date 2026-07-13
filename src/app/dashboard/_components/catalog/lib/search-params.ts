@@ -6,7 +6,7 @@ const DEFAULT_CATEGORY = "all";
 type SearchParamValue = string | string[] | undefined;
 
 /**
- * Mapeia a opcao de ordenacao da UI para o contrato da API `product-pdv`.
+ * Mapeia a opcao de ordenacao da UI para o contrato da API `product-manager`.
  * Centraliza o conhecimento do contrato de sort fora da camada de rota.
  */
 export function mapSortToApiParams(sortBy?: string): {

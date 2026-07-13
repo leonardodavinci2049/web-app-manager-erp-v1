@@ -208,11 +208,11 @@ export const BRAND_ENDPOINTS = {
   DELETE: "/brand/v2/brand-delete",
 } as const;
 
-// Endpoints de Product PDV
-export const PRODUCT_PDV_ENDPOINTS = {
-  FIND_ALL: "/product-pdv/v2/product-find-pdv-all",
-  FIND_BY_ID: "/product-pdv/v2/product-find-pdv-id",
-  FIND_SEARCH: "/product-pdv/v2/product-find-pdv-search",
+// Endpoints de Product Manager
+export const PRODUCT_MANAGER_ENDPOINTS = {
+  FIND_ALL: "/product-manager/v2/product-find-manager-all",
+  FIND_BY_ID: "/product-manager/v2/product-find-manager-id",
+  FIND_SEARCH: "/product-manager/v2/product-find-manager-search",
 } as const;
 
 // Endpoints de Carrier

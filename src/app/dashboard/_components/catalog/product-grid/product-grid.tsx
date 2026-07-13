@@ -1,12 +1,12 @@
 import { Package } from "lucide-react";
-import type { UIProductPdv } from "@/services/api-main/product-pdv/transformers/transformers";
+import type { UIProductManager } from "@/services/api-main/product-manager/transformers/transformers";
 import { ProductCard } from "../product-card/product-card";
 import { ProductTable } from "../product-table";
 import type { ViewMode } from "../types/catalog-types";
 import { LoadMoreButton } from "./load-more-button";
 
 interface ProductGridProps {
-  products: UIProductPdv[];
+  products: UIProductManager[];
   viewMode: ViewMode;
   catalogReturnTo: string;
   limit: number;

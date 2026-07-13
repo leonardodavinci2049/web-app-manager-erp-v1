@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { UIProductPdv } from "@/services/api-main/product-pdv/transformers/transformers";
+import type { UIProductManager } from "@/services/api-main/product-manager/transformers/transformers";
 import type { ProductCategory } from "@/types/types";
 import { formatCurrency } from "@/utils/common-utils";
 import { CategoryTags } from "./category-tags";
@@ -21,7 +21,7 @@ import { InlineStockEditor } from "./product-card/inline-update/inline-stock-edi
 import { ProductImageSection } from "./product-card/product-image-section";
 
 interface ProductTableProps {
-  products: UIProductPdv[];
+  products: UIProductManager[];
   catalogReturnTo: string;
 }
 

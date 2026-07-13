@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { UIProductPdv } from "@/services/api-main/product-pdv/transformers/transformers";
+import type { UIProductManager } from "@/services/api-main/product-manager/transformers/transformers";
 import { ProductCharacteristicsCard } from "./ProductCharacteristicsCard";
 import { ProductGeneralDataCard } from "./ProductGeneralDataCard";
 import { ProductDescriptionEditor } from "./tab-card-components/ProductDescriptionEditor";
@@ -12,7 +12,7 @@ import { ProductTaxValuesCard } from "./tab-card-components/ProductTaxValuesCard
 import { ProductTechnicalDataCard } from "./tab-card-components/ProductTechnicalDataCard";
 
 interface ProductDetailsTabsProps {
-  product: UIProductPdv;
+  product: UIProductManager;
   productId: number;
 }
 

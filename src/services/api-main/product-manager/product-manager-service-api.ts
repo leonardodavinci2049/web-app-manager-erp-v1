@@ -5,44 +5,44 @@ import {
   API_STATUS_CODES,
   isApiError,
   isApiSuccess,
-  PRODUCT_PDV_ENDPOINTS,
+  PRODUCT_MANAGER_ENDPOINTS,
 } from "@/core/constants/api-constants";
 import { createLogger } from "@/core/logger";
 import { BaseApiService } from "@/lib/axios/base-api-service";
 import {
-  transformProductPdv,
-  transformProductPdvList,
-  transformProductPdvSearchList,
+  transformProductManager,
+  transformProductManagerList,
+  transformProductManagerSearchList,
   transformRelatedCategories,
-  type UIProductPdv,
-  type UIProductPdvRelatedCategory,
+  type UIProductManager,
+  type UIProductManagerRelatedCategory,
 } from "./transformers/transformers";
 import type {
-  ProductPdvDetail,
-  ProductPdvFindAllRequest,
-  ProductPdvFindAllResponse,
-  ProductPdvFindByIdRequest,
-  ProductPdvFindByIdResponse,
-  ProductPdvFindSearchRequest,
-  ProductPdvFindSearchResponse,
-  ProductPdvListItem,
-  ProductPdvRelatedCategory,
-  ProductPdvRelatedProduct,
-  ProductPdvSearchItem,
-} from "./types/product-pdv-types";
+  ProductManagerDetail,
+  ProductManagerFindAllRequest,
+  ProductManagerFindAllResponse,
+  ProductManagerFindByIdRequest,
+  ProductManagerFindByIdResponse,
+  ProductManagerFindSearchRequest,
+  ProductManagerFindSearchResponse,
+  ProductManagerListItem,
+  ProductManagerRelatedCategory,
+  ProductManagerRelatedProduct,
+  ProductManagerSearchItem,
+} from "./types/product-manager-types";
 import {
-  ProductPdvError,
-  ProductPdvNotFoundError,
-} from "./types/product-pdv-types";
+  ProductManagerError,
+  ProductManagerNotFoundError,
+} from "./types/product-manager-types";
 import {
-  ProductPdvFindAllSchema,
-  ProductPdvFindByIdSchema,
-  ProductPdvFindSearchSchema,
-} from "./validation/product-pdv-schemas";
+  ProductManagerFindAllSchema,
+  ProductManagerFindByIdSchema,
+  ProductManagerFindSearchSchema,
+} from "./validation/product-manager-schemas";
 
-const logger = createLogger("ProductPdvServiceApi");
+const logger = createLogger("ProductManagerServiceApi");
 
-export class ProductPdvServiceApi extends BaseApiService {
+export class ProductManagerServiceApi extends BaseApiService {
   private buildBasePayload(
     additionalData: Record<string, unknown> = {},
   ): Record<string, unknown> {
@@ -53,11 +53,12 @@ export class ProductPdvServiceApi extends BaseApiService {
     };
   }
 
-  async findAllProductsPdv(
-    params: Partial<ProductPdvFindAllRequest> = {},
-  ): Promise<ProductPdvFindAllResponse> {
+  async findAllProductsManager(
+    params: Partial<ProductManagerFindAllRequest> = {},
+  ): Promise<ProductManagerFindAllResponse> {
     try {
-      const validatedParams = ProductPdvFindAllSchema.partial().parse(params);
+      const validatedParams =
+        ProductManagerFindAllSchema.partial().parse(params);
       const requestBody = this.buildBasePayload({
         pe_system_client_id: validatedParams.pe_system_client_id,
         pe_organization_id: validatedParams.pe_organization_id,
@@ -77,55 +78,55 @@ export class ProductPdvServiceApi extends BaseApiService {
         pe_order_id: validatedParams.pe_order_id ?? 1,
       });
 
-      const response = await this.post<ProductPdvFindAllResponse>(
-        PRODUCT_PDV_ENDPOINTS.FIND_ALL,
+      const response = await this.post<ProductManagerFindAllResponse>(
+        PRODUCT_MANAGER_ENDPOINTS.FIND_ALL,
         requestBody,
       );
 
       return this.normalizeEmptyFindAllResponse(response);
     } catch (error) {
-      logger.error("Erro ao buscar todos os produtos PDV", error);
+      logger.error("Erro ao buscar todos os produtos do Manager", error);
       throw error;
     }
   }
 
-  async findProductPdvById(
-    params: ProductPdvFindByIdRequest,
-  ): Promise<ProductPdvFindByIdResponse> {
+  async findProductManagerById(
+    params: ProductManagerFindByIdRequest,
+  ): Promise<ProductManagerFindByIdResponse> {
     try {
-      const validatedParams = ProductPdvFindByIdSchema.parse(params);
+      const validatedParams = ProductManagerFindByIdSchema.parse(params);
       const requestBody = this.buildBasePayload(validatedParams);
 
-      const response = await this.post<ProductPdvFindByIdResponse>(
-        PRODUCT_PDV_ENDPOINTS.FIND_BY_ID,
+      const response = await this.post<ProductManagerFindByIdResponse>(
+        PRODUCT_MANAGER_ENDPOINTS.FIND_BY_ID,
         requestBody,
       );
 
       if (response.statusCode === API_STATUS_CODES.NOT_FOUND) {
-        throw new ProductPdvNotFoundError(validatedParams);
+        throw new ProductManagerNotFoundError(validatedParams);
       }
 
       if (isApiError(response.statusCode)) {
-        throw new ProductPdvError(
-          response.message || "Erro ao buscar produto PDV por ID",
-          "PRODUCT_PDV_FIND_BY_ID_ERROR",
+        throw new ProductManagerError(
+          response.message || "Erro ao buscar produto do Manager por ID",
+          "PRODUCT_MANAGER_FIND_BY_ID_ERROR",
           response.statusCode,
         );
       }
 
       return response;
     } catch (error) {
-      logger.error("Erro ao buscar produto PDV por ID", error);
+      logger.error("Erro ao buscar produto do Manager por ID", error);
       throw error;
     }
   }
 
-  async findProductsPdvSearch(
-    params: Partial<ProductPdvFindSearchRequest> = {},
-  ): Promise<ProductPdvFindSearchResponse> {
+  async findProductsManagerSearch(
+    params: Partial<ProductManagerFindSearchRequest> = {},
+  ): Promise<ProductManagerFindSearchResponse> {
     try {
       const validatedParams =
-        ProductPdvFindSearchSchema.partial().parse(params);
+        ProductManagerFindSearchSchema.partial().parse(params);
       const requestBody = this.buildBasePayload({
         pe_system_client_id: validatedParams.pe_system_client_id,
         pe_organization_id: validatedParams.pe_organization_id,
@@ -139,21 +140,24 @@ export class ProductPdvServiceApi extends BaseApiService {
         pe_limit: validatedParams.pe_limit,
       });
 
-      const response = await this.post<ProductPdvFindSearchResponse>(
-        PRODUCT_PDV_ENDPOINTS.FIND_SEARCH,
+      const response = await this.post<ProductManagerFindSearchResponse>(
+        PRODUCT_MANAGER_ENDPOINTS.FIND_SEARCH,
         requestBody,
       );
 
       return this.normalizeEmptyFindSearchResponse(response);
     } catch (error) {
-      logger.error("Erro ao buscar produtos PDV por termo de pesquisa", error);
+      logger.error(
+        "Erro ao buscar produtos do Manager por termo de pesquisa",
+        error,
+      );
       throw error;
     }
   }
 
   private normalizeEmptyFindAllResponse(
-    response: ProductPdvFindAllResponse,
-  ): ProductPdvFindAllResponse {
+    response: ProductManagerFindAllResponse,
+  ): ProductManagerFindAllResponse {
     if (
       response.statusCode === API_STATUS_CODES.NOT_FOUND ||
       response.statusCode === API_STATUS_CODES.EMPTY_RESULT
@@ -163,7 +167,7 @@ export class ProductPdvServiceApi extends BaseApiService {
         statusCode: API_STATUS_CODES.SUCCESS,
         quantity: 0,
         data: {
-          "Product Pdv find All": [],
+          "Product Manager find All": [],
         },
       };
     }
@@ -171,8 +175,8 @@ export class ProductPdvServiceApi extends BaseApiService {
   }
 
   private normalizeEmptyFindSearchResponse(
-    response: ProductPdvFindSearchResponse,
-  ): ProductPdvFindSearchResponse {
+    response: ProductManagerFindSearchResponse,
+  ): ProductManagerFindSearchResponse {
     if (
       response.statusCode === API_STATUS_CODES.NOT_FOUND ||
       response.statusCode === API_STATUS_CODES.EMPTY_RESULT
@@ -182,72 +186,76 @@ export class ProductPdvServiceApi extends BaseApiService {
         statusCode: API_STATUS_CODES.SUCCESS,
         quantity: 0,
         data: {
-          "Product Pdv find Search": [],
+          "Product Manager find Search": [],
         },
       };
     }
     return response;
   }
 
-  extractProductsPdv(
-    response: ProductPdvFindAllResponse,
-  ): ProductPdvListItem[] {
-    return response.data?.["Product Pdv find All"] ?? [];
+  extractProductsManager(
+    response: ProductManagerFindAllResponse,
+  ): ProductManagerListItem[] {
+    return response.data?.["Product Manager find All"] ?? [];
   }
 
-  extractProductsPdvSearch(
-    response: ProductPdvFindSearchResponse,
-  ): ProductPdvSearchItem[] {
-    return response.data?.["Product Pdv find Search"] ?? [];
+  extractProductsManagerSearch(
+    response: ProductManagerFindSearchResponse,
+  ): ProductManagerSearchItem[] {
+    return response.data?.["Product Manager find Search"] ?? [];
   }
 
-  extractProductPdvById(
-    response: ProductPdvFindByIdResponse,
-  ): ProductPdvDetail | null {
-    return response.data?.["Product Pdv find Id"]?.[0] ?? null;
+  extractProductManagerById(
+    response: ProductManagerFindByIdResponse,
+  ): ProductManagerDetail | null {
+    return response.data?.["Product Manager find Id"]?.[0] ?? null;
   }
 
   extractRelatedCategories(
-    response: ProductPdvFindByIdResponse,
-  ): ProductPdvRelatedCategory[] {
+    response: ProductManagerFindByIdResponse,
+  ): ProductManagerRelatedCategory[] {
     return response.data?.["Related Categories"] ?? [];
   }
 
   extractRelatedProducts(
-    response: ProductPdvFindByIdResponse,
-  ): ProductPdvRelatedProduct[] {
+    response: ProductManagerFindByIdResponse,
+  ): ProductManagerRelatedProduct[] {
     return response.data?.["Related Products"] ?? [];
   }
 
-  isValidProductPdvList(response: ProductPdvFindAllResponse): boolean {
+  isValidProductManagerList(response: ProductManagerFindAllResponse): boolean {
     return (
       isApiSuccess(response.statusCode) &&
       response.data &&
-      Array.isArray(response.data["Product Pdv find All"])
+      Array.isArray(response.data["Product Manager find All"])
     );
   }
 
-  isValidProductPdvDetail(response: ProductPdvFindByIdResponse): boolean {
+  isValidProductManagerDetail(
+    response: ProductManagerFindByIdResponse,
+  ): boolean {
     return (
       isApiSuccess(response.statusCode) &&
       response.data &&
-      Array.isArray(response.data["Product Pdv find Id"]) &&
-      response.data["Product Pdv find Id"].length > 0
+      Array.isArray(response.data["Product Manager find Id"]) &&
+      response.data["Product Manager find Id"].length > 0
     );
   }
 
-  isValidProductPdvSearchList(response: ProductPdvFindSearchResponse): boolean {
+  isValidProductManagerSearchList(
+    response: ProductManagerFindSearchResponse,
+  ): boolean {
     return (
       isApiSuccess(response.statusCode) &&
       response.data &&
-      Array.isArray(response.data["Product Pdv find Search"])
+      Array.isArray(response.data["Product Manager find Search"])
     );
   }
 }
 
-export const productPdvServiceApi = new ProductPdvServiceApi();
+export const productManagerServiceApi = new ProductManagerServiceApi();
 
-export async function getProductsPdv(
+export async function getProductsManager(
   params: {
     search?: string;
     taxonomyId?: number;
@@ -266,12 +274,12 @@ export async function getProductsPdv(
     pe_user_role?: string;
     pe_person_id?: number;
   } = {},
-): Promise<{ products: UIProductPdv[]; total: number }> {
+): Promise<{ products: UIProductManager[]; total: number }> {
   if (!params.pe_system_client_id) {
     return { products: [], total: 0 };
   }
 
-  const response = await productPdvServiceApi.findAllProductsPdv({
+  const response = await productManagerServiceApi.findAllProductsManager({
     pe_search: params.search,
     pe_taxonomy_id: params.taxonomyId,
     pe_type_id: params.typeId,
@@ -290,14 +298,14 @@ export async function getProductsPdv(
     pe_person_id: params.pe_person_id,
   });
 
-  const products = productPdvServiceApi.extractProductsPdv(response);
+  const products = productManagerServiceApi.extractProductsManager(response);
   return {
-    products: transformProductPdvList(products),
+    products: transformProductManagerList(products),
     total: response.quantity ?? products.length,
   };
 }
 
-export async function getProductPdvById(
+export async function getProductManagerById(
   id: number,
   params: {
     pe_system_client_id?: number;
@@ -309,14 +317,17 @@ export async function getProductPdvById(
     pe_type_business?: number;
   } = {},
 ): Promise<
-  | { product: UIProductPdv; relatedCategories: UIProductPdvRelatedCategory[] }
+  | {
+      product: UIProductManager;
+      relatedCategories: UIProductManagerRelatedCategory[];
+    }
   | undefined
 > {
   if (!params.pe_system_client_id) {
     return undefined;
   }
 
-  const response = await productPdvServiceApi.findProductPdvById({
+  const response = await productManagerServiceApi.findProductManagerById({
     pe_product_id: id,
     pe_type_business: params.pe_type_business,
     pe_system_client_id: params.pe_system_client_id,
@@ -327,24 +338,25 @@ export async function getProductPdvById(
     pe_person_id: params.pe_person_id,
   });
 
-  const productEntity = productPdvServiceApi.extractProductPdvById(response);
+  const productEntity =
+    productManagerServiceApi.extractProductManagerById(response);
   if (!productEntity) {
     return undefined;
   }
 
-  const product = transformProductPdv(productEntity);
+  const product = transformProductManager(productEntity);
   if (!product) {
     return undefined;
   }
 
   const categoriesEntities =
-    productPdvServiceApi.extractRelatedCategories(response);
+    productManagerServiceApi.extractRelatedCategories(response);
   const relatedCategories = transformRelatedCategories(categoriesEntities);
 
   return { product, relatedCategories };
 }
 
-export async function searchProductsPdv(
+export async function searchProductsManager(
   params: {
     search?: string;
     customerId?: number;
@@ -357,12 +369,12 @@ export async function searchProductsPdv(
     pe_user_role?: string;
     pe_person_id?: number;
   } = {},
-): Promise<UIProductPdv[]> {
+): Promise<UIProductManager[]> {
   if (!params.pe_system_client_id) {
     return [];
   }
 
-  const response = await productPdvServiceApi.findProductsPdvSearch({
+  const response = await productManagerServiceApi.findProductsManagerSearch({
     pe_search: params.search,
     pe_customer_id: params.customerId,
     pe_flag_stock: params.flagStock,
@@ -375,6 +387,7 @@ export async function searchProductsPdv(
     pe_person_id: params.pe_person_id,
   });
 
-  const products = productPdvServiceApi.extractProductsPdvSearch(response);
-  return transformProductPdvSearchList(products);
+  const products =
+    productManagerServiceApi.extractProductsManagerSearch(response);
+  return transformProductManagerSearchList(products);
 }

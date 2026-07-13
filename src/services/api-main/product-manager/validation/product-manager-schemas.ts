@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const ProductPdvFindAllSchema = z.object({
+export const ProductManagerFindAllSchema = z.object({
   pe_system_client_id: z.number().int().min(0).optional(),
   pe_organization_id: z.string().max(200).optional(),
   pe_user_id: z.string().max(200).optional(),
@@ -19,7 +19,7 @@ export const ProductPdvFindAllSchema = z.object({
   pe_order_id: z.number().int().min(1).max(2).optional(),
 });
 
-export const ProductPdvFindByIdSchema = z.object({
+export const ProductManagerFindByIdSchema = z.object({
   pe_system_client_id: z.number().int().min(0).optional(),
   pe_organization_id: z.string().max(200).optional(),
   pe_user_id: z.string().max(200).optional(),
@@ -30,7 +30,7 @@ export const ProductPdvFindByIdSchema = z.object({
   pe_type_business: z.number().int().optional(),
 });
 
-export const ProductPdvFindSearchSchema = z.object({
+export const ProductManagerFindSearchSchema = z.object({
   pe_system_client_id: z.number().int().min(0).optional(),
   pe_organization_id: z.string().max(200).optional(),
   pe_user_id: z.string().max(200).optional(),
@@ -43,8 +43,12 @@ export const ProductPdvFindSearchSchema = z.object({
   pe_limit: z.number().int().positive().optional(),
 });
 
-export type ProductPdvFindAllInput = z.infer<typeof ProductPdvFindAllSchema>;
-export type ProductPdvFindByIdInput = z.infer<typeof ProductPdvFindByIdSchema>;
-export type ProductPdvFindSearchInput = z.infer<
-  typeof ProductPdvFindSearchSchema
+export type ProductManagerFindAllInput = z.infer<
+  typeof ProductManagerFindAllSchema
+>;
+export type ProductManagerFindByIdInput = z.infer<
+  typeof ProductManagerFindByIdSchema
+>;
+export type ProductManagerFindSearchInput = z.infer<
+  typeof ProductManagerFindSearchSchema
 >;

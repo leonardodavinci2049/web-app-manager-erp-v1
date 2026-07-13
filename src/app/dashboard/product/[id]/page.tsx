@@ -9,7 +9,7 @@ import {
 import { SiteHeaderWithBreadcrumb } from "@/components/dashboard/header/site-header-with-breadcrumb";
 import { createLogger } from "@/lib/logger";
 import { getAuthContext } from "@/server/auth-context";
-import { getProductPdvById } from "@/services/api-main/product-pdv/product-pdv-service-api";
+import { getProductManagerById } from "@/services/api-main/product-manager/product-manager-service-api";
 
 const logger = createLogger("ProductDetailsPageV2");
 
@@ -30,11 +30,14 @@ async function ProductDetailsPageContent({ productId }: { productId: number }) {
   await connection();
   const { apiContext } = await getAuthContext();
 
-  const result = await getProductPdvById(productId, {
+  const result = await getProductManagerById(productId, {
     ...apiContext,
     pe_type_business: 1,
   }).catch((error) => {
-    logger.error(`Erro ao buscar produto PDV por ID ${productId}:`, error);
+    logger.error(
+      `Erro ao buscar produto do Manager por ID ${productId}:`,
+      error,
+    );
     return undefined;
   });
 

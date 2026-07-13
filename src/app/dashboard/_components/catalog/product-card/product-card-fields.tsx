@@ -1,9 +1,9 @@
 import { Shield } from "lucide-react";
 import type { ReactNode } from "react";
-import type { UIProductPdv } from "@/services/api-main/product-pdv/transformers/transformers";
+import type { UIProductManager } from "@/services/api-main/product-manager/transformers/transformers";
 
 interface ProductCardFieldsProps {
-  product: UIProductPdv;
+  product: UIProductManager;
   textSize?: "xs" | "sm";
   gap?: string;
   className?: string;
