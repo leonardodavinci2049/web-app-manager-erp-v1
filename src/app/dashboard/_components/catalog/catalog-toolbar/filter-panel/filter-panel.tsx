@@ -1,7 +1,7 @@
 "use client";
 
-import { Filter, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Filter, Search, X } from "lucide-react";
+import { type FormEvent, useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,7 +16,6 @@ import {
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetFooter,
   SheetHeader,
   SheetTitle,
@@ -62,6 +61,7 @@ interface FilterPanelProps {
 interface TextFilterInputProps {
   id: string;
   label: string;
+  placeholder?: string;
   value: string;
   disabled: boolean;
   onChange: (value: string) => void;
@@ -70,6 +70,7 @@ interface TextFilterInputProps {
 function TextFilterInput({
   id,
   label,
+  placeholder,
   value,
   disabled,
   onChange,
@@ -78,32 +79,49 @@ function TextFilterInput({
 
   useEffect(() => setInputValue(value), [value]);
 
-  useEffect(() => {
-    const normalizedValue = inputValue.trim().slice(0, 200);
-    if (normalizedValue === value) return;
-    const timer = window.setTimeout(() => onChange(normalizedValue), 500);
-    return () => window.clearTimeout(timer);
-  }, [inputValue, onChange, value]);
+  const normalizedValue = inputValue.trim().slice(0, 200);
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (normalizedValue !== value) onChange(normalizedValue);
+  };
 
   return (
-    <div className="space-y-2">
+    <form className="min-w-0 space-y-1.5" onSubmit={handleSubmit}>
       <Label htmlFor={id} className="text-muted-foreground">
         {label}
       </Label>
-      <Input
-        id={id}
-        value={inputValue}
-        maxLength={200}
-        disabled={disabled}
-        onChange={(event) => setInputValue(event.target.value)}
-      />
-    </div>
+      <div className="relative min-w-0">
+        <Input
+          id={id}
+          value={inputValue}
+          placeholder={placeholder}
+          maxLength={200}
+          disabled={disabled}
+          className="min-w-0 pr-10"
+          onChange={(event) => setInputValue(event.target.value)}
+        />
+        <Button
+          type="submit"
+          variant="ghost"
+          size="icon-sm"
+          className="absolute top-0.5 right-0.5"
+          disabled={disabled || normalizedValue === value}
+          aria-label={`Filtrar por ${label}`}
+          title={`Filtrar por ${label}`}
+        >
+          <Search className="size-4" aria-hidden="true" />
+        </Button>
+      </div>
+    </form>
   );
 }
 
 interface NumericFilterInputProps {
   id: string;
   label: string;
+  placeholder?: string;
+  submitManually?: boolean;
   value?: number;
   disabled: boolean;
   onChange: (value: number | undefined) => void;
@@ -112,6 +130,8 @@ interface NumericFilterInputProps {
 function NumericFilterInput({
   id,
   label,
+  placeholder,
+  submitManually = false,
   value,
   disabled,
   onChange,
@@ -120,38 +140,60 @@ function NumericFilterInput({
 
   useEffect(() => setInputValue(value?.toString() ?? ""), [value]);
 
+  const numericValue = inputValue === "" ? undefined : Number(inputValue);
+  const normalizedValue =
+    numericValue && Number.isSafeInteger(numericValue) && numericValue > 0
+      ? numericValue
+      : undefined;
+
   useEffect(() => {
-    const numericValue = inputValue === "" ? undefined : Number(inputValue);
-    const normalizedValue =
-      numericValue && Number.isSafeInteger(numericValue) && numericValue > 0
-        ? numericValue
-        : undefined;
-    if (normalizedValue === value) return;
+    if (submitManually || normalizedValue === value) return;
     const timer = window.setTimeout(() => onChange(normalizedValue), 500);
     return () => window.clearTimeout(timer);
-  }, [inputValue, onChange, value]);
+  }, [normalizedValue, onChange, submitManually, value]);
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (normalizedValue !== value) onChange(normalizedValue);
+  };
 
   return (
-    <div className="space-y-2">
+    <form className="min-w-0 space-y-1.5" onSubmit={handleSubmit}>
       <Label htmlFor={id} className="text-muted-foreground">
         {label}
       </Label>
-      <Input
-        id={id}
-        type="number"
-        inputMode="numeric"
-        min={1}
-        step={1}
-        value={inputValue}
-        disabled={disabled}
-        onChange={(event) => {
-          const nextValue = event.target.value;
-          if (nextValue === "" || /^\d+$/.test(nextValue)) {
-            setInputValue(nextValue);
-          }
-        }}
-      />
-    </div>
+      <div className="relative min-w-0">
+        <Input
+          id={id}
+          type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          placeholder={placeholder}
+          value={inputValue}
+          disabled={disabled}
+          className={submitManually ? "min-w-0 pr-10" : "min-w-0"}
+          onChange={(event) => {
+            const nextValue = event.target.value;
+            if (nextValue === "" || /^\d+$/.test(nextValue)) {
+              setInputValue(nextValue);
+            }
+          }}
+        />
+        {submitManually && (
+          <Button
+            type="submit"
+            variant="ghost"
+            size="icon-sm"
+            className="absolute top-0.5 right-0.5"
+            disabled={disabled || normalizedValue === value}
+            aria-label={`Filtrar por ${label}`}
+            title={`Filtrar por ${label}`}
+          >
+            <Search className="size-4" aria-hidden="true" />
+          </Button>
+        )}
+      </div>
+    </form>
   );
 }
 
@@ -219,17 +261,13 @@ export function FilterPanel({
       </SheetTrigger>
       <SheetContent
         side="right"
-        className="flex w-[80vw] max-w-[80vw] flex-col gap-0 p-0 sm:w-full sm:max-w-md"
+        className="flex w-[90vw] max-w-[90vw] flex-col gap-0 p-0 sm:w-full sm:max-w-md"
       >
         <SheetHeader className="space-y-1 border-b p-4 pr-12">
           <SheetTitle className="flex items-center gap-2 text-base">
             <Filter className="h-4 w-4" />
             Filtros
           </SheetTitle>
-          <SheetDescription>
-            Selecione uma opção para filtrar os produtos. A lista é atualizada
-            automaticamente.
-          </SheetDescription>
         </SheetHeader>
 
         <Tabs defaultValue="general" className="min-h-0 flex-1 gap-0">
@@ -242,23 +280,8 @@ export function FilterPanel({
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto p-4">
-            <TabsContent value="general" className="space-y-5">
-              <TextFilterInput
-                id="filter-reference"
-                label="Referência"
-                value={filters.reference}
-                disabled={isLoading}
-                onChange={(value) => onFilterChange("reference", value)}
-              />
-              <TextFilterInput
-                id="filter-model"
-                label="Modelo"
-                value={filters.model}
-                disabled={isLoading}
-                onChange={(value) => onFilterChange("model", value)}
-              />
-
-              <div className="space-y-2">
+            <TabsContent value="general" className="space-y-4">
+              <div className="space-y-1.5">
                 <Label className="text-muted-foreground">Categoria</Label>
                 <CategoryMenu
                   categories={categories}
@@ -270,75 +293,109 @@ export function FilterPanel({
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label className="text-muted-foreground">Marca</Label>
-                <Select
-                  value={filters.selectedBrand || "all"}
-                  onValueChange={(value) =>
-                    onFilterChange(
-                      "selectedBrand",
-                      value === "all" ? undefined : value,
-                    )
-                  }
-                  disabled={isLoading}
-                >
-                  <SelectTrigger className="w-full" aria-label="Marca">
-                    <SelectValue placeholder="Selecione uma marca" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todas as Marcas</SelectItem>
-                    {brands.map((brand) => (
-                      <SelectItem key={brand.id} value={brand.id.toString()}>
-                        {brand.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="min-w-0 space-y-1.5">
+                  <Label className="text-muted-foreground">Marca</Label>
+                  <Select
+                    value={filters.selectedBrand || "all"}
+                    onValueChange={(value) =>
+                      onFilterChange(
+                        "selectedBrand",
+                        value === "all" ? undefined : value,
+                      )
+                    }
+                    disabled={isLoading}
+                  >
+                    <SelectTrigger className="w-full" aria-label="Marca">
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todas as marcas</SelectItem>
+                      {brands.map((brand) => (
+                        <SelectItem key={brand.id} value={brand.id.toString()}>
+                          {brand.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="min-w-0 space-y-1.5">
+                  <Label className="text-muted-foreground">
+                    Tipo de produto
+                  </Label>
+                  <Select
+                    value={filters.selectedPtype || "all"}
+                    onValueChange={(value) =>
+                      onFilterChange(
+                        "selectedPtype",
+                        value === "all" ? undefined : value,
+                      )
+                    }
+                    disabled={isLoading}
+                  >
+                    <SelectTrigger
+                      className="w-full"
+                      aria-label="Tipo de produto"
+                    >
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos os tipos</SelectItem>
+                      {ptypes.map((ptype) => (
+                        <SelectItem key={ptype.id} value={ptype.id.toString()}>
+                          {ptype.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <Label className="text-muted-foreground">Tipo</Label>
-                <Select
-                  value={filters.selectedPtype || "all"}
-                  onValueChange={(value) =>
-                    onFilterChange(
-                      "selectedPtype",
-                      value === "all" ? undefined : value,
-                    )
-                  }
+              <div className="grid grid-cols-2 gap-3">
+                <NumericFilterInput
+                  id="filter-supplier"
+                  label="Fornecedor"
+                  placeholder="Digite o ID"
+                  submitManually
+                  value={filters.supplierId}
                   disabled={isLoading}
-                >
-                  <SelectTrigger className="w-full" aria-label="Tipo">
-                    <SelectValue placeholder="Selecione um tipo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos os Tipos</SelectItem>
-                    {ptypes.map((ptype) => (
-                      <SelectItem key={ptype.id} value={ptype.id.toString()}>
-                        {ptype.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  onChange={(value) => onFilterChange("supplierId", value)}
+                />
+                <NumericFilterInput
+                  id="filter-physical"
+                  label="Produto físico"
+                  placeholder="Digite o ID"
+                  submitManually
+                  value={filters.physicalId}
+                  disabled={isLoading}
+                  onChange={(value) => onFilterChange("physicalId", value)}
+                />
               </div>
 
-              <NumericFilterInput
-                id="filter-supplier"
-                label="ID do fornecedor"
-                value={filters.supplierId}
-                disabled={isLoading}
-                onChange={(value) => onFilterChange("supplierId", value)}
-              />
-              <NumericFilterInput
-                id="filter-physical"
-                label="ID do produto físico"
-                value={filters.physicalId}
-                disabled={isLoading}
-                onChange={(value) => onFilterChange("physicalId", value)}
-              />
+              <div className="grid grid-cols-2 gap-3">
+                <TextFilterInput
+                  id="filter-reference"
+                  label="Referência"
+                  placeholder="Digite o ID"
+                  value={filters.reference}
+                  disabled={isLoading}
+                  onChange={(value) => onFilterChange("reference", value)}
+                />
+                <TextFilterInput
+                  id="filter-model"
+                  label="Modelo"
+                  placeholder="Digite o ID"
+                  value={filters.model}
+                  disabled={isLoading}
+                  onChange={(value) => onFilterChange("model", value)}
+                />
+              </div>
+
               <TextFilterInput
                 id="filter-ean"
                 label="EAN"
+                placeholder="Digite o EAN"
                 value={filters.ean}
                 disabled={isLoading}
                 onChange={(value) => onFilterChange("ean", value)}
