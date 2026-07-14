@@ -16,7 +16,6 @@ import {
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetFooter,
   SheetHeader,
   SheetTitle,
@@ -269,7 +268,6 @@ export function FilterPanel({
             <Filter className="h-4 w-4" />
             Filtros
           </SheetTitle>
- 
         </SheetHeader>
 
         <Tabs defaultValue="general" className="min-h-0 flex-1 gap-0">
