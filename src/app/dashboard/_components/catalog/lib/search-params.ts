@@ -2,6 +2,13 @@ import type { CatalogFilters, SortOption } from "../types/catalog-types";
 
 const DEFAULT_SORT: SortOption = "newest";
 const DEFAULT_CATEGORY = "all";
+const VALID_SORT_OPTIONS = new Set<SortOption>([
+  "name-asc",
+  "name-desc",
+  "newest",
+  "price-asc",
+  "price-desc",
+]);
 
 type SearchParamValue = string | string[] | undefined;
 
@@ -57,6 +64,29 @@ function normalizeParams(
   return params;
 }
 
+function parseText(params: URLSearchParams, key: string): string {
+  return (params.get(key) ?? "").trim().slice(0, 200);
+}
+
+function parsePositiveInteger(
+  params: URLSearchParams,
+  key: string,
+): number | undefined {
+  const rawValue = params.get(key);
+  if (!rawValue || !/^\d+$/.test(rawValue)) return undefined;
+  const value = Number(rawValue);
+  return Number.isSafeInteger(value) && value > 0 ? value : undefined;
+}
+
+function parseFlag(params: URLSearchParams, key: string): boolean {
+  return params.get(key) === "1";
+}
+
+function parseSort(params: URLSearchParams): SortOption {
+  const sort = params.get("sort") as SortOption | null;
+  return sort && VALID_SORT_OPTIONS.has(sort) ? sort : DEFAULT_SORT;
+}
+
 /**
  * Constroi o estado de filtros do catalogo a partir de searchParams.
  * Fonte unica de verdade para a leitura URL -> objeto.
@@ -67,11 +97,33 @@ export function parseCatalogSearchParams(
   const params = normalizeParams(sp);
   return {
     searchTerm: params.get("search") ?? "",
-    selectedCategory: params.get("category") ?? DEFAULT_CATEGORY,
-    selectedBrand: params.get("brand") ?? undefined,
-    selectedPtype: params.get("type") ?? undefined,
-    onlyInStock: params.get("stock") === "1",
-    sortBy: (params.get("sort") as SortOption | null) ?? DEFAULT_SORT,
+    reference: parseText(params, "reference"),
+    model: parseText(params, "model"),
+    selectedCategory:
+      parsePositiveInteger(params, "category")?.toString() ?? DEFAULT_CATEGORY,
+    selectedBrand: parsePositiveInteger(params, "brand")?.toString(),
+    selectedPtype: parsePositiveInteger(params, "type")?.toString(),
+    supplierId: parsePositiveInteger(params, "supplier"),
+    physicalId: parsePositiveInteger(params, "physical"),
+    ean: parseText(params, "ean"),
+    onlyInStock: parseFlag(params, "stock"),
+    isService: parseFlag(params, "service"),
+    hasNoImage: parseFlag(params, "no-image"),
+    hasNoDescription: parseFlag(params, "no-description"),
+    hasNoSalesCopy: parseFlag(params, "no-sales-copy"),
+    isPromotion: parseFlag(params, "promotion"),
+    isFeatured: parseFlag(params, "featured"),
+    isImported: parseFlag(params, "imported"),
+    isInactive: parseFlag(params, "inactive"),
+    isConsignment: parseFlag(params, "consignment"),
+    isDiscontinued: parseFlag(params, "discontinued"),
+    hasNoInventory: parseFlag(params, "no-inventory"),
+    isLowestSelling: parseFlag(params, "lowest-selling"),
+    isStalled: parseFlag(params, "stalled"),
+    isLatestArrival: parseFlag(params, "latest-arrivals"),
+    hasPriceLessThanOne: parseFlag(params, "price-less-than"),
+    lowStockThreshold: parsePositiveInteger(params, "low-stock"),
+    sortBy: parseSort(params),
   };
 }
 
@@ -87,11 +139,33 @@ export function buildCatalogUrl(
   const params = new URLSearchParams();
 
   if (filters.searchTerm) params.set("search", filters.searchTerm);
+  if (filters.reference) params.set("reference", filters.reference);
+  if (filters.model) params.set("model", filters.model);
   if (filters.selectedCategory && filters.selectedCategory !== DEFAULT_CATEGORY)
     params.set("category", filters.selectedCategory);
   if (filters.selectedBrand) params.set("brand", filters.selectedBrand);
   if (filters.selectedPtype) params.set("type", filters.selectedPtype);
+  if (filters.supplierId) params.set("supplier", String(filters.supplierId));
+  if (filters.physicalId) params.set("physical", String(filters.physicalId));
+  if (filters.ean) params.set("ean", filters.ean);
   if (filters.onlyInStock) params.set("stock", "1");
+  if (filters.isService) params.set("service", "1");
+  if (filters.hasNoImage) params.set("no-image", "1");
+  if (filters.hasNoDescription) params.set("no-description", "1");
+  if (filters.hasNoSalesCopy) params.set("no-sales-copy", "1");
+  if (filters.isPromotion) params.set("promotion", "1");
+  if (filters.isFeatured) params.set("featured", "1");
+  if (filters.isImported) params.set("imported", "1");
+  if (filters.isInactive) params.set("inactive", "1");
+  if (filters.isConsignment) params.set("consignment", "1");
+  if (filters.isDiscontinued) params.set("discontinued", "1");
+  if (filters.hasNoInventory) params.set("no-inventory", "1");
+  if (filters.isLowestSelling) params.set("lowest-selling", "1");
+  if (filters.isStalled) params.set("stalled", "1");
+  if (filters.isLatestArrival) params.set("latest-arrivals", "1");
+  if (filters.hasPriceLessThanOne) params.set("price-less-than", "1");
+  if (filters.lowStockThreshold)
+    params.set("low-stock", String(filters.lowStockThreshold));
   if (filters.sortBy && filters.sortBy !== DEFAULT_SORT)
     params.set("sort", filters.sortBy);
 

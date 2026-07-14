@@ -11,22 +11,14 @@ import {
   CatalogShell,
   flattenCategories,
   mapSortToApiParams,
+  parseCatalogSearchParams,
 } from "./_components/catalog";
 
 const logger = createLogger("DashboardPage");
 const CATALOG_PATHNAME = "/dashboard";
 
 interface DashboardPageProps {
-  searchParams: Promise<{
-    search?: string;
-    category?: string;
-    brand?: string;
-    type?: string;
-    stock?: string;
-    sort?: string;
-    limit?: string;
-    page?: string;
-  }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
 export default async function DashboardPage(props: DashboardPageProps) {
@@ -34,21 +26,49 @@ export default async function DashboardPage(props: DashboardPageProps) {
   const searchParams = await props.searchParams;
   const { apiContext } = await getAuthContext();
 
-  const sort = mapSortToApiParams(searchParams.sort);
-  const limit = Number(searchParams.limit) || 50;
+  const filters = parseCatalogSearchParams(searchParams);
+  const sort = mapSortToApiParams(filters.sortBy);
+  const rawLimit = Number(searchParams.limit);
+  const limit = Number.isInteger(rawLimit) && rawLimit > 0 ? rawLimit : 50;
+  const rawPage = Number(searchParams.page);
+  const page = Number.isInteger(rawPage) && rawPage >= 0 ? rawPage : 0;
   const catalogReturnTo = buildCatalogReturnTo(searchParams, CATALOG_PATHNAME);
 
   const [productsResult, brands, categories, ptypes] = await Promise.all([
     getProductsManager({
-      search: searchParams.search,
-      taxonomyId: searchParams.category
-        ? Number(searchParams.category)
+      search: filters.searchTerm,
+      reference: filters.reference,
+      model: filters.model,
+      taxonomyId:
+        filters.selectedCategory === "all"
+          ? undefined
+          : Number(filters.selectedCategory),
+      brandId: filters.selectedBrand
+        ? Number(filters.selectedBrand)
         : undefined,
-      brandId: searchParams.brand ? Number(searchParams.brand) : undefined,
-      typeId: searchParams.type ? Number(searchParams.type) : undefined,
-      flagStock: searchParams.stock === "1" ? 1 : undefined,
+      typeId: filters.selectedPtype ? Number(filters.selectedPtype) : undefined,
+      supplierId: filters.supplierId,
+      physicalId: filters.physicalId,
+      ean: filters.ean,
+      flagStock: filters.onlyInStock ? 1 : undefined,
+      flagService: filters.isService ? 1 : undefined,
+      flagNoImage: filters.hasNoImage ? 1 : undefined,
+      flagNoDescription: filters.hasNoDescription ? 1 : undefined,
+      flagNoSalesCopy: filters.hasNoSalesCopy ? 1 : undefined,
+      flagPromotion: filters.isPromotion ? 1 : undefined,
+      flagFeatured: filters.isFeatured ? 1 : undefined,
+      flagImported: filters.isImported ? 1 : undefined,
+      flagInactive: filters.isInactive ? 1 : undefined,
+      flagConsignment: filters.isConsignment ? 1 : undefined,
+      flagDiscontinued: filters.isDiscontinued ? 1 : undefined,
+      flagNoInventory: filters.hasNoInventory ? 1 : undefined,
+      flagLowestSelling: filters.isLowestSelling ? 1 : undefined,
+      flagStalledProduct: filters.isStalled ? 1 : undefined,
+      flagLatestArrivals: filters.isLatestArrival ? 1 : undefined,
+      flagPriceLessThan: filters.hasPriceLessThanOne ? 1 : undefined,
+      flagLowStock: filters.lowStockThreshold,
       recordsQuantity: limit,
-      pageId: Number(searchParams.page) || 0,
+      pageId: page,
       columnId: sort.columnId,
       orderId: sort.orderId,
       ...apiContext,

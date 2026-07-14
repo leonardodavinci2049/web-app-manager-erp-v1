@@ -16,6 +16,7 @@ import type { UIPtype } from "@/services/api-main/ptype/transformers/transformer
 import {
   buildCatalogUrl,
   parseCatalogSearchParams,
+  SORT_OPTIONS,
 } from "../lib/search-params";
 import type {
   CatalogFilters,
@@ -30,6 +31,35 @@ import { ViewModeToggle } from "./view-mode-toggle";
 
 const VIEW_MODE_STORAGE_KEY = "catalog:product-view-mode";
 
+const PANEL_FILTER_DEFAULTS: Pick<CatalogFilters, PanelFilterType> = {
+  reference: "",
+  model: "",
+  selectedCategory: "all",
+  selectedBrand: undefined,
+  selectedPtype: undefined,
+  supplierId: undefined,
+  physicalId: undefined,
+  ean: "",
+  onlyInStock: false,
+  isService: false,
+  hasNoImage: false,
+  hasNoDescription: false,
+  hasNoSalesCopy: false,
+  isPromotion: false,
+  isFeatured: false,
+  isImported: false,
+  isInactive: false,
+  isConsignment: false,
+  isDiscontinued: false,
+  hasNoInventory: false,
+  isLowestSelling: false,
+  isStalled: false,
+  isLatestArrival: false,
+  hasPriceLessThanOne: false,
+  lowStockThreshold: undefined,
+  sortBy: "newest",
+};
+
 type ActiveFilterType = PanelFilterType | "search";
 
 interface ActiveFilter {
@@ -40,25 +70,17 @@ interface ActiveFilter {
 
 interface CatalogToolbarProps {
   products: UIProductManager[];
-  /** Total de produtos que correspondem aos filtros (paginacao). */
   total: number;
   brands: UIBrand[];
   categories: CategoryOption[];
   ptypes: UIPtype[];
-  /** Variante do grid (Server) em modo grade. */
   grid: ReactNode;
-  /** Variante do grid (Server) em modo lista. */
   list: ReactNode;
 }
 
 /**
- * Toolbar do catalogo (Client). Orquestra leitura/escrita de searchParams
- * (filtros de dados) e o modo de visualizacao (preferencia client-side).
- *
- * O modo de visualizacao (grid/list) e' apenas apresentacao: fica no
- * localStorage e NUNCA na URL, evitando refetch ao alternar. As variantes
- * `grid`/`list` (Server Components) sao passadas pelo parent e apenas uma e
- * renderizada por vez — toggle instantaneo, sem travamento.
+ * Toolbar client que mantem filtros de dados na URL e a preferencia de
+ * visualizacao no localStorage.
  */
 export function CatalogToolbar({
   products,
@@ -78,22 +100,14 @@ export function CatalogToolbar({
     () => parseCatalogSearchParams(searchParams),
     [searchParams],
   );
-
-  // Ref that always holds the latest intended filters, updated synchronously.
-  // Prevents stale closure reads during pending transitions: useSearchParams
-  // returns the committed (old) value while startTransition is in flight, so
-  // callbacks that spread `filters` would lose pending filter changes.
   const latestFiltersRef = useRef(filters);
 
-  // Sync the ref whenever committed filters change (URL navigation settled).
   useEffect(() => {
     latestFiltersRef.current = filters;
   }, [filters]);
 
   const updateFilters = useCallback(
     (newFilters: CatalogFilters) => {
-      // Update ref synchronously so subsequent callbacks see the latest state
-      // even before the transition commits.
       latestFiltersRef.current = newFilters;
       startTransition(() => {
         router.replace(buildCatalogUrl(newFilters, pathname));
@@ -110,190 +124,194 @@ export function CatalogToolbar({
   );
 
   const handleSearch = useCallback(
-    (term: string) => {
-      updateFilters({ ...latestFiltersRef.current, searchTerm: term });
-    },
-    [updateFilters],
-  );
-
-  const handleCategoryChange = useCallback(
-    (categoryId: string) => {
-      setIsFilterOpenState(false);
-      updateFilters({
-        ...latestFiltersRef.current,
-        selectedCategory: categoryId,
-      });
-    },
-    [updateFilters],
-  );
-
-  const handleBrandChange = useCallback(
-    (brandId: string) => {
-      setIsFilterOpenState(false);
-      updateFilters({
-        ...latestFiltersRef.current,
-        selectedBrand: brandId === "all" ? undefined : brandId,
-      });
-    },
-    [updateFilters],
-  );
-
-  const handlePtypeChange = useCallback(
-    (ptypeId: string) => {
-      setIsFilterOpenState(false);
-      updateFilters({
-        ...latestFiltersRef.current,
-        selectedPtype: ptypeId === "all" ? undefined : ptypeId,
-      });
-    },
-    [updateFilters],
-  );
-
-  const handleOnlyInStockChange = useCallback(
-    (checked: boolean) => {
-      setIsFilterOpenState(false);
-      updateFilter("onlyInStock", checked);
-    },
-    [updateFilter],
-  );
-
-  const handleSortChange = useCallback(
-    (sortBy: CatalogFilters["sortBy"]) => {
-      setIsFilterOpenState(false);
-      updateFilter("sortBy", sortBy);
-    },
+    (term: string) => updateFilter("searchTerm", term),
     [updateFilter],
   );
 
   const handleClearPanelFilters = useCallback(() => {
-    setIsFilterOpenState(false);
     updateFilters({
       ...latestFiltersRef.current,
-      selectedCategory: "all",
-      selectedBrand: undefined,
-      selectedPtype: undefined,
-      onlyInStock: false,
+      ...PANEL_FILTER_DEFAULTS,
     });
   }, [updateFilters]);
 
   const handleClearSearchAndFilters = useCallback(() => {
     updateFilters({
-      ...latestFiltersRef.current,
       searchTerm: "",
-      selectedCategory: "all",
-      selectedBrand: undefined,
-      selectedPtype: undefined,
-      onlyInStock: false,
+      ...PANEL_FILTER_DEFAULTS,
     });
   }, [updateFilters]);
 
-  const removePanelFilter = useCallback(
-    (filterType: PanelFilterType) => {
-      setIsFilterOpenState(false);
-      const current = latestFiltersRef.current;
-      switch (filterType) {
-        case "category":
-          updateFilters({ ...current, selectedCategory: "all" });
-          break;
-        case "brand":
-          updateFilters({ ...current, selectedBrand: undefined });
-          break;
-        case "ptype":
-          updateFilters({ ...current, selectedPtype: undefined });
-          break;
-        case "stock":
-          updateFilters({ ...current, onlyInStock: false });
-          break;
+  const removeActiveFilter = useCallback(
+    (filterType: ActiveFilterType) => {
+      if (filterType === "search") {
+        updateFilter("searchTerm", "");
+        return;
       }
+
+      updateFilters({
+        ...latestFiltersRef.current,
+        [filterType]: PANEL_FILTER_DEFAULTS[filterType],
+      });
     },
-    [updateFilters],
+    [updateFilter, updateFilters],
   );
 
   const activeFilters = useMemo(() => {
     const result: ActiveFilter[] = [];
+    const add = (
+      condition: boolean,
+      type: ActiveFilterType,
+      label: string,
+      value: string,
+    ) => {
+      if (condition) result.push({ type, label, value });
+    };
 
-    if (filters.searchTerm.trim() !== "") {
-      result.push({
-        type: "search",
-        label: "Pesquisa",
-        value: filters.searchTerm,
-      });
-    }
+    add(
+      filters.searchTerm.trim() !== "",
+      "search",
+      "Pesquisa",
+      filters.searchTerm,
+    );
+    add(filters.reference !== "", "reference", "Referência", filters.reference);
+    add(filters.model !== "", "model", "Modelo", filters.model);
 
-    if (filters.selectedCategory && filters.selectedCategory !== "all") {
-      const selectedCategory = categories.find(
-        (cat) => cat.id.toString() === filters.selectedCategory,
+    if (filters.selectedCategory !== "all") {
+      const category = categories.find(
+        (item) => item.id.toString() === filters.selectedCategory,
       );
       result.push({
-        type: "category",
+        type: "selectedCategory",
         label: "Categoria",
-        value: selectedCategory?.name || filters.selectedCategory,
+        value: category?.name ?? filters.selectedCategory,
       });
     }
-
     if (filters.selectedBrand) {
-      const selectedBrand = brands.find(
-        (brand) => brand.id.toString() === filters.selectedBrand,
+      const brand = brands.find(
+        (item) => item.id.toString() === filters.selectedBrand,
       );
       result.push({
-        type: "brand",
+        type: "selectedBrand",
         label: "Marca",
-        value: selectedBrand?.name || filters.selectedBrand,
+        value: brand?.name ?? filters.selectedBrand,
       });
     }
-
     if (filters.selectedPtype) {
-      const selectedPtype = ptypes.find(
-        (ptype) => ptype.id.toString() === filters.selectedPtype,
+      const ptype = ptypes.find(
+        (item) => item.id.toString() === filters.selectedPtype,
       );
       result.push({
-        type: "ptype",
+        type: "selectedPtype",
         label: "Tipo",
-        value: selectedPtype?.name || filters.selectedPtype,
+        value: ptype?.name ?? filters.selectedPtype,
       });
     }
 
-    if (filters.onlyInStock) {
+    add(
+      Boolean(filters.supplierId),
+      "supplierId",
+      "ID do fornecedor",
+      String(filters.supplierId ?? ""),
+    );
+    add(
+      Boolean(filters.physicalId),
+      "physicalId",
+      "ID do produto físico",
+      String(filters.physicalId ?? ""),
+    );
+    add(filters.ean !== "", "ean", "EAN", filters.ean);
+    add(
+      filters.onlyInStock,
+      "onlyInStock",
+      "Estoque",
+      "Apenas produtos em estoque",
+    );
+    add(filters.isService, "isService", "Serviço", "Produtos de serviço");
+    add(filters.hasNoImage, "hasNoImage", "Imagem", "Produtos sem imagem");
+    add(
+      filters.hasNoDescription,
+      "hasNoDescription",
+      "Descrição",
+      "Produtos sem descrição",
+    );
+    add(
+      filters.hasNoSalesCopy,
+      "hasNoSalesCopy",
+      "Descrição de venda",
+      "Produtos sem descrição de venda",
+    );
+    add(filters.isPromotion, "isPromotion", "Promoção", "Produtos em promoção");
+    add(filters.isFeatured, "isFeatured", "Destaque", "Produtos em destaque");
+    add(filters.isImported, "isImported", "Importação", "Produtos importados");
+    add(filters.isInactive, "isInactive", "Situação", "Produtos inativos");
+    add(
+      filters.isConsignment,
+      "isConsignment",
+      "Consignação",
+      "Produtos consignados",
+    );
+    add(
+      filters.isDiscontinued,
+      "isDiscontinued",
+      "Descontinuação",
+      "Produtos descontinuados",
+    );
+    add(
+      filters.hasNoInventory,
+      "hasNoInventory",
+      "Controle de estoque",
+      "Produtos sem controle de estoque",
+    );
+    add(filters.isLowestSelling, "isLowestSelling", "Vendas", "Menos vendidos");
+    add(filters.isStalled, "isStalled", "Movimentação", "Produtos parados");
+    add(
+      filters.isLatestArrival,
+      "isLatestArrival",
+      "Cadastro",
+      "Últimos cadastrados",
+    );
+    add(
+      filters.hasPriceLessThanOne,
+      "hasPriceLessThanOne",
+      "Preço",
+      "Atacado menor que 1",
+    );
+    add(
+      Boolean(filters.lowStockThreshold),
+      "lowStockThreshold",
+      "Estoque baixo até",
+      String(filters.lowStockThreshold ?? ""),
+    );
+
+    if (filters.sortBy !== "newest") {
+      const sort = SORT_OPTIONS.find((item) => item.value === filters.sortBy);
       result.push({
-        type: "stock",
-        label: "Estoque",
-        value: "Apenas em estoque",
+        type: "sortBy",
+        label: "Ordenação",
+        value: sort?.label ?? filters.sortBy,
       });
     }
 
     return result;
   }, [filters, categories, brands, ptypes]);
 
-  const hasActiveFilters = activeFilters.length > 0;
-
   const panelActiveFilters = activeFilters.filter(
-    (f): f is ActiveFilter & { type: PanelFilterType } =>
-      f.type === "category" ||
-      f.type === "brand" ||
-      f.type === "ptype" ||
-      f.type === "stock",
+    (filter): filter is ActiveFilter & { type: PanelFilterType } =>
+      filter.type !== "search",
   );
   const panelFilterCount = panelActiveFilters.length;
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  const [isFilterOpen, setIsFilterOpenState] = useState(false);
-
-  const setIsFilterOpen = useCallback((open: boolean) => {
-    setIsFilterOpenState(open);
-  }, []);
-
-  // Modo de visualizacao: preferencia client-side persistida no localStorage.
-  // Sincroniza apenas apos hidratacao para evitar mismatch SSR.
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     try {
       const stored = window.localStorage.getItem(VIEW_MODE_STORAGE_KEY);
-      if (stored === "list" || stored === "grid") {
-        setViewMode(stored);
-      }
+      if (stored === "list" || stored === "grid") setViewMode(stored);
     } catch {
-      // ignora erros de acesso ao storage (modo privado, etc.)
+      // Storage can be unavailable in private browsing contexts.
     }
     setHydrated(true);
   }, []);
@@ -303,7 +321,7 @@ export function CatalogToolbar({
     try {
       window.localStorage.setItem(VIEW_MODE_STORAGE_KEY, mode);
     } catch {
-      // ignora
+      // Storage can be unavailable in private browsing contexts.
     }
   }, []);
 
@@ -327,15 +345,10 @@ export function CatalogToolbar({
                   panelActiveFilters={panelActiveFilters}
                   panelFilterCount={panelFilterCount}
                   onOpenChange={setIsFilterOpen}
-                  onCategoryChange={handleCategoryChange}
-                  onBrandChange={handleBrandChange}
-                  onPtypeChange={handlePtypeChange}
-                  onOnlyInStockChange={handleOnlyInStockChange}
-                  onSortChange={handleSortChange}
+                  onFilterChange={updateFilter}
                   onClearPanelFilters={handleClearPanelFilters}
-                  onRemovePanelFilter={removePanelFilter}
+                  onRemovePanelFilter={removeActiveFilter}
                 />
-
                 <ViewModeToggle
                   viewMode={viewMode}
                   onChange={handleViewModeChange}
@@ -346,7 +359,7 @@ export function CatalogToolbar({
         </div>
       </div>
 
-      {hasActiveFilters && (
+      {activeFilters.length > 0 && (
         <div className="flex w-full justify-center">
           <div className="w-full max-w-xl lg:max-w-2xl">
             <CatalogActiveFiltersPanel
@@ -355,6 +368,7 @@ export function CatalogToolbar({
               total={total}
               isLoading={isPending}
               onClear={handleClearSearchAndFilters}
+              onRemove={(type) => removeActiveFilter(type as ActiveFilterType)}
             />
           </div>
         </div>
