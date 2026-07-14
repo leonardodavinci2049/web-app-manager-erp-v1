@@ -20,16 +20,38 @@ export interface CategoryOption {
 /**
  * Tipos de filtro manipulados pelo painel lateral (Sheet).
  */
-export type PanelFilterType = "category" | "brand" | "ptype" | "stock";
-
 /**
  * Estado de filtros do catalogo derivado da URL (searchParams).
  */
 export interface CatalogFilters {
   searchTerm: string;
+  reference: string;
+  model: string;
   selectedCategory: string;
   selectedBrand?: string;
   selectedPtype?: string;
+  supplierId?: number;
+  physicalId?: number;
+  ean: string;
   onlyInStock: boolean;
+  isService: boolean;
+  hasNoImage: boolean;
+  hasNoDescription: boolean;
+  hasNoSalesCopy: boolean;
+  isPromotion: boolean;
+  isFeatured: boolean;
+  isImported: boolean;
+  isInactive: boolean;
+  isConsignment: boolean;
+  isDiscontinued: boolean;
+  hasNoInventory: boolean;
+  isLowestSelling: boolean;
+  isStalled: boolean;
+  isLatestArrival: boolean;
+  hasPriceLessThanOne: boolean;
+  lowStockThreshold?: number;
   sortBy: SortOption;
 }
+
+/** Filtros pertencentes ao painel lateral, excluindo a busca principal. */
+export type PanelFilterType = Exclude<keyof CatalogFilters, "searchTerm">;

@@ -15,6 +15,7 @@ interface CatalogActiveFiltersPanelProps {
   total: number;
   isLoading: boolean;
   onClear: () => void;
+  onRemove: (type: string) => void;
 }
 
 /**
@@ -27,6 +28,7 @@ export function CatalogActiveFiltersPanel({
   total,
   isLoading,
   onClear,
+  onRemove,
 }: CatalogActiveFiltersPanelProps) {
   if (activeFilters.length === 0) {
     return null;
@@ -46,11 +48,22 @@ export function CatalogActiveFiltersPanel({
         <ul className="mt-0.5 space-y-0.5 sm:mt-0 sm:inline-flex sm:flex-wrap sm:items-center sm:gap-x-2 sm:gap-y-1 sm:space-y-0">
           {activeFilters.map((filter) => (
             <li
-              className="min-w-0 leading-tight sm:inline-flex"
+              className="inline-flex min-w-0 items-center gap-1 leading-tight"
               key={filter.type}
             >
-              <span className="font-medium">{filter.label}:&nbsp;</span>
-              <span className="break-words">{filter.value}</span>
+              <span>
+                <span className="font-medium">{filter.label}:&nbsp;</span>
+                <span className="break-words">{filter.value}</span>
+              </span>
+              <button
+                type="button"
+                aria-label={`Remover filtro ${filter.label}`}
+                className="rounded-sm p-0.5 hover:bg-yellow-200/70 focus-visible:outline-2 dark:hover:bg-yellow-900/50"
+                onClick={() => onRemove(filter.type)}
+                disabled={isLoading}
+              >
+                <X className="size-3" aria-hidden="true" />
+              </button>
             </li>
           ))}
           <li className="min-w-0 leading-tight sm:inline-flex">
