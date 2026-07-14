@@ -1,12 +1,12 @@
 import type { UIBrand } from "@/services/api-main/brand/transformers/transformers";
-import type { UIProductPdv } from "@/services/api-main/product-pdv/transformers/transformers";
+import type { UIProductManager } from "@/services/api-main/product-manager/transformers/transformers";
 import type { UIPtype } from "@/services/api-main/ptype/transformers/transformers";
 import { CatalogToolbar } from "./catalog-toolbar/catalog-toolbar";
 import { ProductGrid } from "./product-grid/product-grid";
 import type { CategoryOption } from "./types/catalog-types";
 
 interface CatalogShellProps {
-  products: UIProductPdv[];
+  products: UIProductManager[];
   total: number;
   brands: UIBrand[];
   categories: CategoryOption[];

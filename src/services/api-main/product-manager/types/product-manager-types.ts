@@ -1,6 +1,6 @@
 import "server-only";
 
-interface ProductPdvBaseRequest {
+interface ProductManagerBaseRequest {
   pe_app_id?: number;
   pe_system_client_id?: number;
   pe_store_id?: number;
@@ -11,7 +11,7 @@ interface ProductPdvBaseRequest {
   pe_person_id?: number;
 }
 
-interface ProductPdvBaseResponse {
+interface ProductManagerBaseResponse {
   statusCode: number;
   message: string;
   recordId: string;
@@ -22,25 +22,52 @@ interface ProductPdvBaseResponse {
 
 // --- Request Interfaces ---
 
-export interface ProductPdvFindAllRequest extends ProductPdvBaseRequest {
+export interface ProductManagerFindAllRequest
+  extends ProductManagerBaseRequest {
   pe_search?: string;
+  pe_ean?: string;
+  pe_reference?: string;
+  pe_model?: string;
   pe_taxonomy_id?: number;
   pe_type_id?: number;
   pe_brand_id?: number;
+  pe_supplier_id?: number;
+  pe_physical_id?: number;
+  pe_flag_best_sellers?: number;
+  pe_flag_lowest_selling?: number;
+  pe_flag_stalled_product?: number;
+  pe_flag_latest_arrivals?: number;
+  pe_flag_price_less_than?: number;
+  pe_flag_low_stock?: number;
+  pe_flag_no_image?: number;
+  pe_flag_no_description?: number;
+  pe_flag_no_sales_copy?: number;
+  pe_flag_promotion?: number;
+  pe_flag_featured?: number;
+  pe_flag_imported?: number;
+  pe_flag_inactive?: number;
+  pe_flag_consignment?: number;
+  pe_flag_discontinued?: number;
+  pe_flag_no_inventory?: number;
   pe_flag_stock?: number;
   pe_flag_service?: number;
+  pe_flag_registration?: number;
+  pe_start_date?: string;
+  pe_end_date?: string;
   pe_records_quantity?: number;
   pe_page_id?: number;
   pe_column_id?: number;
   pe_order_id?: number;
 }
 
-export interface ProductPdvFindByIdRequest extends ProductPdvBaseRequest {
+export interface ProductManagerFindByIdRequest
+  extends ProductManagerBaseRequest {
   pe_product_id?: number;
   pe_type_business?: number;
 }
 
-export interface ProductPdvFindSearchRequest extends ProductPdvBaseRequest {
+export interface ProductManagerFindSearchRequest
+  extends ProductManagerBaseRequest {
   pe_customer_id?: number;
   pe_search?: string;
   pe_flag_stock?: number;
@@ -49,7 +76,7 @@ export interface ProductPdvFindSearchRequest extends ProductPdvBaseRequest {
 
 // --- Entity Interfaces (campos retornados pela API) ---
 
-export interface ProductPdvListItem {
+export interface ProductManagerListItem {
   ID_PRODUTO: number;
   SKU: number;
   PRODUTO: string;
@@ -85,7 +112,7 @@ export interface ProductPdvListItem {
   DATADOCADASTRO: string;
 }
 
-export interface ProductPdvSearchItem {
+export interface ProductManagerSearchItem {
   ID_PRODUTO: number;
   SKU: number;
   PRODUTO: string;
@@ -122,7 +149,7 @@ export interface ProductPdvSearchItem {
   DATADOCADASTRO: string;
 }
 
-export interface ProductPdvDetail {
+export interface ProductManagerDetail {
   ID_PRODUTO: number;
   SKU: number;
   PRODUTO: string;
@@ -170,7 +197,7 @@ export interface ProductPdvDetail {
   DT_UPDATE: string;
 }
 
-export interface ProductPdvRelatedCategory {
+export interface ProductManagerRelatedCategory {
   ID_TAXONOMY: number;
   PARENT_ID: number;
   TAXONOMIA: string;
@@ -179,7 +206,7 @@ export interface ProductPdvRelatedCategory {
   LEVEL: number;
 }
 
-export interface ProductPdvRelatedProduct {
+export interface ProductManagerRelatedProduct {
   ID_TAXONOMY: number;
   SKU: number;
   PRODUTO: string;
@@ -200,60 +227,63 @@ export interface ProductPdvRelatedProduct {
 
 // --- Response Interfaces ---
 
-export interface ProductPdvFindAllResponse extends ProductPdvBaseResponse {
+export interface ProductManagerFindAllResponse
+  extends ProductManagerBaseResponse {
   data: {
-    "Product Pdv find All": ProductPdvListItem[];
+    "Product Manager find All": ProductManagerListItem[];
   };
 }
 
-export interface ProductPdvFindByIdData {
-  "Product Pdv find Id": ProductPdvDetail[];
-  "Related Categories": ProductPdvRelatedCategory[];
-  "Related Products": ProductPdvRelatedProduct[];
+export interface ProductManagerFindByIdData {
+  "Product Manager find Id": ProductManagerDetail[];
+  "Related Categories": ProductManagerRelatedCategory[];
+  "Related Products": ProductManagerRelatedProduct[];
 }
 
-export interface ProductPdvFindByIdResponse extends ProductPdvBaseResponse {
-  data: ProductPdvFindByIdData;
+export interface ProductManagerFindByIdResponse
+  extends ProductManagerBaseResponse {
+  data: ProductManagerFindByIdData;
 }
 
-export interface ProductPdvFindSearchResponse extends ProductPdvBaseResponse {
+export interface ProductManagerFindSearchResponse
+  extends ProductManagerBaseResponse {
   data: {
-    "Product Pdv find Search": ProductPdvSearchItem[];
+    "Product Manager find Search": ProductManagerSearchItem[];
   };
 }
 
 // --- Error Classes ---
 
-export class ProductPdvError extends Error {
+export class ProductManagerError extends Error {
   constructor(
     message: string,
     public readonly code?: string,
     public readonly statusCode?: number,
   ) {
     super(message);
-    this.name = "ProductPdvError";
-    Object.setPrototypeOf(this, ProductPdvError.prototype);
+    this.name = "ProductManagerError";
+    Object.setPrototypeOf(this, ProductManagerError.prototype);
   }
 }
 
-export class ProductPdvNotFoundError extends ProductPdvError {
+export class ProductManagerNotFoundError extends ProductManagerError {
   constructor(params?: Record<string, unknown>) {
     const message = params
-      ? `Produto PDV não encontrado com os parâmetros: ${JSON.stringify(params)}`
-      : "Produto PDV não encontrado";
-    super(message, "PRODUCT_PDV_NOT_FOUND", 100404);
-    this.name = "ProductPdvNotFoundError";
-    Object.setPrototypeOf(this, ProductPdvNotFoundError.prototype);
+      ? `Produto do Manager não encontrado com os parâmetros: ${JSON.stringify(params)}`
+      : "Produto do Manager não encontrado";
+    super(message, "PRODUCT_MANAGER_NOT_FOUND", 100404);
+    this.name = "ProductManagerNotFoundError";
+    Object.setPrototypeOf(this, ProductManagerNotFoundError.prototype);
   }
 }
 
-export class ProductPdvValidationError extends ProductPdvError {
+export class ProductManagerValidationError extends ProductManagerError {
   constructor(
     message: string,
     public readonly validationErrors?: Record<string, string[]>,
   ) {
-    super(message, "PRODUCT_PDV_VALIDATION_ERROR", 100400);
-    this.name = "ProductPdvValidationError";
-    Object.setPrototypeOf(this, ProductPdvValidationError.prototype);
+    super(message, "PRODUCT_MANAGER_VALIDATION_ERROR", 100400);
+    this.name = "ProductManagerValidationError";
+    Object.setPrototypeOf(this, ProductManagerValidationError.prototype);
   }
 }

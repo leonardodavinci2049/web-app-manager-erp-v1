@@ -11,7 +11,7 @@ import {
   useTransition,
 } from "react";
 import type { UIBrand } from "@/services/api-main/brand/transformers/transformers";
-import type { UIProductPdv } from "@/services/api-main/product-pdv/transformers/transformers";
+import type { UIProductManager } from "@/services/api-main/product-manager/transformers/transformers";
 import type { UIPtype } from "@/services/api-main/ptype/transformers/transformers";
 import {
   buildCatalogUrl,
@@ -39,7 +39,7 @@ interface ActiveFilter {
 }
 
 interface CatalogToolbarProps {
-  products: UIProductPdv[];
+  products: UIProductManager[];
   /** Total de produtos que correspondem aos filtros (paginacao). */
   total: number;
   brands: UIBrand[];

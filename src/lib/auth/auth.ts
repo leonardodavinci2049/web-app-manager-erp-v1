@@ -32,7 +32,7 @@ import {
 import { ac } from "./permissions/statements";
 
 export const auth = betterAuth({
-  appName: "PDV WinERP",
+  appName: "WEB APP MANAGER",
   secret: envs.BETTER_AUTH_SECRET,
   database: createPool({
     host: envs.DATABASE_HOST,

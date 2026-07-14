@@ -6,12 +6,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import type { UIProductPdv } from "@/services/api-main/product-pdv/transformers/transformers";
+import type { UIProductManager } from "@/services/api-main/product-manager/transformers/transformers";
 import { createImageErrorHandler, getValidImageUrl } from "@/utils/image-utils";
 import { ProductImageUpload } from "../product-image-upload";
 
 interface ProductImageSectionProps {
-  product: UIProductPdv;
+  product: UIProductManager;
   viewMode: "grid" | "list";
   productDetailsHref?: string;
   hasPromotion?: boolean;

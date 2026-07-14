@@ -3,7 +3,7 @@ import { SiteHeaderWithBreadcrumb } from "@/components/dashboard/header/site-hea
 import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
 import { getBrands } from "@/services/api-main/brand/brand-service-api";
-import { getProductsPdv } from "@/services/api-main/product-pdv/product-pdv-service-api";
+import { getProductsManager } from "@/services/api-main/product-manager/product-manager-service-api";
 import { getPtypes } from "@/services/api-main/ptype/ptype-service-api";
 import { getTaxonomyMenu } from "@/services/api-main/taxonomy-base/taxonomy-base-service-api";
 import {
@@ -39,7 +39,7 @@ export default async function DashboardPage(props: DashboardPageProps) {
   const catalogReturnTo = buildCatalogReturnTo(searchParams, CATALOG_PATHNAME);
 
   const [productsResult, brands, categories, ptypes] = await Promise.all([
-    getProductsPdv({
+    getProductsManager({
       search: searchParams.search,
       taxonomyId: searchParams.category
         ? Number(searchParams.category)
@@ -53,11 +53,11 @@ export default async function DashboardPage(props: DashboardPageProps) {
       orderId: sort.orderId,
       ...apiContext,
     }).catch((error) => {
-      logger.error("Erro ao buscar produtos PDV:", error);
+      logger.error("Erro ao buscar produtos do Manager:", error);
       return {
         products: [],
         total: 0,
-      } as Awaited<ReturnType<typeof getProductsPdv>>;
+      } as Awaited<ReturnType<typeof getProductsManager>>;
     }),
     getBrands({ limit: 100, ...apiContext }).catch((error) => {
       logger.error("Erro ao buscar marcas:", error);

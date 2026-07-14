@@ -1,9 +1,9 @@
 import { Skeleton } from "@/components/ui/skeleton";
 // Server Component - não usar hooks de cliente
 import type {
-  UIProductPdv,
-  UIProductPdvRelatedCategory,
-} from "@/services/api-main/product-pdv/transformers/transformers";
+  UIProductManager,
+  UIProductManagerRelatedCategory,
+} from "@/services/api-main/product-manager/transformers/transformers";
 import { formatCurrency } from "@/utils/common-utils";
 import { BackToCatalogButton } from "./BackToCatalogButton";
 import { ProductDetailsTabs } from "./ProductDetailsTabs";
@@ -11,9 +11,9 @@ import { ProductImageGalleryServer } from "./ProductImageGallery/ProductImageGal
 import { ProductInfoDisplay } from "./ProductInfoDisplay";
 
 interface ProductDetailsLayoutProps {
-  product: UIProductPdv;
+  product: UIProductManager;
   productId: number;
-  relatedCategories: UIProductPdvRelatedCategory[];
+  relatedCategories: UIProductManagerRelatedCategory[];
 }
 
 export function ProductDetailsLayout({
@@ -95,7 +95,7 @@ export function ProductDetailsLayout({
   const corporatePrice =
     corporatePriceRaw > 0 ? formatCurrency(corporatePriceRaw) : null;
 
-  // Stock status - use storeStock from UIProductPdv
+  // Stock status - use storeStock from UIProductManager
   const stockLevel = product.storeStock ?? 0;
   const isOutOfStock = stockLevel === 0;
   const isLowStock = stockLevel > 0 && stockLevel <= 5;

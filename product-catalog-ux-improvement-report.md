@@ -33,7 +33,7 @@ A análise foi baseada em:
 
 - revisão estática de `src/app/dashboard/page.tsx`;
 - revisão dos componentes em `src/app/dashboard/_components/catalog/`;
-- revisão dos DTOs e do serviço de produtos PDV;
+- revisão dos DTOs e do serviço de produtos do Manager;
 - verificação das rotas adjacentes de criação, importação e detalhes do produto;
 - comparação documental com padrões atuais de Shopify, Adobe Commerce e Odoo;
 - critérios de acessibilidade do WCAG 2.2 e padrões de interação do WAI-ARIA.
@@ -89,7 +89,7 @@ Os filtros atuais descrevem atributos básicos, mas não identificam problemas o
 - preço ausente, zerado ou incoerente;
 - cadastro incompleto para publicação;
 - produto desatualizado há muito tempo;
-- falha de sincronização com e-commerce, PDV ou outro canal;
+- falha de sincronização com e-commerce, WEB APP MANAGER ou outro canal;
 - produto alterado recentemente;
 - produto ativo, inativo, rascunho, bloqueado ou arquivado.
 
@@ -492,7 +492,7 @@ Em ordem prática: corrigir as fricções do filtro e os estados de erro, implan
 - `src/app/dashboard/_components/catalog/product-grid/load-more-button.tsx`
 - `src/app/dashboard/_components/catalog/product-table.tsx`
 - `src/app/dashboard/_components/catalog/product-card/`
-- `src/services/api-main/product-pdv/`
+- `src/services/api-main/product-manager/`
 - `src/app/dashboard/product/new-product/page.tsx`
 - `src/app/dashboard/product/import-products/page.tsx`
 
