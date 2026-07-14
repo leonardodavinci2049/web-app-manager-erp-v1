@@ -25,11 +25,35 @@ interface ProductManagerBaseResponse {
 export interface ProductManagerFindAllRequest
   extends ProductManagerBaseRequest {
   pe_search?: string;
+  pe_ean?: string;
+  pe_reference?: string;
+  pe_model?: string;
   pe_taxonomy_id?: number;
   pe_type_id?: number;
   pe_brand_id?: number;
+  pe_supplier_id?: number;
+  pe_physical_id?: number;
+  pe_flag_best_sellers?: number;
+  pe_flag_lowest_selling?: number;
+  pe_flag_stalled_product?: number;
+  pe_flag_latest_arrivals?: number;
+  pe_flag_price_less_than?: number;
+  pe_flag_low_stock?: number;
+  pe_flag_no_image?: number;
+  pe_flag_no_description?: number;
+  pe_flag_no_sales_copy?: number;
+  pe_flag_promotion?: number;
+  pe_flag_featured?: number;
+  pe_flag_imported?: number;
+  pe_flag_inactive?: number;
+  pe_flag_consignment?: number;
+  pe_flag_discontinued?: number;
+  pe_flag_no_inventory?: number;
   pe_flag_stock?: number;
   pe_flag_service?: number;
+  pe_flag_registration?: number;
+  pe_start_date?: string;
+  pe_end_date?: string;
   pe_records_quantity?: number;
   pe_page_id?: number;
   pe_column_id?: number;

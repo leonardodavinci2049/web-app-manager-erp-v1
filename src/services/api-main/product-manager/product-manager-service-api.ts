@@ -67,11 +67,35 @@ export class ProductManagerServiceApi extends BaseApiService {
         pe_user_role: validatedParams.pe_user_role,
         pe_person_id: validatedParams.pe_person_id,
         pe_search: validatedParams.pe_search ?? "",
+        pe_ean: validatedParams.pe_ean ?? "",
+        pe_reference: validatedParams.pe_reference ?? "",
+        pe_model: validatedParams.pe_model ?? "",
         pe_taxonomy_id: validatedParams.pe_taxonomy_id ?? 0,
         pe_type_id: validatedParams.pe_type_id ?? 0,
         pe_brand_id: validatedParams.pe_brand_id ?? 0,
+        pe_supplier_id: validatedParams.pe_supplier_id ?? 0,
+        pe_physical_id: validatedParams.pe_physical_id ?? 0,
+        pe_flag_best_sellers: validatedParams.pe_flag_best_sellers ?? 0,
+        pe_flag_lowest_selling: validatedParams.pe_flag_lowest_selling ?? 0,
+        pe_flag_stalled_product: validatedParams.pe_flag_stalled_product ?? 0,
+        pe_flag_latest_arrivals: validatedParams.pe_flag_latest_arrivals ?? 0,
+        pe_flag_price_less_than: validatedParams.pe_flag_price_less_than ?? 0,
+        pe_flag_low_stock: validatedParams.pe_flag_low_stock ?? 0,
+        pe_flag_no_image: validatedParams.pe_flag_no_image ?? 0,
+        pe_flag_no_description: validatedParams.pe_flag_no_description ?? 0,
+        pe_flag_no_sales_copy: validatedParams.pe_flag_no_sales_copy ?? 0,
+        pe_flag_promotion: validatedParams.pe_flag_promotion ?? 0,
+        pe_flag_featured: validatedParams.pe_flag_featured ?? 0,
+        pe_flag_imported: validatedParams.pe_flag_imported ?? 0,
+        pe_flag_inactive: validatedParams.pe_flag_inactive ?? 0,
+        pe_flag_consignment: validatedParams.pe_flag_consignment ?? 0,
+        pe_flag_discontinued: validatedParams.pe_flag_discontinued ?? 0,
+        pe_flag_no_inventory: validatedParams.pe_flag_no_inventory ?? 0,
         pe_flag_stock: validatedParams.pe_flag_stock ?? 0,
         pe_flag_service: validatedParams.pe_flag_service ?? 0,
+        pe_flag_registration: validatedParams.pe_flag_registration ?? 0,
+        pe_start_date: validatedParams.pe_start_date ?? "",
+        pe_end_date: validatedParams.pe_end_date ?? "",
         pe_records_quantity: validatedParams.pe_records_quantity ?? 100,
         pe_page_id: validatedParams.pe_page_id ?? 0,
         pe_column_id: validatedParams.pe_column_id ?? 1,
@@ -255,25 +279,51 @@ export class ProductManagerServiceApi extends BaseApiService {
 
 export const productManagerServiceApi = new ProductManagerServiceApi();
 
+export interface GetProductsManagerParams {
+  search?: string;
+  ean?: string;
+  reference?: string;
+  model?: string;
+  taxonomyId?: number;
+  typeId?: number;
+  brandId?: number;
+  supplierId?: number;
+  physicalId?: number;
+  flagBestSellers?: number;
+  flagLowestSelling?: number;
+  flagStalledProduct?: number;
+  flagLatestArrivals?: number;
+  flagPriceLessThan?: number;
+  flagLowStock?: number;
+  flagNoImage?: number;
+  flagNoDescription?: number;
+  flagNoSalesCopy?: number;
+  flagPromotion?: number;
+  flagFeatured?: number;
+  flagImported?: number;
+  flagInactive?: number;
+  flagConsignment?: number;
+  flagDiscontinued?: number;
+  flagNoInventory?: number;
+  flagStock?: number;
+  flagService?: number;
+  flagRegistration?: number;
+  startDate?: string;
+  endDate?: string;
+  recordsQuantity?: number;
+  pageId?: number;
+  columnId?: number;
+  orderId?: number;
+  pe_system_client_id?: number;
+  pe_organization_id?: string;
+  pe_user_id?: string;
+  pe_user_name?: string;
+  pe_user_role?: string;
+  pe_person_id?: number;
+}
+
 export async function getProductsManager(
-  params: {
-    search?: string;
-    taxonomyId?: number;
-    typeId?: number;
-    brandId?: number;
-    flagStock?: number;
-    flagService?: number;
-    recordsQuantity?: number;
-    pageId?: number;
-    columnId?: number;
-    orderId?: number;
-    pe_system_client_id?: number;
-    pe_organization_id?: string;
-    pe_user_id?: string;
-    pe_user_name?: string;
-    pe_user_role?: string;
-    pe_person_id?: number;
-  } = {},
+  params: GetProductsManagerParams = {},
 ): Promise<{ products: UIProductManager[]; total: number }> {
   if (!params.pe_system_client_id) {
     return { products: [], total: 0 };
@@ -281,11 +331,35 @@ export async function getProductsManager(
 
   const response = await productManagerServiceApi.findAllProductsManager({
     pe_search: params.search,
+    pe_ean: params.ean,
+    pe_reference: params.reference,
+    pe_model: params.model,
     pe_taxonomy_id: params.taxonomyId,
     pe_type_id: params.typeId,
     pe_brand_id: params.brandId,
+    pe_supplier_id: params.supplierId,
+    pe_physical_id: params.physicalId,
+    pe_flag_best_sellers: params.flagBestSellers,
+    pe_flag_lowest_selling: params.flagLowestSelling,
+    pe_flag_stalled_product: params.flagStalledProduct,
+    pe_flag_latest_arrivals: params.flagLatestArrivals,
+    pe_flag_price_less_than: params.flagPriceLessThan,
+    pe_flag_low_stock: params.flagLowStock,
+    pe_flag_no_image: params.flagNoImage,
+    pe_flag_no_description: params.flagNoDescription,
+    pe_flag_no_sales_copy: params.flagNoSalesCopy,
+    pe_flag_promotion: params.flagPromotion,
+    pe_flag_featured: params.flagFeatured,
+    pe_flag_imported: params.flagImported,
+    pe_flag_inactive: params.flagInactive,
+    pe_flag_consignment: params.flagConsignment,
+    pe_flag_discontinued: params.flagDiscontinued,
+    pe_flag_no_inventory: params.flagNoInventory,
     pe_flag_stock: params.flagStock,
     pe_flag_service: params.flagService,
+    pe_flag_registration: params.flagRegistration,
+    pe_start_date: params.startDate,
+    pe_end_date: params.endDate,
     pe_records_quantity: params.recordsQuantity,
     pe_page_id: params.pageId,
     pe_column_id: params.columnId,
