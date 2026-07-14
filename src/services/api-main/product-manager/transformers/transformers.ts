@@ -1,12 +1,12 @@
 import type {
-  ProductPdvDetail,
-  ProductPdvListItem,
-  ProductPdvRelatedCategory,
-  ProductPdvRelatedProduct,
-  ProductPdvSearchItem,
-} from "../types/product-pdv-types";
+  ProductManagerDetail,
+  ProductManagerListItem,
+  ProductManagerRelatedCategory,
+  ProductManagerRelatedProduct,
+  ProductManagerSearchItem,
+} from "../types/product-manager-types";
 
-export interface UIProductPdv {
+export interface UIProductManager {
   id: number;
   taxonomyId?: number;
   sku: number;
@@ -63,9 +63,9 @@ export interface UIProductPdv {
   updatedAt?: string;
 }
 
-export function transformProductPdvListItem(
-  entity: ProductPdvListItem,
-): UIProductPdv {
+export function transformProductManagerListItem(
+  entity: ProductManagerListItem,
+): UIProductManager {
   return {
     id: entity.ID_PRODUTO,
     sku: entity.SKU,
@@ -103,15 +103,15 @@ export function transformProductPdvListItem(
   };
 }
 
-export function transformProductPdvList(
-  items: ProductPdvListItem[],
-): UIProductPdv[] {
-  return items.map(transformProductPdvListItem);
+export function transformProductManagerList(
+  items: ProductManagerListItem[],
+): UIProductManager[] {
+  return items.map(transformProductManagerListItem);
 }
 
-export function transformProductPdvSearchItem(
-  entity: ProductPdvSearchItem,
-): UIProductPdv {
+export function transformProductManagerSearchItem(
+  entity: ProductManagerSearchItem,
+): UIProductManager {
   return {
     id: entity.ID_PRODUTO,
     sku: entity.SKU,
@@ -150,15 +150,15 @@ export function transformProductPdvSearchItem(
   };
 }
 
-export function transformProductPdvSearchList(
-  items: ProductPdvSearchItem[],
-): UIProductPdv[] {
-  return items.map(transformProductPdvSearchItem);
+export function transformProductManagerSearchList(
+  items: ProductManagerSearchItem[],
+): UIProductManager[] {
+  return items.map(transformProductManagerSearchItem);
 }
 
-export function transformProductPdvDetail(
-  entity: ProductPdvDetail,
-): UIProductPdv {
+export function transformProductManagerDetail(
+  entity: ProductManagerDetail,
+): UIProductManager {
   return {
     id: entity.ID_PRODUTO,
     sku: entity.SKU,
@@ -210,27 +210,27 @@ export function transformProductPdvDetail(
   };
 }
 
-export function transformProductPdvDetailList(
-  items: ProductPdvDetail[],
-): UIProductPdv[] {
-  return items.map(transformProductPdvDetail);
+export function transformProductManagerDetailList(
+  items: ProductManagerDetail[],
+): UIProductManager[] {
+  return items.map(transformProductManagerDetail);
 }
 
-export function transformProductPdv(
-  entity: ProductPdvListItem | ProductPdvDetail | null | undefined,
-): UIProductPdv | null {
+export function transformProductManager(
+  entity: ProductManagerListItem | ProductManagerDetail | null | undefined,
+): UIProductManager | null {
   if (!entity) return null;
 
   if ("ANOTACOES" in entity) {
-    return transformProductPdvDetail(entity as ProductPdvDetail);
+    return transformProductManagerDetail(entity as ProductManagerDetail);
   }
 
-  return transformProductPdvListItem(entity as ProductPdvListItem);
+  return transformProductManagerListItem(entity as ProductManagerListItem);
 }
 
 // --- Related Categories ---
 
-export interface UIProductPdvRelatedCategory {
+export interface UIProductManagerRelatedCategory {
   taxonomyId: number;
   parentId: number;
   name: string;
@@ -240,8 +240,8 @@ export interface UIProductPdvRelatedCategory {
 }
 
 export function transformRelatedCategory(
-  entity: ProductPdvRelatedCategory,
-): UIProductPdvRelatedCategory {
+  entity: ProductManagerRelatedCategory,
+): UIProductManagerRelatedCategory {
   return {
     taxonomyId: entity.ID_TAXONOMY,
     parentId: entity.PARENT_ID,
@@ -253,14 +253,14 @@ export function transformRelatedCategory(
 }
 
 export function transformRelatedCategories(
-  items: ProductPdvRelatedCategory[],
-): UIProductPdvRelatedCategory[] {
+  items: ProductManagerRelatedCategory[],
+): UIProductManagerRelatedCategory[] {
   return items.map(transformRelatedCategory);
 }
 
 // --- Related Products ---
 
-export interface UIProductPdvRelatedProduct {
+export interface UIProductManagerRelatedProduct {
   taxonomyId: number;
   sku: number;
   name: string;
@@ -280,8 +280,8 @@ export interface UIProductPdvRelatedProduct {
 }
 
 export function transformRelatedProduct(
-  entity: ProductPdvRelatedProduct,
-): UIProductPdvRelatedProduct {
+  entity: ProductManagerRelatedProduct,
+): UIProductManagerRelatedProduct {
   return {
     taxonomyId: entity.ID_TAXONOMY,
     sku: entity.SKU,
@@ -303,7 +303,7 @@ export function transformRelatedProduct(
 }
 
 export function transformRelatedProducts(
-  items: ProductPdvRelatedProduct[],
-): UIProductPdvRelatedProduct[] {
+  items: ProductManagerRelatedProduct[],
+): UIProductManagerRelatedProduct[] {
   return items.map(transformRelatedProduct);
 }

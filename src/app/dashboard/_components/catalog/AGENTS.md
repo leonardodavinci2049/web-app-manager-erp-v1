@@ -102,7 +102,7 @@ Actions consumed: `action-product-updates` (name, price, stock), `action-product
 
 ## Relevant External Dependencies
 
-- **UI Types:** `@/services/api-main/{brand,product-pdv,ptype,taxonomy-base,taxonomy-rel}/transformers/transformers` (`UIProductPdv`, `UIBrand`, `UIPtype`, `UITaxonomyMenuItem`, `UITaxonomyRelProduct`).
+- **UI Types:** `@/services/api-main/{brand,product-manager,ptype,taxonomy-base,taxonomy-rel}/transformers/transformers` (`UIProductManager`, `UIBrand`, `UIPtype`, `UITaxonomyMenuItem`, `UITaxonomyRelProduct`).
 - **Shared Types:** `@/types/types` (`SortOption`, `ViewMode`, `ProductCategory`).
 - **Utils:** `@/utils/common-utils` (`formatCurrency`) and `@/utils/image-utils` (`getValidImageUrl`, `createImageErrorHandler`).
 - **UI (shadcn/ui):** `@/components/ui/*` (`Button`, `Card`, `Input`, `Sheet`, `Dialog`, `Select`, `Badge`, `Switch`, `Table`, `Skeleton`, etc.).

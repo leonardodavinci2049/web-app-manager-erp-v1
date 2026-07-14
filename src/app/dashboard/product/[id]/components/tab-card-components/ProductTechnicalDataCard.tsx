@@ -1,11 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { UIProductPdv } from "@/services/api-main/product-pdv/transformers/transformers";
+import type { UIProductManager } from "@/services/api-main/product-manager/transformers/transformers";
 import { ChangeProductBrandDialog } from "../ChangeProductBrandDialog";
 import { ChangeProductTypeDialog } from "../ChangeProductTypeDialog";
 import { ProductFlagsCard } from "./ProductFlagsCard";
 
 interface ProductTechnicalDataCardProps {
-  product: UIProductPdv;
+  product: UIProductManager;
   productId: number;
   onDataChange?: () => void;
 }

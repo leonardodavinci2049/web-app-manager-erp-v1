@@ -1,9 +1,9 @@
 import { Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import type {
-  UIProductPdv,
-  UIProductPdvRelatedCategory,
-} from "@/services/api-main/product-pdv/transformers/transformers";
+  UIProductManager,
+  UIProductManagerRelatedCategory,
+} from "@/services/api-main/product-manager/transformers/transformers";
 import { ProductCategoriesCard } from "./ProductCategoriesCard";
 import { ProductNameEditor } from "./ProductNameEditor";
 import { ProductPricingCard } from "./ProductPricingCard";
@@ -11,8 +11,8 @@ import { ShortDescriptionEditor } from "./ShortDescriptionEditor";
 import { ProductStockCard } from "./tab-card-components/ProductStockCard";
 
 interface ProductInfoDisplayProps {
-  product: UIProductPdv;
-  relatedCategories: UIProductPdvRelatedCategory[];
+  product: UIProductManager;
+  relatedCategories: UIProductManagerRelatedCategory[];
   stockStatus: {
     label: string;
     variant: "default" | "destructive" | "secondary";

@@ -7,7 +7,7 @@ import { defaultStatements as orgDefaultStatements } from "better-auth/plugins/o
  * - defaultStatements do admin plugin (user, session)
  * - defaultStatements do organization plugin (organization, member, invitation)
  * - permissões da plataforma (platform)
- * - permissões do PDV (product, order, customer, report, cashier, etc)
+ * - permissões do WEB APP MANAGER (product, order, customer, report, cashier, etc)
  *
  * Roles disponíveis na organização:
  * - owner: Proprietário da loja (todas as permissões)
@@ -44,7 +44,7 @@ const statement = {
   ],
 
   // ==========================================
-  // NÍVEL ORGANIZAÇÃO (PDV)
+  // NÍVEL ORGANIZAÇÃO (WEB APP MANAGER)
   // Permissões para operação dentro de uma organização/loja
   // ==========================================
 

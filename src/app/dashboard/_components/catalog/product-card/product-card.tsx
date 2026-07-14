@@ -2,7 +2,7 @@ import { Eye } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import type { UIProductPdv } from "@/services/api-main/product-pdv/transformers/transformers";
+import type { UIProductManager } from "@/services/api-main/product-manager/transformers/transformers";
 import type { ProductCategory } from "@/types/types";
 import { formatCurrency } from "@/utils/common-utils";
 import { CategoryTags } from "../category-tags";
@@ -16,7 +16,7 @@ import { ProductCardFields } from "./product-card-fields";
 import { ProductImageSection } from "./product-image-section";
 
 interface ProductCardProps {
-  product: UIProductPdv;
+  product: UIProductManager;
   viewMode: ViewMode;
   catalogReturnTo: string;
   eagerImage?: boolean;

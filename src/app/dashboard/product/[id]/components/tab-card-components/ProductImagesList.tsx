@@ -14,11 +14,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import type { UIProductPdv } from "@/services/api-main/product-pdv/transformers/transformers";
+import type { UIProductManager } from "@/services/api-main/product-manager/transformers/transformers";
 import type { GalleryImage } from "@/types/api-assets";
 
 interface ProductImagesListProps {
-  product: UIProductPdv;
+  product: UIProductManager;
   productId: number;
   initialDescription?: string;
 }

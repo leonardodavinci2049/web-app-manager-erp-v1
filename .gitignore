@@ -59,6 +59,6 @@ src/core/config-tenant
 # project generated files
 /scripts
 /docs
-
+/API-documentation
 
 

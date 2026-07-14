@@ -15,7 +15,7 @@ const user = ac.newRole(userAc.statements);
  * ===========================================
  *
  * Administrador da PLATAFORMA com acesso total ao sistema.
- * NÃO opera o PDV das organizações, apenas GERENCIA a plataforma.
+ * NÃO opera o WEB APP MANAGER das organizações, apenas GERENCIA a plataforma.
  *
  * Usado por: Você (desenvolvedor/dono do sistema SaaS)
  *
@@ -51,7 +51,7 @@ const superAdmin = ac.newRole({
     "send-announcements",
   ],
 
-  // ⚠️ NOTA: SuperAdmin NÃO tem permissões de PDV (product, order, etc)
+  // ⚠️ NOTA: SuperAdmin NÃO tem permissões de WEB APP MANAGER (product, order, etc)
   // Ele gerencia a plataforma, não opera as lojas dos clientes.
   // Se precisar acessar dados de uma organização específica,
   // use "impersonate-organization" para entrar como suporte.

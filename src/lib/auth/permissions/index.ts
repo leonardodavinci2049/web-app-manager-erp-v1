@@ -4,7 +4,7 @@
  * Este módulo exporta todas as configurações de controle de acesso
  * para os plugins organization e admin do Better Auth.
  *
- * Roles de Organização (PDV):
+ * Roles de Organização (WEB APP MANAGER):
  * - owner: Proprietário da loja (todas as permissões)
  * - manager: Gerente da loja (configurações, usuários, cadastros)
  * - salesperson: Vendedores (clientes, pedidos)
