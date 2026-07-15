@@ -25,6 +25,10 @@ export interface UIProductManager {
   pagePath?: string;
   slug?: string;
   storeStock: number;
+  salesMonth?: number;
+  salesLastThreeMonths?: number;
+  salesYear?: number;
+  salesAllTime?: number;
   valueType?: string;
   productValue?: string;
   wholesalePrice: string;
@@ -84,6 +88,10 @@ export function transformProductManagerListItem(
     pagePath: entity.PATH_PAGE || undefined,
     slug: entity.SLUG || undefined,
     storeStock: entity.ESTOQUE_LOJA,
+    salesMonth: entity.QT_VENDAS_MES,
+    salesLastThreeMonths: entity.QT_VENDAS_3MESES,
+    salesYear: entity.QT_VENDAS_ANO,
+    salesAllTime: entity.QT_VENDAS_ALL,
     wholesalePrice: entity.VL_ATACADO,
     corporatePrice: entity.VL_CORPORATIVO,
     retailPrice: entity.VL_VAREJO,
@@ -176,6 +184,10 @@ export function transformProductManagerDetail(
     pagePath: entity.PATH_PAGE || undefined,
     slug: entity.SLUG || undefined,
     storeStock: entity.ESTOQUE_LOJA,
+    salesMonth: entity.QT_VENDAS_MES,
+    salesLastThreeMonths: entity.QT_VENDAS_3MESES,
+    salesYear: entity.QT_VENDAS_ANO,
+    salesAllTime: entity.QT_VENDAS_ALL,
     wholesalePrice: entity.VL_ATACADO,
     corporatePrice: entity.VL_CORPORATIVO,
     retailPrice: entity.VL_VAREJO,

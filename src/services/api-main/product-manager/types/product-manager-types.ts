@@ -49,6 +49,8 @@ export interface ProductManagerFindAllRequest
   pe_flag_consignment?: number;
   pe_flag_discontinued?: number;
   pe_flag_no_inventory?: number;
+  pe_flag_Website_Off?: number;
+  pe_flag_Premium?: number;
   pe_flag_stock?: number;
   pe_flag_service?: number;
   pe_flag_registration?: number;
@@ -93,6 +95,10 @@ export interface ProductManagerListItem {
   PATH_IMAGEM: string;
   PATH_PAGE: string;
   SLUG: string;
+  QT_VENDAS_MES: number;
+  QT_VENDAS_3MESES: number;
+  QT_VENDAS_ANO: number;
+  QT_VENDAS_ALL: number;
   ESTOQUE_LOJA: number;
   VL_ATACADO: string;
   VL_CORPORATIVO: string;
@@ -172,6 +178,10 @@ export interface ProductManagerDetail {
   PRATA: string;
   BRONZE: string;
   ESTOQUE_LOJA: number;
+  QT_VENDAS_MES: number;
+  QT_VENDAS_3MESES: number;
+  QT_VENDAS_ANO: number;
+  QT_VENDAS_ALL: number;
   TEMPODEGARANTIA_DIA: number;
   PESO_GR: number;
   COMPRIMENTO_MM: number;

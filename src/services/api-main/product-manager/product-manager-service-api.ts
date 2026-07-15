@@ -91,6 +91,8 @@ export class ProductManagerServiceApi extends BaseApiService {
         pe_flag_consignment: validatedParams.pe_flag_consignment ?? 0,
         pe_flag_discontinued: validatedParams.pe_flag_discontinued ?? 0,
         pe_flag_no_inventory: validatedParams.pe_flag_no_inventory ?? 0,
+        pe_flag_Website_Off: validatedParams.pe_flag_Website_Off ?? 0,
+        pe_flag_Premium: validatedParams.pe_flag_Premium ?? 0,
         pe_flag_stock: validatedParams.pe_flag_stock ?? 0,
         pe_flag_service: validatedParams.pe_flag_service ?? 0,
         pe_flag_registration: validatedParams.pe_flag_registration ?? 0,
@@ -305,6 +307,8 @@ export interface GetProductsManagerParams {
   flagConsignment?: number;
   flagDiscontinued?: number;
   flagNoInventory?: number;
+  flagWebsiteOff?: number;
+  flagPremium?: number;
   flagStock?: number;
   flagService?: number;
   flagRegistration?: number;
@@ -355,6 +359,8 @@ export async function getProductsManager(
     pe_flag_consignment: params.flagConsignment,
     pe_flag_discontinued: params.flagDiscontinued,
     pe_flag_no_inventory: params.flagNoInventory,
+    pe_flag_Website_Off: params.flagWebsiteOff,
+    pe_flag_Premium: params.flagPremium,
     pe_flag_stock: params.flagStock,
     pe_flag_service: params.flagService,
     pe_flag_registration: params.flagRegistration,
