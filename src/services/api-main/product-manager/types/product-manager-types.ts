@@ -101,7 +101,7 @@ export interface ProductManagerListItem {
   OURO: string;
   PRATA: string;
   BRONZE: string;
-  DECONTO: string;
+  DESCONTO: string;
   TEMPODEGARANTIA_MES: number;
   TEMPODEGARANTIA_DIA: number;
   DESCRICAO_VENDA: string | null;
@@ -139,7 +139,7 @@ export interface ProductManagerSearchItem {
   OURO: string;
   PRATA: string;
   BRONZE: string;
-  DECONTO: string;
+  DESCONTO: string;
   TEMPODEGARANTIA_MES: number;
   TEMPODEGARANTIA_DIA: number;
   DESCRICAO_VENDA: string | null;
