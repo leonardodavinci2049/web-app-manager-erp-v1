@@ -41,6 +41,8 @@ export const ProductManagerFindAllSchema = z.object({
   pe_flag_consignment: binaryFlagSchema,
   pe_flag_discontinued: binaryFlagSchema,
   pe_flag_no_inventory: binaryFlagSchema,
+  pe_flag_Website_Off: binaryFlagSchema,
+  pe_flag_Premium: binaryFlagSchema,
   pe_flag_stock: binaryFlagSchema,
   pe_flag_service: binaryFlagSchema,
   pe_flag_registration: binaryFlagSchema,
