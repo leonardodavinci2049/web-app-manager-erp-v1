@@ -99,6 +99,7 @@ export interface ProductManagerListItem {
   QT_VENDAS_3MESES: number;
   QT_VENDAS_ANO: number;
   QT_VENDAS_ALL: number;
+  DATA_ULT_VENDA: string | null;
   ESTOQUE_LOJA: number;
   VL_ATACADO: string;
   VL_CORPORATIVO: string;

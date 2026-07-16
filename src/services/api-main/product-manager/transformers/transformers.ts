@@ -29,6 +29,7 @@ export interface UIProductManager {
   salesLastThreeMonths?: number;
   salesYear?: number;
   salesAllTime?: number;
+  lastSaleAt?: string;
   valueType?: string;
   productValue?: string;
   wholesalePrice: string;
@@ -92,6 +93,7 @@ export function transformProductManagerListItem(
     salesLastThreeMonths: entity.QT_VENDAS_3MESES,
     salesYear: entity.QT_VENDAS_ANO,
     salesAllTime: entity.QT_VENDAS_ALL,
+    lastSaleAt: entity.DATA_ULT_VENDA ?? undefined,
     wholesalePrice: entity.VL_ATACADO,
     corporatePrice: entity.VL_CORPORATIVO,
     retailPrice: entity.VL_VAREJO,
