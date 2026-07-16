@@ -19,6 +19,10 @@ import { InlineNameEditor } from "./product-card/inline-update/inline-name-edito
 import { InlinePriceEditor } from "./product-card/inline-update/inline-price-editor";
 import { InlineStockEditor } from "./product-card/inline-update/inline-stock-editor";
 import { ProductImageSection } from "./product-card/product-image-section";
+import {
+  formatLastSaleDate,
+  formatSalesQuantity,
+} from "./product-sales-information";
 
 interface ProductTableProps {
   products: UIProductManager[];
@@ -42,12 +46,17 @@ function parseCategories(raw?: string): ProductCategory[] {
  */
 export function ProductTable({ products, catalogReturnTo }: ProductTableProps) {
   return (
-    <div className="overflow-hidden rounded-lg border">
+    <div className="overflow-x-auto rounded-lg border">
       <Table>
         <TableHeader className="bg-muted/50">
           <TableRow>
             <TableHead className="w-[40%] min-w-72">Produto</TableHead>
             <TableHead className="min-w-36">Marca e tipo</TableHead>
+            <TableHead className="min-w-20 text-right">V. Total</TableHead>
+            <TableHead className="min-w-20 text-right">V. Ano</TableHead>
+            <TableHead className="min-w-24 text-right">V. 3 meses</TableHead>
+            <TableHead className="min-w-20 text-right">V. Mês</TableHead>
+            <TableHead className="min-w-28">Últ. venda</TableHead>
             <TableHead className="min-w-36">Estoque</TableHead>
             <TableHead className="min-w-28">Atacado</TableHead>
             <TableHead className="min-w-28">Varejo</TableHead>
@@ -111,6 +120,21 @@ export function ProductTable({ products, catalogReturnTo }: ProductTableProps) {
                       </p>
                     )}
                   </div>
+                </TableCell>
+                <TableCell className="text-right font-medium tabular-nums">
+                  {formatSalesQuantity(product.salesAllTime)}
+                </TableCell>
+                <TableCell className="text-right font-medium tabular-nums">
+                  {formatSalesQuantity(product.salesYear)}
+                </TableCell>
+                <TableCell className="text-right font-medium tabular-nums">
+                  {formatSalesQuantity(product.salesLastThreeMonths)}
+                </TableCell>
+                <TableCell className="text-right font-medium tabular-nums">
+                  {formatSalesQuantity(product.salesMonth)}
+                </TableCell>
+                <TableCell className="tabular-nums">
+                  {formatLastSaleDate(product.lastSaleAt)}
                 </TableCell>
                 <TableCell className="whitespace-normal">
                   <InlineStockEditor

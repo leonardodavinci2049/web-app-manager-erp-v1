@@ -22,7 +22,7 @@ export function ProductSkeleton({ viewMode }: ProductSkeletonProps) {
       <Card className="gap-0 py-0">
         <CardContent className="p-1 sm:p-1.5">
           <div className="flex gap-2">
-            <Skeleton className="h-16 w-16 shrink-0 rounded-md sm:h-20 sm:w-20" />
+            <Skeleton className="h-14 w-14 shrink-0 rounded-md sm:h-16 sm:w-16" />
 
             <div className="flex min-w-0 flex-1 flex-col gap-1">
               <div className="space-y-0.5">
@@ -34,6 +34,12 @@ export function ProductSkeleton({ viewMode }: ProductSkeletonProps) {
                   <Skeleton className="h-3 w-3/4" />
                 </div>
               </div>
+
+              <div className="border-y py-1">
+                <Skeleton className="h-7 w-full" />
+                <Skeleton className="mt-1 h-3 w-24" />
+              </div>
+              <Skeleton className="h-4 w-20" />
 
               <div className="border-y py-1">
                 <Skeleton className="h-5 w-24" />
@@ -52,9 +58,9 @@ export function ProductSkeleton({ viewMode }: ProductSkeletonProps) {
   }
 
   return (
-    <Card className="h-full">
+    <Card className="h-full py-2 sm:py-3">
       <CardContent className="flex h-full flex-col p-1.5 sm:p-2">
-        <Skeleton className="aspect-[4/3] w-full rounded-md" />
+        <Skeleton className="aspect-[3/2] w-full rounded-md" />
 
         <div className="mt-1 flex flex-1 flex-col gap-1">
           <Skeleton className="h-5 w-full" />
@@ -62,6 +68,10 @@ export function ProductSkeleton({ viewMode }: ProductSkeletonProps) {
             <Skeleton className="h-3 w-2/3" />
             <Skeleton className="h-3 w-3/4" />
             <Skeleton className="h-3 w-1/2" />
+          </div>
+          <div className="border-y py-1">
+            <Skeleton className="h-7 w-full" />
+            <Skeleton className="mt-1 h-3 w-24" />
           </div>
           <Skeleton className="h-4 w-20" />
           <div className="border-y py-1">
@@ -100,14 +110,20 @@ export function ProductGridSkeleton({
           ))}
         </div>
 
-        <div className="hidden overflow-hidden rounded-lg border lg:block">
+        <div className="hidden overflow-x-auto rounded-lg border lg:block">
           <Table>
             <TableHeader className="bg-muted/50">
               <TableRow>
                 <TableHead className="w-[40%] min-w-72">Produto</TableHead>
                 <TableHead className="min-w-36">Marca e tipo</TableHead>
+                <TableHead className="min-w-20">V. Total</TableHead>
+                <TableHead className="min-w-20">V. Ano</TableHead>
+                <TableHead className="min-w-24">V. 3 meses</TableHead>
+                <TableHead className="min-w-20">V. Mês</TableHead>
+                <TableHead className="min-w-28">Últ. venda</TableHead>
                 <TableHead className="min-w-36">Estoque</TableHead>
-                <TableHead className="min-w-48">Preços</TableHead>
+                <TableHead className="min-w-28">Atacado</TableHead>
+                <TableHead className="min-w-28">Varejo</TableHead>
                 <TableHead className="min-w-52">Categorias</TableHead>
                 <TableHead className="w-16">
                   <span className="sr-only">Ações</span>
@@ -133,13 +149,28 @@ export function ProductGridSkeleton({
                     </div>
                   </TableCell>
                   <TableCell>
+                    <Skeleton className="ml-auto h-4 w-8" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="ml-auto h-4 w-8" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="ml-auto h-4 w-8" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="ml-auto h-4 w-8" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-20" />
+                  </TableCell>
+                  <TableCell>
                     <Skeleton className="h-5 w-20" />
                   </TableCell>
                   <TableCell>
-                    <div className="space-y-2">
-                      <Skeleton className="h-5 w-24" />
-                      <Skeleton className="h-3 w-20" />
-                    </div>
+                    <Skeleton className="h-5 w-24" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-5 w-24" />
                   </TableCell>
                   <TableCell>
                     <div className="space-y-2">

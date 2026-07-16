@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Edit2, X } from "lucide-react";
+import { Boxes, Check, Edit2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -13,6 +13,8 @@ interface InlineStockEditorProps {
   productName: string;
   currentStock: number;
   className?: string;
+  emphasizeValue?: boolean;
+  showStockIcon?: boolean;
 }
 
 export function InlineStockEditor({
@@ -20,6 +22,8 @@ export function InlineStockEditor({
   productName,
   currentStock,
   className = "",
+  emphasizeValue = false,
+  showStockIcon = false,
 }: InlineStockEditorProps) {
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
@@ -189,9 +193,17 @@ export function InlineStockEditor({
             : "text-muted-foreground"
         }`}
       >
-        Estoque: {displayStock}
+        Estoque:{" "}
+        <span className={emphasizeValue ? "text-sm font-bold" : undefined}>
+          {displayStock}
+        </span>
       </span>
-      <Edit2 className="h-3 w-3 text-muted-foreground transition-opacity md:opacity-0 md:group-hover/stock-editor:opacity-100 md:group-focus-visible/stock-editor:opacity-100" />
+      <span className="ml-auto flex shrink-0 items-center gap-1.5">
+        <Edit2 className="h-3 w-3 text-muted-foreground transition-opacity md:opacity-0 md:group-hover/stock-editor:opacity-100 md:group-focus-visible/stock-editor:opacity-100" />
+        {showStockIcon && (
+          <Boxes className="size-4 text-muted-foreground" aria-hidden="true" />
+        )}
+      </span>
     </button>
   );
 }
