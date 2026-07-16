@@ -16,6 +16,7 @@ interface ProductImageSectionProps {
   productDetailsHref?: string;
   hasPromotion?: boolean;
   eager?: boolean;
+  compact?: boolean;
 }
 
 /**
@@ -29,6 +30,7 @@ export function ProductImageSection({
   productDetailsHref,
   hasPromotion = false,
   eager = false,
+  compact = false,
 }: ProductImageSectionProps) {
   const router = useRouter();
   const [imageError, setImageError] = useState(false);
@@ -50,6 +52,8 @@ export function ProductImageSection({
         productId={String(product.id)}
         productName={product.name}
         viewMode={viewMode}
+        compact={compact}
+        isOutOfStock={isOutOfStock}
         onUploadSuccess={() => router.refresh()}
       />
     );
@@ -57,7 +61,11 @@ export function ProductImageSection({
 
   if (viewMode === "list") {
     const imageContent = (
-      <div className="relative h-16 w-16 flex-shrink-0 sm:h-20 sm:w-20">
+      <div
+        className={`relative flex-shrink-0 ${
+          compact ? "h-14 w-14 sm:h-16 sm:w-16" : "h-16 w-16 sm:h-20 sm:w-20"
+        }`}
+      >
         <Image
           src={imageUrl}
           alt={`Imagem do produto ${product.name}`}
@@ -72,11 +80,16 @@ export function ProductImageSection({
           onLoad={() => setImageError(false)}
         />
         {isOutOfStock && (
-          <div className="absolute inset-0 flex items-center justify-center rounded-md bg-black/50">
-            <Badge variant="destructive" className="text-xs">
-              Esgotado
-            </Badge>
-          </div>
+          <Badge
+            variant="destructive"
+            className={`absolute z-10 whitespace-nowrap py-0 ${
+              compact
+                ? "top-0.5 right-0.5 px-0.5 text-[7px] sm:text-[8px]"
+                : "top-1 right-1 px-1 text-[9px]"
+            }`}
+          >
+            SEM ESTOQUE
+          </Badge>
         )}
       </div>
     );
@@ -85,7 +98,7 @@ export function ProductImageSection({
   }
 
   const gridImageContent = (
-    <div className="relative aspect-[4/3] overflow-hidden rounded-md">
+    <div className="relative aspect-[3/2] overflow-hidden rounded-md">
       <Image
         src={imageUrl}
         alt={`Imagem do produto ${product.name}`}
@@ -121,9 +134,12 @@ export function ProductImageSection({
       </div>
 
       {isOutOfStock && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-          <Badge variant="destructive">Esgotado</Badge>
-        </div>
+        <Badge
+          variant="destructive"
+          className="absolute top-1 right-1 z-10 whitespace-nowrap px-1 py-0 text-[9px] sm:top-2 sm:right-2 sm:text-[10px]"
+        >
+          SEM ESTOQUE
+        </Badge>
       )}
     </div>
   );

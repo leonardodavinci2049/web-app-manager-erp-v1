@@ -4,11 +4,14 @@ import { Loader2, Package, Upload } from "lucide-react";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { uploadProductImageAction } from "@/app/actions/action-product-images";
+import { Badge } from "@/components/ui/badge";
 
 interface ProductImageUploadProps {
   productId: string;
   productName: string;
   viewMode: "grid" | "list";
+  compact?: boolean;
+  isOutOfStock?: boolean;
   onUploadSuccess?: () => void | Promise<void>;
 }
 
@@ -16,6 +19,8 @@ export function ProductImageUpload({
   productId,
   productName,
   viewMode,
+  compact = false,
+  isOutOfStock = false,
   onUploadSuccess,
 }: ProductImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
@@ -99,7 +104,7 @@ export function ProductImageUpload({
       <button
         type="button"
         className={`
-          relative aspect-[4/3] rounded-md overflow-hidden cursor-pointer transition-all duration-200
+          relative aspect-[3/2] rounded-md overflow-hidden cursor-pointer transition-all duration-200
           border-2 border-dashed border-muted-foreground/30 hover:border-primary/50
           bg-muted/50 hover:bg-muted/80 w-full
           ${isDragOver ? "border-primary bg-primary/10" : ""}
@@ -122,6 +127,15 @@ export function ProductImageUpload({
           disabled={isUploading}
           aria-label="Enviar imagem do produto"
         />
+
+        {isOutOfStock && (
+          <Badge
+            variant="destructive"
+            className="pointer-events-none absolute top-1 right-1 z-10 whitespace-nowrap px-1 py-0 text-[9px] sm:top-2 sm:right-2 sm:text-[10px]"
+          >
+            SEM ESTOQUE
+          </Badge>
+        )}
 
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 p-4 text-center">
           {isUploading ? (
@@ -158,9 +172,10 @@ export function ProductImageUpload({
     <button
       type="button"
       className={`
-        relative h-16 w-16 flex-shrink-0 rounded-md overflow-hidden cursor-pointer transition-all duration-200
+        relative flex-shrink-0 rounded-md overflow-hidden cursor-pointer transition-all duration-200
         border-2 border-dashed border-muted-foreground/30 hover:border-primary/50
-        bg-muted/50 hover:bg-muted/80 sm:h-20 sm:w-20
+        bg-muted/50 hover:bg-muted/80
+        ${compact ? "h-14 w-14 sm:h-16 sm:w-16" : "h-16 w-16 sm:h-20 sm:w-20"}
         ${isDragOver ? "border-primary bg-primary/10" : ""}
         ${isUploading ? "pointer-events-none opacity-60" : ""}
       `}
@@ -181,6 +196,19 @@ export function ProductImageUpload({
         disabled={isUploading}
         aria-label="Enviar imagem do produto"
       />
+
+      {isOutOfStock && (
+        <Badge
+          variant="destructive"
+          className={`pointer-events-none absolute z-10 whitespace-nowrap py-0 ${
+            compact
+              ? "top-0.5 right-0.5 px-0.5 text-[7px] sm:text-[8px]"
+              : "top-1 right-1 px-1 text-[9px]"
+          }`}
+        >
+          SEM ESTOQUE
+        </Badge>
+      )}
 
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
         {isUploading ? (

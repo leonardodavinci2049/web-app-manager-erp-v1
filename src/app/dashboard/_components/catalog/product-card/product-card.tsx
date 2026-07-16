@@ -7,6 +7,7 @@ import type { ProductCategory } from "@/types/types";
 import { formatCurrency } from "@/utils/common-utils";
 import { CategoryTags } from "../category-tags";
 import { buildProductDetailsHref } from "../lib/search-params";
+import { ProductSalesInformation } from "../product-sales-information";
 import type { ViewMode } from "../types/catalog-types";
 import { InlineCategoryEditor } from "./inline-update/inline-category-editor";
 import { InlineNameEditor } from "./inline-update/inline-name-editor";
@@ -69,6 +70,7 @@ export function ProductCard({
                 productDetailsHref={productDetailsHref}
                 hasPromotion={hasPromotion}
                 eager={eagerImage}
+                compact
               />
             </div>
 
@@ -80,17 +82,15 @@ export function ProductCard({
                   productDetailsHref={productDetailsHref}
                   className="border-b pb-1 [&_h3]:text-[11px] [&_h3]:sm:text-xs"
                 />
-                <ProductCardFields
-                  product={product}
-                  textSize="xs"
-                  listStock={
-                    <InlineStockEditor
-                      productId={product.id}
-                      productName={product.name}
-                      currentStock={product.storeStock}
-                      className="min-w-0 text-xs font-medium"
-                    />
-                  }
+                <ProductCardFields product={product} textSize="xs" compact />
+                <ProductSalesInformation product={product} />
+                <InlineStockEditor
+                  productId={product.id}
+                  productName={product.name}
+                  currentStock={product.storeStock}
+                  className="min-w-0 w-full text-xs font-medium"
+                  emphasizeValue
+                  showStockIcon
                 />
               </div>
 
@@ -137,7 +137,7 @@ export function ProductCard({
   }
 
   return (
-    <Card className="group h-full transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+    <Card className="group h-full py-2 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md sm:py-3">
       <CardContent className="flex h-full flex-col p-1.5 sm:p-2">
         <ProductImageSection
           product={product}
@@ -145,6 +145,7 @@ export function ProductCard({
           productDetailsHref={productDetailsHref}
           hasPromotion={hasPromotion}
           eager={eagerImage}
+          compact
         />
 
         <div className="mt-1 flex flex-1 flex-col gap-1">
@@ -156,11 +157,15 @@ export function ProductCard({
           />
           <ProductCardFields product={product} textSize="xs" />
 
+          <ProductSalesInformation product={product} />
+
           <InlineStockEditor
             productId={product.id}
             productName={product.name}
             currentStock={product.storeStock}
-            className="text-xs font-medium"
+            className="w-full text-xs font-medium"
+            emphasizeValue
+            showStockIcon
           />
 
           <div className="border-y py-1">
