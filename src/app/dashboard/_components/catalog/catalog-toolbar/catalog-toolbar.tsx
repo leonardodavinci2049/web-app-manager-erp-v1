@@ -45,18 +45,21 @@ const PANEL_FILTER_DEFAULTS: Pick<CatalogFilters, PanelFilterType> = {
   hasNoImage: false,
   hasNoDescription: false,
   hasNoSalesCopy: false,
+  isBestSeller: false,
   isPromotion: false,
   isFeatured: false,
-  isImported: false,
-  isInactive: false,
+  importedStatus: 0,
+  inactiveStatus: 2,
+  isPremium: false,
   isConsignment: false,
   isDiscontinued: false,
   hasNoInventory: false,
+  isWebsiteOff: false,
   isLowestSelling: false,
   isStalled: false,
   isLatestArrival: false,
   hasPriceLessThanOne: false,
-  lowStockThreshold: undefined,
+  hasLowStock: false,
   sortBy: "newest",
 };
 
@@ -241,10 +244,22 @@ export function CatalogToolbar({
       "Descrição de venda",
       "Produtos sem descrição de venda",
     );
+    add(filters.isBestSeller, "isBestSeller", "Vendas", "Mais vendidos");
     add(filters.isPromotion, "isPromotion", "Promoção", "Produtos em promoção");
     add(filters.isFeatured, "isFeatured", "Destaque", "Produtos em destaque");
-    add(filters.isImported, "isImported", "Importação", "Produtos importados");
-    add(filters.isInactive, "isInactive", "Situação", "Produtos inativos");
+    add(
+      filters.importedStatus !== 0,
+      "importedStatus",
+      "Origem",
+      filters.importedStatus === 1 ? "Importados" : "Nacionais",
+    );
+    add(
+      filters.inactiveStatus !== 2,
+      "inactiveStatus",
+      "Situação",
+      filters.inactiveStatus === 0 ? "Todos" : "Inativos",
+    );
+    add(filters.isPremium, "isPremium", "Premium", "Produtos premium");
     add(
       filters.isConsignment,
       "isConsignment",
@@ -263,6 +278,12 @@ export function CatalogToolbar({
       "Controle de estoque",
       "Produtos sem controle de estoque",
     );
+    add(
+      filters.isWebsiteOff,
+      "isWebsiteOff",
+      "Website",
+      "Desativados para o website",
+    );
     add(filters.isLowestSelling, "isLowestSelling", "Vendas", "Menos vendidos");
     add(filters.isStalled, "isStalled", "Movimentação", "Produtos parados");
     add(
@@ -278,10 +299,10 @@ export function CatalogToolbar({
       "Atacado menor que 1",
     );
     add(
-      Boolean(filters.lowStockThreshold),
-      "lowStockThreshold",
-      "Estoque baixo até",
-      String(filters.lowStockThreshold ?? ""),
+      filters.hasLowStock,
+      "hasLowStock",
+      "Estoque",
+      "Produtos com estoque baixo",
     );
 
     if (filters.sortBy !== "newest") {

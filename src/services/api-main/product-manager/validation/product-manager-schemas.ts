@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 const binaryFlagSchema = z.number().int().min(0).max(1).optional();
+const ternaryFlagSchema = z.number().int().min(0).max(2).optional();
 const disabledOrIsoDateSchema = z
   .string()
   .refine(
@@ -36,8 +37,8 @@ export const ProductManagerFindAllSchema = z.object({
   pe_flag_no_sales_copy: binaryFlagSchema,
   pe_flag_promotion: binaryFlagSchema,
   pe_flag_featured: binaryFlagSchema,
-  pe_flag_imported: binaryFlagSchema,
-  pe_flag_inactive: binaryFlagSchema,
+  pe_flag_imported: ternaryFlagSchema,
+  pe_flag_inactive: ternaryFlagSchema,
   pe_flag_consignment: binaryFlagSchema,
   pe_flag_discontinued: binaryFlagSchema,
   pe_flag_no_inventory: binaryFlagSchema,

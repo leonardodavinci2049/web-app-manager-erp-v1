@@ -2,6 +2,9 @@ import type { SortOption, ViewMode } from "@/types/types";
 
 export type { SortOption, ViewMode };
 
+/** Estado ternario aceito pelos filtros de situacao e origem da API. */
+export type TernaryFlag = 0 | 1 | 2;
+
 /**
  * Opcao de categoria utilizada pelos filtros do catalogo. Mantem os campos de
  * hierarquia (parentId, order, productCount) para permitir a montagem de um
@@ -38,18 +41,21 @@ export interface CatalogFilters {
   hasNoImage: boolean;
   hasNoDescription: boolean;
   hasNoSalesCopy: boolean;
+  isBestSeller: boolean;
   isPromotion: boolean;
   isFeatured: boolean;
-  isImported: boolean;
-  isInactive: boolean;
+  importedStatus: TernaryFlag;
+  inactiveStatus: TernaryFlag;
+  isPremium: boolean;
   isConsignment: boolean;
   isDiscontinued: boolean;
   hasNoInventory: boolean;
+  isWebsiteOff: boolean;
   isLowestSelling: boolean;
   isStalled: boolean;
   isLatestArrival: boolean;
   hasPriceLessThanOne: boolean;
-  lowStockThreshold?: number;
+  hasLowStock: boolean;
   sortBy: SortOption;
 }
 

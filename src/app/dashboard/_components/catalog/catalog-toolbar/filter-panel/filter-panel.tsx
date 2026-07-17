@@ -1,7 +1,7 @@
 "use client";
 
 import { Filter, Search, X } from "lucide-react";
-import { type FormEvent, useEffect, useState } from "react";
+import { type FormEvent, type ReactNode, useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
   SheetContent,
@@ -31,6 +32,7 @@ import type {
   CategoryOption,
   PanelFilterType,
   SortOption,
+  TernaryFlag,
 } from "../../types/catalog-types";
 import { CategoryMenu } from "./category-menu";
 
@@ -87,7 +89,7 @@ function TextFilterInput({
   };
 
   return (
-    <form className="min-w-0 space-y-1.5" onSubmit={handleSubmit}>
+    <form className="min-w-0 space-y-1" onSubmit={handleSubmit}>
       <Label htmlFor={id} className="text-muted-foreground">
         {label}
       </Label>
@@ -158,7 +160,7 @@ function NumericFilterInput({
   };
 
   return (
-    <form className="min-w-0 space-y-1.5" onSubmit={handleSubmit}>
+    <form className="min-w-0 space-y-1" onSubmit={handleSubmit}>
       <Label htmlFor={id} className="text-muted-foreground">
         {label}
       </Label>
@@ -213,17 +215,87 @@ function SwitchFilter({
   onCheckedChange,
 }: SwitchFilterProps) {
   return (
-    <div className="flex min-h-11 items-center justify-between gap-3 rounded-md border px-3 py-2.5">
-      <Label htmlFor={id} className="cursor-pointer leading-snug">
+    <div className="flex min-h-9 items-center justify-between gap-2 rounded-md border px-2.5 py-1.5">
+      <Label htmlFor={id} className="cursor-pointer text-sm leading-tight">
         {label}
       </Label>
       <Switch
         id={id}
+        size="sm"
         checked={checked}
         disabled={disabled}
         onCheckedChange={onCheckedChange}
       />
     </div>
+  );
+}
+
+interface RadioFilterProps {
+  id: string;
+  label: string;
+  value: TernaryFlag;
+  options: ReadonlyArray<{ label: string; value: TernaryFlag }>;
+  disabled: boolean;
+  onValueChange: (value: TernaryFlag) => void;
+}
+
+function RadioFilter({
+  id,
+  label,
+  value,
+  options,
+  disabled,
+  onValueChange,
+}: RadioFilterProps) {
+  return (
+    <fieldset className="space-y-1 rounded-md border px-2.5 py-1.5">
+      <legend className="px-1 text-xs font-medium">{label}</legend>
+      <div className="grid grid-cols-3 gap-0.5 rounded-md bg-muted p-0.5">
+        {options.map((option) => {
+          const optionId = `${id}-${option.value}`;
+          return (
+            <div key={option.value} className="min-w-0">
+              <input
+                id={optionId}
+                type="radio"
+                name={id}
+                value={option.value}
+                checked={value === option.value}
+                disabled={disabled}
+                className="peer sr-only"
+                onChange={() => onValueChange(option.value)}
+              />
+              <Label
+                htmlFor={optionId}
+                className="min-h-8 cursor-pointer justify-center rounded-sm px-1 text-center text-xs leading-tight transition-colors peer-checked:bg-background peer-checked:text-foreground peer-checked:shadow-sm peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+              >
+                {option.label}
+              </Label>
+            </div>
+          );
+        })}
+      </div>
+    </fieldset>
+  );
+}
+
+function FilterGroup({
+  title,
+  children,
+}: {
+  title: string;
+  children: ReactNode;
+}) {
+  return (
+    <section className="space-y-1.5" aria-label={title}>
+      <div className="flex items-center gap-2">
+        <span className="shrink-0 text-[11px] text-muted-foreground font-semibold uppercase tracking-wide">
+          {title}
+        </span>
+        <Separator />
+      </div>
+      <div className="space-y-1.5">{children}</div>
+    </section>
   );
 }
 
@@ -263,7 +335,7 @@ export function FilterPanel({
         side="right"
         className="flex w-[90vw] max-w-[90vw] flex-col gap-0 p-0 sm:w-full sm:max-w-md"
       >
-        <SheetHeader className="space-y-1 border-b p-4 pr-12">
+        <SheetHeader className="space-y-0.5 border-b p-3 pr-12">
           <SheetTitle className="flex items-center gap-2 text-base">
             <Filter className="h-4 w-4" />
             Filtros
@@ -271,17 +343,17 @@ export function FilterPanel({
         </SheetHeader>
 
         <Tabs defaultValue="general" className="min-h-0 flex-1 gap-0">
-          <div className="border-b px-4 py-3">
-            <TabsList className="grid w-full grid-cols-3">
+          <div className="border-b px-3 py-2">
+            <TabsList className="grid h-8 w-full grid-cols-3">
               <TabsTrigger value="general">Geral</TabsTrigger>
-              <TabsTrigger value="flags">Flags</TabsTrigger>
               <TabsTrigger value="advanced">Avançado</TabsTrigger>
+              <TabsTrigger value="flags">Flags</TabsTrigger>
             </TabsList>
           </div>
 
-          <div className="min-h-0 flex-1 overflow-y-auto p-4">
-            <TabsContent value="general" className="space-y-4">
-              <div className="space-y-1.5">
+          <div className="min-h-0 flex-1 overflow-y-auto p-3">
+            <TabsContent value="general" className="space-y-3">
+              <div className="space-y-1">
                 <Label className="text-muted-foreground">Categoria</Label>
                 <CategoryMenu
                   categories={categories}
@@ -293,8 +365,8 @@ export function FilterPanel({
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="min-w-0 space-y-1.5">
+              <div className="grid grid-cols-2 gap-2">
+                <div className="min-w-0 space-y-1">
                   <Label className="text-muted-foreground">Marca</Label>
                   <Select
                     value={filters.selectedBrand || "all"}
@@ -320,7 +392,7 @@ export function FilterPanel({
                   </Select>
                 </div>
 
-                <div className="min-w-0 space-y-1.5">
+                <div className="min-w-0 space-y-1">
                   <Label className="text-muted-foreground">
                     Tipo de produto
                   </Label>
@@ -352,7 +424,7 @@ export function FilterPanel({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2">
                 <NumericFilterInput
                   id="filter-supplier"
                   label="Fornecedor"
@@ -373,7 +445,7 @@ export function FilterPanel({
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2">
                 <TextFilterInput
                   id="filter-reference"
                   label="Referência"
@@ -400,153 +472,8 @@ export function FilterPanel({
                 disabled={isLoading}
                 onChange={(value) => onFilterChange("ean", value)}
               />
-            </TabsContent>
 
-            <TabsContent value="flags" className="space-y-3">
-              <SwitchFilter
-                id="filter-stock"
-                label="Apenas produtos em estoque"
-                checked={filters.onlyInStock}
-                disabled={isLoading}
-                onCheckedChange={(value) =>
-                  onFilterChange("onlyInStock", value)
-                }
-              />
-              <SwitchFilter
-                id="filter-service"
-                label="Produtos de serviço"
-                checked={filters.isService}
-                disabled={isLoading}
-                onCheckedChange={(value) => onFilterChange("isService", value)}
-              />
-              <SwitchFilter
-                id="filter-no-image"
-                label="Produtos sem imagem"
-                checked={filters.hasNoImage}
-                disabled={isLoading}
-                onCheckedChange={(value) => onFilterChange("hasNoImage", value)}
-              />
-              <SwitchFilter
-                id="filter-no-description"
-                label="Produtos sem descrição"
-                checked={filters.hasNoDescription}
-                disabled={isLoading}
-                onCheckedChange={(value) =>
-                  onFilterChange("hasNoDescription", value)
-                }
-              />
-              <SwitchFilter
-                id="filter-no-sales-copy"
-                label="Produtos sem descrição de venda"
-                checked={filters.hasNoSalesCopy}
-                disabled={isLoading}
-                onCheckedChange={(value) =>
-                  onFilterChange("hasNoSalesCopy", value)
-                }
-              />
-              <SwitchFilter
-                id="filter-promotion"
-                label="Produtos em promoção"
-                checked={filters.isPromotion}
-                disabled={isLoading}
-                onCheckedChange={(value) =>
-                  onFilterChange("isPromotion", value)
-                }
-              />
-              <SwitchFilter
-                id="filter-featured"
-                label="Produtos em destaque"
-                checked={filters.isFeatured}
-                disabled={isLoading}
-                onCheckedChange={(value) => onFilterChange("isFeatured", value)}
-              />
-              <SwitchFilter
-                id="filter-imported"
-                label="Produtos importados"
-                checked={filters.isImported}
-                disabled={isLoading}
-                onCheckedChange={(value) => onFilterChange("isImported", value)}
-              />
-              <SwitchFilter
-                id="filter-inactive"
-                label="Produtos inativos"
-                checked={filters.isInactive}
-                disabled={isLoading}
-                onCheckedChange={(value) => onFilterChange("isInactive", value)}
-              />
-              <SwitchFilter
-                id="filter-consignment"
-                label="Produtos consignados"
-                checked={filters.isConsignment}
-                disabled={isLoading}
-                onCheckedChange={(value) =>
-                  onFilterChange("isConsignment", value)
-                }
-              />
-              <SwitchFilter
-                id="filter-discontinued"
-                label="Produtos descontinuados"
-                checked={filters.isDiscontinued}
-                disabled={isLoading}
-                onCheckedChange={(value) =>
-                  onFilterChange("isDiscontinued", value)
-                }
-              />
-              <SwitchFilter
-                id="filter-no-inventory"
-                label="Produtos sem controle de estoque"
-                checked={filters.hasNoInventory}
-                disabled={isLoading}
-                onCheckedChange={(value) =>
-                  onFilterChange("hasNoInventory", value)
-                }
-              />
-            </TabsContent>
-
-            <TabsContent value="advanced" className="space-y-3">
-              <SwitchFilter
-                id="filter-lowest-selling"
-                label="Menos vendidos"
-                checked={filters.isLowestSelling}
-                disabled={isLoading}
-                onCheckedChange={(value) =>
-                  onFilterChange("isLowestSelling", value)
-                }
-              />
-              <SwitchFilter
-                id="filter-stalled"
-                label="Produtos parados"
-                checked={filters.isStalled}
-                disabled={isLoading}
-                onCheckedChange={(value) => onFilterChange("isStalled", value)}
-              />
-              <SwitchFilter
-                id="filter-latest-arrivals"
-                label="Últimos cadastrados"
-                checked={filters.isLatestArrival}
-                disabled={isLoading}
-                onCheckedChange={(value) =>
-                  onFilterChange("isLatestArrival", value)
-                }
-              />
-              <SwitchFilter
-                id="filter-price-less-than"
-                label="Preço de atacado menor que 1"
-                checked={filters.hasPriceLessThanOne}
-                disabled={isLoading}
-                onCheckedChange={(value) =>
-                  onFilterChange("hasPriceLessThanOne", value)
-                }
-              />
-              <NumericFilterInput
-                id="filter-low-stock"
-                label="Estoque baixo até"
-                value={filters.lowStockThreshold}
-                disabled={isLoading}
-                onChange={(value) => onFilterChange("lowStockThreshold", value)}
-              />
-
-              <div className="space-y-2 pt-2">
+              <div className="space-y-1 pt-1">
                 <Label className="text-muted-foreground">Ordenação</Label>
                 <Select
                   value={filters.sortBy}
@@ -569,17 +496,226 @@ export function FilterPanel({
               </div>
             </TabsContent>
 
+            <TabsContent value="advanced" className="space-y-3">
+              <FilterGroup title="Lista de vendas">
+                <SwitchFilter
+                  id="filter-best-sellers"
+                  label="Mais vendidos"
+                  checked={filters.isBestSeller}
+                  disabled={isLoading}
+                  onCheckedChange={(value) =>
+                    onFilterChange("isBestSeller", value)
+                  }
+                />
+                <SwitchFilter
+                  id="filter-lowest-selling"
+                  label="Menos vendidos"
+                  checked={filters.isLowestSelling}
+                  disabled={isLoading}
+                  onCheckedChange={(value) =>
+                    onFilterChange("isLowestSelling", value)
+                  }
+                />
+                <SwitchFilter
+                  id="filter-stalled"
+                  label="Produtos parados"
+                  checked={filters.isStalled}
+                  disabled={isLoading}
+                  onCheckedChange={(value) =>
+                    onFilterChange("isStalled", value)
+                  }
+                />
+              </FilterGroup>
+
+              <FilterGroup title="Lista de estoque">
+                <SwitchFilter
+                  id="filter-stock"
+                  label="Apenas produtos com estoque"
+                  checked={filters.onlyInStock}
+                  disabled={isLoading}
+                  onCheckedChange={(value) =>
+                    onFilterChange("onlyInStock", value)
+                  }
+                />
+                <SwitchFilter
+                  id="filter-low-stock"
+                  label="Produtos com estoque baixo"
+                  checked={filters.hasLowStock}
+                  disabled={isLoading}
+                  onCheckedChange={(value) =>
+                    onFilterChange("hasLowStock", value)
+                  }
+                />
+                <SwitchFilter
+                  id="filter-latest-arrivals"
+                  label="Últimos cadastrados"
+                  checked={filters.isLatestArrival}
+                  disabled={isLoading}
+                  onCheckedChange={(value) =>
+                    onFilterChange("isLatestArrival", value)
+                  }
+                />
+              </FilterGroup>
+
+              <FilterGroup title="Sem conteúdo">
+                <SwitchFilter
+                  id="filter-no-image"
+                  label="Produtos sem imagem"
+                  checked={filters.hasNoImage}
+                  disabled={isLoading}
+                  onCheckedChange={(value) =>
+                    onFilterChange("hasNoImage", value)
+                  }
+                />
+                <SwitchFilter
+                  id="filter-no-description"
+                  label="Produtos sem descrição"
+                  checked={filters.hasNoDescription}
+                  disabled={isLoading}
+                  onCheckedChange={(value) =>
+                    onFilterChange("hasNoDescription", value)
+                  }
+                />
+                <SwitchFilter
+                  id="filter-no-sales-copy"
+                  label="Produtos sem descrição de venda"
+                  checked={filters.hasNoSalesCopy}
+                  disabled={isLoading}
+                  onCheckedChange={(value) =>
+                    onFilterChange("hasNoSalesCopy", value)
+                  }
+                />
+              </FilterGroup>
+
+              <FilterGroup title="Diversos">
+                <SwitchFilter
+                  id="filter-price-less-than"
+                  label="Preço de atacado menor que 1"
+                  checked={filters.hasPriceLessThanOne}
+                  disabled={isLoading}
+                  onCheckedChange={(value) =>
+                    onFilterChange("hasPriceLessThanOne", value)
+                  }
+                />
+                <SwitchFilter
+                  id="filter-service"
+                  label="Lista de serviço"
+                  checked={filters.isService}
+                  disabled={isLoading}
+                  onCheckedChange={(value) =>
+                    onFilterChange("isService", value)
+                  }
+                />
+              </FilterGroup>
+            </TabsContent>
+
+            <TabsContent value="flags" className="space-y-2">
+              <RadioFilter
+                id="filter-inactive"
+                label="Produtos inativos"
+                value={filters.inactiveStatus}
+                options={[
+                  { label: "Todos", value: 0 },
+                  { label: "Inativo", value: 1 },
+                  { label: "Ativo", value: 2 },
+                ]}
+                disabled={isLoading}
+                onValueChange={(value) =>
+                  onFilterChange("inactiveStatus", value)
+                }
+              />
+              <RadioFilter
+                id="filter-imported"
+                label="Produtos importados"
+                value={filters.importedStatus}
+                options={[
+                  { label: "Todos", value: 0 },
+                  { label: "Importado", value: 1 },
+                  { label: "Nacional", value: 2 },
+                ]}
+                disabled={isLoading}
+                onValueChange={(value) =>
+                  onFilterChange("importedStatus", value)
+                }
+              />
+              <SwitchFilter
+                id="filter-premium"
+                label="Produtos premium"
+                checked={filters.isPremium}
+                disabled={isLoading}
+                onCheckedChange={(value) => onFilterChange("isPremium", value)}
+              />
+
+              <Separator />
+
+              <SwitchFilter
+                id="filter-promotion"
+                label="Produtos em promoção"
+                checked={filters.isPromotion}
+                disabled={isLoading}
+                onCheckedChange={(value) =>
+                  onFilterChange("isPromotion", value)
+                }
+              />
+              <SwitchFilter
+                id="filter-featured"
+                label="Produtos em destaque"
+                checked={filters.isFeatured}
+                disabled={isLoading}
+                onCheckedChange={(value) => onFilterChange("isFeatured", value)}
+              />
+              <SwitchFilter
+                id="filter-consignment"
+                label="Produtos consignados"
+                checked={filters.isConsignment}
+                disabled={isLoading}
+                onCheckedChange={(value) =>
+                  onFilterChange("isConsignment", value)
+                }
+              />
+
+              <Separator />
+
+              <SwitchFilter
+                id="filter-discontinued"
+                label="Produtos descontinuados"
+                checked={filters.isDiscontinued}
+                disabled={isLoading}
+                onCheckedChange={(value) =>
+                  onFilterChange("isDiscontinued", value)
+                }
+              />
+              <SwitchFilter
+                id="filter-no-inventory"
+                label="Sem controle de estoque"
+                checked={filters.hasNoInventory}
+                disabled={isLoading}
+                onCheckedChange={(value) =>
+                  onFilterChange("hasNoInventory", value)
+                }
+              />
+              <SwitchFilter
+                id="filter-website-off"
+                label="Desativado para website"
+                checked={filters.isWebsiteOff}
+                disabled={isLoading}
+                onCheckedChange={(value) =>
+                  onFilterChange("isWebsiteOff", value)
+                }
+              />
+            </TabsContent>
+
             {panelFilterCount > 0 && (
-              <div className="mt-5 space-y-2 border-t pt-4">
+              <div className="mt-3 space-y-1.5 border-t pt-3">
                 <div className="text-muted-foreground text-sm font-medium">
                   Filtros ativos
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   {panelActiveFilters.map((filter) => (
                     <Badge
                       key={filter.type}
                       variant="secondary"
-                      className="flex items-center gap-1.5 px-2.5 py-1 text-xs"
+                      className="flex items-center gap-1 px-2 py-0.5 text-xs"
                     >
                       <span>
                         {filter.label}: {filter.value}
@@ -601,7 +737,7 @@ export function FilterPanel({
           </div>
         </Tabs>
 
-        <SheetFooter className="supports-[backdrop-filter]:bg-background/80 shrink-0 border-t bg-background/95 p-4 backdrop-blur">
+        <SheetFooter className="supports-[backdrop-filter]:bg-background/80 shrink-0 border-t bg-background/95 p-3 backdrop-blur">
           <Button
             type="button"
             variant="outline"
