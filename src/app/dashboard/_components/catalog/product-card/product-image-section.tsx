@@ -19,6 +19,18 @@ interface ProductImageSectionProps {
   compact?: boolean;
 }
 
+const ONE_WEEK_IN_MS = 7 * 24 * 60 * 60 * 1000;
+
+function wasCreatedWithinLastWeek(createdAt?: string): boolean {
+  if (!createdAt) return false;
+
+  const createdAtTimestamp = Date.parse(createdAt.replace(" ", "T"));
+  if (Number.isNaN(createdAtTimestamp)) return false;
+
+  const productAge = Date.now() - createdAtTimestamp;
+  return productAge >= 0 && productAge < ONE_WEEK_IN_MS;
+}
+
 /**
  * Secao de imagem do card (Client): exibe a imagem do produto ou o uploader,
  * com badges de estado (promocao/novo/importado/esgotado). Dispara
@@ -35,6 +47,7 @@ export function ProductImageSection({
   const router = useRouter();
   const [imageError, setImageError] = useState(false);
   const isOutOfStock = product.storeStock === 0;
+  const isNew = wasCreatedWithinLastWeek(product.createdAt);
 
   const imageUrl = getValidImageUrl(product.imagePath);
   const imageErrorHandler = createImageErrorHandler();
@@ -119,7 +132,7 @@ export function ProductImageSection({
             Promoção
           </Badge>
         )}
-        {product.launch && (
+        {isNew && (
           <Badge className="bg-blue-500 text-xs hover:bg-blue-600">
             <Star className="mr-1 h-3 w-3" />
             Novo
