@@ -122,6 +122,102 @@ function TextFilterInput({
   );
 }
 
+function formatIsoDateToBrazilian(value: string): string {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  return match ? `${match[3]}/${match[2]}/${match[1]}` : "";
+}
+
+function parseBrazilianDate(value: string): string | undefined {
+  const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value);
+  if (!match) return undefined;
+
+  const day = Number(match[1]);
+  const month = Number(match[2]);
+  const year = Number(match[3]);
+  const date = new Date(Date.UTC(year, month - 1, day));
+
+  if (
+    date.getUTCFullYear() !== year ||
+    date.getUTCMonth() !== month - 1 ||
+    date.getUTCDate() !== day
+  ) {
+    return undefined;
+  }
+
+  return `${match[3]}-${match[2]}-${match[1]}`;
+}
+
+function maskBrazilianDate(value: string): string {
+  const digits = value.replace(/\D/g, "").slice(0, 8);
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+  return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+}
+
+interface DateFilterInputProps {
+  id: string;
+  label: string;
+  value: string;
+  min?: string;
+  max?: string;
+  disabled: boolean;
+  onChange: (value: string) => void;
+}
+
+function DateFilterInput({
+  id,
+  label,
+  value,
+  min,
+  max,
+  disabled,
+  onChange,
+}: DateFilterInputProps) {
+  const formattedValue = formatIsoDateToBrazilian(value);
+  const [inputValue, setInputValue] = useState(formattedValue);
+
+  useEffect(() => setInputValue(formattedValue), [formattedValue]);
+
+  const commitValue = () => {
+    const isoDate = parseBrazilianDate(inputValue);
+    const isWithinRange =
+      isoDate && (!min || isoDate >= min) && (!max || isoDate <= max);
+
+    if (isoDate && isWithinRange) {
+      if (isoDate !== value) onChange(isoDate);
+      return;
+    }
+
+    setInputValue(formattedValue);
+  };
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    commitValue();
+  };
+
+  return (
+    <form className="space-y-1" onSubmit={handleSubmit}>
+      <Label htmlFor={id}>{label}</Label>
+      <Input
+        id={id}
+        type="text"
+        inputMode="numeric"
+        autoComplete="off"
+        lang="pt-BR"
+        placeholder="DD/MM/AAAA"
+        maxLength={10}
+        value={inputValue}
+        disabled={disabled}
+        onBlur={commitValue}
+        onChange={(event) =>
+          setInputValue(maskBrazilianDate(event.target.value))
+        }
+      />
+    </form>
+  );
+}
+
 interface NumericFilterInputProps {
   id: string;
   label: string;
@@ -562,34 +658,6 @@ export function FilterPanel({
               />
 
               <FilterGroup title="Período de cadastro">
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="space-y-1">
-                    <Label htmlFor="filter-start-date">Data inicial</Label>
-                    <Input
-                      id="filter-start-date"
-                      type="date"
-                      value={filters.startDate}
-                      max={filters.endDate || undefined}
-                      disabled={isLoading}
-                      onChange={(event) =>
-                        onFilterChange("startDate", event.target.value)
-                      }
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label htmlFor="filter-end-date">Data final</Label>
-                    <Input
-                      id="filter-end-date"
-                      type="date"
-                      value={filters.endDate}
-                      min={filters.startDate || undefined}
-                      disabled={isLoading}
-                      onChange={(event) =>
-                        onFilterChange("endDate", event.target.value)
-                      }
-                    />
-                  </div>
-                </div>
                 <SwitchFilter
                   id="filter-registration-period"
                   label="Filtrar pelo período informado"
@@ -599,6 +667,24 @@ export function FilterPanel({
                     onFilterChange("operationList", value ? 1 : 0)
                   }
                 />
+                <div className="grid grid-cols-2 gap-2">
+                  <DateFilterInput
+                    id="filter-start-date"
+                    label="Data inicial"
+                    value={filters.startDate}
+                    max={filters.endDate || undefined}
+                    disabled={isLoading || filters.operationList !== 1}
+                    onChange={(value) => onFilterChange("startDate", value)}
+                  />
+                  <DateFilterInput
+                    id="filter-end-date"
+                    label="Data final"
+                    value={filters.endDate}
+                    min={filters.startDate || undefined}
+                    disabled={isLoading || filters.operationList !== 1}
+                    onChange={(value) => onFilterChange("endDate", value)}
+                  />
+                </div>
               </FilterGroup>
             </TabsContent>
 

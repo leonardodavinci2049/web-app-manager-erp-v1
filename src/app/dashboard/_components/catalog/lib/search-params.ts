@@ -120,6 +120,35 @@ function parseDate(params: URLSearchParams, key: string): string {
   return /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : "";
 }
 
+function formatDateInputValue(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function getDefaultRegistrationPeriod(): {
+  startDate: string;
+  endDate: string;
+} {
+  const today = new Date();
+  const startDate = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate() - 7,
+  );
+  const endDate = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate() + 1,
+  );
+
+  return {
+    startDate: formatDateInputValue(startDate),
+    endDate: formatDateInputValue(endDate),
+  };
+}
+
 function parseSort(params: URLSearchParams): SortOption {
   const sort = params.get("sort") as SortOption | null;
   return sort && VALID_SORT_OPTIONS.has(sort) ? sort : DEFAULT_SORT;
@@ -133,8 +162,9 @@ export function parseCatalogSearchParams(
   sp: URLSearchParams | Record<string, SearchParamValue>,
 ): CatalogFilters {
   const params = normalizeParams(sp);
-  const startDate = parseDate(params, "start-date");
-  const endDate = parseDate(params, "end-date");
+  const defaultPeriod = getDefaultRegistrationPeriod();
+  const startDate = parseDate(params, "start-date") || defaultPeriod.startDate;
+  const endDate = parseDate(params, "end-date") || defaultPeriod.endDate;
   return {
     searchTerm: (params.get("search") ?? "").trim().slice(0, 300),
     selectedCategory:
@@ -228,9 +258,9 @@ export function buildCatalogUrl(
     filters.startDate <= filters.endDate
   ) {
     params.set("registration-period", "1");
+    params.set("start-date", filters.startDate);
+    params.set("end-date", filters.endDate);
   }
-  if (filters.startDate) params.set("start-date", filters.startDate);
-  if (filters.endDate) params.set("end-date", filters.endDate);
   if (filters.hasNoImage) params.set("no-image", "1");
   if (filters.hasNoDescription) params.set("no-description", "1");
   if (filters.hasNoSalesCopy) params.set("no-sales-copy", "1");

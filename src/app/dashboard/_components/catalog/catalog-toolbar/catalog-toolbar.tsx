@@ -266,15 +266,8 @@ export function CatalogToolbar({
       filters.operationList === 1,
       "operationList",
       "Período de cadastro",
-      "Ativado",
+      `${filters.startDate} até ${filters.endDate}`,
     );
-    add(
-      filters.startDate !== "",
-      "startDate",
-      "Data inicial",
-      filters.startDate,
-    );
-    add(filters.endDate !== "", "endDate", "Data final", filters.endDate);
     add(filters.hasNoImage, "hasNoImage", "Imagem", "Produtos sem imagem");
     add(
       filters.hasNoDescription,
