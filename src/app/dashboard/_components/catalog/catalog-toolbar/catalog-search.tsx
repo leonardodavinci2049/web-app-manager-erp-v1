@@ -57,7 +57,7 @@ export function CatalogSearch({
             <Search className="text-muted-foreground h-4.5 w-4.5 transition-colors group-focus-within:text-primary" />
           </div>
           <Input
-            placeholder="Buscar por nome ou SKU..."
+            placeholder="Buscar por ID, nome, referência ou modelo..."
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}

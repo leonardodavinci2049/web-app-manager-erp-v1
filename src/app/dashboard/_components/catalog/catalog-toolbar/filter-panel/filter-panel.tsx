@@ -28,11 +28,14 @@ import type { UIBrand } from "@/services/api-main/brand/transformers/transformer
 import type { UIPtype } from "@/services/api-main/ptype/transformers/transformers";
 import { SORT_OPTIONS } from "../../lib/search-params";
 import type {
+  AdvancedFilterFlag,
   CatalogFilters,
   CategoryOption,
   PanelFilterType,
+  SalesListFlag,
   SortOption,
-  TernaryFlag,
+  StockListFlag,
+  VariousListFlag,
 } from "../../types/catalog-types";
 import { CategoryMenu } from "./category-menu";
 
@@ -230,27 +233,29 @@ function SwitchFilter({
   );
 }
 
-interface RadioFilterProps {
+interface RadioFilterProps<T extends number> {
   id: string;
   label: string;
-  value: TernaryFlag;
-  options: ReadonlyArray<{ label: string; value: TernaryFlag }>;
+  value: T;
+  options: ReadonlyArray<{ label: string; value: T }>;
   disabled: boolean;
-  onValueChange: (value: TernaryFlag) => void;
+  onValueChange: (value: T) => void;
 }
 
-function RadioFilter({
+function RadioFilter<T extends number>({
   id,
   label,
   value,
   options,
   disabled,
   onValueChange,
-}: RadioFilterProps) {
+}: RadioFilterProps<T>) {
+  const gridColumns = options.length <= 3 ? "grid-cols-3" : "grid-cols-2";
+
   return (
     <fieldset className="space-y-1 rounded-md border px-2.5 py-1.5">
       <legend className="px-1 text-xs font-medium">{label}</legend>
-      <div className="grid grid-cols-3 gap-0.5 rounded-md bg-muted p-0.5">
+      <div className={`grid ${gridColumns} gap-0.5 rounded-md bg-muted p-0.5`}>
         {options.map((option) => {
           const optionId = `${id}-${option.value}`;
           return (
@@ -314,6 +319,11 @@ export function FilterPanel({
   onClearPanelFilters,
   onRemovePanelFilter,
 }: FilterPanelProps) {
+  const hasValidRegistrationPeriod =
+    filters.startDate !== "" &&
+    filters.endDate !== "" &&
+    filters.startDate <= filters.endDate;
+
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetTrigger asChild>
@@ -445,25 +455,6 @@ export function FilterPanel({
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
-                <TextFilterInput
-                  id="filter-reference"
-                  label="Referência"
-                  placeholder="Digite o ID"
-                  value={filters.reference}
-                  disabled={isLoading}
-                  onChange={(value) => onFilterChange("reference", value)}
-                />
-                <TextFilterInput
-                  id="filter-model"
-                  label="Modelo"
-                  placeholder="Digite o ID"
-                  value={filters.model}
-                  disabled={isLoading}
-                  onChange={(value) => onFilterChange("model", value)}
-                />
-              </div>
-
               <TextFilterInput
                 id="filter-ean"
                 label="EAN"
@@ -497,65 +488,33 @@ export function FilterPanel({
             </TabsContent>
 
             <TabsContent value="advanced" className="space-y-3">
-              <FilterGroup title="Lista de vendas">
-                <SwitchFilter
-                  id="filter-best-sellers"
-                  label="Mais vendidos"
-                  checked={filters.isBestSeller}
-                  disabled={isLoading}
-                  onCheckedChange={(value) =>
-                    onFilterChange("isBestSeller", value)
-                  }
-                />
-                <SwitchFilter
-                  id="filter-lowest-selling"
-                  label="Menos vendidos"
-                  checked={filters.isLowestSelling}
-                  disabled={isLoading}
-                  onCheckedChange={(value) =>
-                    onFilterChange("isLowestSelling", value)
-                  }
-                />
-                <SwitchFilter
-                  id="filter-stalled"
-                  label="Produtos parados"
-                  checked={filters.isStalled}
-                  disabled={isLoading}
-                  onCheckedChange={(value) =>
-                    onFilterChange("isStalled", value)
-                  }
-                />
-              </FilterGroup>
+              <RadioFilter<SalesListFlag>
+                id="filter-sales-list"
+                label="Lista de vendas"
+                value={filters.salesList}
+                options={[
+                  { label: "Todos", value: 0 },
+                  { label: "Mais vendidos", value: 1 },
+                  { label: "Menos vendidos", value: 2 },
+                  { label: "Encalhados", value: 3 },
+                ]}
+                disabled={isLoading}
+                onValueChange={(value) => onFilterChange("salesList", value)}
+              />
 
-              <FilterGroup title="Lista de estoque">
-                <SwitchFilter
-                  id="filter-stock"
-                  label="Apenas produtos com estoque"
-                  checked={filters.onlyInStock}
-                  disabled={isLoading}
-                  onCheckedChange={(value) =>
-                    onFilterChange("onlyInStock", value)
-                  }
-                />
-                <SwitchFilter
-                  id="filter-low-stock"
-                  label="Produtos com estoque baixo"
-                  checked={filters.hasLowStock}
-                  disabled={isLoading}
-                  onCheckedChange={(value) =>
-                    onFilterChange("hasLowStock", value)
-                  }
-                />
-                <SwitchFilter
-                  id="filter-latest-arrivals"
-                  label="Últimos cadastrados"
-                  checked={filters.isLatestArrival}
-                  disabled={isLoading}
-                  onCheckedChange={(value) =>
-                    onFilterChange("isLatestArrival", value)
-                  }
-                />
-              </FilterGroup>
+              <RadioFilter<StockListFlag>
+                id="filter-stock-list"
+                label="Lista de estoque"
+                value={filters.stockList}
+                options={[
+                  { label: "Todos", value: 0 },
+                  { label: "Com estoque", value: 1 },
+                  { label: "Estoque até 2", value: 2 },
+                  { label: "Últimos cadastrados", value: 3 },
+                ]}
+                disabled={isLoading}
+                onValueChange={(value) => onFilterChange("stockList", value)}
+              />
 
               <FilterGroup title="Sem conteúdo">
                 <SwitchFilter
@@ -587,23 +546,57 @@ export function FilterPanel({
                 />
               </FilterGroup>
 
-              <FilterGroup title="Diversos">
+              <RadioFilter<AdvancedFilterFlag>
+                id="filter-advanced"
+                label="Filtro avançado"
+                value={filters.advancedFilter}
+                options={[
+                  { label: "Todos", value: 0 },
+                  { label: "Atacado menor que 1", value: 1 },
+                  { label: "Serviço", value: 2 },
+                ]}
+                disabled={isLoading}
+                onValueChange={(value) =>
+                  onFilterChange("advancedFilter", value)
+                }
+              />
+
+              <FilterGroup title="Período de cadastro">
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-1">
+                    <Label htmlFor="filter-start-date">Data inicial</Label>
+                    <Input
+                      id="filter-start-date"
+                      type="date"
+                      value={filters.startDate}
+                      max={filters.endDate || undefined}
+                      disabled={isLoading}
+                      onChange={(event) =>
+                        onFilterChange("startDate", event.target.value)
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="filter-end-date">Data final</Label>
+                    <Input
+                      id="filter-end-date"
+                      type="date"
+                      value={filters.endDate}
+                      min={filters.startDate || undefined}
+                      disabled={isLoading}
+                      onChange={(event) =>
+                        onFilterChange("endDate", event.target.value)
+                      }
+                    />
+                  </div>
+                </div>
                 <SwitchFilter
-                  id="filter-price-less-than"
-                  label="Preço de atacado menor que 1"
-                  checked={filters.hasPriceLessThanOne}
-                  disabled={isLoading}
+                  id="filter-registration-period"
+                  label="Filtrar pelo período informado"
+                  checked={filters.operationList === 1}
+                  disabled={isLoading || !hasValidRegistrationPeriod}
                   onCheckedChange={(value) =>
-                    onFilterChange("hasPriceLessThanOne", value)
-                  }
-                />
-                <SwitchFilter
-                  id="filter-service"
-                  label="Lista de serviço"
-                  checked={filters.isService}
-                  disabled={isLoading}
-                  onCheckedChange={(value) =>
-                    onFilterChange("isService", value)
+                    onFilterChange("operationList", value ? 1 : 0)
                   }
                 />
               </FilterGroup>
@@ -648,60 +641,21 @@ export function FilterPanel({
 
               <Separator />
 
-              <SwitchFilter
-                id="filter-promotion"
-                label="Produtos em promoção"
-                checked={filters.isPromotion}
+              <RadioFilter<VariousListFlag>
+                id="filter-various-list"
+                label="Listas adicionais"
+                value={filters.variousList}
+                options={[
+                  { label: "Todos", value: 0 },
+                  { label: "Promoção", value: 1 },
+                  { label: "Destaque", value: 2 },
+                  { label: "Consignado", value: 3 },
+                  { label: "Descontinuado", value: 4 },
+                  { label: "Sem estoque controlado", value: 5 },
+                  { label: "Site desativado", value: 6 },
+                ]}
                 disabled={isLoading}
-                onCheckedChange={(value) =>
-                  onFilterChange("isPromotion", value)
-                }
-              />
-              <SwitchFilter
-                id="filter-featured"
-                label="Produtos em destaque"
-                checked={filters.isFeatured}
-                disabled={isLoading}
-                onCheckedChange={(value) => onFilterChange("isFeatured", value)}
-              />
-              <SwitchFilter
-                id="filter-consignment"
-                label="Produtos consignados"
-                checked={filters.isConsignment}
-                disabled={isLoading}
-                onCheckedChange={(value) =>
-                  onFilterChange("isConsignment", value)
-                }
-              />
-
-              <Separator />
-
-              <SwitchFilter
-                id="filter-discontinued"
-                label="Produtos descontinuados"
-                checked={filters.isDiscontinued}
-                disabled={isLoading}
-                onCheckedChange={(value) =>
-                  onFilterChange("isDiscontinued", value)
-                }
-              />
-              <SwitchFilter
-                id="filter-no-inventory"
-                label="Sem controle de estoque"
-                checked={filters.hasNoInventory}
-                disabled={isLoading}
-                onCheckedChange={(value) =>
-                  onFilterChange("hasNoInventory", value)
-                }
-              />
-              <SwitchFilter
-                id="filter-website-off"
-                label="Desativado para website"
-                checked={filters.isWebsiteOff}
-                disabled={isLoading}
-                onCheckedChange={(value) =>
-                  onFilterChange("isWebsiteOff", value)
-                }
+                onValueChange={(value) => onFilterChange("variousList", value)}
               />
             </TabsContent>
 
