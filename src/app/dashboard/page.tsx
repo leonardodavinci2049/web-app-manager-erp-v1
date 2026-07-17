@@ -14,6 +14,7 @@ import {
   parseCatalogSearchParams,
 } from "./_components/catalog";
 
+
 const logger = createLogger("DashboardPage");
 const CATALOG_PATHNAME = "/dashboard";
 
