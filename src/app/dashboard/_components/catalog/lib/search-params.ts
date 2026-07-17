@@ -1,4 +1,8 @@
-import type { CatalogFilters, SortOption } from "../types/catalog-types";
+import type {
+  CatalogFilters,
+  SortOption,
+  TernaryFlag,
+} from "../types/catalog-types";
 
 const DEFAULT_SORT: SortOption = "newest";
 const DEFAULT_CATEGORY = "all";
@@ -82,6 +86,17 @@ function parseFlag(params: URLSearchParams, key: string): boolean {
   return params.get(key) === "1";
 }
 
+function parseTernaryFlag(
+  params: URLSearchParams,
+  key: string,
+  defaultValue: TernaryFlag,
+): TernaryFlag {
+  const rawValue = params.get(key);
+  if (rawValue === null) return defaultValue;
+  const value = Number(rawValue);
+  return value === 0 || value === 1 || value === 2 ? value : defaultValue;
+}
+
 function parseSort(params: URLSearchParams): SortOption {
   const sort = params.get("sort") as SortOption | null;
   return sort && VALID_SORT_OPTIONS.has(sort) ? sort : DEFAULT_SORT;
@@ -111,18 +126,21 @@ export function parseCatalogSearchParams(
     hasNoImage: parseFlag(params, "no-image"),
     hasNoDescription: parseFlag(params, "no-description"),
     hasNoSalesCopy: parseFlag(params, "no-sales-copy"),
+    isBestSeller: parseFlag(params, "best-sellers"),
     isPromotion: parseFlag(params, "promotion"),
     isFeatured: parseFlag(params, "featured"),
-    isImported: parseFlag(params, "imported"),
-    isInactive: parseFlag(params, "inactive"),
+    importedStatus: parseTernaryFlag(params, "imported", 0),
+    inactiveStatus: parseTernaryFlag(params, "inactive", 2),
+    isPremium: parseFlag(params, "premium"),
     isConsignment: parseFlag(params, "consignment"),
     isDiscontinued: parseFlag(params, "discontinued"),
     hasNoInventory: parseFlag(params, "no-inventory"),
+    isWebsiteOff: parseFlag(params, "website-off"),
     isLowestSelling: parseFlag(params, "lowest-selling"),
     isStalled: parseFlag(params, "stalled"),
     isLatestArrival: parseFlag(params, "latest-arrivals"),
     hasPriceLessThanOne: parseFlag(params, "price-less-than"),
-    lowStockThreshold: parsePositiveInteger(params, "low-stock"),
+    hasLowStock: parseFlag(params, "low-stock"),
     sortBy: parseSort(params),
   };
 }
@@ -153,19 +171,23 @@ export function buildCatalogUrl(
   if (filters.hasNoImage) params.set("no-image", "1");
   if (filters.hasNoDescription) params.set("no-description", "1");
   if (filters.hasNoSalesCopy) params.set("no-sales-copy", "1");
+  if (filters.isBestSeller) params.set("best-sellers", "1");
   if (filters.isPromotion) params.set("promotion", "1");
   if (filters.isFeatured) params.set("featured", "1");
-  if (filters.isImported) params.set("imported", "1");
-  if (filters.isInactive) params.set("inactive", "1");
+  if (filters.importedStatus !== 0)
+    params.set("imported", String(filters.importedStatus));
+  if (filters.inactiveStatus !== 2)
+    params.set("inactive", String(filters.inactiveStatus));
+  if (filters.isPremium) params.set("premium", "1");
   if (filters.isConsignment) params.set("consignment", "1");
   if (filters.isDiscontinued) params.set("discontinued", "1");
   if (filters.hasNoInventory) params.set("no-inventory", "1");
+  if (filters.isWebsiteOff) params.set("website-off", "1");
   if (filters.isLowestSelling) params.set("lowest-selling", "1");
   if (filters.isStalled) params.set("stalled", "1");
   if (filters.isLatestArrival) params.set("latest-arrivals", "1");
   if (filters.hasPriceLessThanOne) params.set("price-less-than", "1");
-  if (filters.lowStockThreshold)
-    params.set("low-stock", String(filters.lowStockThreshold));
+  if (filters.hasLowStock) params.set("low-stock", "1");
   if (filters.sortBy && filters.sortBy !== DEFAULT_SORT)
     params.set("sort", filters.sortBy);
 
