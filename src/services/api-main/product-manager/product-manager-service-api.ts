@@ -59,7 +59,15 @@ export class ProductManagerServiceApi extends BaseApiService {
     try {
       const validatedParams =
         ProductManagerFindAllSchema.partial().parse(params);
-      const operationList = validatedParams.pe_flag_operation_list ?? 0;
+      const hasValidRegistrationPeriod =
+        validatedParams.pe_start_date &&
+        validatedParams.pe_end_date &&
+        validatedParams.pe_start_date <= validatedParams.pe_end_date;
+      const operationList =
+        validatedParams.pe_flag_operation_list === 1 &&
+        hasValidRegistrationPeriod
+          ? 1
+          : 0;
       const requestBody = this.buildBasePayload({
         pe_system_client_id: validatedParams.pe_system_client_id,
         pe_organization_id: validatedParams.pe_organization_id,

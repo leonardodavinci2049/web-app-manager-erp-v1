@@ -173,7 +173,7 @@ export function parseCatalogSearchParams(
       0,
     ),
     operationList:
-      startDate && endDate
+      startDate && endDate && startDate <= endDate
         ? parseIntegerInRange<OperationListFlag>(
             params,
             "registration-period",
@@ -221,7 +221,14 @@ export function buildCatalogUrl(
     params.set("advanced", String(filters.advancedFilter));
   if (filters.variousList !== 0)
     params.set("various-list", String(filters.variousList));
-  if (filters.operationList === 1) params.set("registration-period", "1");
+  if (
+    filters.operationList === 1 &&
+    filters.startDate &&
+    filters.endDate &&
+    filters.startDate <= filters.endDate
+  ) {
+    params.set("registration-period", "1");
+  }
   if (filters.startDate) params.set("start-date", filters.startDate);
   if (filters.endDate) params.set("end-date", filters.endDate);
   if (filters.hasNoImage) params.set("no-image", "1");
