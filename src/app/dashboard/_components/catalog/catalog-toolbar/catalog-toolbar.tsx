@@ -32,34 +32,25 @@ import { ViewModeToggle } from "./view-mode-toggle";
 const VIEW_MODE_STORAGE_KEY = "catalog:product-view-mode";
 
 const PANEL_FILTER_DEFAULTS: Pick<CatalogFilters, PanelFilterType> = {
-  reference: "",
-  model: "",
   selectedCategory: "all",
   selectedBrand: undefined,
   selectedPtype: undefined,
   supplierId: undefined,
   physicalId: undefined,
   ean: "",
-  onlyInStock: false,
-  isService: false,
+  salesList: 0,
+  stockList: 0,
+  advancedFilter: 0,
+  variousList: 0,
+  operationList: 0,
+  startDate: "",
+  endDate: "",
   hasNoImage: false,
   hasNoDescription: false,
   hasNoSalesCopy: false,
-  isBestSeller: false,
-  isPromotion: false,
-  isFeatured: false,
   importedStatus: 0,
   inactiveStatus: 2,
   isPremium: false,
-  isConsignment: false,
-  isDiscontinued: false,
-  hasNoInventory: false,
-  isWebsiteOff: false,
-  isLowestSelling: false,
-  isStalled: false,
-  isLatestArrival: false,
-  hasPriceLessThanOne: false,
-  hasLowStock: false,
   sortBy: "newest",
 };
 
@@ -177,9 +168,6 @@ export function CatalogToolbar({
       "Pesquisa",
       filters.searchTerm,
     );
-    add(filters.reference !== "", "reference", "Referência", filters.reference);
-    add(filters.model !== "", "model", "Modelo", filters.model);
-
     if (filters.selectedCategory !== "all") {
       const category = categories.find(
         (item) => item.id.toString() === filters.selectedCategory,
@@ -224,13 +212,69 @@ export function CatalogToolbar({
       String(filters.physicalId ?? ""),
     );
     add(filters.ean !== "", "ean", "EAN", filters.ean);
+    const salesListLabels = [
+      "",
+      "Mais vendidos",
+      "Menos vendidos",
+      "Produtos encalhados",
+    ];
     add(
-      filters.onlyInStock,
-      "onlyInStock",
-      "Estoque",
-      "Apenas produtos em estoque",
+      filters.salesList !== 0,
+      "salesList",
+      "Lista de vendas",
+      salesListLabels[filters.salesList],
     );
-    add(filters.isService, "isService", "Serviço", "Produtos de serviço");
+    const stockListLabels = [
+      "",
+      "Produtos com estoque",
+      "Estoque menor ou igual a 2",
+      "Últimos cadastrados",
+    ];
+    add(
+      filters.stockList !== 0,
+      "stockList",
+      "Lista de estoque",
+      stockListLabels[filters.stockList],
+    );
+    const advancedFilterLabels = [
+      "",
+      "Preço de atacado menor que 1",
+      "Produtos de serviço",
+    ];
+    add(
+      filters.advancedFilter !== 0,
+      "advancedFilter",
+      "Filtro avançado",
+      advancedFilterLabels[filters.advancedFilter],
+    );
+    const variousListLabels = [
+      "",
+      "Produtos em promoção",
+      "Produtos em destaque",
+      "Produtos consignados",
+      "Produtos descontinuados",
+      "Sem controle de estoque",
+      "Desativados para o website",
+    ];
+    add(
+      filters.variousList !== 0,
+      "variousList",
+      "Lista adicional",
+      variousListLabels[filters.variousList],
+    );
+    add(
+      filters.operationList === 1,
+      "operationList",
+      "Período de cadastro",
+      "Ativado",
+    );
+    add(
+      filters.startDate !== "",
+      "startDate",
+      "Data inicial",
+      filters.startDate,
+    );
+    add(filters.endDate !== "", "endDate", "Data final", filters.endDate);
     add(filters.hasNoImage, "hasNoImage", "Imagem", "Produtos sem imagem");
     add(
       filters.hasNoDescription,
@@ -244,9 +288,6 @@ export function CatalogToolbar({
       "Descrição de venda",
       "Produtos sem descrição de venda",
     );
-    add(filters.isBestSeller, "isBestSeller", "Vendas", "Mais vendidos");
-    add(filters.isPromotion, "isPromotion", "Promoção", "Produtos em promoção");
-    add(filters.isFeatured, "isFeatured", "Destaque", "Produtos em destaque");
     add(
       filters.importedStatus !== 0,
       "importedStatus",
@@ -260,50 +301,6 @@ export function CatalogToolbar({
       filters.inactiveStatus === 0 ? "Todos" : "Inativos",
     );
     add(filters.isPremium, "isPremium", "Premium", "Produtos premium");
-    add(
-      filters.isConsignment,
-      "isConsignment",
-      "Consignação",
-      "Produtos consignados",
-    );
-    add(
-      filters.isDiscontinued,
-      "isDiscontinued",
-      "Descontinuação",
-      "Produtos descontinuados",
-    );
-    add(
-      filters.hasNoInventory,
-      "hasNoInventory",
-      "Controle de estoque",
-      "Produtos sem controle de estoque",
-    );
-    add(
-      filters.isWebsiteOff,
-      "isWebsiteOff",
-      "Website",
-      "Desativados para o website",
-    );
-    add(filters.isLowestSelling, "isLowestSelling", "Vendas", "Menos vendidos");
-    add(filters.isStalled, "isStalled", "Movimentação", "Produtos parados");
-    add(
-      filters.isLatestArrival,
-      "isLatestArrival",
-      "Cadastro",
-      "Últimos cadastrados",
-    );
-    add(
-      filters.hasPriceLessThanOne,
-      "hasPriceLessThanOne",
-      "Preço",
-      "Atacado menor que 1",
-    );
-    add(
-      filters.hasLowStock,
-      "hasLowStock",
-      "Estoque",
-      "Produtos com estoque baixo",
-    );
 
     if (filters.sortBy !== "newest") {
       const sort = SORT_OPTIONS.find((item) => item.value === filters.sortBy);

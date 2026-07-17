@@ -4,6 +4,11 @@ export type { SortOption, ViewMode };
 
 /** Estado ternario aceito pelos filtros de situacao e origem da API. */
 export type TernaryFlag = 0 | 1 | 2;
+export type SalesListFlag = 0 | 1 | 2 | 3;
+export type StockListFlag = 0 | 1 | 2 | 3;
+export type AdvancedFilterFlag = 0 | 1 | 2;
+export type VariousListFlag = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+export type OperationListFlag = 0 | 1;
 
 /**
  * Opcao de categoria utilizada pelos filtros do catalogo. Mantem os campos de
@@ -28,34 +33,25 @@ export interface CategoryOption {
  */
 export interface CatalogFilters {
   searchTerm: string;
-  reference: string;
-  model: string;
   selectedCategory: string;
   selectedBrand?: string;
   selectedPtype?: string;
   supplierId?: number;
   physicalId?: number;
   ean: string;
-  onlyInStock: boolean;
-  isService: boolean;
+  salesList: SalesListFlag;
+  stockList: StockListFlag;
+  advancedFilter: AdvancedFilterFlag;
+  variousList: VariousListFlag;
+  operationList: OperationListFlag;
+  startDate: string;
+  endDate: string;
   hasNoImage: boolean;
   hasNoDescription: boolean;
   hasNoSalesCopy: boolean;
-  isBestSeller: boolean;
-  isPromotion: boolean;
-  isFeatured: boolean;
   importedStatus: TernaryFlag;
   inactiveStatus: TernaryFlag;
   isPremium: boolean;
-  isConsignment: boolean;
-  isDiscontinued: boolean;
-  hasNoInventory: boolean;
-  isWebsiteOff: boolean;
-  isLowestSelling: boolean;
-  isStalled: boolean;
-  isLatestArrival: boolean;
-  hasPriceLessThanOne: boolean;
-  hasLowStock: boolean;
   sortBy: SortOption;
 }
 
