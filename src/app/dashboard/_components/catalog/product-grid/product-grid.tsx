@@ -15,6 +15,7 @@ interface ProductGridProps {
 const GRID_CLASS =
   "grid grid-cols-2 gap-2 sm:grid-cols-[repeat(auto-fill,minmax(190px,1fr))] sm:gap-3 lg:gap-4";
 const LIST_CLASS = "space-y-2 sm:space-y-3";
+const EAGER_GRID_IMAGE_COUNT = 6;
 
 /**
  * Grid de produtos (Server Component). Apenas layout + .map() + empty state.
@@ -53,7 +54,7 @@ export function ProductGrid({
               product={product}
               viewMode="grid"
               catalogReturnTo={catalogReturnTo}
-              eagerImage={index === 0}
+              eagerImage={index < EAGER_GRID_IMAGE_COUNT}
             />
           ))}
         </div>
