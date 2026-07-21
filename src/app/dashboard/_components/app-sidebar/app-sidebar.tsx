@@ -98,17 +98,8 @@ const data = {
       icon: Tags,
       items: [
         {
-          title: "Visão Geral de Categorias",
-          url: "/dashboard/category/category-overviews",
-        },
-        {
-          title: "Lista de Categorias",
-          url: "/dashboard/category/category-list",
-        },
-
-        {
-          title: "Nova Categoria",
-          url: "/dashboard/category/new-category",
+          title: "Central de Categorias",
+          url: "/dashboard/category",
         },
       ],
     },
