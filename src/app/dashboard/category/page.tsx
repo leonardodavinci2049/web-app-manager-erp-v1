@@ -2,11 +2,10 @@ import { connection } from "next/server";
 import { SiteHeaderWithBreadcrumb } from "@/components/dashboard/header/site-header-with-breadcrumb";
 import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
-import { getProductsManager } from "@/services/api-main/product-manager/product-manager-service-api";
 import {
-  getTaxonomies,
   getTaxonomyById,
   getTaxonomyMenuManager,
+  getTaxonomyProducts,
 } from "@/services/api-main/taxonomy-base/taxonomy-base-service-api";
 import type { UITaxonomy } from "@/services/api-main/taxonomy-base/transformers/transformers";
 import { CategoryDashboard } from "./_components/category-dashboard";
@@ -22,6 +21,8 @@ import type {
 } from "./_components/category-types";
 
 const logger = createLogger("CategoryDashboardPage");
+const CATEGORY_MENU_LIMIT = 10_000;
+const PRODUCTS_PER_PAGE = 50;
 interface CategoryDashboardPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
@@ -70,66 +71,54 @@ export default async function CategoryDashboardPage({
   const { apiContext } = await getAuthContext();
 
   let dataError: string | undefined;
-  const [menuResult, activeListItems, inactiveListItems] = await Promise.all([
-    getTaxonomyMenuManager({ limit: 1000, ...apiContext }).catch((error) => {
+  const [menuResult, selectedCategoryDetail] = await Promise.all([
+    getTaxonomyMenuManager({
+      limit: CATEGORY_MENU_LIMIT,
+      ...apiContext,
+    }).catch((error) => {
       logger.error("Failed to load category menu", error);
       dataError = "Não foi possível carregar a hierarquia completa.";
       return { items: [], totalTaxonomies: 0 };
     }),
-    getTaxonomies({ inactive: 0, recordsQuantity: 1000, ...apiContext }).catch(
-      (error) => {
-        logger.error("Failed to load active category list", error);
-        return [];
-      },
-    ),
-    getTaxonomies({ inactive: 1, recordsQuantity: 1000, ...apiContext }).catch(
-      (error) => {
-        logger.error("Failed to load inactive category list", error);
-        return [];
-      },
-    ),
+    categoryId
+      ? getTaxonomyById(categoryId, apiContext).catch((error) => {
+          logger.warn("Failed to load selected category detail", {
+            categoryId,
+            error,
+          });
+          return undefined;
+        })
+      : Promise.resolve(undefined),
   ]);
 
   const baseById = new Map<number, UITaxonomy>();
-  for (const category of [...activeListItems, ...inactiveListItems]) {
-    baseById.set(category.id, category);
-  }
   for (const category of menuResult.items) {
-    const current = baseById.get(category.id);
     baseById.set(category.id, {
       id: category.id,
       parentId: category.parentId,
       name: category.name,
       slug: category.slug,
       imagePath: category.imagePath,
-      imageId: current?.imageId,
       level: category.level,
       order: category.order,
       productCount: category.productCount,
       inactive: category.inactive,
-      metaTitle: current?.metaTitle,
-      metaDescription: current?.metaDescription,
-      notes: current?.notes,
     });
   }
 
-  const detailedCategories = await Promise.all(
-    [...baseById.keys()].map(async (id) => {
-      try {
-        return await getTaxonomyById(id, apiContext);
-      } catch (error) {
-        logger.warn("Failed to load one category detail", { id, error });
-        return undefined;
-      }
-    }),
-  );
-  for (const category of detailedCategories) {
-    if (!category) continue;
-    const menu = baseById.get(category.id);
-    baseById.set(category.id, {
-      ...category,
-      productCount: menu?.productCount ?? category.productCount,
-    });
+  if (selectedCategoryDetail) {
+    const menuCategory = baseById.get(selectedCategoryDetail.id);
+    if (menuCategory) {
+      baseById.set(selectedCategoryDetail.id, {
+        ...menuCategory,
+        imageId: selectedCategoryDetail.imageId,
+        metaTitle: selectedCategoryDetail.metaTitle,
+        metaDescription: selectedCategoryDetail.metaDescription,
+        notes: selectedCategoryDetail.notes,
+        createdAt: selectedCategoryDetail.createdAt,
+        updatedAt: selectedCategoryDetail.updatedAt,
+      });
+    }
   }
 
   const categories = [...baseById.values()];
@@ -143,20 +132,23 @@ export default async function CategoryDashboardPage({
   let productTotal = detail?.directProductCount ?? 0;
   if (detail && tab === "products") {
     try {
-      const result = await getProductsManager({
+      const result = await getTaxonomyProducts({
         taxonomyId: detail.id,
         search: productSearch,
-        recordsQuantity: 30,
+        flagNoFamily: 0,
+        flagNoGroup: 0,
+        flagNoSubgroup: 0,
+        recordsQuantity: PRODUCTS_PER_PAGE,
         pageId: productPage,
         ...apiContext,
       });
       productTotal = result.total;
-      products = result.products.map((product) => ({
+      products = result.items.map((product) => ({
         id: product.id,
         sku: product.sku,
         name: product.name,
-        ean: product.ean,
-        brand: product.brand,
+        ref: product.ref,
+        model: product.model,
         inactive: false,
       }));
     } catch (error) {
@@ -195,6 +187,8 @@ export default async function CategoryDashboardPage({
         }
         tab={tab}
         productSearch={productSearch}
+        productPage={productPage}
+        productsPerPage={PRODUCTS_PER_PAGE}
         dataError={dataError}
       />
     </>

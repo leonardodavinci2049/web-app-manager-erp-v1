@@ -23,6 +23,8 @@ export interface CategoryDashboardProps {
   filters: CategoryFiltersState;
   tab: "details" | "products";
   productSearch: string;
+  productPage: number;
+  productsPerPage: number;
   dataError?: string;
 }
 
@@ -61,6 +63,8 @@ export function CategoryDashboard(props: CategoryDashboardProps) {
                 flatCategories={props.flatCategories}
                 tab={props.tab}
                 productSearch={props.productSearch}
+                productPage={props.productPage}
+                productsPerPage={props.productsPerPage}
                 products={props.products}
                 productTotal={props.productTotal}
               />

@@ -3,20 +3,14 @@
 import { ChevronsDownUp, ChevronsUpDown, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { LEVEL_LABELS } from "../category-constants";
-import type {
-  CategoryFilterLevel,
-  CategoryFilterStatus,
-} from "../category-types";
+import type { CategoryFilterStatus } from "../category-types";
 
 export interface CategoryTreeFiltersProps {
   search: string;
-  level: CategoryFilterLevel;
   status: CategoryFilterStatus;
   withoutProducts: boolean;
   onSearchChange: (value: string) => void;
   onSearchSubmit: () => void;
-  onLevelChange: (value: CategoryFilterLevel) => void;
   onStatusChange: (value: CategoryFilterStatus) => void;
   onToggleWithoutProducts: () => void;
   onExpandAll: () => void;
@@ -25,12 +19,10 @@ export interface CategoryTreeFiltersProps {
 
 export function CategoryTreeFilters({
   search,
-  level,
   status,
   withoutProducts,
   onSearchChange,
   onSearchSubmit,
-  onLevelChange,
   onStatusChange,
   onToggleWithoutProducts,
   onExpandAll,
@@ -54,23 +46,6 @@ export function CategoryTreeFilters({
           aria-label="Buscar categorias"
         />
       </form>
-      <fieldset
-        className="flex gap-1 overflow-x-auto"
-        aria-label="Filtrar por nível"
-      >
-        {(["all", "1", "2", "3"] as const).map((value) => (
-          <Button
-            key={value}
-            size="xs"
-            variant={level === value ? "default" : "outline"}
-            onClick={() => onLevelChange(value)}
-          >
-            {value === "all"
-              ? "Todos"
-              : LEVEL_LABELS[Number(value) as 1 | 2 | 3]}
-          </Button>
-        ))}
-      </fieldset>
       <fieldset
         className="flex gap-1 overflow-x-auto"
         aria-label="Filtrar por status"

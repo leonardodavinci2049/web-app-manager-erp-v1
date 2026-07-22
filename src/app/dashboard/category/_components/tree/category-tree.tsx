@@ -9,7 +9,6 @@ import {
   getVisibleRows,
 } from "../../_utils/category-tree-visibility";
 import type {
-  CategoryFilterLevel,
   CategoryFilterStatus,
   CategoryFiltersState,
   CategoryNodeDto,
@@ -28,7 +27,6 @@ export function CategoryTree({ tree, selectedId, filters }: CategoryTreeProps) {
   const allParentIds = useMemo(() => collectExpandableIds(tree), [tree]);
   const [expanded, setExpanded] = useState<Set<number>>(() => new Set());
   const [search, setSearch] = useState(filters.search);
-  const [level, setLevel] = useState<CategoryFilterLevel>(filters.level);
   const [status, setStatus] = useState<CategoryFilterStatus>(filters.status);
   const [withoutProducts, setWithoutProducts] = useState(
     filters.withoutProducts,
@@ -37,7 +35,6 @@ export function CategoryTree({ tree, selectedId, filters }: CategoryTreeProps) {
   const treeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => setSearch(filters.search), [filters.search]);
-  useEffect(() => setLevel(filters.level), [filters.level]);
   useEffect(() => setStatus(filters.status), [filters.status]);
   useEffect(
     () => setWithoutProducts(filters.withoutProducts),
@@ -47,7 +44,7 @@ export function CategoryTree({ tree, selectedId, filters }: CategoryTreeProps) {
 
   const localFilters: CategoryFiltersState = {
     search,
-    level,
+    level: filters.level,
     status,
     withoutProducts,
     issue,
@@ -94,22 +91,11 @@ export function CategoryTree({ tree, selectedId, filters }: CategoryTreeProps) {
     <aside className="flex min-h-0 flex-col border-r bg-card md:w-[300px] md:min-w-[260px]">
       <CategoryTreeFilters
         search={search}
-        level={level}
         status={status}
         withoutProducts={withoutProducts}
         onSearchChange={setSearch}
-        onSearchSubmit={() => {
-          setExpanded(new Set(allParentIds));
-          commit({ search });
-        }}
-        onLevelChange={(value) => {
-          setExpanded(new Set(allParentIds));
-          setLevel(value);
-          setIssue("");
-          commit({ level: value, issue: "" });
-        }}
+        onSearchSubmit={() => commit({ search })}
         onStatusChange={(value) => {
-          setExpanded(new Set(allParentIds));
           setStatus(value);
           setWithoutProducts(false);
           setIssue("");
@@ -117,7 +103,6 @@ export function CategoryTree({ tree, selectedId, filters }: CategoryTreeProps) {
         }}
         onToggleWithoutProducts={() => {
           const next = !withoutProducts;
-          setExpanded(new Set(allParentIds));
           setWithoutProducts(next);
           if (next) setStatus("all");
           setIssue("");
@@ -151,7 +136,12 @@ export function CategoryTree({ tree, selectedId, filters }: CategoryTreeProps) {
               isExpanded={expanded.has(node.id)}
               hasChildren={node.children.length > 0}
               tabbable={selectedId === node.id || (!selectedId && index === 0)}
-              onSelect={(id) => navigate({ categoryId: String(id) })}
+              onSelect={(id) =>
+                navigate({
+                  categoryId: String(id),
+                  productPage: undefined,
+                })
+              }
               onToggleExpand={toggleExpand}
               onExpand={expand}
               onCollapse={collapse}

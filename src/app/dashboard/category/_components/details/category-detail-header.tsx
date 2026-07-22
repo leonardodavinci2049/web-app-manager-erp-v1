@@ -34,7 +34,12 @@ export function CategoryDetailHeader({
               <button
                 key={item.id}
                 type="button"
-                onClick={() => navigate({ categoryId: String(item.id) })}
+                onClick={() =>
+                  navigate({
+                    categoryId: String(item.id),
+                    productPage: undefined,
+                  })
+                }
                 className="hover:text-foreground"
               >
                 {index > 0 && <span className="mr-1">›</span>}
