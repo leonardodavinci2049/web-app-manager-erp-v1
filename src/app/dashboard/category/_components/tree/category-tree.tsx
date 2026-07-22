@@ -3,10 +3,7 @@
 import { AlertTriangle, Circle } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useCategoryQueryNavigation } from "../../_hooks/use-category-query-navigation";
-import {
-  buildTreePredicate,
-  hasActiveFilters,
-} from "../../_utils/category-filters";
+import { buildTreePredicate } from "../../_utils/category-filters";
 import {
   collectExpandableIds,
   getVisibleRows,
@@ -56,12 +53,7 @@ export function CategoryTree({ tree, selectedId, filters }: CategoryTreeProps) {
     issue,
   };
   const predicate = buildTreePredicate(localFilters);
-  const rows = getVisibleRows(
-    tree,
-    expanded,
-    predicate,
-    hasActiveFilters(localFilters),
-  );
+  const rows = getVisibleRows(tree, expanded, predicate);
 
   const commit = (next: Partial<CategoryFiltersState>) => {
     const merged = { ...localFilters, ...next };
@@ -106,22 +98,34 @@ export function CategoryTree({ tree, selectedId, filters }: CategoryTreeProps) {
         status={status}
         withoutProducts={withoutProducts}
         onSearchChange={setSearch}
-        onSearchSubmit={() => commit({ search })}
+        onSearchSubmit={() => {
+          setExpanded(new Set(allParentIds));
+          commit({ search });
+        }}
         onLevelChange={(value) => {
+          setExpanded(new Set(allParentIds));
           setLevel(value);
           setIssue("");
           commit({ level: value, issue: "" });
         }}
         onStatusChange={(value) => {
+          setExpanded(new Set(allParentIds));
           setStatus(value);
+          setWithoutProducts(false);
           setIssue("");
-          commit({ status: value, issue: "" });
+          commit({ status: value, withoutProducts: false, issue: "" });
         }}
         onToggleWithoutProducts={() => {
           const next = !withoutProducts;
+          setExpanded(new Set(allParentIds));
           setWithoutProducts(next);
+          if (next) setStatus("all");
           setIssue("");
-          commit({ withoutProducts: next, issue: "" });
+          commit({
+            status: next ? "all" : status,
+            withoutProducts: next,
+            issue: "",
+          });
         }}
         onExpandAll={() => setExpanded(new Set(allParentIds))}
         onCollapseAll={() => setExpanded(new Set())}

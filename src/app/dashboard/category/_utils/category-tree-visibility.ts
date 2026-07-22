@@ -19,17 +19,13 @@ export function getVisibleRows(
   tree: CategoryNodeDto[],
   expanded: Set<number>,
   predicate: (node: CategoryNodeDto) => boolean,
-  forceAncestors: boolean,
 ): CategoryTreeRow[] {
   const rows: CategoryTreeRow[] = [];
   const visit = (nodes: CategoryNodeDto[], depth: number) => {
     for (const node of nodes) {
       if (!includesNode(node, predicate)) continue;
       rows.push({ node, depth });
-      if (
-        (expanded.has(node.id) || forceAncestors) &&
-        node.children.length > 0
-      ) {
+      if (expanded.has(node.id) && node.children.length > 0) {
         visit(node.children, depth + 1);
       }
     }

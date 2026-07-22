@@ -78,8 +78,12 @@ export function CategoryTreeFilters({
         {(["all", "active", "inactive"] as const).map((value) => (
           <Button
             key={value}
+            type="button"
             size="xs"
-            variant={status === value ? "secondary" : "outline"}
+            variant={
+              !withoutProducts && status === value ? "default" : "outline"
+            }
+            aria-pressed={!withoutProducts && status === value}
             onClick={() => onStatusChange(value)}
           >
             {value === "all"
@@ -90,8 +94,10 @@ export function CategoryTreeFilters({
           </Button>
         ))}
         <Button
+          type="button"
           size="xs"
-          variant={withoutProducts ? "secondary" : "outline"}
+          variant={withoutProducts ? "default" : "outline"}
+          aria-pressed={withoutProducts}
           onClick={onToggleWithoutProducts}
         >
           Sem produtos
