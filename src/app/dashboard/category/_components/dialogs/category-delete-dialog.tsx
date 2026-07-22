@@ -15,7 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { deleteCategoryAction } from "../../_actions/category-actions";
-import { useCategoryQueryNavigation } from "../_hooks/use-category-query-navigation";
+import { useCategoryQueryNavigation } from "../../_hooks/use-category-query-navigation";
 import type { CategoryDetailDto } from "../category-types";
 
 export function CategoryDeleteDialog({

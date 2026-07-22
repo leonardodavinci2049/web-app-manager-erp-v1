@@ -1,4 +1,4 @@
-import type { CategoryNodeDto } from "../category-types";
+import type { CategoryNodeDto } from "../_components/category-types";
 
 export function includesNode(
   node: CategoryNodeDto,
