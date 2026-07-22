@@ -44,7 +44,7 @@ const modules = [
   {
     title: "Cadastro de Categorias",
     description: "Gerencie categorias e agrupamentos usados no catálogo.",
-    href: "/dashboard/category/category-overviews",
+    href: "/dashboard/category",
     icon: Tags,
     color: "text-blue-500",
     bgColor: "bg-blue-500/10",
