@@ -54,7 +54,7 @@ export function buildCategoryTree(categories: UITaxonomy[]): {
   const roots: CategoryNodeDto[] = [];
   for (const node of nodesById.values()) {
     const parent = nodesById.get(node.parentId);
-    if (node.level > 1 && parent && parent.id !== node.id) {
+    if (node.parentId !== 0 && parent && parent.id !== node.id) {
       parent.children.push(node);
     } else {
       roots.push(node);

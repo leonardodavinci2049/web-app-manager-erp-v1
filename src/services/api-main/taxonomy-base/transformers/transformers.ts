@@ -67,6 +67,10 @@ export interface UITaxonomyMenuManagerItem {
   productCount: number;
 }
 
+function isInactiveTaxonomy(value: number): boolean {
+  return Number(value) === 1;
+}
+
 function parseProductCategories(raw: string | null): UIProductCategory[] {
   if (!raw) return [];
   try {
@@ -120,7 +124,7 @@ export function transformTaxonomyDetail(entity: TaxonomyDetail): UITaxonomy {
     productCount: entity.QT_RECORDS ?? undefined,
     metaTitle: entity.META_TITLE ?? undefined,
     metaDescription: entity.META_DESCRIPTION ?? undefined,
-    inactive: entity.INATIVO === 1,
+    inactive: isInactiveTaxonomy(entity.INATIVO),
     createdAt: entity.CREATEDAT,
     updatedAt: entity.UPDATEDAT,
   };
@@ -194,13 +198,13 @@ export function transformTaxonomyMenuManagerItem(
 ): UITaxonomyMenuManagerItem {
   return {
     id: entity.ID_TAXONOMY,
-    parentId: entity.PARENT_ID,
+    parentId: entity.PARENTID ?? entity.PARENT_ID ?? 0,
     name: entity.TAXONOMIA,
     slug: entity.SLUG || undefined,
     imagePath: entity.PATH_IMAGEM || undefined,
     level: entity.LEVEL,
     order: entity.ORDEM,
-    inactive: entity.INATIVO === 1,
+    inactive: isInactiveTaxonomy(entity.INATIVO),
     productCount: entity.QTY_PRODUCTS,
   };
 }

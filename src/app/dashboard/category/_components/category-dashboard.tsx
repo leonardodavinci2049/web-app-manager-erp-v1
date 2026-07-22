@@ -234,9 +234,7 @@ function CategoryTree({
     collect(tree);
     return ids;
   }, [tree]);
-  const [expanded, setExpanded] = useState<Set<number>>(
-    () => new Set(allParentIds),
-  );
+  const [expanded, setExpanded] = useState<Set<number>>(() => new Set());
   const [search, setSearch] = useState(initialSearch);
   const [level, setLevel] = useState<CategoryFilterLevel>(initialLevel);
   const [status, setStatus] = useState<CategoryFilterStatus>(initialStatus);
