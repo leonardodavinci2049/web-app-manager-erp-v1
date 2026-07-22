@@ -90,7 +90,7 @@ export class TaxonomyBaseServiceApi extends BaseApiService {
         pe_user_name: validatedParams.pe_user_name,
         pe_user_role: validatedParams.pe_user_role,
         pe_person_id: validatedParams.pe_person_id,
-        pe_parent_id: validatedParams.pe_parent_id ?? 0,
+        pe_parent_id: validatedParams.pe_parent_id,
         pe_search: validatedParams.pe_search ?? "",
         pe_flag_inactive: validatedParams.pe_flag_inactive ?? 0,
         pe_records_quantity: validatedParams.pe_records_quantity ?? 20,
@@ -394,7 +394,7 @@ export class TaxonomyBaseServiceApi extends BaseApiService {
         quantity: 0,
         recordId: "0",
         data: {
-          "Taxonomy find menu nanager": [],
+          "Taxonomy find menu manager": [],
           "Taxonomy quantity": [],
         },
       };
@@ -425,11 +425,53 @@ export class TaxonomyBaseServiceApi extends BaseApiService {
   extractTaxonomyMenuManager(
     response: TaxonomyFindMenuManagerResponse,
   ): TaxonomyMenuManagerItem[] {
-    return response.data?.["Taxonomy find menu nanager"] ?? [];
+    const data: unknown = response.data;
+    if (!data) return [];
+
+    const candidates = Array.isArray(data)
+      ? [data, ...data]
+      : typeof data === "object"
+        ? Object.values(data)
+        : [];
+
+    for (const candidate of candidates) {
+      if (
+        Array.isArray(candidate) &&
+        candidate.some(
+          (item) =>
+            typeof item === "object" && item !== null && "ID_TAXONOMY" in item,
+        )
+      ) {
+        return candidate as TaxonomyMenuManagerItem[];
+      }
+    }
+
+    return [];
   }
 
   extractTaxonomyQuantity(response: TaxonomyFindMenuManagerResponse): number {
-    return response.data?.["Taxonomy quantity"]?.[0]?.QTY_TAXONOMIES ?? 0;
+    const data: unknown = response.data;
+    if (!data) return 0;
+
+    const candidates = Array.isArray(data)
+      ? [data, ...data]
+      : typeof data === "object"
+        ? Object.values(data)
+        : [];
+
+    for (const candidate of candidates) {
+      if (!Array.isArray(candidate)) continue;
+
+      const quantity = candidate.find(
+        (item) =>
+          typeof item === "object" && item !== null && "QTY_TAXONOMIES" in item,
+      );
+      if (quantity && "QTY_TAXONOMIES" in quantity) {
+        return Number(quantity.QTY_TAXONOMIES) || 0;
+      }
+    }
+
+    return 0;
   }
 
   extractStoredProcedureResult(
@@ -484,7 +526,7 @@ export class TaxonomyBaseServiceApi extends BaseApiService {
     return (
       isApiSuccess(response.statusCode) &&
       response.data != null &&
-      Array.isArray(response.data["Taxonomy find menu nanager"])
+      Array.isArray(response.data["Taxonomy find menu manager"])
     );
   }
 }
@@ -529,7 +571,13 @@ export async function getTaxonomies(
   });
 
   const taxonomies = taxonomyBaseServiceApi.extractTaxonomies(response);
-  return transformTaxonomyList(taxonomies);
+  const transformedTaxonomies = transformTaxonomyList(taxonomies);
+  if (params.inactive !== 1) return transformedTaxonomies;
+
+  return transformedTaxonomies.map((taxonomy) => ({
+    ...taxonomy,
+    inactive: true,
+  }));
 }
 
 export async function getTaxonomyById(
