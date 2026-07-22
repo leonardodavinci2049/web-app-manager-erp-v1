@@ -90,7 +90,7 @@ export class TaxonomyBaseServiceApi extends BaseApiService {
         pe_user_name: validatedParams.pe_user_name,
         pe_user_role: validatedParams.pe_user_role,
         pe_person_id: validatedParams.pe_person_id,
-        pe_parent_id: validatedParams.pe_parent_id ?? 0,
+        pe_parent_id: validatedParams.pe_parent_id,
         pe_search: validatedParams.pe_search ?? "",
         pe_flag_inactive: validatedParams.pe_flag_inactive ?? 0,
         pe_records_quantity: validatedParams.pe_records_quantity ?? 20,
@@ -394,7 +394,7 @@ export class TaxonomyBaseServiceApi extends BaseApiService {
         quantity: 0,
         recordId: "0",
         data: {
-          "Taxonomy find menu nanager": [],
+          "Taxonomy find menu manager": [],
           "Taxonomy quantity": [],
         },
       };
@@ -526,7 +526,7 @@ export class TaxonomyBaseServiceApi extends BaseApiService {
     return (
       isApiSuccess(response.statusCode) &&
       response.data != null &&
-      Array.isArray(response.data["Taxonomy find menu nanager"])
+      Array.isArray(response.data["Taxonomy find menu manager"])
     );
   }
 }
@@ -571,7 +571,13 @@ export async function getTaxonomies(
   });
 
   const taxonomies = taxonomyBaseServiceApi.extractTaxonomies(response);
-  return transformTaxonomyList(taxonomies);
+  const transformedTaxonomies = transformTaxonomyList(taxonomies);
+  if (params.inactive !== 1) return transformedTaxonomies;
+
+  return transformedTaxonomies.map((taxonomy) => ({
+    ...taxonomy,
+    inactive: true,
+  }));
 }
 
 export async function getTaxonomyById(

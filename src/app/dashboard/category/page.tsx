@@ -69,20 +69,30 @@ export default async function CategoryDashboardPage({
   const { apiContext } = await getAuthContext();
 
   let dataError: string | undefined;
-  const [menuResult, listItems] = await Promise.all([
+  const [menuResult, activeListItems, inactiveListItems] = await Promise.all([
     getTaxonomyMenuManager({ limit: 1000, ...apiContext }).catch((error) => {
       logger.error("Failed to load category menu", error);
       dataError = "Não foi possível carregar a hierarquia completa.";
       return { items: [], totalTaxonomies: 0 };
     }),
-    getTaxonomies({ recordsQuantity: 1000, ...apiContext }).catch((error) => {
-      logger.error("Failed to load category list", error);
-      return [];
-    }),
+    getTaxonomies({ inactive: 0, recordsQuantity: 1000, ...apiContext }).catch(
+      (error) => {
+        logger.error("Failed to load active category list", error);
+        return [];
+      },
+    ),
+    getTaxonomies({ inactive: 1, recordsQuantity: 1000, ...apiContext }).catch(
+      (error) => {
+        logger.error("Failed to load inactive category list", error);
+        return [];
+      },
+    ),
   ]);
 
   const baseById = new Map<number, UITaxonomy>();
-  for (const category of listItems) baseById.set(category.id, category);
+  for (const category of [...activeListItems, ...inactiveListItems]) {
+    baseById.set(category.id, category);
+  }
   for (const category of menuResult.items) {
     const current = baseById.get(category.id);
     baseById.set(category.id, {
