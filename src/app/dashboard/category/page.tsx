@@ -6,7 +6,7 @@ import { getProductsManager } from "@/services/api-main/product-manager/product-
 import {
   getTaxonomies,
   getTaxonomyById,
-  getTaxonomyMenu,
+  getTaxonomyMenuManager,
 } from "@/services/api-main/taxonomy-base/taxonomy-base-service-api";
 import type { UITaxonomy } from "@/services/api-main/taxonomy-base/transformers/transformers";
 import { CategoryDashboard } from "./_components/category-dashboard";
@@ -21,8 +21,6 @@ import type {
 } from "./_components/category-types";
 
 const logger = createLogger("CategoryDashboardPage");
-const PRODUCT_CATEGORY_TAXONOMY_TYPE_ID = 1;
-
 interface CategoryDashboardPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
@@ -71,14 +69,12 @@ export default async function CategoryDashboardPage({
   const { apiContext } = await getAuthContext();
 
   let dataError: string | undefined;
-  const [menuItems, listItems] = await Promise.all([
-    getTaxonomyMenu(PRODUCT_CATEGORY_TAXONOMY_TYPE_ID, 0, apiContext).catch(
-      (error) => {
-        logger.error("Failed to load category menu", error);
-        dataError = "Não foi possível carregar a hierarquia completa.";
-        return [];
-      },
-    ),
+  const [menuResult, listItems] = await Promise.all([
+    getTaxonomyMenuManager({ limit: 1000, ...apiContext }).catch((error) => {
+      logger.error("Failed to load category menu", error);
+      dataError = "Não foi possível carregar a hierarquia completa.";
+      return { items: [], totalTaxonomies: 0 };
+    }),
     getTaxonomies({ recordsQuantity: 1000, ...apiContext }).catch((error) => {
       logger.error("Failed to load category list", error);
       return [];
@@ -87,7 +83,7 @@ export default async function CategoryDashboardPage({
 
   const baseById = new Map<number, UITaxonomy>();
   for (const category of listItems) baseById.set(category.id, category);
-  for (const category of menuItems) {
+  for (const category of menuResult.items) {
     const current = baseById.get(category.id);
     baseById.set(category.id, {
       id: category.id,
@@ -95,11 +91,11 @@ export default async function CategoryDashboardPage({
       name: category.name,
       slug: category.slug,
       imagePath: category.imagePath,
-      imageId: category.imageId,
+      imageId: current?.imageId,
       level: category.level,
       order: category.order,
       productCount: category.productCount,
-      inactive: current?.inactive ?? false,
+      inactive: category.inactive,
       metaTitle: current?.metaTitle,
       metaDescription: current?.metaDescription,
       notes: current?.notes,

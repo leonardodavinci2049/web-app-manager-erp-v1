@@ -194,7 +194,7 @@ export function transformTaxonomyMenuManagerItem(
 ): UITaxonomyMenuManagerItem {
   return {
     id: entity.ID_TAXONOMY,
-    parentId: entity.PARENT_ID,
+    parentId: entity.PARENTID ?? entity.PARENT_ID ?? 0,
     name: entity.TAXONOMIA,
     slug: entity.SLUG || undefined,
     imagePath: entity.PATH_IMAGEM || undefined,

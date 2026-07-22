@@ -163,7 +163,8 @@ export interface ProductCategory {
 
 export interface TaxonomyMenuManagerItem {
   ID_TAXONOMY: number;
-  PARENT_ID: number;
+  PARENTID?: number;
+  PARENT_ID?: number;
   TAXONOMIA: string;
   PATH_IMAGEM: string | null;
   SLUG: string;

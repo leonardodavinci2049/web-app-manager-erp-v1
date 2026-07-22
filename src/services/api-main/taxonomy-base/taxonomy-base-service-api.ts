@@ -425,11 +425,53 @@ export class TaxonomyBaseServiceApi extends BaseApiService {
   extractTaxonomyMenuManager(
     response: TaxonomyFindMenuManagerResponse,
   ): TaxonomyMenuManagerItem[] {
-    return response.data?.["Taxonomy find menu nanager"] ?? [];
+    const data: unknown = response.data;
+    if (!data) return [];
+
+    const candidates = Array.isArray(data)
+      ? [data, ...data]
+      : typeof data === "object"
+        ? Object.values(data)
+        : [];
+
+    for (const candidate of candidates) {
+      if (
+        Array.isArray(candidate) &&
+        candidate.some(
+          (item) =>
+            typeof item === "object" && item !== null && "ID_TAXONOMY" in item,
+        )
+      ) {
+        return candidate as TaxonomyMenuManagerItem[];
+      }
+    }
+
+    return [];
   }
 
   extractTaxonomyQuantity(response: TaxonomyFindMenuManagerResponse): number {
-    return response.data?.["Taxonomy quantity"]?.[0]?.QTY_TAXONOMIES ?? 0;
+    const data: unknown = response.data;
+    if (!data) return 0;
+
+    const candidates = Array.isArray(data)
+      ? [data, ...data]
+      : typeof data === "object"
+        ? Object.values(data)
+        : [];
+
+    for (const candidate of candidates) {
+      if (!Array.isArray(candidate)) continue;
+
+      const quantity = candidate.find(
+        (item) =>
+          typeof item === "object" && item !== null && "QTY_TAXONOMIES" in item,
+      );
+      if (quantity && "QTY_TAXONOMIES" in quantity) {
+        return Number(quantity.QTY_TAXONOMIES) || 0;
+      }
+    }
+
+    return 0;
   }
 
   extractStoredProcedureResult(
