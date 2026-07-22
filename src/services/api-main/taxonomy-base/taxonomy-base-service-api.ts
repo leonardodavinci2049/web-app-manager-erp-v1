@@ -374,7 +374,7 @@ export class TaxonomyBaseServiceApi extends BaseApiService {
         quantity: 0,
         recordId: 0,
         data: {
-          "Taxnomy product manager": [],
+          "Taxonomy product manager": [],
         },
       };
     }
@@ -516,7 +516,7 @@ export class TaxonomyBaseServiceApi extends BaseApiService {
     return (
       isApiSuccess(response.statusCode) &&
       response.data != null &&
-      Array.isArray(response.data["Taxnomy product manager"])
+      Array.isArray(response.data["Taxonomy product manager"])
     );
   }
 

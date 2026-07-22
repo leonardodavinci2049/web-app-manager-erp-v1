@@ -222,7 +222,7 @@ export interface TaxonomyFindMenuManagerResponse
   extends Omit<TaxonomyBaseResponse, "recordId"> {
   recordId: string;
   data: {
-    "Taxonomy find menu nanager": TaxonomyMenuManagerItem[];
+    "Taxonomy find menu manager": TaxonomyMenuManagerItem[];
     "Taxonomy quantity": TaxonomyQuantity[];
   };
 }
