@@ -17,6 +17,7 @@ import {
 import type {
   CategoryFilterLevel,
   CategoryFilterStatus,
+  CategoryFiltersState,
   CategoryProductDto,
 } from "./_components/category-types";
 
@@ -183,12 +184,16 @@ export default async function CategoryDashboardPage({
         detail={detail}
         products={products}
         productTotal={productTotal}
-        initialSearch={search}
-        initialLevel={level}
-        initialStatus={status}
-        initialWithoutProducts={withoutProducts}
-        initialIssue={issue}
-        initialTab={tab}
+        filters={
+          {
+            search,
+            level,
+            status,
+            withoutProducts,
+            issue,
+          } satisfies CategoryFiltersState
+        }
+        tab={tab}
         productSearch={productSearch}
         dataError={dataError}
       />

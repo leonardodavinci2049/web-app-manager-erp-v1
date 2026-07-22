@@ -6,6 +6,14 @@ export type CategoryFilterLevel = "all" | "1" | "2" | "3";
 
 export type CategoryFilterStatus = "all" | "active" | "inactive";
 
+export interface CategoryFiltersState {
+  search: string;
+  level: CategoryFilterLevel;
+  status: CategoryFilterStatus;
+  withoutProducts: boolean;
+  issue: string;
+}
+
 export interface CategoryNodeDto {
   id: number;
   parentId: number;
