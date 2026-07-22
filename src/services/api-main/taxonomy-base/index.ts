@@ -4,6 +4,7 @@ export {
 } from "./taxonomy-base-service-api";
 
 export type {
+  ProductCategory,
   StoredProcedureResponse,
   TaxonomyCreateRequest,
   TaxonomyCreateResponse,
@@ -14,10 +15,19 @@ export type {
   TaxonomyFindAllResponse,
   TaxonomyFindByIdRequest,
   TaxonomyFindByIdResponse,
+  TaxonomyFindMenuManagerRequest,
+  TaxonomyFindMenuManagerResponse,
   TaxonomyFindMenuRequest,
   TaxonomyFindMenuResponse,
   TaxonomyListItem,
   TaxonomyMenuItem,
+  TaxonomyMenuManagerItem,
+  TaxonomyProductItem,
+  TaxonomyProductManagerRequest,
+  TaxonomyProductManagerResponse,
+  TaxonomyQuantity,
+  TaxonomyRelCreateBulkRequest,
+  TaxonomyRelCreateBulkResponse,
   TaxonomyUpdateMetadataRequest,
   TaxonomyUpdateMetadataResponse,
   TaxonomyUpdateRequest,

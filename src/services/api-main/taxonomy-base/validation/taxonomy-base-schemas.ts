@@ -67,6 +67,31 @@ export const TaxonomyUpdateMetadataSchema = z.object({
   pe_meta_keywords: z.string().max(500).optional(),
 });
 
+export const TaxonomyProductManagerSchema = z.object({
+  ...baseContextSchema,
+  pe_search: z.string().max(300).optional(),
+  pe_id_taxonomy: z.number().int().min(0),
+  pe_flag_no_family: z.number().int().min(0).max(1),
+  pe_flag_no_group: z.number().int().min(0).max(1),
+  pe_flag_no_subgroup: z.number().int().min(0).max(1),
+  pe_qt_registros: z.number().int().min(1).max(1000),
+  pe_pagina_id: z.number().int().min(0),
+  pe_coluna_id: z.number().int().min(1).max(2),
+  pe_ordem_id: z.number().int().min(1).max(2),
+});
+
+export const TaxonomyFindMenuManagerSchema = z.object({
+  ...baseContextSchema,
+  pe_limit: z.number().int().min(1).max(10000),
+});
+
+export const TaxonomyRelCreateBulkSchema = z.object({
+  ...baseContextSchema,
+  pe_id_taxonomy: z.number().int().min(1),
+  pe_filter_keyword: z.string().min(3).max(200),
+  pe_level: z.number().int().min(0).max(32767).optional(),
+});
+
 export type TaxonomyFindAllInput = z.infer<typeof TaxonomyFindAllSchema>;
 export type TaxonomyFindByIdInput = z.infer<typeof TaxonomyFindByIdSchema>;
 export type TaxonomyFindMenuInput = z.infer<typeof TaxonomyFindMenuSchema>;
@@ -75,4 +100,13 @@ export type TaxonomyUpdateInput = z.infer<typeof TaxonomyUpdateSchema>;
 export type TaxonomyDeleteInput = z.infer<typeof TaxonomyDeleteSchema>;
 export type TaxonomyUpdateMetadataInput = z.infer<
   typeof TaxonomyUpdateMetadataSchema
+>;
+export type TaxonomyProductManagerInput = z.infer<
+  typeof TaxonomyProductManagerSchema
+>;
+export type TaxonomyFindMenuManagerInput = z.infer<
+  typeof TaxonomyFindMenuManagerSchema
+>;
+export type TaxonomyRelCreateBulkInput = z.infer<
+  typeof TaxonomyRelCreateBulkSchema
 >;

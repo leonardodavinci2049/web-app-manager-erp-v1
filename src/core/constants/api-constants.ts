@@ -84,6 +84,9 @@ export const TAXONOMY_BASE_ENDPOINTS = {
   UPDATE: "/taxonomy-base/v3/taxonomy-update",
   DELETE: "/taxonomy-base/v3/taxonomy-delete",
   UPDATE_METADATA: "/taxonomy-base/v3/taxonomy-upd-metadata",
+  PRODUCT_MANAGER: "/taxonomy-base/v2/taxnomy-product-manager",
+  FIND_MENU_MANAGER: "/taxonomy-base/v3/taxonomy-find-menu-nanager",
+  REL_CREATE_BULK: "/taxonomy-base/v3/taxonomy-rel-create-bulk",
 } as const;
 
 // Endpoints de Taxonomy Inline (V3) - Mutations inline
