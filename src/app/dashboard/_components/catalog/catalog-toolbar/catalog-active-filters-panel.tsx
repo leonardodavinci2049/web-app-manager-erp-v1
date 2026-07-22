@@ -11,8 +11,8 @@ interface ActiveFilter {
 
 interface CatalogActiveFiltersPanelProps {
   activeFilters: ActiveFilter[];
-  productsCount: number;
-  total: number;
+  loadedProductsCount: number;
+  filteredProductsTotal: number;
   isLoading: boolean;
   onClear: () => void;
   onRemove: (type: string) => void;
@@ -24,8 +24,8 @@ interface CatalogActiveFiltersPanelProps {
  */
 export function CatalogActiveFiltersPanel({
   activeFilters,
-  productsCount,
-  total,
+  loadedProductsCount,
+  filteredProductsTotal,
   isLoading,
   onClear,
   onRemove,
@@ -67,9 +67,10 @@ export function CatalogActiveFiltersPanel({
             </li>
           ))}
           <li className="min-w-0 leading-tight sm:inline-flex">
-            <span className="font-medium">Produtos:&nbsp;</span>
+            <span className="font-medium">Produtos carregados:&nbsp;</span>
             <span className="break-words">
-              {productsCount} de {total}
+              {loadedProductsCount.toLocaleString("pt-BR")} de{" "}
+              {filteredProductsTotal.toLocaleString("pt-BR")} encontrados
             </span>
           </li>
         </ul>

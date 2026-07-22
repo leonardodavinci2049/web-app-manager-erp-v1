@@ -227,7 +227,8 @@ export interface ProductManagerRelatedProduct {
 // --- Response Interfaces ---
 
 export interface ProductManagerFindAllResponse
-  extends ProductManagerBaseResponse {
+  extends Omit<ProductManagerBaseResponse, "recordId"> {
+  recordId: number;
   data: {
     "Product Manager find All": ProductManagerListItem[];
   };
