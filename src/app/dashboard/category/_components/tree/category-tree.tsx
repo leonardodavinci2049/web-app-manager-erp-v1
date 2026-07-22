@@ -3,16 +3,12 @@
 import { AlertTriangle, Circle } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useCategoryQueryNavigation } from "../../_hooks/use-category-query-navigation";
-import {
-  buildTreePredicate,
-  hasActiveFilters,
-} from "../../_utils/category-filters";
+import { buildTreePredicate } from "../../_utils/category-filters";
 import {
   collectExpandableIds,
   getVisibleRows,
 } from "../../_utils/category-tree-visibility";
 import type {
-  CategoryFilterLevel,
   CategoryFilterStatus,
   CategoryFiltersState,
   CategoryNodeDto,
@@ -31,7 +27,6 @@ export function CategoryTree({ tree, selectedId, filters }: CategoryTreeProps) {
   const allParentIds = useMemo(() => collectExpandableIds(tree), [tree]);
   const [expanded, setExpanded] = useState<Set<number>>(() => new Set());
   const [search, setSearch] = useState(filters.search);
-  const [level, setLevel] = useState<CategoryFilterLevel>(filters.level);
   const [status, setStatus] = useState<CategoryFilterStatus>(filters.status);
   const [withoutProducts, setWithoutProducts] = useState(
     filters.withoutProducts,
@@ -40,7 +35,6 @@ export function CategoryTree({ tree, selectedId, filters }: CategoryTreeProps) {
   const treeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => setSearch(filters.search), [filters.search]);
-  useEffect(() => setLevel(filters.level), [filters.level]);
   useEffect(() => setStatus(filters.status), [filters.status]);
   useEffect(
     () => setWithoutProducts(filters.withoutProducts),
@@ -50,18 +44,13 @@ export function CategoryTree({ tree, selectedId, filters }: CategoryTreeProps) {
 
   const localFilters: CategoryFiltersState = {
     search,
-    level,
+    level: filters.level,
     status,
     withoutProducts,
     issue,
   };
   const predicate = buildTreePredicate(localFilters);
-  const rows = getVisibleRows(
-    tree,
-    expanded,
-    predicate,
-    hasActiveFilters(localFilters),
-  );
+  const rows = getVisibleRows(tree, expanded, predicate);
 
   const commit = (next: Partial<CategoryFiltersState>) => {
     const merged = { ...localFilters, ...next };
@@ -102,26 +91,26 @@ export function CategoryTree({ tree, selectedId, filters }: CategoryTreeProps) {
     <aside className="flex min-h-0 flex-col border-r bg-card md:w-[300px] md:min-w-[260px]">
       <CategoryTreeFilters
         search={search}
-        level={level}
         status={status}
         withoutProducts={withoutProducts}
         onSearchChange={setSearch}
         onSearchSubmit={() => commit({ search })}
-        onLevelChange={(value) => {
-          setLevel(value);
-          setIssue("");
-          commit({ level: value, issue: "" });
-        }}
         onStatusChange={(value) => {
           setStatus(value);
+          setWithoutProducts(false);
           setIssue("");
-          commit({ status: value, issue: "" });
+          commit({ status: value, withoutProducts: false, issue: "" });
         }}
         onToggleWithoutProducts={() => {
           const next = !withoutProducts;
           setWithoutProducts(next);
+          if (next) setStatus("all");
           setIssue("");
-          commit({ withoutProducts: next, issue: "" });
+          commit({
+            status: next ? "all" : status,
+            withoutProducts: next,
+            issue: "",
+          });
         }}
         onExpandAll={() => setExpanded(new Set(allParentIds))}
         onCollapseAll={() => setExpanded(new Set())}
@@ -147,7 +136,12 @@ export function CategoryTree({ tree, selectedId, filters }: CategoryTreeProps) {
               isExpanded={expanded.has(node.id)}
               hasChildren={node.children.length > 0}
               tabbable={selectedId === node.id || (!selectedId && index === 0)}
-              onSelect={(id) => navigate({ categoryId: String(id) })}
+              onSelect={(id) =>
+                navigate({
+                  categoryId: String(id),
+                  productPage: undefined,
+                })
+              }
               onToggleExpand={toggleExpand}
               onExpand={expand}
               onCollapse={collapse}

@@ -1,6 +1,13 @@
 "use client";
 
-import { Package, Plus, Search, Unlink } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Package,
+  Plus,
+  Search,
+  Unlink,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -19,17 +26,24 @@ export function CategoryProductsTab({
   products,
   total,
   productSearch,
+  page,
+  pageSize,
 }: {
   detail: CategoryDetailDto;
   products: CategoryProductDto[];
   total: number;
   productSearch: string;
+  page: number;
+  pageSize: number;
 }) {
   const router = useRouter();
   const navigate = useCategoryQueryNavigation();
   const [search, setSearch] = useState(productSearch);
   const [productId, setProductId] = useState("");
   const [pending, startTransition] = useTransition();
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const firstProduct = total === 0 ? 0 : page * pageSize + 1;
+  const lastProduct = Math.min((page + 1) * pageSize, total);
 
   return (
     <div className="space-y-4">
@@ -39,7 +53,7 @@ export function CategoryProductsTab({
             {total} produtos vinculados diretamente
           </h3>
           <p className="text-xs text-muted-foreground">
-            A contagem agregada e a origem aguardam contrato de API.
+            Exibindo até {pageSize} produtos por página.
           </p>
         </div>
         <MassLinkPreviewDialog detail={detail} />
@@ -104,7 +118,12 @@ export function CategoryProductsTab({
           {productSearch && (
             <Button
               variant="link"
-              onClick={() => navigate({ productSearch: undefined })}
+              onClick={() =>
+                navigate({
+                  productSearch: undefined,
+                  productPage: undefined,
+                })
+              }
             >
               Limpar busca
             </Button>
@@ -115,8 +134,8 @@ export function CategoryProductsTab({
           <div className="hidden grid-cols-[1fr_120px_160px_100px_48px] gap-3 bg-muted/50 px-3 py-2 text-xs font-medium text-muted-foreground md:grid">
             <span>Produto</span>
             <span>SKU</span>
-            <span>EAN</span>
-            <span>Marca</span>
+            <span>Referência</span>
+            <span>Modelo</span>
             <span />
           </div>
           {products.map((product) => (
@@ -127,17 +146,17 @@ export function CategoryProductsTab({
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium">{product.name}</p>
                 <p className="text-xs text-muted-foreground md:hidden">
-                  SKU {product.sku} · {product.brand}
+                  SKU {product.sku} · {product.model || "Sem modelo"}
                 </p>
               </div>
               <span className="hidden text-xs font-mono md:block">
                 {product.sku}
               </span>
               <span className="hidden text-xs font-mono md:block">
-                {product.ean || "—"}
+                {product.ref || "—"}
               </span>
               <span className="hidden truncate text-xs md:block">
-                {product.brand}
+                {product.model || "—"}
               </span>
               <Button
                 variant="ghost"
@@ -161,6 +180,38 @@ export function CategoryProductsTab({
               </Button>
             </div>
           ))}
+        </div>
+      )}
+      {total > pageSize && (
+        <div className="flex flex-col gap-3 border-t pt-4 text-sm sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-muted-foreground">
+            {firstProduct}–{lastProduct} de {total} produtos
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={pending || page === 0}
+              onClick={() =>
+                navigate({ productPage: String(Math.max(0, page - 1)) })
+              }
+            >
+              <ChevronLeft /> Anterior
+            </Button>
+            <span className="min-w-20 text-center text-muted-foreground">
+              Página {page + 1} de {totalPages}
+            </span>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={pending || page + 1 >= totalPages}
+              onClick={() => navigate({ productPage: String(page + 1) })}
+            >
+              Próxima <ChevronRight />
+            </Button>
+          </div>
         </div>
       )}
     </div>
