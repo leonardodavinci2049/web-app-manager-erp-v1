@@ -13,6 +13,8 @@ export interface CategoryDetailPanelProps {
   flatCategories: CategoryNodeDto[];
   tab: "details" | "products";
   productSearch: string;
+  productPage: number;
+  productsPerPage: number;
   products: CategoryProductDto[];
   productTotal: number;
 }
@@ -22,6 +24,8 @@ export function CategoryDetailPanel({
   flatCategories,
   tab,
   productSearch,
+  productPage,
+  productsPerPage,
   products,
   productTotal,
 }: CategoryDetailPanelProps) {
@@ -38,6 +42,8 @@ export function CategoryDetailPanel({
             products={products}
             total={productTotal}
             productSearch={productSearch}
+            page={productPage}
+            pageSize={productsPerPage}
           />
         )}
       </div>

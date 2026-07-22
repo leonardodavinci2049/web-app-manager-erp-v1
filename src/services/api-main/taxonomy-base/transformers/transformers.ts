@@ -198,14 +198,14 @@ export function transformTaxonomyMenuManagerItem(
 ): UITaxonomyMenuManagerItem {
   return {
     id: entity.ID_TAXONOMY,
-    parentId: entity.PARENTID ?? entity.PARENT_ID ?? 0,
+    parentId: entity.PARENT_ID,
     name: entity.TAXONOMIA,
     slug: entity.SLUG || undefined,
     imagePath: entity.PATH_IMAGEM || undefined,
     level: entity.LEVEL,
     order: entity.ORDEM,
     inactive: isInactiveTaxonomy(entity.INATIVO),
-    productCount: entity.QTY_PRODUCTS,
+    productCount: Number(entity.QTY_PRODUCTS) || 0,
   };
 }
 

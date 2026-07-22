@@ -50,8 +50,8 @@ export interface CategoryProductDto {
   id: number;
   sku: number;
   name: string;
-  ean?: string;
-  brand: string;
+  ref: string;
+  model: string;
   inactive: boolean;
 }
 

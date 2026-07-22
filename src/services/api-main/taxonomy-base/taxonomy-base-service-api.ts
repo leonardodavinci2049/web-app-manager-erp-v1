@@ -419,7 +419,11 @@ export class TaxonomyBaseServiceApi extends BaseApiService {
   extractTaxonomyProducts(
     response: TaxonomyProductManagerResponse,
   ): TaxonomyProductItem[] {
-    return response.data?.["Taxnomy product manager"] ?? [];
+    return (
+      response.data?.["Taxnomy product manager"] ??
+      response.data?.["Taxonomy product manager"] ??
+      []
+    );
   }
 
   extractTaxonomyMenuManager(
@@ -516,7 +520,8 @@ export class TaxonomyBaseServiceApi extends BaseApiService {
     return (
       isApiSuccess(response.statusCode) &&
       response.data != null &&
-      Array.isArray(response.data["Taxonomy product manager"])
+      (Array.isArray(response.data["Taxonomy product manager"]) ||
+        Array.isArray(response.data["Taxonomy product manager"]))
     );
   }
 
