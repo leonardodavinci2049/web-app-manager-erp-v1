@@ -1,8 +1,8 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { useCategoryQueryNavigation } from "../_hooks/use-category-query-navigation";
-import { statFilterToQuery } from "../_utils/category-filters";
+import { useCategoryQueryNavigation } from "../../_hooks/use-category-query-navigation";
+import { statFilterToQuery } from "../../_utils/category-filters";
 import type { CategoryStatsDto } from "../category-types";
 
 export function CategoryStatStrip({ stats }: { stats: CategoryStatsDto }) {

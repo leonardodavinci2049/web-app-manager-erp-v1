@@ -17,7 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createCategoryAction } from "../../_actions/category-actions";
-import { useCategoryQueryNavigation } from "../_hooks/use-category-query-navigation";
+import { useCategoryQueryNavigation } from "../../_hooks/use-category-query-navigation";
 import type { CategoryDetailDto } from "../category-types";
 
 type ButtonVariant = VariantProps<typeof buttonVariants>["variant"];

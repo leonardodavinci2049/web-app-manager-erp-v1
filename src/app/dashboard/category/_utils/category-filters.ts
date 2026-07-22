@@ -1,4 +1,7 @@
-import type { CategoryFiltersState, CategoryNodeDto } from "../category-types";
+import type {
+  CategoryFiltersState,
+  CategoryNodeDto,
+} from "../_components/category-types";
 
 export function buildTreePredicate(
   filters: CategoryFiltersState,

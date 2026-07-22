@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { useCategoryQueryNavigation } from "../_hooks/use-category-query-navigation";
+import { useCategoryQueryNavigation } from "../../_hooks/use-category-query-navigation";
 
 export function CategoryDetailTabs({ tab }: { tab: "details" | "products" }) {
   const navigate = useCategoryQueryNavigation();

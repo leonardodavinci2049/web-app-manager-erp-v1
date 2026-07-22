@@ -10,7 +10,7 @@ import {
   linkProductAction,
   unlinkProductAction,
 } from "../../_actions/category-actions";
-import { useCategoryQueryNavigation } from "../_hooks/use-category-query-navigation";
+import { useCategoryQueryNavigation } from "../../_hooks/use-category-query-navigation";
 import type { CategoryDetailDto, CategoryProductDto } from "../category-types";
 import { MassLinkPreviewDialog } from "../dialogs/mass-link-preview-dialog";
 

@@ -2,15 +2,15 @@
 
 import { AlertTriangle, Circle } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useCategoryQueryNavigation } from "../_hooks/use-category-query-navigation";
+import { useCategoryQueryNavigation } from "../../_hooks/use-category-query-navigation";
 import {
   buildTreePredicate,
   hasActiveFilters,
-} from "../_utils/category-filters";
+} from "../../_utils/category-filters";
 import {
   collectExpandableIds,
   getVisibleRows,
-} from "../_utils/category-tree-visibility";
+} from "../../_utils/category-tree-visibility";
 import type {
   CategoryFilterLevel,
   CategoryFilterStatus,
