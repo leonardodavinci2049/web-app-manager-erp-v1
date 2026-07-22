@@ -73,6 +73,28 @@ export interface TaxonomyUpdateMetadataRequest extends TaxonomyBaseRequest {
   pe_meta_keywords?: string;
 }
 
+export interface TaxonomyProductManagerRequest extends TaxonomyBaseRequest {
+  pe_search?: string;
+  pe_id_taxonomy: number;
+  pe_flag_no_family: number;
+  pe_flag_no_group: number;
+  pe_flag_no_subgroup: number;
+  pe_qt_registros: number;
+  pe_pagina_id: number;
+  pe_coluna_id: number;
+  pe_ordem_id: number;
+}
+
+export interface TaxonomyFindMenuManagerRequest extends TaxonomyBaseRequest {
+  pe_limit: number;
+}
+
+export interface TaxonomyRelCreateBulkRequest extends TaxonomyBaseRequest {
+  pe_id_taxonomy: number;
+  pe_filter_keyword: string;
+  pe_level?: number;
+}
+
 // --- Entity interfaces ---
 
 export interface TaxonomyListItem {
@@ -121,6 +143,40 @@ export interface TaxonomyMenuItem {
   QT_RECORDS: number | null;
 }
 
+export interface TaxonomyProductItem {
+  ID_PRODUTO: number;
+  SKU: number;
+  PRODUTO: string;
+  REF: string;
+  MODELO: string;
+  PATH_IMAGEM: string | null;
+  PATH_PAGE: string | null;
+  SLUG: string;
+  CATEGORIAS: string | null;
+  DATADOCADASTRO: string;
+}
+
+export interface ProductCategory {
+  ID_TAXONOMY: number;
+  TAXONOMIA: string;
+}
+
+export interface TaxonomyMenuManagerItem {
+  ID_TAXONOMY: number;
+  PARENT_ID: number;
+  TAXONOMIA: string;
+  PATH_IMAGEM: string | null;
+  SLUG: string;
+  LEVEL: number;
+  ORDEM: number;
+  INATIVO: number;
+  QTY_PRODUCTS: number;
+}
+
+export interface TaxonomyQuantity {
+  QTY_TAXONOMIES: number;
+}
+
 export interface StoredProcedureResponse {
   sp_return_id: number;
   sp_message: string;
@@ -154,6 +210,25 @@ export interface TaxonomyDeleteResponse extends TaxonomyBaseResponse {
 }
 
 export interface TaxonomyUpdateMetadataResponse extends TaxonomyBaseResponse {
+  data: StoredProcedureResponse[];
+}
+
+export interface TaxonomyProductManagerResponse extends TaxonomyBaseResponse {
+  data: Record<string, TaxonomyProductItem[]>;
+}
+
+export interface TaxonomyFindMenuManagerResponse
+  extends Omit<TaxonomyBaseResponse, "recordId"> {
+  recordId: string;
+  data: {
+    "Taxonomy find menu nanager": TaxonomyMenuManagerItem[];
+    "Taxonomy quantity": TaxonomyQuantity[];
+  };
+}
+
+export interface TaxonomyRelCreateBulkResponse
+  extends Omit<TaxonomyBaseResponse, "recordId"> {
+  recordId: string;
   data: StoredProcedureResponse[];
 }
 

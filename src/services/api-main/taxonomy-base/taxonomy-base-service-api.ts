@@ -13,8 +13,12 @@ import {
   transformTaxonomyDetail,
   transformTaxonomyList,
   transformTaxonomyMenuList,
+  transformTaxonomyMenuManagerList,
+  transformTaxonomyProductList,
   type UITaxonomy,
   type UITaxonomyMenuItem,
+  type UITaxonomyMenuManagerItem,
+  type UITaxonomyProduct,
 } from "./transformers/transformers";
 import type {
   StoredProcedureResponse,
@@ -27,10 +31,18 @@ import type {
   TaxonomyFindAllResponse,
   TaxonomyFindByIdRequest,
   TaxonomyFindByIdResponse,
+  TaxonomyFindMenuManagerRequest,
+  TaxonomyFindMenuManagerResponse,
   TaxonomyFindMenuRequest,
   TaxonomyFindMenuResponse,
   TaxonomyListItem,
   TaxonomyMenuItem,
+  TaxonomyMenuManagerItem,
+  TaxonomyProductItem,
+  TaxonomyProductManagerRequest,
+  TaxonomyProductManagerResponse,
+  TaxonomyRelCreateBulkRequest,
+  TaxonomyRelCreateBulkResponse,
   TaxonomyUpdateMetadataRequest,
   TaxonomyUpdateMetadataResponse,
   TaxonomyUpdateRequest,
@@ -45,7 +57,10 @@ import {
   TaxonomyDeleteSchema,
   TaxonomyFindAllSchema,
   TaxonomyFindByIdSchema,
+  TaxonomyFindMenuManagerSchema,
   TaxonomyFindMenuSchema,
+  TaxonomyProductManagerSchema,
+  TaxonomyRelCreateBulkSchema,
   TaxonomyUpdateMetadataSchema,
   TaxonomyUpdateSchema,
 } from "./validation/taxonomy-base-schemas";
@@ -226,12 +241,77 @@ export class TaxonomyBaseServiceApi extends BaseApiService {
     }
   }
 
+  async taxonomyProductManager(
+    params: TaxonomyProductManagerRequest,
+  ): Promise<TaxonomyProductManagerResponse> {
+    try {
+      const validatedParams = TaxonomyProductManagerSchema.parse(params);
+      const requestBody = this.buildBasePayload({
+        ...validatedParams,
+        pe_search: validatedParams.pe_search ?? "",
+      });
+
+      const response = await this.post<TaxonomyProductManagerResponse>(
+        TAXONOMY_BASE_ENDPOINTS.PRODUCT_MANAGER,
+        requestBody,
+      );
+
+      return this.normalizeEmptyProductManagerResponse(response);
+    } catch (error) {
+      logger.error("Erro ao buscar produtos por taxonomia", error);
+      throw error;
+    }
+  }
+
+  async findTaxonomyMenuManager(
+    params: TaxonomyFindMenuManagerRequest,
+  ): Promise<TaxonomyFindMenuManagerResponse> {
+    try {
+      const validatedParams = TaxonomyFindMenuManagerSchema.parse(params);
+      const requestBody = this.buildBasePayload(validatedParams);
+
+      const response = await this.post<TaxonomyFindMenuManagerResponse>(
+        TAXONOMY_BASE_ENDPOINTS.FIND_MENU_MANAGER,
+        requestBody,
+      );
+
+      return this.normalizeEmptyFindMenuManagerResponse(response);
+    } catch (error) {
+      logger.error("Erro ao buscar menu de gerenciamento de taxonomias", error);
+      throw error;
+    }
+  }
+
+  async createTaxonomyRelBulk(
+    params: TaxonomyRelCreateBulkRequest,
+  ): Promise<TaxonomyRelCreateBulkResponse> {
+    try {
+      const validatedParams = TaxonomyRelCreateBulkSchema.parse(params);
+      const requestBody = this.buildBasePayload(validatedParams);
+
+      const response = await this.post<TaxonomyRelCreateBulkResponse>(
+        TAXONOMY_BASE_ENDPOINTS.REL_CREATE_BULK,
+        requestBody,
+      );
+
+      this.checkStoredProcedureError(response);
+      return response;
+    } catch (error) {
+      logger.error(
+        "Erro ao criar relacionamentos taxonomia-produto em lote",
+        error,
+      );
+      throw error;
+    }
+  }
+
   private checkStoredProcedureError(
     response:
       | TaxonomyCreateResponse
       | TaxonomyUpdateResponse
       | TaxonomyDeleteResponse
-      | TaxonomyUpdateMetadataResponse,
+      | TaxonomyUpdateMetadataResponse
+      | TaxonomyRelCreateBulkResponse,
   ): void {
     const spResponse = response.data?.[0] as StoredProcedureResponse;
     if (spResponse && spResponse.sp_error_id !== 0) {
@@ -281,6 +361,47 @@ export class TaxonomyBaseServiceApi extends BaseApiService {
     return response;
   }
 
+  private normalizeEmptyProductManagerResponse(
+    response: TaxonomyProductManagerResponse,
+  ): TaxonomyProductManagerResponse {
+    if (
+      response.statusCode === API_STATUS_CODES.NOT_FOUND ||
+      response.statusCode === API_STATUS_CODES.EMPTY_RESULT
+    ) {
+      return {
+        ...response,
+        statusCode: API_STATUS_CODES.SUCCESS,
+        quantity: 0,
+        recordId: 0,
+        data: {
+          "Taxnomy product manager": [],
+        },
+      };
+    }
+    return response;
+  }
+
+  private normalizeEmptyFindMenuManagerResponse(
+    response: TaxonomyFindMenuManagerResponse,
+  ): TaxonomyFindMenuManagerResponse {
+    if (
+      response.statusCode === API_STATUS_CODES.NOT_FOUND ||
+      response.statusCode === API_STATUS_CODES.EMPTY_RESULT
+    ) {
+      return {
+        ...response,
+        statusCode: API_STATUS_CODES.SUCCESS,
+        quantity: 0,
+        recordId: "0",
+        data: {
+          "Taxonomy find menu nanager": [],
+          "Taxonomy quantity": [],
+        },
+      };
+    }
+    return response;
+  }
+
   extractTaxonomies(response: TaxonomyFindAllResponse): TaxonomyListItem[] {
     return response.data?.["Taxonomy find All"] ?? [];
   }
@@ -295,12 +416,29 @@ export class TaxonomyBaseServiceApi extends BaseApiService {
     return response.data?.["Taxonomy find Menu"] ?? [];
   }
 
+  extractTaxonomyProducts(
+    response: TaxonomyProductManagerResponse,
+  ): TaxonomyProductItem[] {
+    return response.data?.["Taxnomy product manager"] ?? [];
+  }
+
+  extractTaxonomyMenuManager(
+    response: TaxonomyFindMenuManagerResponse,
+  ): TaxonomyMenuManagerItem[] {
+    return response.data?.["Taxonomy find menu nanager"] ?? [];
+  }
+
+  extractTaxonomyQuantity(response: TaxonomyFindMenuManagerResponse): number {
+    return response.data?.["Taxonomy quantity"]?.[0]?.QTY_TAXONOMIES ?? 0;
+  }
+
   extractStoredProcedureResult(
     response:
       | TaxonomyCreateResponse
       | TaxonomyUpdateResponse
       | TaxonomyDeleteResponse
-      | TaxonomyUpdateMetadataResponse,
+      | TaxonomyUpdateMetadataResponse
+      | TaxonomyRelCreateBulkResponse,
   ): StoredProcedureResponse | null {
     return (response.data?.[0] as StoredProcedureResponse) ?? null;
   }
@@ -327,6 +465,26 @@ export class TaxonomyBaseServiceApi extends BaseApiService {
       isApiSuccess(response.statusCode) &&
       response.data != null &&
       Array.isArray(response.data["Taxonomy find Menu"])
+    );
+  }
+
+  isValidTaxonomyProductList(
+    response: TaxonomyProductManagerResponse,
+  ): boolean {
+    return (
+      isApiSuccess(response.statusCode) &&
+      response.data != null &&
+      Array.isArray(response.data["Taxnomy product manager"])
+    );
+  }
+
+  isValidTaxonomyMenuManager(
+    response: TaxonomyFindMenuManagerResponse,
+  ): boolean {
+    return (
+      isApiSuccess(response.statusCode) &&
+      response.data != null &&
+      Array.isArray(response.data["Taxonomy find menu nanager"])
     );
   }
 }
@@ -434,4 +592,86 @@ export async function getTaxonomyMenu(
 
   const menuItems = taxonomyBaseServiceApi.extractTaxonomyMenu(response);
   return transformTaxonomyMenuList(menuItems);
+}
+
+export async function getTaxonomyProducts(
+  params: {
+    search?: string;
+    taxonomyId?: number;
+    flagNoFamily?: number;
+    flagNoGroup?: number;
+    flagNoSubgroup?: number;
+    recordsQuantity?: number;
+    pageId?: number;
+    columnId?: number;
+    orderId?: number;
+    pe_system_client_id?: number;
+    pe_organization_id?: string;
+    pe_user_id?: string;
+    pe_user_name?: string;
+    pe_user_role?: string;
+    pe_person_id?: number;
+  } = {},
+): Promise<{ items: UITaxonomyProduct[]; total: number }> {
+  if (!params.pe_system_client_id) {
+    return { items: [], total: 0 };
+  }
+
+  const response = await taxonomyBaseServiceApi.taxonomyProductManager({
+    pe_search: params.search,
+    pe_id_taxonomy: params.taxonomyId ?? 0,
+    pe_flag_no_family: params.flagNoFamily ?? 0,
+    pe_flag_no_group: params.flagNoGroup ?? 0,
+    pe_flag_no_subgroup: params.flagNoSubgroup ?? 0,
+    pe_qt_registros: params.recordsQuantity ?? 20,
+    pe_pagina_id: params.pageId ?? 0,
+    pe_coluna_id: params.columnId ?? 1,
+    pe_ordem_id: params.orderId ?? 1,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
+
+  const products = taxonomyBaseServiceApi.extractTaxonomyProducts(response);
+  return {
+    items: transformTaxonomyProductList(products),
+    total: response.recordId,
+  };
+}
+
+export async function getTaxonomyMenuManager(
+  params: {
+    limit?: number;
+    pe_system_client_id?: number;
+    pe_organization_id?: string;
+    pe_user_id?: string;
+    pe_user_name?: string;
+    pe_user_role?: string;
+    pe_person_id?: number;
+  } = {},
+): Promise<{ items: UITaxonomyMenuManagerItem[]; totalTaxonomies: number }> {
+  if (!params.pe_system_client_id) {
+    return { items: [], totalTaxonomies: 0 };
+  }
+
+  const response = await taxonomyBaseServiceApi.findTaxonomyMenuManager({
+    pe_limit: params.limit ?? 100,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
+
+  const items = taxonomyBaseServiceApi.extractTaxonomyMenuManager(response);
+  const totalTaxonomies =
+    taxonomyBaseServiceApi.extractTaxonomyQuantity(response);
+  return {
+    items: transformTaxonomyMenuManagerList(items),
+    totalTaxonomies,
+  };
 }

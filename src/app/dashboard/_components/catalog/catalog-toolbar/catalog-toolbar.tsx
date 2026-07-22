@@ -375,8 +375,8 @@ export function CatalogToolbar({
           <div className="w-full max-w-xl lg:max-w-2xl">
             <CatalogActiveFiltersPanel
               activeFilters={activeFilters}
-              productsCount={products.length}
-              total={total}
+              loadedProductsCount={products.length}
+              filteredProductsTotal={total}
               isLoading={isPending}
               onClear={handleClearSearchAndFilters}
               onRemove={(type) => removeActiveFilter(type as ActiveFilterType)}

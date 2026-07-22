@@ -354,9 +354,14 @@ export async function getProductsManager(
   });
 
   const products = productManagerServiceApi.extractProductsManager(response);
+  const filteredTotal = Number(response.recordId);
+
   return {
     products: transformProductManagerList(products),
-    total: response.quantity ?? products.length,
+    total:
+      Number.isFinite(filteredTotal) && filteredTotal >= 0
+        ? filteredTotal
+        : (response.quantity ?? products.length),
   };
 }
 

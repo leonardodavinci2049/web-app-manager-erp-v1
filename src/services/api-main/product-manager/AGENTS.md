@@ -31,11 +31,11 @@ product-manager/
 - **Valida** respostas da API (`isValidProductManagerList`, `isValidProductManagerDetail`, `isValidProductManagerSearchList`)
 - **Lança** erros específicos (`ProductManagerError`, `ProductManagerNotFoundError`)
 - **Exporta** instância singleton `productManagerServiceApi`
-- **Fornece** funções de leitura para Server Components (`getProductsManager`, `getProductManagerById`, `searchProductsManager`) **sem cache** — transformam entidades API → DTOs UI via `transformers` e retornam `{ products: UIProductManager[], total: number }` (`getProductsManager`, onde `total` vem de `response.quantity`) / `UIProductManager[]` (`searchProductsManager`) / `{ product, relatedCategories } | undefined` (`getProductManagerById`)
+- **Fornece** funções de leitura para Server Components (`getProductsManager`, `getProductManagerById`, `searchProductsManager`) **sem cache** — transformam entidades API → DTOs UI via `transformers` e retornam `{ products: UIProductManager[], total: number }` (`getProductsManager`, onde `total` vem de `response.recordId`) / `UIProductManager[]` (`searchProductsManager`) / `{ product, relatedCategories } | undefined` (`getProductManagerById`)
 - **Guard check**: retorna `{ products: [], total: 0 }` (`getProductsManager`) ou `undefined` (`getProductManagerById`) se `pe_system_client_id` não for fornecido
 
 ### 2. `types/product-manager-types.ts`
-- Define interfaces base (`ProductManagerBaseRequest`, `ProductManagerBaseResponse` com `recordId: string`)
+- Define interfaces base (`ProductManagerBaseRequest`, `ProductManagerBaseResponse`) e especializa `recordId: number` no retorno do find all
 - Define interfaces para **requests** (`ProductManagerFindAllRequest`, `ProductManagerFindByIdRequest`, `ProductManagerFindSearchRequest`)
 - Define interfaces para **responses** com chaves tipadas nos dados:
   - `ProductManagerFindAllResponse` → `data: { "Product Manager find All": ProductManagerListItem[] }`
@@ -110,7 +110,7 @@ pe_limit: number             // Limite de registros retornados
 {
   statusCode: number,
   message: string,
-  recordId: string,
+  recordId: number,
   data: {
     "Product Manager find All": ProductManagerListItem[]
   },
