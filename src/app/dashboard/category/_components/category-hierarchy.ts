@@ -53,11 +53,13 @@ export function buildCategoryTree(categories: UITaxonomy[]): {
 
   const roots: CategoryNodeDto[] = [];
   for (const node of nodesById.values()) {
-    const parent = nodesById.get(node.parentId);
-    if (node.parentId !== 0 && parent && parent.id !== node.id) {
-      parent.children.push(node);
-    } else {
+    if (node.parentId === 0 || node.parentId === node.id) {
       roots.push(node);
+      continue;
+    }
+    const parent = nodesById.get(node.parentId);
+    if (parent) {
+      parent.children.push(node);
     }
   }
 
