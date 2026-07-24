@@ -2,6 +2,7 @@ import { FolderTree } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CategoryDashboardHeader } from "./category-dashboard-header";
 import { CategoryEmptyState } from "./category-empty-state";
+import { CategoryMobileBottomBar } from "./category-mobile-bottom-bar";
 import type {
   CategoryDetailDto,
   CategoryFiltersState,
@@ -30,7 +31,7 @@ export interface CategoryDashboardProps {
 
 export function CategoryDashboard(props: CategoryDashboardProps) {
   return (
-    <div className="flex min-h-0 flex-1 flex-col bg-background">
+    <div className="flex min-h-0 flex-1 flex-col bg-background pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0">
       <CategoryDashboardHeader />
       {props.dataError && (
         <div className="mx-3 mb-3 rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive lg:mx-6">
@@ -72,6 +73,10 @@ export function CategoryDashboard(props: CategoryDashboardProps) {
           </main>
         </div>
       )}
+      <CategoryMobileBottomBar
+        filters={props.filters}
+        selectedCategoryId={props.detail?.id}
+      />
     </div>
   );
 }

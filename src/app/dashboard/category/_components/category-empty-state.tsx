@@ -11,7 +11,10 @@ export function CategoryEmptyState({ detail }: { detail?: CategoryDetailDto }) {
         <p className="mt-1 text-sm text-muted-foreground">
           Crie uma família para iniciar a hierarquia.
         </p>
-        <CategoryCreateTrigger parent={detail} className="mt-4">
+        <CategoryCreateTrigger
+          parent={detail}
+          className="mt-4 hidden md:inline-flex"
+        >
           <Plus /> Nova família
         </CategoryCreateTrigger>
       </div>

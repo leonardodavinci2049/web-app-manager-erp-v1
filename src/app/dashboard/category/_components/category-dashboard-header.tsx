@@ -12,7 +12,7 @@ export function CategoryDashboardHeader() {
           Famílias, grupos, subgrupos e seus produtos.
         </p>
       </div>
-      <CategoryCreateTrigger>
+      <CategoryCreateTrigger className="hidden md:inline-flex">
         <Plus /> Nova família
       </CategoryCreateTrigger>
     </div>
