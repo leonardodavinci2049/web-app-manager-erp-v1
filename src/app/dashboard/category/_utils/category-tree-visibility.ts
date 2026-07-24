@@ -44,3 +44,22 @@ export function collectExpandableIds(tree: CategoryNodeDto[]): Set<number> {
   collect(tree);
   return ids;
 }
+
+export function collectAncestorIds(
+  tree: CategoryNodeDto[],
+  selectedId: number,
+): Set<number> {
+  const findAncestors = (
+    nodes: CategoryNodeDto[],
+    ancestors: number[],
+  ): number[] | undefined => {
+    for (const node of nodes) {
+      if (node.id === selectedId) return ancestors;
+      const result = findAncestors(node.children, [...ancestors, node.id]);
+      if (result) return result;
+    }
+    return undefined;
+  };
+
+  return new Set(findAncestors(tree, []) ?? []);
+}

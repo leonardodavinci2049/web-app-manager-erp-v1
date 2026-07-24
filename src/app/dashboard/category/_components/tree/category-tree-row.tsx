@@ -54,6 +54,7 @@ export function CategoryTreeRow({
   return (
     <div
       role="treeitem"
+      data-category-id={node.id}
       tabIndex={tabbable ? 0 : -1}
       aria-level={node.level}
       aria-expanded={hasChildren ? isExpanded : undefined}

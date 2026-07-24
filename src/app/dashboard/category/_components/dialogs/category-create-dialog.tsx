@@ -1,7 +1,6 @@
 "use client";
 
 import type { VariantProps } from "class-variance-authority";
-import { useRouter } from "next/navigation";
 import { type ReactNode, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { Button, type buttonVariants } from "@/components/ui/button";
@@ -65,7 +64,6 @@ export function CategoryCreateDialog({
   onOpenChange: (open: boolean) => void;
   parent?: CategoryDetailDto;
 }) {
-  const router = useRouter();
   const navigate = useCategoryQueryNavigation();
   const [name, setName] = useState("");
   const [pending, startTransition] = useTransition();
@@ -112,8 +110,10 @@ export function CategoryCreateDialog({
                     categoryId: result.categoryId
                       ? String(result.categoryId)
                       : undefined,
+                    tab: undefined,
+                    productSearch: undefined,
+                    productPage: undefined,
                   });
-                  router.refresh();
                 }
               })
             }

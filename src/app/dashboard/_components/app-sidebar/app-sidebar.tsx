@@ -43,17 +43,7 @@ const data = {
     {
       name: "WinERP",
       logo: GalleryVerticalEnd,
-      plan: "Distribuidora",
-    },
-    {
-      name: "Mundial Megastore",
-      logo: AudioWaveform,
-      plan: "Enterprise",
-    },
-    {
-      name: "Atacadão Eletrônico",
-      logo: Command,
-      plan: "Revenda",
+      plan: "Sistema de Gestão",
     },
   ],
   navMain: [
@@ -64,45 +54,16 @@ const data = {
       isActive: true,
       items: [
         {
-          title: "Visão Geral",
+          title: "Catalogo de Produtos",
           url: "/dashboard",
         },
-        {
-          title: "Últimas Vendas",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Produtos",
-      url: "#",
-      icon: Package,
-      items: [
-        {
-          title: "Catálogo",
-          url: "/dashboard/product/catalog",
-        },
-        {
-          title: "Novos Produtos",
-          url: "/dashboard/product/new-product",
-        },
-        {
-          title: "Mais vendidos",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Categorias",
-      url: "#",
-      icon: Tags,
-      items: [
         {
           title: "Central de Categorias",
           url: "/dashboard/category",
         },
       ],
     },
+
     {
       title: "Clientes",
       url: "#",

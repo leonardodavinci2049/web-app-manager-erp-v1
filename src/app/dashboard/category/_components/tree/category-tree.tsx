@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useCategoryQueryNavigation } from "../../_hooks/use-category-query-navigation";
 import { buildTreePredicate } from "../../_utils/category-filters";
 import {
+  collectAncestorIds,
   collectExpandableIds,
   getVisibleRows,
 } from "../../_utils/category-tree-visibility";
@@ -41,6 +42,11 @@ export function CategoryTree({ tree, selectedId, filters }: CategoryTreeProps) {
     [filters.withoutProducts],
   );
   useEffect(() => setIssue(filters.issue), [filters.issue]);
+  useEffect(() => {
+    if (!selectedId) return;
+    const ancestorIds = collectAncestorIds(tree, selectedId);
+    setExpanded((current) => new Set([...current, ...ancestorIds]));
+  }, [selectedId, tree]);
 
   const localFilters: CategoryFiltersState = {
     search,
@@ -49,8 +55,18 @@ export function CategoryTree({ tree, selectedId, filters }: CategoryTreeProps) {
     withoutProducts,
     issue,
   };
-  const predicate = buildTreePredicate(localFilters);
+  const filterPredicate = buildTreePredicate(localFilters);
+  const predicate = (node: CategoryNodeDto) =>
+    node.id === selectedId || filterPredicate(node);
   const rows = getVisibleRows(tree, expanded, predicate);
+  const selectedIsVisible = rows.some((row) => row.node.id === selectedId);
+
+  useEffect(() => {
+    if (!selectedId || !selectedIsVisible) return;
+    treeRef.current
+      ?.querySelector<HTMLElement>(`[data-category-id="${selectedId}"]`)
+      ?.scrollIntoView({ block: "nearest" });
+  }, [selectedId, selectedIsVisible]);
 
   const commit = (next: Partial<CategoryFiltersState>) => {
     const merged = { ...localFilters, ...next };
