@@ -13,7 +13,7 @@ export function NewProductHeader() {
         { label: "Início", href: "/dashboard" },
         {
           label: "Produtos",
-          href: "/dashboard/product/catalog",
+          href: "/dashboard/catalog",
         },
         { label: "Adicionar Novo Produto", isActive: true },
       ]}

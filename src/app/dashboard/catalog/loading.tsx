@@ -1,8 +1,8 @@
 import { SiteHeaderWithBreadcrumb } from "@/components/dashboard/header/site-header-with-breadcrumb";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CatalogLoadingProducts } from "./_components/catalog/catalog-loading-products";
+import { CatalogLoadingProducts } from "./_components/catalog-loading-products";
 
-export default function DashboardLoading() {
+export default function CatalogLoading() {
   return (
     <>
       <SiteHeaderWithBreadcrumb

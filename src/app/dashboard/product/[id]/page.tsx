@@ -89,7 +89,7 @@ export default async function ProductDetailsPage({
   const breadcrumbItems = [
     { label: "Dashboard", href: "/dashboard" },
     { label: "Produtos", href: "#" },
-    { label: "Catálogo", href: "/dashboard/product/catalog" },
+    { label: "Catálogo", href: "/dashboard/catalog" },
     { label: "Detalhes", isActive: true },
   ];
 

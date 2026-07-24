@@ -158,7 +158,7 @@ export function NewProductForm() {
     if (result.success && result.productId) {
       toast.success("Produto criado com sucesso!");
       router.refresh();
-      router.push("/dashboard/product/catalog");
+      router.push("/dashboard/catalog");
     } else if (result.error) {
       toast.error(result.error);
     }
@@ -166,7 +166,7 @@ export function NewProductForm() {
 
   // Cancelar e voltar para lista
   const handleCancel = () => {
-    router.push("/dashboard/product/catalog");
+    router.push("/dashboard/catalog");
   };
 
   return (

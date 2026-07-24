@@ -35,7 +35,7 @@ const modules = [
   {
     title: "Catálogo de Produtos",
     description: "Consulte e organize o catálogo principal de produtos.",
-    href: "/dashboard/product/catalog",
+    href: "/dashboard/catalog",
     icon: PackageSearch,
     color: "text-blue-500",
     bgColor: "bg-blue-500/10",
