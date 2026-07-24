@@ -52,7 +52,7 @@ const data = {
       items: [
         {
           title: "Catalogo de Produtos",
-          url: "/dashboard",
+          url: "/dashboard/catalog",
         },
         {
           title: "Central de Categorias",

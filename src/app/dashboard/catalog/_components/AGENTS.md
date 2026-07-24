@@ -1,17 +1,23 @@
-# AGENTS.md — `catalog/`
+# Product Catalog Components Agent Guide
 
-Operational guide for agents editing the product catalog on the `/dashboard` route (`src/app/dashboard/page.tsx`). Complements the root `AGENTS.md`; in case of conflict, the root guide prevails.
+This guide governs `src/app/dashboard/catalog/_components`. It complements the
+repository, dashboard, and `catalog/AGENTS.md` guides. The closest applicable
+guide specializes broader instructions; repository-level rules still prevail
+in case of conflict.
 
 ## Overview
 
-This folder groups **all the components of the product catalog screen**. The page (`page.tsx`) only fetches data (Server) and renders the [`CatalogShell`](./catalog-shell.tsx). The entire UI — toolbar, filters, grid, cards, and inline editors — lives here.
+This folder groups **all the components of the product catalog screen**. The
+route page (`../page.tsx`) fetches data on the server and renders
+[`CatalogShell`](./catalog-shell.tsx). The entire UI — toolbar, filters, grid,
+cards, and inline editors — lives here.
 
 The core philosophy is **URL as the single source of truth for data filters** and **Server Components by default, Client Components isolated to the smallest possible scope**. The **view mode** (grid/list) is an exception: it is a display preference stored in `localStorage` (client-side), never in the URL, so toggling it is instant and does not trigger a data refetch.
 
 ## File Structure
 
 ```
-catalog/
+_components/
 ├── index.ts                          # Public export barrel for the folder
 ├── catalog-shell.tsx                 # Shell (Server) that composes toolbar + grid
 ├── category-tags.tsx                 # Category tags/badges (Server)
@@ -66,22 +72,16 @@ page.tsx (Server)
                     └── <LoadMoreButton> (Client)   ─> `limit` searchParam (+50)
 ```
 
-### Supported searchParams
+The complete query-parameter contract is documented in `../AGENTS.md`. Object
+<-> URL mapping is **always** handled in
+[`lib/search-params.ts`](./lib/search-params.ts)
+(`parseCatalogSearchParams`, `buildCatalogUrl`, `buildCatalogReturnTo`,
+`buildProductDetailsHref`, `mapSortToApiParams`, `SORT_OPTIONS`). Do not
+reimplement this logic elsewhere.
 
-| Param      | Owner Component        | Default   |
-|------------|------------------------|-----------|
-| `search`   | `CatalogSearch`        | `""`      |
-| `category` | `FilterPanel`          | `"all"`   |
-| `brand`    | `FilterPanel`          | omitted   |
-| `type`     | `FilterPanel`          | omitted   |
-| `stock`    | `FilterPanel`          | omitted   |
-| `sort`     | `FilterPanel`          | `"newest"`|
-| `limit`    | `LoadMoreButton`       | `50`      |
-| `page`     | `page.tsx`             | `0`       |
-
-> **Note:** `view` (grid|list) is **not** a searchParam. It is a display preference kept in `localStorage` (key `catalog:product-view-mode`) and managed inside `CatalogToolbar`. Only data-affecting filters go through the URL.
-
-The object <-> URL mapping is **always** handled in [`lib/search-params.ts`](./lib/search-params.ts) (`parseCatalogSearchParams`, `buildCatalogUrl`, `buildCatalogReturnTo`, `buildProductDetailsHref`, `mapSortToApiParams`, `SORT_OPTIONS`). Do not reimplement this logic elsewhere.
+The `view` preference (`grid` or `list`) is not a search parameter. It remains
+in `localStorage` under `catalog:product-view-mode` and is managed by
+`CatalogToolbar`.
 
 ## Server / Client Boundaries
 
@@ -111,7 +111,8 @@ Actions consumed: `action-product-updates` (name, price, stock), `action-product
 
 - **Public exports** from the folder are exposed via the [`index.ts`](./index.ts) barrel. Internal components can import each other directly.
 - **Naming:** Files in kebab-case; components in PascalCase; pure functions in camelCase.
-- **Component comments** in pt-BR, explaining the Server/Client role and component responsibility — follow the pattern of existing docblocks.
+- **Component comments** use US English and explain the Server/Client role and
+  component responsibility.
 - **No global state**: All **data filters** are managed via the URL (`searchParams`). Do not introduce React contexts or state stores for filters. The **view mode** (grid|list) is the only exception: it is a display preference kept in `localStorage`, not a filter, so it stays client-side and never triggers a refetch.
 - **Pagination** is heuristic via `limit` (+50), not via `page`. Although `page` is forwarded to the API, the UI uses the `LoadMoreButton`.
 - **Currency/price** use Brazilian formatting (decimal comma) in inputs; `formatCurrency` handles the display.

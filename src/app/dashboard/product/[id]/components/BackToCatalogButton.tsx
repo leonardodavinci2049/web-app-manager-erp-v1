@@ -4,8 +4,8 @@ import { ArrowLeft } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
-const CATALOG_HREF = "/dashboard";
-const VALID_RETURN_PATHNAMES = ["/dashboard", "/dashboard/product/catalog"];
+const CATALOG_HREF = "/dashboard/catalog";
+const VALID_RETURN_PATHNAMES = ["/dashboard/catalog", "/dashboard"];
 
 function getSafeCatalogHref(returnTo: string | null): string {
   if (!returnTo) {
