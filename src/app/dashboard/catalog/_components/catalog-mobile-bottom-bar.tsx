@@ -1,6 +1,7 @@
 "use client";
 
-import { Filter, Home, PackagePlus } from "lucide-react";
+import { Filter, FolderTree, Home, PackagePlus } from "lucide-react";
+import Link from "next/link";
 import type { ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
 import { useSidebar } from "@/components/ui/sidebar";
@@ -61,6 +62,27 @@ function BottomBarItem({
   );
 }
 
+function BottomBarLink({
+  href,
+  icon,
+  label,
+}: {
+  href: string;
+  icon: ReactNode;
+  label: string;
+}) {
+  return (
+    <li className="flex flex-1">
+      <Link href={href} className={ITEM_CLASS_NAME} aria-label={label}>
+        <span className="relative flex size-6 items-center justify-center">
+          {icon}
+        </span>
+        <span className="leading-tight">{label}</span>
+      </Link>
+    </li>
+  );
+}
+
 interface CatalogMobileBottomBarProps {
   filterCount: number;
   isFilterOpen: boolean;
@@ -97,6 +119,11 @@ export function CatalogMobileBottomBar({
           badgeCount={filterCount}
           isActive={isFilterOpen}
           onClick={onOpenFilters}
+        />
+        <BottomBarLink
+          href="/dashboard/category"
+          icon={<FolderTree className="size-5" aria-hidden="true" />}
+          label="Categorias"
         />
         <BottomBarItem
           icon={<PackagePlus className="size-5" aria-hidden="true" />}

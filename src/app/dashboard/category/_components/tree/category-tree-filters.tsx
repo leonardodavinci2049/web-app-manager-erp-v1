@@ -29,7 +29,7 @@ export function CategoryTreeFilters({
   onCollapseAll,
 }: CategoryTreeFiltersProps) {
   return (
-    <div className="space-y-3 border-b p-3">
+    <div id="category-tree-filters" className="space-y-3 border-b p-3">
       <form
         onSubmit={(event) => {
           event.preventDefault();
