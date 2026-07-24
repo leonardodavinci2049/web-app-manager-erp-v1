@@ -1,16 +1,13 @@
 "use client";
 
 import {
-  AudioWaveform,
   Boxes,
   ChartColumn,
-  Command,
   Frame,
   GalleryVerticalEnd,
   Handshake,
   House,
   LayoutDashboard,
-  Package,
   PieChart,
   Settings,
   ShoppingCart,
