@@ -31,7 +31,7 @@ export interface CategoryDashboardProps {
 export function CategoryDashboard(props: CategoryDashboardProps) {
   return (
     <div className="flex min-h-0 flex-1 flex-col bg-background">
-      <CategoryDashboardHeader detail={props.detail} />
+      <CategoryDashboardHeader />
       {props.dataError && (
         <div className="mx-3 mb-3 rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive lg:mx-6">
           {props.dataError}

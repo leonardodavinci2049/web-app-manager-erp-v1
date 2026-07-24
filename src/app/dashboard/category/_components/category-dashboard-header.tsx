@@ -1,12 +1,7 @@
 import { Plus } from "lucide-react";
-import type { CategoryDetailDto } from "./category-types";
 import { CategoryCreateTrigger } from "./dialogs/category-create-dialog";
 
-export function CategoryDashboardHeader({
-  detail,
-}: {
-  detail?: CategoryDetailDto;
-}) {
+export function CategoryDashboardHeader() {
   return (
     <div className="flex flex-col justify-between gap-3 px-3 py-3 sm:flex-row sm:items-center lg:px-6">
       <div>
@@ -17,7 +12,7 @@ export function CategoryDashboardHeader({
           Famílias, grupos, subgrupos e seus produtos.
         </p>
       </div>
-      <CategoryCreateTrigger parent={detail}>
+      <CategoryCreateTrigger>
         <Plus /> Nova família
       </CategoryCreateTrigger>
     </div>
