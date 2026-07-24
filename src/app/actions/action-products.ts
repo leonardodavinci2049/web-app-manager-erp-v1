@@ -1,6 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { unstable_rethrow } from "next/navigation";
+import { z } from "zod";
 import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
 import { productBaseServiceApi } from "@/services/api-main/product-base";
@@ -8,6 +10,32 @@ import { productUpdateServiceApi } from "@/services/api-main/product-update";
 import { generateSlugFromName } from "@/utils/slug-utils";
 
 const logger = createLogger("ProductActions");
+
+const createProductFormSchema = z
+  .object({
+    name: z.string().trim().min(3).max(300),
+    reference: z.string().trim().max(100),
+    wholesalePrice: z.number().finite().positive().max(2000000),
+    retailPrice: z.number().finite().positive().max(2000000),
+    corporatePrice: z.number().finite().positive().max(2000000),
+    stock: z.number().int().min(0).max(1000000),
+    brandId: z.number().int().positive(),
+    typeId: z.number().int().positive(),
+    additionalInfo: z.string().trim().max(5000),
+  })
+  .refine((data) => data.wholesalePrice <= data.retailPrice, {
+    path: ["wholesalePrice"],
+  });
+
+function readFormString(formData: FormData, key: string): string {
+  const value = formData.get(key);
+  return typeof value === "string" ? value : "";
+}
+
+function readFormNumber(formData: FormData, key: string): number {
+  const value = readFormString(formData, key).trim();
+  return value === "" ? Number.NaN : Number(value.replace(",", "."));
+}
 
 // ========================================
 // CREATE PRODUCT ACTION
@@ -42,38 +70,29 @@ export async function createProductFromForm(formData: FormData): Promise<{
   error?: string;
 }> {
   try {
-    // Extract data from FormData
-    const name = formData.get("name") as string;
-    const reference = formData.get("reference") as string;
-    const additionalInfo = formData.get("additionalInfo") as string;
+    const { apiContext } = await getAuthContext();
+    const parsedData = createProductFormSchema.safeParse({
+      name: readFormString(formData, "name"),
+      reference: readFormString(formData, "reference"),
+      wholesalePrice: readFormNumber(formData, "wholesalePrice"),
+      retailPrice: readFormNumber(formData, "retailPrice"),
+      corporatePrice: readFormNumber(formData, "corporatePrice"),
+      stock: readFormNumber(formData, "stock"),
+      brandId: readFormNumber(formData, "brandId"),
+      typeId: readFormNumber(formData, "typeId"),
+      additionalInfo: readFormString(formData, "additionalInfo"),
+    });
 
-    // Set description, tags, and model as empty strings (server-side)
-    const description = "";
-    const tags = "";
-    const model = "";
-
-    // Parse numeric values with fallbacks
-    const wholesalePrice =
-      parseFloat(formData.get("wholesalePrice") as string) || 0;
-    const retailPrice = parseFloat(formData.get("retailPrice") as string) || 0;
-    const corporatePrice =
-      parseFloat(formData.get("corporatePrice") as string) || 0;
-    const stock = parseInt(formData.get("stock") as string, 10) || 0;
-    const brandId = parseInt(formData.get("brandId") as string, 10) || 0;
-    const typeId = parseInt(formData.get("typeId") as string, 10) || 0;
-
-    // Auto-generate slug from product name
-    const slug = generateSlugFromName(name);
-
-    // Validate that we have a name to work with
-    if (!name?.trim()) {
+    if (!parsedData.success) {
       return {
         success: false,
-        error: "Nome do produto é obrigatório",
+        error: "Revise os dados informados e tente novamente.",
       };
     }
 
-    // Validate generated slug
+    const data = parsedData.data;
+    const slug = generateSlugFromName(data.name);
+
     if (!slug || slug.length < 2) {
       return {
         success: false,
@@ -84,29 +103,27 @@ export async function createProductFromForm(formData: FormData): Promise<{
 
     // Prepare API request data — novos nomes de parâmetros
     const apiData = {
-      pe_product_name: name,
-      pe_tab_description: description || "",
-      pe_label: tags || "",
-      pe_ref: reference || "",
-      pe_model: model || "",
-      pe_product_type_id: typeId,
-      pe_brand_id: brandId,
+      pe_product_name: data.name,
+      pe_tab_description: "",
+      pe_label: "",
+      pe_ref: data.reference,
+      pe_model: "",
+      pe_product_type_id: data.typeId,
+      pe_brand_id: data.brandId,
       pe_weight_gr: 0,
       pe_length_mm: 0,
       pe_width_mm: 0,
       pe_height_mm: 0,
       pe_diameter_mm: 0,
       pe_warranty_period_days: 0,
-      pe_wholesale_price: wholesalePrice,
-      pe_retail_price: retailPrice,
-      pe_corporate_price: corporatePrice,
-      pe_stock_quantity: stock,
+      pe_wholesale_price: data.wholesalePrice,
+      pe_retail_price: data.retailPrice,
+      pe_corporate_price: data.corporatePrice,
+      pe_stock_quantity: data.stock,
       pe_website_off_flag: 0,
       pe_imported_flag: 0,
-      pe_additional_info: additionalInfo || "",
+      pe_additional_info: data.additionalInfo,
     };
-
-    const { apiContext } = await getAuthContext();
 
     const response = await productBaseServiceApi.createProduct({
       ...apiData,
@@ -125,23 +142,19 @@ export async function createProductFromForm(formData: FormData): Promise<{
       };
     }
 
-    revalidatePath("/dashboard");
+    revalidatePath("/dashboard/catalog");
 
     return {
       success: true,
       productId,
     };
   } catch (error) {
+    unstable_rethrow(error);
     logger.error("Error creating product:", error);
-
-    const errorMessage =
-      error instanceof Error
-        ? error.message
-        : "Erro desconhecido ao criar produto";
 
     return {
       success: false,
-      error: errorMessage,
+      error: "Não foi possível criar o produto. Tente novamente.",
     };
   }
 }

@@ -426,7 +426,7 @@ export function FilterPanel({
         <Button
           type="button"
           variant={panelFilterCount > 0 ? "default" : "outline"}
-          className="h-11 shrink-0 gap-1.5 px-3 shadow-sm sm:px-4"
+          className="hidden h-11 shrink-0 gap-1.5 px-3 shadow-sm sm:px-4 md:inline-flex"
         >
           <Filter className="h-4 w-4" />
           <span className="hidden text-sm sm:inline">Filtros</span>

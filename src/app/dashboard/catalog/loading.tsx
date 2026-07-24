@@ -16,7 +16,7 @@ export default function CatalogLoading() {
               <div className="space-y-4">
                 <div className="space-y-4">
                   <div className="flex w-full justify-center">
-                    <div className="flex w-full max-w-xl flex-col gap-2 lg:max-w-2xl">
+                    <div className="flex w-full max-w-xl flex-col gap-2 lg:max-w-4xl">
                       <div className="flex min-w-0 flex-1 items-center gap-2">
                         <div className="flex min-w-0 flex-1 items-center">
                           <div className="relative flex-1">
@@ -24,8 +24,9 @@ export default function CatalogLoading() {
                           </div>
                           <Skeleton className="h-11 w-11 shrink-0 rounded-l-none rounded-r-md sm:w-[110px]" />
                         </div>
-                        <Skeleton className="h-11 w-11 shrink-0 rounded-md sm:w-[100px]" />
+                        <Skeleton className="hidden h-11 w-[100px] shrink-0 rounded-md md:block" />
                         <Skeleton className="h-11 w-11 shrink-0 rounded-md" />
+                        <Skeleton className="hidden h-11 w-11 shrink-0 rounded-md md:block lg:w-[164px]" />
                       </div>
                     </div>
                   </div>

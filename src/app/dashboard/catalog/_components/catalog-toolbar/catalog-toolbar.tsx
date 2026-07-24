@@ -1,5 +1,6 @@
 "use client";
 
+import { PackagePlus } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   type ReactNode,
@@ -10,14 +11,17 @@ import {
   useState,
   useTransition,
 } from "react";
+import { Button } from "@/components/ui/button";
 import type { UIBrand } from "@/services/api-main/brand/transformers/transformers";
 import type { UIProductManager } from "@/services/api-main/product-manager/transformers/transformers";
 import type { UIPtype } from "@/services/api-main/ptype/transformers/transformers";
+import { CatalogMobileBottomBar } from "../catalog-mobile-bottom-bar";
 import {
   buildCatalogUrl,
   parseCatalogSearchParams,
   SORT_OPTIONS,
 } from "../lib/search-params";
+import { NewProductSheet } from "../new-product/new-product-sheet";
 import type {
   CatalogFilters,
   CategoryOption,
@@ -52,6 +56,11 @@ const PANEL_FILTER_DEFAULTS: Pick<CatalogFilters, PanelFilterType> = {
   inactiveStatus: 2,
   isPremium: false,
   sortBy: "newest",
+};
+
+const DEFAULT_CATALOG_FILTERS: CatalogFilters = {
+  searchTerm: "",
+  ...PANEL_FILTER_DEFAULTS,
 };
 
 type ActiveFilterType = PanelFilterType | "search";
@@ -130,10 +139,7 @@ export function CatalogToolbar({
   }, [updateFilters]);
 
   const handleClearSearchAndFilters = useCallback(() => {
-    updateFilters({
-      searchTerm: "",
-      ...PANEL_FILTER_DEFAULTS,
-    });
+    updateFilters(DEFAULT_CATALOG_FILTERS);
   }, [updateFilters]);
 
   const removeActiveFilter = useCallback(
@@ -313,6 +319,16 @@ export function CatalogToolbar({
   );
   const panelFilterCount = panelActiveFilters.length;
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isNewProductOpen, setIsNewProductOpen] = useState(false);
+
+  const handleProductCreated = useCallback(() => {
+    latestFiltersRef.current = DEFAULT_CATALOG_FILTERS;
+    startTransition(() => {
+      router.replace(buildCatalogUrl(DEFAULT_CATALOG_FILTERS, pathname));
+      router.refresh();
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [pathname, router]);
 
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [hydrated, setHydrated] = useState(false);
@@ -337,9 +353,9 @@ export function CatalogToolbar({
   }, []);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0">
       <div className="bg-background/95 supports-[backdrop-filter]:bg-background/80 sticky top-0 z-20 -mx-3 flex justify-center border-b px-3 py-3 shadow-sm backdrop-blur lg:-mx-6 lg:px-6">
-        <div className="flex w-full max-w-xl flex-col gap-2 lg:max-w-2xl">
+        <div className="flex w-full max-w-xl flex-col gap-2 lg:max-w-4xl">
           <CatalogSearch
             searchTerm={filters.searchTerm}
             isLoading={isPending}
@@ -364,6 +380,14 @@ export function CatalogToolbar({
                   viewMode={viewMode}
                   onChange={handleViewModeChange}
                 />
+                <Button
+                  type="button"
+                  className="hidden h-11 shrink-0 gap-2 shadow-sm md:inline-flex"
+                  onClick={() => setIsNewProductOpen(true)}
+                >
+                  <PackagePlus className="size-4" aria-hidden="true" />
+                  <span className="hidden lg:inline">Adicionar produto</span>
+                </Button>
               </>
             }
           />
@@ -372,7 +396,7 @@ export function CatalogToolbar({
 
       {activeFilters.length > 0 && (
         <div className="flex w-full justify-center">
-          <div className="w-full max-w-xl lg:max-w-2xl">
+          <div className="w-full max-w-xl lg:max-w-4xl">
             <CatalogActiveFiltersPanel
               activeFilters={activeFilters}
               loadedProductsCount={products.length}
@@ -405,6 +429,22 @@ export function CatalogToolbar({
           {hydrated && viewMode === "list" ? list : grid}
         </div>
       </div>
+
+      <CatalogMobileBottomBar
+        filterCount={panelFilterCount}
+        isFilterOpen={isFilterOpen}
+        isNewProductOpen={isNewProductOpen}
+        onOpenFilters={() => setIsFilterOpen(true)}
+        onOpenNewProduct={() => setIsNewProductOpen(true)}
+      />
+
+      <NewProductSheet
+        open={isNewProductOpen}
+        brands={brands}
+        ptypes={ptypes}
+        onOpenChange={setIsNewProductOpen}
+        onCreated={handleProductCreated}
+      />
     </div>
   );
 }
