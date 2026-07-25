@@ -58,6 +58,10 @@ const data = {
           title: "Central de Categorias",
           url: "/dashboard/category",
         },
+        {
+          title: "Central das Marcas",
+          url: "/dashboard/brand",
+        },
       ],
     },
 
