@@ -34,12 +34,11 @@ const serverEnvsSchema = z.object({
   EXTERNAL_API_ASSETS_URL: z.string().url(),
   APP_ID: z.coerce.number().positive(),
   STORE_ID: z.coerce.number().positive(),
-  DATABASE_URL: z.string().min(1),
-  DATABASE_HOST: z.string().min(1),
-  DATABASE_PORT: z.coerce.number().positive(),
-  DATABASE_NAME: z.string().min(1),
-  DATABASE_USER: z.string().min(1),
-  DATABASE_PASSWORD: z.string().min(1),
+  DATABASE_ADMIN_HOST: z.string().min(1),
+  DATABASE_ADMIN_PORT: z.coerce.number().positive(),
+  DATABASE_ADMIN_NAME: z.string().min(1),
+  DATABASE_ADMIN_USER: z.string().min(1),
+  DATABASE_ADMIN_PASSWORD: z.string().min(1),
   // Database Pool Config
   DB_POOL_CONNECTION_LIMIT: z
     .string()

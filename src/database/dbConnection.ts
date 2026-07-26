@@ -93,11 +93,11 @@ class DatabaseService {
 
   private createPool(): Pool {
     const config: PoolOptions = {
-      host: envs.DATABASE_HOST,
-      port: envs.DATABASE_PORT,
-      database: envs.DATABASE_NAME,
-      user: envs.DATABASE_USER,
-      password: envs.DATABASE_PASSWORD,
+      host: envs.DATABASE_ADMIN_HOST,
+      port: envs.DATABASE_ADMIN_PORT,
+      database: envs.DATABASE_ADMIN_NAME,
+      user: envs.DATABASE_ADMIN_USER,
+      password: envs.DATABASE_ADMIN_PASSWORD,
       waitForConnections: true,
       connectionLimit: envs.DB_POOL_CONNECTION_LIMIT,
       maxIdle: envs.DB_POOL_MAX_IDLE,
