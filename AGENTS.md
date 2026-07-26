@@ -34,6 +34,12 @@ This project does not currently use automated tests. Do not invent or suggest te
 - `src/core` and `src/lib`: shared config, logger, auth, helpers, cache, and utilities.
 - `src/types` or module-level `types/`: shared types.
 
+## Cross-Repository Work
+
+- When explicitly requested by the user, the agent is authorized to inspect and modify the REST API server repository at `/home/leomer/projects/mercury-projects/srvapi01`.
+- Before changing the API server, read and follow its applicable `AGENTS.md` files and preserve any existing user changes.
+- Treat the web app and API server as separate Git repositories: inspect their status, validate their changes, and report their results independently.
+
 ## Next.js and React
 
 - Server Components by default. `page.tsx` and `layout.tsx` should remain server-side unless there is a real framework exception.
