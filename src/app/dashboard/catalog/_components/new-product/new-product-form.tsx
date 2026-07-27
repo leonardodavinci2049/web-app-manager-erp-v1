@@ -1,7 +1,7 @@
 "use client";
 
 import { CircleDollarSign, Package, Tags, Warehouse } from "lucide-react";
-import { useState } from "react";
+import { type FormEvent, useState } from "react";
 import { toast } from "sonner";
 import { createProductFromForm } from "@/app/actions/action-products";
 import { Button } from "@/components/ui/button";
@@ -125,8 +125,12 @@ export function NewProductForm({
   );
   const [brandId, setBrandId] = useState("");
   const [typeId, setTypeId] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (formData: FormData) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const formData = new FormData(event.currentTarget);
     const errors = validateForm(formData);
     setValidationErrors(errors);
 
@@ -138,18 +142,27 @@ export function NewProductForm({
       return;
     }
 
-    const result = await createProductFromForm(formData);
+    setIsSubmitting(true);
+    try {
+      const result = await createProductFromForm(formData);
 
-    if (!result.success || !result.productId) {
+      if (!result.success || !result.productId) {
+        toast.error(
+          result.error ?? "Não foi possível criar o produto. Tente novamente.",
+        );
+        return;
+      }
+
+      onDirtyChange(false);
+      toast.success(result.message ?? "Produto criado com sucesso!");
+      onCreated(result.productId);
+    } catch {
       toast.error(
-        result.error ?? "Não foi possível criar o produto. Tente novamente.",
+        "Não foi possível concluir a comunicação com o servidor. Tente novamente.",
       );
-      return;
+    } finally {
+      setIsSubmitting(false);
     }
-
-    onDirtyChange(false);
-    toast.success("Produto criado com sucesso!");
-    onCreated(result.productId);
   };
 
   const brandOptions = brands.map((brand) => ({
@@ -163,18 +176,21 @@ export function NewProductForm({
 
   return (
     <form
-      action={handleSubmit}
+      onSubmit={handleSubmit}
       className="flex min-h-0 flex-1 flex-col"
       onChangeCapture={() => onDirtyChange(true)}
     >
-      <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4 sm:p-6">
-        <section className="space-y-4 rounded-lg border p-4">
+      <fieldset
+        disabled={isSubmitting}
+        className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4"
+      >
+        <section className="space-y-3 rounded-lg border p-3">
           <div className="flex items-center gap-2">
             <Package className="text-primary size-4" aria-hidden="true" />
             <h3 className="font-medium">Informações básicas</h3>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <Label htmlFor="name">Nome do produto</Label>
             <NewProductFormInput
               id="name"
@@ -190,19 +206,41 @@ export function NewProductForm({
             <FieldError id="name-error" message={validationErrors.name} />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="reference">Referência/Código</Label>
-            <NewProductFormInput
-              id="reference"
-              name="reference"
-              placeholder="Ex.: REF001"
-              maxLength={100}
-              autoComplete="off"
-            />
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <div className="min-w-0 space-y-1.5">
+              <Label htmlFor="reference">Referência</Label>
+              <NewProductFormInput
+                id="reference"
+                name="reference"
+                placeholder="Ex.: REF001"
+                maxLength={100}
+                autoComplete="off"
+              />
+            </div>
+            <div className="min-w-0 space-y-1.5">
+              <Label htmlFor="model">Modelo</Label>
+              <NewProductFormInput
+                id="model"
+                name="model"
+                placeholder="Ex.: XPTO 100"
+                maxLength={100}
+                autoComplete="off"
+              />
+            </div>
+            <div className="col-span-2 min-w-0 space-y-1.5 sm:col-span-1">
+              <Label htmlFor="label">Etiqueta</Label>
+              <NewProductFormInput
+                id="label"
+                name="label"
+                placeholder="Ex.: Linha premium"
+                maxLength={100}
+                autoComplete="off"
+              />
+            </div>
           </div>
         </section>
 
-        <section className="space-y-4 rounded-lg border p-4">
+        <section className="space-y-3 rounded-lg border p-3">
           <div className="flex items-center gap-2">
             <CircleDollarSign
               className="text-primary size-4"
@@ -211,8 +249,8 @@ export function NewProductForm({
             <h3 className="font-medium">Preços</h3>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div className="space-y-2">
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-3">
+            <div className="min-w-0 space-y-1.5">
               <Label htmlFor="wholesalePrice">Atacado</Label>
               <NewProductCurrencyInput
                 id="wholesalePrice"
@@ -232,7 +270,7 @@ export function NewProductForm({
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="min-w-0 space-y-1.5">
               <Label htmlFor="retailPrice">Varejo</Label>
               <NewProductCurrencyInput
                 id="retailPrice"
@@ -252,7 +290,7 @@ export function NewProductForm({
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="min-w-0 space-y-1.5">
               <Label htmlFor="corporatePrice">Corporativo</Label>
               <NewProductCurrencyInput
                 id="corporatePrice"
@@ -271,39 +309,34 @@ export function NewProductForm({
                 message={validationErrors.corporatePrice}
               />
             </div>
+            <div className="col-span-3 min-w-0 space-y-1.5 sm:col-span-1">
+              <Label htmlFor="stock" className="flex items-center gap-1.5">
+                <Warehouse className="size-3.5" aria-hidden="true" />
+                Estoque
+              </Label>
+              <NewProductIntegerInput
+                id="stock"
+                name="stock"
+                defaultValue="0"
+                placeholder="0"
+                aria-invalid={Boolean(validationErrors.stock)}
+                aria-describedby={
+                  validationErrors.stock ? "stock-error" : undefined
+                }
+              />
+              <FieldError id="stock-error" message={validationErrors.stock} />
+            </div>
           </div>
         </section>
 
-        <section className="space-y-4 rounded-lg border p-4">
-          <div className="flex items-center gap-2">
-            <Warehouse className="text-primary size-4" aria-hidden="true" />
-            <h3 className="font-medium">Estoque</h3>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="stock">Estoque inicial</Label>
-            <NewProductIntegerInput
-              id="stock"
-              name="stock"
-              defaultValue="0"
-              placeholder="0"
-              aria-invalid={Boolean(validationErrors.stock)}
-              aria-describedby={
-                validationErrors.stock ? "stock-error" : undefined
-              }
-            />
-            <FieldError id="stock-error" message={validationErrors.stock} />
-          </div>
-        </section>
-
-        <section className="space-y-4 rounded-lg border p-4">
+        <section className="space-y-3 rounded-lg border p-3">
           <div className="flex items-center gap-2">
             <Tags className="text-primary size-4" aria-hidden="true" />
             <h3 className="font-medium">Classificação</h3>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="min-w-0 space-y-1.5">
               <Label htmlFor="brandId">Marca</Label>
               <NewProductFormSelect
                 id="brandId"
@@ -317,6 +350,7 @@ export function NewProductForm({
                 options={brandOptions}
                 ariaLabel="Marca"
                 ariaInvalid={Boolean(validationErrors.brandId)}
+                disabled={isSubmitting}
                 onValueChange={(value) => {
                   setBrandId(value);
                   onDirtyChange(true);
@@ -329,7 +363,7 @@ export function NewProductForm({
               <FieldError id="brand-error" message={validationErrors.brandId} />
             </div>
 
-            <div className="space-y-2">
+            <div className="min-w-0 space-y-1.5">
               <Label htmlFor="typeId">Tipo de produto</Label>
               <NewProductFormSelect
                 id="typeId"
@@ -343,6 +377,7 @@ export function NewProductForm({
                 options={ptypeOptions}
                 ariaLabel="Tipo de produto"
                 ariaInvalid={Boolean(validationErrors.typeId)}
+                disabled={isSubmitting}
                 onValueChange={(value) => {
                   setTypeId(value);
                   onDirtyChange(true);
@@ -357,26 +392,26 @@ export function NewProductForm({
           </div>
         </section>
 
-        <section className="space-y-4 rounded-lg border p-4">
-          <div>
+        <section className="space-y-2 rounded-lg border p-3">
+          <div className="flex items-baseline justify-between gap-3">
             <h3 className="font-medium">Informações adicionais</h3>
-            <p className="text-muted-foreground text-sm">
-              Inclua observações internas úteis para o cadastro.
+            <p className="text-muted-foreground hidden text-xs sm:block">
+              Observações internas do cadastro
             </p>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <Label htmlFor="additionalInfo">Observações</Label>
             <NewProductFormTextarea
               id="additionalInfo"
               name="additionalInfo"
               placeholder="Informações extras sobre o produto..."
-              rows={4}
+              rows={2}
               maxLength={5000}
             />
           </div>
         </section>
-      </div>
+      </fieldset>
 
       <SheetFooter className="supports-[backdrop-filter]:bg-background/80 shrink-0 border-t bg-background/95 p-4 backdrop-blur sm:flex-row sm:justify-end">
         <Button
@@ -384,10 +419,12 @@ export function NewProductForm({
           variant="outline"
           onClick={onCancel}
           className="w-full sm:w-auto"
+          disabled={isSubmitting}
         >
           Cancelar
         </Button>
         <NewProductSubmitButton
+          pending={isSubmitting}
           pendingText="Criando produto..."
           className="w-full sm:w-auto"
           disabled={brandOptions.length === 0 || ptypeOptions.length === 0}
