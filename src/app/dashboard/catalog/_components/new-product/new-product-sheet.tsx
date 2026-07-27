@@ -80,9 +80,7 @@ export function NewProductSheet({
               <PackagePlus className="text-primary size-5" aria-hidden="true" />
               Adicionar produto
             </SheetTitle>
-            <SheetDescription>
-              Cadastre um novo produto sem sair do catálogo.
-            </SheetDescription>
+
           </SheetHeader>
 
           <NewProductForm

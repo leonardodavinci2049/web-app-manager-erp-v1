@@ -3,7 +3,6 @@
 import { Loader2 } from "lucide-react";
 import type { ComponentProps } from "react";
 import { useState } from "react";
-import { useFormStatus } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -16,15 +15,11 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 
 export function NewProductFormInput(props: ComponentProps<typeof Input>) {
-  const { pending } = useFormStatus();
-
-  return <Input {...props} disabled={pending || props.disabled} />;
+  return <Input {...props} />;
 }
 
 export function NewProductFormTextarea(props: ComponentProps<typeof Textarea>) {
-  const { pending } = useFormStatus();
-
-  return <Textarea {...props} disabled={pending || props.disabled} />;
+  return <Textarea {...props} />;
 }
 
 interface NewProductCurrencyInputProps
@@ -45,7 +40,6 @@ export function NewProductCurrencyInput({
   maxValue = 2000000,
   ...props
 }: NewProductCurrencyInputProps) {
-  const { pending } = useFormStatus();
   const [displayValue, setDisplayValue] = useState(
     defaultValue.replace(".", ","),
   );
@@ -59,7 +53,6 @@ export function NewProductCurrencyInput({
         type="text"
         inputMode="decimal"
         value={displayValue}
-        disabled={pending || props.disabled}
         onChange={(event) => {
           let nextValue = event.target.value.replace(/[^0-9,]/g, "");
           const [integerPart = "", ...decimalParts] = nextValue.split(",");
@@ -101,7 +94,6 @@ export function NewProductIntegerInput({
   maxValue = 1000000,
   ...props
 }: NewProductIntegerInputProps) {
-  const { pending } = useFormStatus();
   const [value, setValue] = useState(defaultValue);
 
   return (
@@ -111,7 +103,6 @@ export function NewProductIntegerInput({
       inputMode="numeric"
       pattern="[0-9]*"
       value={value}
-      disabled={pending || props.disabled}
       onChange={(event) => {
         const nextValue = event.target.value.replace(/\D/g, "");
         const numericValue = Number(nextValue);
@@ -143,6 +134,7 @@ interface NewProductFormSelectProps {
   options: NewProductSelectOption[];
   ariaLabel: string;
   ariaInvalid?: boolean;
+  disabled?: boolean;
   onValueChange: (value: string) => void;
 }
 
@@ -154,16 +146,15 @@ export function NewProductFormSelect({
   options,
   ariaLabel,
   ariaInvalid,
+  disabled,
   onValueChange,
 }: NewProductFormSelectProps) {
-  const { pending } = useFormStatus();
-
   return (
     <>
       <Select
         value={value}
         onValueChange={onValueChange}
-        disabled={pending || options.length === 0}
+        disabled={disabled || options.length === 0}
       >
         <SelectTrigger
           id={id}
@@ -188,16 +179,16 @@ export function NewProductFormSelect({
 
 interface NewProductSubmitButtonProps
   extends Omit<ComponentProps<typeof Button>, "type"> {
+  pending: boolean;
   pendingText: string;
 }
 
 export function NewProductSubmitButton({
   children,
+  pending,
   pendingText,
   ...props
 }: NewProductSubmitButtonProps) {
-  const { pending } = useFormStatus();
-
   return (
     <Button
       {...props}

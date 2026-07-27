@@ -15,6 +15,8 @@ const createProductFormSchema = z
   .object({
     name: z.string().trim().min(3).max(300),
     reference: z.string().trim().max(100),
+    model: z.string().trim().max(100),
+    label: z.string().trim().max(100),
     wholesalePrice: z.number().finite().positive().max(2000000),
     retailPrice: z.number().finite().positive().max(2000000),
     corporatePrice: z.number().finite().positive().max(2000000),
@@ -67,6 +69,7 @@ export interface CreateProductData {
 export async function createProductFromForm(formData: FormData): Promise<{
   success: boolean;
   productId?: number;
+  message?: string;
   error?: string;
 }> {
   try {
@@ -74,6 +77,8 @@ export async function createProductFromForm(formData: FormData): Promise<{
     const parsedData = createProductFormSchema.safeParse({
       name: readFormString(formData, "name"),
       reference: readFormString(formData, "reference"),
+      model: readFormString(formData, "model"),
+      label: readFormString(formData, "label"),
       wholesalePrice: readFormNumber(formData, "wholesalePrice"),
       retailPrice: readFormNumber(formData, "retailPrice"),
       corporatePrice: readFormNumber(formData, "corporatePrice"),
@@ -105,9 +110,9 @@ export async function createProductFromForm(formData: FormData): Promise<{
     const apiData = {
       pe_product_name: data.name,
       pe_tab_description: "",
-      pe_label: "",
+      pe_label: data.label,
       pe_ref: data.reference,
-      pe_model: "",
+      pe_model: data.model,
       pe_product_type_id: data.typeId,
       pe_brand_id: data.brandId,
       pe_weight_gr: 0,
@@ -133,20 +138,20 @@ export async function createProductFromForm(formData: FormData): Promise<{
     const spResult =
       productBaseServiceApi.extractStoredProcedureResult(response);
     const productId = spResult?.sp_return_id;
+    const apiMessage = spResult?.sp_message || response.message;
 
     if (!productId) {
       logger.error("No product ID returned from API:", response);
       return {
         success: false,
-        error: "ID do produto não foi retornado",
+        error: apiMessage || "ID do produto não foi retornado",
       };
     }
-
-    revalidatePath("/dashboard/catalog");
 
     return {
       success: true,
       productId,
+      message: apiMessage || "Produto criado com sucesso!",
     };
   } catch (error) {
     unstable_rethrow(error);
@@ -154,7 +159,10 @@ export async function createProductFromForm(formData: FormData): Promise<{
 
     return {
       success: false,
-      error: "Não foi possível criar o produto. Tente novamente.",
+      error:
+        error instanceof Error
+          ? error.message
+          : "Não foi possível criar o produto. Tente novamente.",
     };
   }
 }
