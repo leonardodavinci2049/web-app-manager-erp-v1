@@ -52,6 +52,9 @@ export interface ProductCreateRequest extends ProductBaseRequest {
   pe_model?: string;
   pe_product_type_id?: number;
   pe_brand_id?: number;
+  pe_family_id: number;
+  pe_group_id: number;
+  pe_subgroup_id: number;
   pe_weight_gr?: number;
   pe_length_mm?: number;
   pe_width_mm?: number;

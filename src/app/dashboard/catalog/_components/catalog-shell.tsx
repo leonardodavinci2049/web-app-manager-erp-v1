@@ -3,7 +3,10 @@ import type { UIProductManager } from "@/services/api-main/product-manager/trans
 import type { UIPtype } from "@/services/api-main/ptype/transformers/transformers";
 import { CatalogToolbar } from "./catalog-toolbar/catalog-toolbar";
 import { ProductGrid } from "./product-grid/product-grid";
-import type { CategoryOption } from "./types/catalog-types";
+import type {
+  CategoryOption,
+  NewProductTaxonomyOption,
+} from "./types/catalog-types";
 
 interface CatalogShellProps {
   products: UIProductManager[];
@@ -11,6 +14,8 @@ interface CatalogShellProps {
   brands: UIBrand[];
   categories: CategoryOption[];
   ptypes: UIPtype[];
+  newProductTaxonomy: NewProductTaxonomyOption[];
+  isNewProductTaxonomyAvailable: boolean;
   catalogReturnTo: string;
   limit: number;
 }
@@ -27,6 +32,8 @@ export function CatalogShell({
   brands,
   categories,
   ptypes,
+  newProductTaxonomy,
+  isNewProductTaxonomyAvailable,
   catalogReturnTo,
   limit,
 }: CatalogShellProps) {
@@ -37,6 +44,8 @@ export function CatalogShell({
       brands={brands}
       categories={categories}
       ptypes={ptypes}
+      newProductTaxonomy={newProductTaxonomy}
+      isNewProductTaxonomyAvailable={isNewProductTaxonomyAvailable}
       grid={
         <ProductGrid
           products={products}

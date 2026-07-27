@@ -1,10 +1,15 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
+import { Check, ChevronsUpDown, Loader2, Search, X } from "lucide-react";
 import type { ComponentProps } from "react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -126,6 +131,13 @@ interface NewProductSelectOption {
   label: string;
 }
 
+function normalizeSearch(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLocaleLowerCase("pt-BR");
+}
+
 interface NewProductFormSelectProps {
   id: string;
   name: string;
@@ -172,6 +184,144 @@ export function NewProductFormSelect({
           ))}
         </SelectContent>
       </Select>
+      <input type="hidden" name={name} value={value} />
+    </>
+  );
+}
+
+interface NewProductSearchableSelectProps {
+  id: string;
+  name: string;
+  value: string;
+  placeholder: string;
+  searchPlaceholder: string;
+  emptyMessage: string;
+  options: NewProductSelectOption[];
+  ariaLabel: string;
+  disabled?: boolean;
+  onValueChange: (value: string) => void;
+}
+
+export function NewProductSearchableSelect({
+  id,
+  name,
+  value,
+  placeholder,
+  searchPlaceholder,
+  emptyMessage,
+  options,
+  ariaLabel,
+  disabled,
+  onValueChange,
+}: NewProductSearchableSelectProps) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const selectedOption = options.find((option) => option.value === value);
+  const normalizedSearch = normalizeSearch(search.trim());
+  const filteredOptions = normalizedSearch
+    ? options.filter((option) =>
+        normalizeSearch(option.label).includes(normalizedSearch),
+      )
+    : options;
+  const isDisabled = disabled || options.length === 0;
+
+  return (
+    <>
+      <Popover
+        open={open}
+        onOpenChange={(nextOpen) => {
+          setOpen(nextOpen);
+          if (!nextOpen) setSearch("");
+        }}
+      >
+        <PopoverTrigger asChild>
+          <Button
+            id={id}
+            type="button"
+            variant="outline"
+            role="combobox"
+            aria-label={ariaLabel}
+            aria-expanded={open}
+            disabled={isDisabled}
+            className="w-full justify-between font-normal"
+          >
+            <span className="truncate">
+              {selectedOption?.label ?? placeholder}
+            </span>
+            <ChevronsUpDown
+              className="ml-2 size-4 shrink-0 opacity-50"
+              aria-hidden="true"
+            />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent
+          align="start"
+          className="w-(--radix-popover-trigger-width) p-1"
+        >
+          <div className="relative border-b p-1">
+            <Search
+              className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2"
+              aria-hidden="true"
+            />
+            <Input
+              type="search"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder={searchPlaceholder}
+              aria-label={searchPlaceholder}
+              className="border-0 pl-8 shadow-none focus-visible:ring-0"
+            />
+          </div>
+          <div
+            className="max-h-56 overflow-y-auto p-1"
+            role="listbox"
+            aria-label={ariaLabel}
+          >
+            {value !== "0" && (
+              <Button
+                type="button"
+                variant="ghost"
+                className="text-muted-foreground w-full justify-start"
+                onClick={() => {
+                  onValueChange("0");
+                  setOpen(false);
+                }}
+              >
+                <X className="size-4" aria-hidden="true" />
+                Limpar seleção
+              </Button>
+            )}
+            {filteredOptions.length === 0 ? (
+              <p className="text-muted-foreground px-2 py-6 text-center text-sm">
+                {emptyMessage}
+              </p>
+            ) : (
+              filteredOptions.map((option) => (
+                <Button
+                  key={option.value}
+                  type="button"
+                  variant="ghost"
+                  role="option"
+                  aria-selected={option.value === value}
+                  className="w-full justify-start"
+                  onClick={() => {
+                    onValueChange(option.value);
+                    setOpen(false);
+                  }}
+                >
+                  <Check
+                    className={
+                      option.value === value ? "size-4" : "size-4 opacity-0"
+                    }
+                    aria-hidden="true"
+                  />
+                  <span className="truncate">{option.label}</span>
+                </Button>
+              ))
+            )}
+          </div>
+        </PopoverContent>
+      </Popover>
       <input type="hidden" name={name} value={value} />
     </>
   );

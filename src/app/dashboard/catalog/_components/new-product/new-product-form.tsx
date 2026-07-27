@@ -1,6 +1,12 @@
 "use client";
 
-import { CircleDollarSign, Package, Tags, Warehouse } from "lucide-react";
+import {
+  CircleDollarSign,
+  FolderTree,
+  Package,
+  Tags,
+  Warehouse,
+} from "lucide-react";
 import { type FormEvent, useState } from "react";
 import { toast } from "sonner";
 import { createProductFromForm } from "@/app/actions/action-products";
@@ -9,12 +15,14 @@ import { Label } from "@/components/ui/label";
 import { SheetFooter } from "@/components/ui/sheet";
 import type { UIBrand } from "@/services/api-main/brand/transformers/transformers";
 import type { UIPtype } from "@/services/api-main/ptype/transformers/transformers";
+import type { NewProductTaxonomyOption } from "../types/catalog-types";
 import {
   NewProductCurrencyInput,
   NewProductFormInput,
   NewProductFormSelect,
   NewProductFormTextarea,
   NewProductIntegerInput,
+  NewProductSearchableSelect,
   NewProductSubmitButton,
 } from "./new-product-form-fields";
 
@@ -34,6 +42,8 @@ type ValidationErrors = Partial<
 interface NewProductFormProps {
   brands: UIBrand[];
   ptypes: UIPtype[];
+  taxonomyOptions: NewProductTaxonomyOption[];
+  isTaxonomyAvailable: boolean;
   onCancel: () => void;
   onCreated: (productId: number) => void;
   onDirtyChange: (isDirty: boolean) => void;
@@ -116,6 +126,8 @@ function FieldError({ id, message }: { id: string; message?: string }) {
 export function NewProductForm({
   brands,
   ptypes,
+  taxonomyOptions,
+  isTaxonomyAvailable,
   onCancel,
   onCreated,
   onDirtyChange,
@@ -125,6 +137,9 @@ export function NewProductForm({
   );
   const [brandId, setBrandId] = useState("");
   const [typeId, setTypeId] = useState("");
+  const [familyId, setFamilyId] = useState("0");
+  const [groupId, setGroupId] = useState("0");
+  const [subgroupId, setSubgroupId] = useState("0");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -173,6 +188,30 @@ export function NewProductForm({
     value: ptype.id.toString(),
     label: ptype.name,
   }));
+  const familyOptions = taxonomyOptions
+    .filter((category) => category.level === 1 && category.parentId === 0)
+    .map((category) => ({
+      value: category.id.toString(),
+      label: category.name,
+    }));
+  const groupOptions = taxonomyOptions
+    .filter(
+      (category) =>
+        category.level === 2 && category.parentId === Number(familyId),
+    )
+    .map((category) => ({
+      value: category.id.toString(),
+      label: category.name,
+    }));
+  const subgroupOptions = taxonomyOptions
+    .filter(
+      (category) =>
+        category.level === 3 && category.parentId === Number(groupId),
+    )
+    .map((category) => ({
+      value: category.id.toString(),
+      label: category.name,
+    }));
 
   return (
     <form
@@ -325,6 +364,95 @@ export function NewProductForm({
                 }
               />
               <FieldError id="stock-error" message={validationErrors.stock} />
+            </div>
+          </div>
+        </section>
+
+        <section className="space-y-3 rounded-lg border p-3">
+          <div className="flex items-center gap-2">
+            <FolderTree className="text-primary size-4" aria-hidden="true" />
+            <div>
+              <h3 className="font-medium">Categorias</h3>
+              <p className="text-muted-foreground text-xs">
+                Seleção opcional em ordem hierárquica
+              </p>
+            </div>
+          </div>
+
+          {!isTaxonomyAvailable && (
+            <p className="text-muted-foreground text-sm">
+              A hierarquia não pôde ser carregada. O produto pode ser criado sem
+              categorias.
+            </p>
+          )}
+
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div className="min-w-0 space-y-1.5">
+              <Label htmlFor="familyId">Família</Label>
+              <NewProductSearchableSelect
+                id="familyId"
+                name="familyId"
+                value={familyId}
+                placeholder="Sem família"
+                searchPlaceholder="Pesquisar família"
+                emptyMessage="Nenhuma família encontrada."
+                options={familyOptions}
+                ariaLabel="Família"
+                disabled={isSubmitting || !isTaxonomyAvailable}
+                onValueChange={(value) => {
+                  setFamilyId(value);
+                  setGroupId("0");
+                  setSubgroupId("0");
+                  onDirtyChange(true);
+                }}
+              />
+            </div>
+
+            <div className="min-w-0 space-y-1.5">
+              <Label htmlFor="groupId">Grupo</Label>
+              <NewProductSearchableSelect
+                id="groupId"
+                name="groupId"
+                value={groupId}
+                placeholder={
+                  familyId === "0" ? "Selecione a família" : "Sem grupo"
+                }
+                searchPlaceholder="Pesquisar grupo"
+                emptyMessage="Nenhum grupo encontrado."
+                options={groupOptions}
+                ariaLabel="Grupo"
+                disabled={
+                  isSubmitting || !isTaxonomyAvailable || familyId === "0"
+                }
+                onValueChange={(value) => {
+                  setGroupId(value);
+                  setSubgroupId("0");
+                  onDirtyChange(true);
+                }}
+              />
+            </div>
+
+            <div className="min-w-0 space-y-1.5">
+              <Label htmlFor="subgroupId">Subgrupo</Label>
+              <NewProductSearchableSelect
+                id="subgroupId"
+                name="subgroupId"
+                value={subgroupId}
+                placeholder={
+                  groupId === "0" ? "Selecione o grupo" : "Sem subgrupo"
+                }
+                searchPlaceholder="Pesquisar subgrupo"
+                emptyMessage="Nenhum subgrupo encontrado."
+                options={subgroupOptions}
+                ariaLabel="Subgrupo"
+                disabled={
+                  isSubmitting || !isTaxonomyAvailable || groupId === "0"
+                }
+                onValueChange={(value) => {
+                  setSubgroupId(value);
+                  onDirtyChange(true);
+                }}
+              />
             </div>
           </div>
         </section>
