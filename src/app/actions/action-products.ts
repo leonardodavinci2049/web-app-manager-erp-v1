@@ -15,16 +15,16 @@ const CATEGORY_MENU_LIMIT = 10_000;
 
 const createProductFormSchema = z
   .object({
-    name: z.string().trim().min(3).max(300),
+    name: z.string().trim().min(6).max(300),
     reference: z.string().trim().max(100),
     model: z.string().trim().max(100),
     label: z.string().trim().max(100),
     wholesalePrice: z.number().finite().positive().max(2000000),
     retailPrice: z.number().finite().positive().max(2000000),
     corporatePrice: z.number().finite().positive().max(2000000),
-    stock: z.number().int().min(0).max(1000000),
-    brandId: z.number().int().positive(),
-    typeId: z.number().int().positive(),
+    stock: z.number().int().min(0).max(1000000).default(0),
+    brandId: z.number().int().nonnegative().default(0),
+    typeId: z.number().int().nonnegative().default(0),
     familyId: z.number().int().nonnegative(),
     groupId: z.number().int().nonnegative(),
     subgroupId: z.number().int().nonnegative(),
@@ -42,6 +42,15 @@ function readFormString(formData: FormData, key: string): string {
 function readFormNumber(formData: FormData, key: string): number {
   const value = readFormString(formData, key).trim();
   return value === "" ? Number.NaN : Number(value.replace(",", "."));
+}
+
+function readFormNumberOrDefault(
+  formData: FormData,
+  key: string,
+  defaultValue = 0,
+): number {
+  const value = readFormString(formData, key).trim();
+  return value === "" ? defaultValue : Number(value.replace(",", "."));
 }
 
 // ========================================
@@ -90,12 +99,12 @@ export async function createProductFromForm(formData: FormData): Promise<{
       wholesalePrice: readFormNumber(formData, "wholesalePrice"),
       retailPrice: readFormNumber(formData, "retailPrice"),
       corporatePrice: readFormNumber(formData, "corporatePrice"),
-      stock: readFormNumber(formData, "stock"),
-      brandId: readFormNumber(formData, "brandId"),
-      typeId: readFormNumber(formData, "typeId"),
-      familyId: readFormNumber(formData, "familyId"),
-      groupId: readFormNumber(formData, "groupId"),
-      subgroupId: readFormNumber(formData, "subgroupId"),
+      stock: readFormNumberOrDefault(formData, "stock"),
+      brandId: readFormNumberOrDefault(formData, "brandId"),
+      typeId: readFormNumberOrDefault(formData, "typeId"),
+      familyId: readFormNumberOrDefault(formData, "familyId"),
+      groupId: readFormNumberOrDefault(formData, "groupId"),
+      subgroupId: readFormNumberOrDefault(formData, "subgroupId"),
       additionalInfo: readFormString(formData, "additionalInfo"),
     });
 
@@ -184,6 +193,7 @@ export async function createProductFromForm(formData: FormData): Promise<{
       pe_model: data.model,
       pe_product_type_id: data.typeId,
       pe_brand_id: data.brandId,
+      pe_supplier_id: 0,
       pe_family_id: data.familyId,
       pe_group_id: data.groupId,
       pe_subgroup_id: data.subgroupId,
@@ -198,7 +208,7 @@ export async function createProductFromForm(formData: FormData): Promise<{
       pe_corporate_price: data.corporatePrice,
       pe_stock_quantity: data.stock,
       pe_website_off_flag: 0,
-      pe_imported_flag: 0,
+      pe_imported_flag: 2,
       pe_additional_info: data.additionalInfo,
     };
 

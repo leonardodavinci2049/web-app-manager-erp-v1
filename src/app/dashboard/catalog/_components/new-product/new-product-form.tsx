@@ -63,14 +63,15 @@ function validateForm(formData: FormData): ValidationErrors {
   const wholesalePrice = readNumber(formData, "wholesalePrice");
   const retailPrice = readNumber(formData, "retailPrice");
   const corporatePrice = readNumber(formData, "corporatePrice");
-  const stock = readNumber(formData, "stock");
+  const stockValue = readNumber(formData, "stock");
+  const stock = Number.isNaN(stockValue) ? 0 : stockValue;
   const brandId = readNumber(formData, "brandId");
   const typeId = readNumber(formData, "typeId");
 
   if (normalizedName.length === 0) {
     errors.name = "Informe o nome do produto.";
-  } else if (normalizedName.length < 3) {
-    errors.name = "O nome deve ter pelo menos 3 caracteres.";
+  } else if (normalizedName.length < 6) {
+    errors.name = "O nome deve ter pelo menos 6 caracteres.";
   }
 
   const validatePrice = (
@@ -102,12 +103,12 @@ function validateForm(formData: FormData): ValidationErrors {
     errors.stock = "O estoque deve ser um inteiro entre 0 e 1.000.000.";
   }
 
-  if (!Number.isSafeInteger(brandId) || brandId <= 0) {
-    errors.brandId = "Selecione uma marca.";
+  if (!Number.isSafeInteger(brandId) || brandId < 0) {
+    errors.brandId = "A marca selecionada é inválida.";
   }
 
-  if (!Number.isSafeInteger(typeId) || typeId <= 0) {
-    errors.typeId = "Selecione um tipo de produto.";
+  if (!Number.isSafeInteger(typeId) || typeId < 0) {
+    errors.typeId = "O tipo de produto selecionado é inválido.";
   }
 
   return errors;
@@ -135,8 +136,8 @@ export function NewProductForm({
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>(
     {},
   );
-  const [brandId, setBrandId] = useState("");
-  const [typeId, setTypeId] = useState("");
+  const [brandId, setBrandId] = useState("0");
+  const [typeId, setTypeId] = useState("0");
   const [familyId, setFamilyId] = useState("0");
   const [groupId, setGroupId] = useState("0");
   const [subgroupId, setSubgroupId] = useState("0");
@@ -180,14 +181,20 @@ export function NewProductForm({
     }
   };
 
-  const brandOptions = brands.map((brand) => ({
-    value: brand.id.toString(),
-    label: `${brand.name}${brand.inactive ? " (inativa)" : ""}`,
-  }));
-  const ptypeOptions = ptypes.map((ptype) => ({
-    value: ptype.id.toString(),
-    label: ptype.name,
-  }));
+  const brandOptions = [
+    { value: "0", label: "Sem marca" },
+    ...brands.map((brand) => ({
+      value: brand.id.toString(),
+      label: `${brand.name}${brand.inactive ? " (inativa)" : ""}`,
+    })),
+  ];
+  const ptypeOptions = [
+    { value: "0", label: "Sem tipo de produto" },
+    ...ptypes.map((ptype) => ({
+      value: ptype.id.toString(),
+      label: ptype.name,
+    })),
+  ];
   const familyOptions = taxonomyOptions
     .filter((category) => category.level === 1 && category.parentId === 0)
     .map((category) => ({
@@ -230,11 +237,19 @@ export function NewProductForm({
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="name">Nome do produto</Label>
+            <Label htmlFor="name" className="font-semibold">
+              Nome do produto
+              <span className="text-destructive" aria-hidden="true">
+                *
+              </span>
+              <span className="sr-only"> obrigatório</span>
+            </Label>
             <NewProductFormInput
               id="name"
               name="name"
               placeholder="Digite o nome do produto"
+              required
+              minLength={6}
               maxLength={300}
               autoComplete="off"
               aria-invalid={Boolean(validationErrors.name)}
@@ -290,12 +305,19 @@ export function NewProductForm({
 
           <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-3">
             <div className="min-w-0 space-y-1.5">
-              <Label htmlFor="wholesalePrice">Atacado</Label>
+              <Label htmlFor="wholesalePrice" className="font-semibold">
+                Atacado
+                <span className="text-destructive" aria-hidden="true">
+                  *
+                </span>
+                <span className="sr-only"> obrigatório</span>
+              </Label>
               <NewProductCurrencyInput
                 id="wholesalePrice"
                 name="wholesalePrice"
                 defaultValue="0"
                 placeholder="0,0000"
+                required
                 aria-invalid={Boolean(validationErrors.wholesalePrice)}
                 aria-describedby={
                   validationErrors.wholesalePrice
@@ -310,12 +332,19 @@ export function NewProductForm({
             </div>
 
             <div className="min-w-0 space-y-1.5">
-              <Label htmlFor="retailPrice">Varejo</Label>
+              <Label htmlFor="retailPrice" className="font-semibold">
+                Varejo
+                <span className="text-destructive" aria-hidden="true">
+                  *
+                </span>
+                <span className="sr-only"> obrigatório</span>
+              </Label>
               <NewProductCurrencyInput
                 id="retailPrice"
                 name="retailPrice"
                 defaultValue="0"
                 placeholder="0,0000"
+                required
                 aria-invalid={Boolean(validationErrors.retailPrice)}
                 aria-describedby={
                   validationErrors.retailPrice
@@ -330,12 +359,19 @@ export function NewProductForm({
             </div>
 
             <div className="min-w-0 space-y-1.5">
-              <Label htmlFor="corporatePrice">Corporativo</Label>
+              <Label htmlFor="corporatePrice" className="font-semibold">
+                Corporativo
+                <span className="text-destructive" aria-hidden="true">
+                  *
+                </span>
+                <span className="sr-only"> obrigatório</span>
+              </Label>
               <NewProductCurrencyInput
                 id="corporatePrice"
                 name="corporatePrice"
                 defaultValue="0"
                 placeholder="0,0000"
+                required
                 aria-invalid={Boolean(validationErrors.corporatePrice)}
                 aria-describedby={
                   validationErrors.corporatePrice
@@ -470,11 +506,7 @@ export function NewProductForm({
                 id="brandId"
                 name="brandId"
                 value={brandId}
-                placeholder={
-                  brandOptions.length > 0
-                    ? "Selecione uma marca"
-                    : "Nenhuma marca disponível"
-                }
+                placeholder="Sem marca"
                 options={brandOptions}
                 ariaLabel="Marca"
                 ariaInvalid={Boolean(validationErrors.brandId)}
@@ -497,11 +529,7 @@ export function NewProductForm({
                 id="typeId"
                 name="typeId"
                 value={typeId}
-                placeholder={
-                  ptypeOptions.length > 0
-                    ? "Selecione um tipo"
-                    : "Nenhum tipo disponível"
-                }
+                placeholder="Sem tipo de produto"
                 options={ptypeOptions}
                 ariaLabel="Tipo de produto"
                 ariaInvalid={Boolean(validationErrors.typeId)}
@@ -539,6 +567,13 @@ export function NewProductForm({
             />
           </div>
         </section>
+
+        <p className="text-muted-foreground text-xs">
+          <span className="text-destructive" aria-hidden="true">
+            *
+          </span>{" "}
+          Campos obrigatórios.
+        </p>
       </fieldset>
 
       <SheetFooter className="supports-[backdrop-filter]:bg-background/80 shrink-0 border-t bg-background/95 p-4 backdrop-blur sm:flex-row sm:justify-end">
@@ -555,7 +590,6 @@ export function NewProductForm({
           pending={isSubmitting}
           pendingText="Criando produto..."
           className="w-full sm:w-auto"
-          disabled={brandOptions.length === 0 || ptypeOptions.length === 0}
         >
           Criar produto
         </NewProductSubmitButton>
