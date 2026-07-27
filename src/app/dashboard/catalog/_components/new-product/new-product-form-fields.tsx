@@ -1,10 +1,19 @@
 "use client";
 
-import { Check, ChevronsUpDown, Loader2, Search, X } from "lucide-react";
-import type { ComponentProps } from "react";
+import { Check, ChevronsUpDown, Loader2, Plus, Search, X } from "lucide-react";
+import type { ComponentProps, FormEvent } from "react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Popover,
   PopoverContent,
@@ -199,6 +208,11 @@ interface NewProductSearchableSelectProps {
   options: NewProductSelectOption[];
   ariaLabel: string;
   disabled?: boolean;
+  createLabel?: string;
+  createDialogTitle?: string;
+  createDialogDescription?: string;
+  createSubmitLabel?: string;
+  onCreate?: (name: string) => Promise<boolean>;
   onValueChange: (value: string) => void;
 }
 
@@ -212,10 +226,18 @@ export function NewProductSearchableSelect({
   options,
   ariaLabel,
   disabled,
+  createLabel,
+  createDialogTitle,
+  createDialogDescription,
+  createSubmitLabel,
+  onCreate,
   onValueChange,
 }: NewProductSearchableSelectProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [createName, setCreateName] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
   const selectedOption = options.find((option) => option.value === value);
   const normalizedSearch = normalizeSearch(search.trim());
   const filteredOptions = normalizedSearch
@@ -223,7 +245,31 @@ export function NewProductSearchableSelect({
         normalizeSearch(option.label).includes(normalizedSearch),
       )
     : options;
-  const isDisabled = disabled || options.length === 0;
+  const canCreate = Boolean(
+    onCreate &&
+      createLabel &&
+      createDialogTitle &&
+      createDialogDescription &&
+      createSubmitLabel,
+  );
+  const isDisabled = disabled || (options.length === 0 && !canCreate);
+
+  const handleCreateSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!onCreate || createName.trim().length < 2) return;
+
+    setIsCreating(true);
+    try {
+      const wasCreated = await onCreate(createName.trim());
+      if (wasCreated) {
+        setCreateDialogOpen(false);
+        setCreateName("");
+      }
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
   return (
     <>
@@ -319,10 +365,86 @@ export function NewProductSearchableSelect({
                 </Button>
               ))
             )}
+            {canCreate && (
+              <Button
+                type="button"
+                variant="ghost"
+                role="option"
+                aria-label={createLabel}
+                className="text-primary mt-1 w-full justify-start border-t pt-2"
+                onClick={() => {
+                  setCreateName(search.trim());
+                  setOpen(false);
+                  setCreateDialogOpen(true);
+                }}
+              >
+                <Plus className="size-4" aria-hidden="true" />
+                {createLabel}
+              </Button>
+            )}
           </div>
         </PopoverContent>
       </Popover>
       <input type="hidden" name={name} value={value} />
+
+      {canCreate && (
+        <Dialog
+          open={createDialogOpen}
+          onOpenChange={(nextOpen) => {
+            if (isCreating) return;
+            setCreateDialogOpen(nextOpen);
+            if (!nextOpen) setCreateName("");
+          }}
+        >
+          <DialogContent>
+            <form onSubmit={handleCreateSubmit} className="space-y-4">
+              <DialogHeader>
+                <DialogTitle>{createDialogTitle}</DialogTitle>
+                <DialogDescription>{createDialogDescription}</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-2">
+                <Label htmlFor={`${id}-new-category-name`}>Nome</Label>
+                <Input
+                  id={`${id}-new-category-name`}
+                  value={createName}
+                  onChange={(event) => setCreateName(event.target.value)}
+                  minLength={2}
+                  maxLength={100}
+                  autoComplete="off"
+                  autoFocus
+                  disabled={isCreating}
+                />
+              </div>
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={isCreating}
+                  onClick={() => setCreateDialogOpen(false)}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isCreating || createName.trim().length < 2}
+                >
+                  {isCreating ? (
+                    <>
+                      <Loader2
+                        className="size-4 animate-spin"
+                        aria-hidden="true"
+                      />
+                      Criando...
+                    </>
+                  ) : (
+                    createSubmitLabel
+                  )}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   );
 }
