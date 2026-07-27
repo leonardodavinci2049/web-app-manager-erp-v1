@@ -25,6 +25,7 @@ import { NewProductSheet } from "../new-product/new-product-sheet";
 import type {
   CatalogFilters,
   CategoryOption,
+  NewProductTaxonomyOption,
   PanelFilterType,
   ViewMode,
 } from "../types/catalog-types";
@@ -77,6 +78,8 @@ interface CatalogToolbarProps {
   brands: UIBrand[];
   categories: CategoryOption[];
   ptypes: UIPtype[];
+  newProductTaxonomy: NewProductTaxonomyOption[];
+  isNewProductTaxonomyAvailable: boolean;
   grid: ReactNode;
   list: ReactNode;
 }
@@ -91,6 +94,8 @@ export function CatalogToolbar({
   brands,
   categories,
   ptypes,
+  newProductTaxonomy,
+  isNewProductTaxonomyAvailable,
   grid,
   list,
 }: CatalogToolbarProps) {
@@ -442,6 +447,8 @@ export function CatalogToolbar({
         open={isNewProductOpen}
         brands={brands}
         ptypes={ptypes}
+        taxonomyOptions={newProductTaxonomy}
+        isTaxonomyAvailable={isNewProductTaxonomyAvailable}
         onOpenChange={setIsNewProductOpen}
         onCreated={handleProductCreated}
       />

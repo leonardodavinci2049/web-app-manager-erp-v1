@@ -16,18 +16,20 @@ import {
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
 import type { UIBrand } from "@/services/api-main/brand/transformers/transformers";
 import type { UIPtype } from "@/services/api-main/ptype/transformers/transformers";
+import type { NewProductTaxonomyOption } from "../types/catalog-types";
 import { NewProductForm } from "./new-product-form";
 
 interface NewProductSheetProps {
   open: boolean;
   brands: UIBrand[];
   ptypes: UIPtype[];
+  taxonomyOptions: NewProductTaxonomyOption[];
+  isTaxonomyAvailable: boolean;
   onOpenChange: (open: boolean) => void;
   onCreated: (productId: number) => void;
 }
@@ -36,6 +38,8 @@ export function NewProductSheet({
   open,
   brands,
   ptypes,
+  taxonomyOptions,
+  isTaxonomyAvailable,
   onOpenChange,
   onCreated,
 }: NewProductSheetProps) {
@@ -80,13 +84,14 @@ export function NewProductSheet({
               <PackagePlus className="text-primary size-5" aria-hidden="true" />
               Adicionar produto
             </SheetTitle>
-
           </SheetHeader>
 
           <NewProductForm
             key={formKey}
             brands={brands}
             ptypes={ptypes}
+            taxonomyOptions={taxonomyOptions}
+            isTaxonomyAvailable={isTaxonomyAvailable}
             onCancel={() => requestOpenChange(false)}
             onCreated={handleCreated}
             onDirtyChange={setIsDirty}

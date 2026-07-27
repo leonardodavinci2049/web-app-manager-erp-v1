@@ -11,6 +11,7 @@ export {
 export type {
   CatalogFilters,
   CategoryOption,
+  NewProductTaxonomyOption,
   PanelFilterType,
   SortOption,
   ViewMode,
