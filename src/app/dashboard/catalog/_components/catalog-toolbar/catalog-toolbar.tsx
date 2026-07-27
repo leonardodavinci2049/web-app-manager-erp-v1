@@ -359,43 +359,45 @@ export function CatalogToolbar({
 
   return (
     <div className="space-y-4 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0">
-      <div className="bg-background/95 supports-[backdrop-filter]:bg-background/80 sticky top-0 z-20 -mx-3 flex justify-center border-b px-3 py-3 shadow-sm backdrop-blur lg:-mx-6 lg:px-6">
-        <div className="flex w-full max-w-xl flex-col gap-2 lg:max-w-4xl">
-          <CatalogSearch
-            searchTerm={filters.searchTerm}
-            isLoading={isPending}
-            onSearch={handleSearch}
-            actions={
-              <>
-                <FilterPanel
-                  filters={filters}
-                  categories={categories}
-                  brands={brands}
-                  ptypes={ptypes}
-                  isOpen={isFilterOpen}
-                  isLoading={isPending}
-                  panelActiveFilters={panelActiveFilters}
-                  panelFilterCount={panelFilterCount}
-                  onOpenChange={setIsFilterOpen}
-                  onFilterChange={updateFilter}
-                  onClearPanelFilters={handleClearPanelFilters}
-                  onRemovePanelFilter={removeActiveFilter}
-                />
-                <ViewModeToggle
-                  viewMode={viewMode}
-                  onChange={handleViewModeChange}
-                />
-                <Button
-                  type="button"
-                  className="hidden h-11 shrink-0 gap-2 shadow-sm md:inline-flex"
-                  onClick={() => setIsNewProductOpen(true)}
-                >
-                  <PackagePlus className="size-4" aria-hidden="true" />
-                  <span className="hidden lg:inline">Adicionar produto</span>
-                </Button>
-              </>
-            }
-          />
+      <div className="bg-background/95 supports-[backdrop-filter]:bg-background/80 sticky top-0 z-20 -mx-3 flex border-b px-3 py-3 shadow-sm backdrop-blur lg:-mx-6 lg:px-6">
+        <div className="flex w-full items-center gap-4">
+          <div className="w-full max-w-xl lg:max-w-4xl">
+            <CatalogSearch
+              searchTerm={filters.searchTerm}
+              isLoading={isPending}
+              onSearch={handleSearch}
+              actions={
+                <>
+                  <FilterPanel
+                    filters={filters}
+                    categories={categories}
+                    brands={brands}
+                    ptypes={ptypes}
+                    isOpen={isFilterOpen}
+                    isLoading={isPending}
+                    panelActiveFilters={panelActiveFilters}
+                    panelFilterCount={panelFilterCount}
+                    onOpenChange={setIsFilterOpen}
+                    onFilterChange={updateFilter}
+                    onClearPanelFilters={handleClearPanelFilters}
+                    onRemovePanelFilter={removeActiveFilter}
+                  />
+                  <ViewModeToggle
+                    viewMode={viewMode}
+                    onChange={handleViewModeChange}
+                  />
+                </>
+              }
+            />
+          </div>
+          <Button
+            type="button"
+            className="ml-auto hidden h-11 shrink-0 gap-2 shadow-sm md:inline-flex"
+            onClick={() => setIsNewProductOpen(true)}
+          >
+            <PackagePlus className="size-4" aria-hidden="true" />
+            <span className="hidden lg:inline">Adicionar produto</span>
+          </Button>
         </div>
       </div>
 
