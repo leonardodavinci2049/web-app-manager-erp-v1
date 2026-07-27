@@ -51,6 +51,15 @@ function slugify(value: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
+function normalizeCategoryName(value: string): string {
+  return value
+    .trim()
+    .replace(/\s+/g, " ")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("pt-BR");
+}
+
 async function getCategoryContext() {
   const authContext = await getAuthContext();
   const categories = await getTaxonomyMenu(
@@ -86,6 +95,15 @@ export async function createCategoryAction(input: {
     );
     if (parsed.data.parentId !== 0 && !parent)
       return safeFailure("A categoria pai selecionada não existe.");
+    const normalizedName = normalizeCategoryName(parsed.data.name);
+    if (
+      categories.some(
+        (category) =>
+          category.parentId === parsed.data.parentId &&
+          normalizeCategoryName(category.name) === normalizedName,
+      )
+    )
+      return safeFailure("Já existe uma categoria com este nome neste nível.");
     const level = parent ? parent.level + 1 : 1;
     if (level > 3)
       return safeFailure("Subgrupos são o terceiro e último nível permitido.");
