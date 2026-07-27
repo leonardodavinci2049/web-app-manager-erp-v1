@@ -158,7 +158,13 @@ export class ProductBaseServiceApi extends BaseApiService {
   ): Promise<ProductCreateResponse> {
     try {
       const validatedParams = ProductCreateSchema.parse(params);
-      const requestBody = this.buildBasePayload(validatedParams);
+      const requestBody = this.buildBasePayload({
+        ...validatedParams,
+        pe_service_flag: 0,
+        pe_physical_control_flag: 0,
+        pe_stock_control_flag: 0,
+        pe_consigned_flag: 0,
+      });
 
       const response = await this.post<ProductCreateResponse>(
         PRODUCT_BASE_ENDPOINTS.CREATE,
