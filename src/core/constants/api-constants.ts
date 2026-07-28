@@ -212,6 +212,11 @@ export const BRAND_ENDPOINTS = {
   DELETE: "/brand/v2/brand-delete",
 } as const;
 
+// Endpoints de General Call (chamadas dinâmicas genéricas)
+export const GENERAL_CALL_ENDPOINTS = {
+  UPDATE_TABLE_INL_FIELD: "/general-call/v2/general-table-upd-inl-field",
+} as const;
+
 // Endpoints de Product Manager
 export const PRODUCT_MANAGER_ENDPOINTS = {
   FIND_ALL: "/product-manager/v2/product-find-manager-all",

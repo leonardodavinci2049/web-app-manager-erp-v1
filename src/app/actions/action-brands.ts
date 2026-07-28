@@ -21,12 +21,12 @@ export async function loadBrandsListAction(): Promise<{
   try {
     const { apiContext } = await getAuthContext();
 
-    const response = await brandServiceApi.findAllBrands({
+    const response = await brandServiceApi.searchAllBrands({
       pe_limit: 100,
       ...apiContext,
     });
 
-    const brands = brandServiceApi.extractBrands(response);
+    const brands = brandServiceApi.extractSearchBrands(response);
     return {
       success: true,
       data: transformBrandList(brands),
