@@ -61,4 +61,4 @@ src/core/config-tenant
 !/scripts/create-initial-prompt.sh
 /docs
 /API-documentation
-
+/schemas
