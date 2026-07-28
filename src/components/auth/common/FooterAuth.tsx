@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
-import { envs } from "@/core/config/envs";
+import { publicEnvs } from "@/core/config/envs.client";
 
 export default function CompanyFooter() {
   const { resolvedTheme } = useTheme();
@@ -16,9 +16,9 @@ export default function CompanyFooter() {
   }, []);
 
   // Formatar número do WhatsApp para link (remover caracteres especiais)
-  const whatsappNumber = envs.NEXT_PUBLIC_COMPANY_WHATSAPP;
+  const whatsappNumber = publicEnvs.NEXT_PUBLIC_COMPANY_WHATSAPP;
   const whatsappLink = `https://wa.me/${whatsappNumber}`;
-  const companyPhone = envs.NEXT_PUBLIC_COMPANY_PHONE;
+  const companyPhone = publicEnvs.NEXT_PUBLIC_COMPANY_PHONE;
 
   return (
     <footer className="bg-background/50 border-t">
@@ -34,8 +34,8 @@ export default function CompanyFooter() {
             </div>
 
             <p className="text-muted-foreground text-sm leading-relaxed">
-              O sistema <strong>{envs.NEXT_PUBLIC_COMPANY_NAME}</strong> oferece
-              as melhores soluções para o gerenciamento do seu negócio.
+              O sistema <strong>{publicEnvs.NEXT_PUBLIC_COMPANY_NAME}</strong>{" "}
+              oferece as melhores soluções para o gerenciamento do seu negócio.
               Simplifique processos e aumente sua produtividade conosco.
             </p>
           </div>
@@ -48,7 +48,7 @@ export default function CompanyFooter() {
               </span>
 
               <Link
-                href={envs.NEXT_PUBLIC_DEVELOPER_URL}
+                href={publicEnvs.NEXT_PUBLIC_DEVELOPER_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="transition-opacity hover:opacity-80"
@@ -59,7 +59,7 @@ export default function CompanyFooter() {
                       ? "/images/developer/logo-developer-dark.png"
                       : "/images/developer/logo-developer-light.png"
                   }
-                  alt={envs.NEXT_PUBLIC_DEVELOPER_NAME}
+                  alt={publicEnvs.NEXT_PUBLIC_DEVELOPER_NAME}
                   width={140}
                   height={40}
                   className="h-8 w-auto"
@@ -96,8 +96,8 @@ export default function CompanyFooter() {
         <div className="mt-8 border-t pt-6">
           <div className="mx-auto max-w-5xl px-6 text-center">
             <p className="text-muted-foreground text-xs">
-              © {new Date().getFullYear()} {envs.NEXT_PUBLIC_COMPANY_NAME}.
-              Todos os direitos reservados.
+              © {new Date().getFullYear()} {publicEnvs.NEXT_PUBLIC_COMPANY_NAME}
+              . Todos os direitos reservados.
             </p>
           </div>
         </div>

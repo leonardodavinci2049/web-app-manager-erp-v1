@@ -1,4 +1,4 @@
-import { envs } from "@/core/config/envs";
+import { serverEnvs } from "@/core/config/envs.server";
 import { createLogger } from "@/core/logger";
 
 import type {
@@ -32,8 +32,8 @@ export class AssetsApiService {
   private readonly apiKey: string;
 
   constructor() {
-    this.baseUrl = envs.EXTERNAL_API_ASSETS_URL;
-    this.apiKey = envs.API_KEY;
+    this.baseUrl = serverEnvs.EXTERNAL_API_ASSETS_URL;
+    this.apiKey = serverEnvs.API_KEY;
   }
 
   /**

@@ -129,8 +129,8 @@ Em produção, estes valores devem vir da sessão do usuário:
 
 ```typescript
 // ❌ Não fazer em produção
-import { envs } from '@/core/config/envs';
-const orgId = envs.ORGANIZATION_ID;
+import { serverEnvs } from '@/core/config/envs.server';
+const orgId = serverEnvs.ORGANIZATION_ID;
 
 // ✅ Fazer em produção
 import { getUserSession } from '@/lib/auth';

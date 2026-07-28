@@ -6,10 +6,10 @@ import { admin as adminPlugin } from "better-auth/plugins/admin";
 import { createPool } from "mysql2/promise";
 import { Resend } from "resend";
 import VerifyEmail from "@/components/emails/verify-email";
-import { envs } from "@/core/config/envs";
+import { serverEnvs } from "@/core/config/envs.server";
 import { getActiveOrganization } from "@/server/organizations";
 
-const resend = new Resend(envs.RESEND_API_KEY);
+const resend = new Resend(serverEnvs.RESEND_API_KEY);
 
 import OrganizationInvitationEmail from "@/components/emails/organization-invitation";
 import ForgotPasswordEmail from "@/components/emails/reset-password";
@@ -33,13 +33,13 @@ import { ac } from "./permissions/statements";
 
 export const auth = betterAuth({
   appName: "WEB APP MANAGER",
-  secret: envs.BETTER_AUTH_SECRET,
+  secret: serverEnvs.BETTER_AUTH_SECRET,
   database: createPool({
-    host: envs.DATABASE_ADMIN_HOST,
-    port: envs.DATABASE_ADMIN_PORT,
-    user: envs.DATABASE_ADMIN_USER,
-    password: envs.DATABASE_ADMIN_PASSWORD,
-    database: envs.DATABASE_ADMIN_NAME,
+    host: serverEnvs.DATABASE_ADMIN_HOST,
+    port: serverEnvs.DATABASE_ADMIN_PORT,
+    user: serverEnvs.DATABASE_ADMIN_USER,
+    password: serverEnvs.DATABASE_ADMIN_PASSWORD,
+    database: serverEnvs.DATABASE_ADMIN_NAME,
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
@@ -90,7 +90,7 @@ export const auth = betterAuth({
     enabled: true,
     sendResetPassword: async ({ user, url }) => {
       const response = await resend.emails.send({
-        from: `${envs.EMAIL_SENDER_NAME} <${envs.EMAIL_SENDER_ADDRESS}>`,
+        from: `${serverEnvs.EMAIL_SENDER_NAME} <${serverEnvs.EMAIL_SENDER_ADDRESS}>`,
         to: user.email,
         subject: "Reset your password",
         react: ForgotPasswordEmail({
@@ -112,7 +112,7 @@ export const auth = betterAuth({
   emailVerification: {
     sendVerificationEmail: async ({ user, url }) => {
       await resend.emails.send({
-        from: `${envs.EMAIL_SENDER_NAME} <${envs.EMAIL_SENDER_ADDRESS}>`,
+        from: `${serverEnvs.EMAIL_SENDER_NAME} <${serverEnvs.EMAIL_SENDER_ADDRESS}>`,
         to: user.email,
         subject: "Verify your email",
         react: VerifyEmail({ username: user.name, verifyUrl: url }),
@@ -162,7 +162,7 @@ export const auth = betterAuth({
         const inviteLink = `${process.env.NEXT_PUBLIC_APP_URL}/api/accept-invitation/${data.id}`;
 
         await resend.emails.send({
-          from: `${envs.EMAIL_SENDER_NAME} <${envs.EMAIL_SENDER_ADDRESS}>`,
+          from: `${serverEnvs.EMAIL_SENDER_NAME} <${serverEnvs.EMAIL_SENDER_ADDRESS}>`,
           to: data.email,
           subject: "You've been invited to join our organization",
           react: OrganizationInvitationEmail({

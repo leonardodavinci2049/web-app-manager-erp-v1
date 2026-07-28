@@ -1,1 +1,2 @@
-export * from "./envs";
+export * from "./envs.client";
+export * from "./envs.server";
