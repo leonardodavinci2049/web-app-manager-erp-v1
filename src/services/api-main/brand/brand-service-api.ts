@@ -25,6 +25,8 @@ import type {
   BrandFindByIdRequest,
   BrandFindByIdResponse,
   BrandListItem,
+  BrandSearchAllRequest,
+  BrandSearchAllResponse,
   BrandUpdateRequest,
   BrandUpdateResponse,
   StoredProcedureResponse,
@@ -35,6 +37,7 @@ import {
   BrandDeleteSchema,
   BrandFindAllSchema,
   BrandFindByIdSchema,
+  BrandSearchAllSchema,
   BrandUpdateSchema,
 } from "./validation/brand-schemas";
 
@@ -76,6 +79,35 @@ export class BrandServiceApi extends BaseApiService {
       return this.normalizeEmptyBrandFindAllResponse(response);
     } catch (error) {
       logger.error("Erro ao buscar todas as marcas", error);
+      throw error;
+    }
+  }
+
+  async searchAllBrands(
+    params: Partial<BrandSearchAllRequest> = {},
+  ): Promise<BrandSearchAllResponse> {
+    try {
+      const validatedParams = BrandSearchAllSchema.partial().parse(params);
+      const requestBody = this.buildBasePayload({
+        pe_system_client_id: validatedParams.pe_system_client_id,
+        pe_organization_id: validatedParams.pe_organization_id,
+        pe_user_id: validatedParams.pe_user_id,
+        pe_user_name: validatedParams.pe_user_name,
+        pe_user_role: validatedParams.pe_user_role,
+        pe_person_id: validatedParams.pe_person_id,
+        pe_search: validatedParams.pe_search ?? "",
+        pe_inactive: validatedParams.pe_inactive ?? 0,
+        pe_limit: validatedParams.pe_limit ?? 100,
+      });
+
+      const response = await this.post<BrandSearchAllResponse>(
+        BRAND_ENDPOINTS.SEARCH_ALL,
+        requestBody,
+      );
+
+      return this.normalizeEmptyBrandSearchAllResponse(response);
+    } catch (error) {
+      logger.error("Erro ao pesquisar marcas", error);
       throw error;
     }
   }
@@ -197,7 +229,30 @@ export class BrandServiceApi extends BaseApiService {
     return response;
   }
 
+  private normalizeEmptyBrandSearchAllResponse(
+    response: BrandSearchAllResponse,
+  ): BrandSearchAllResponse {
+    if (
+      response.statusCode === API_STATUS_CODES.NOT_FOUND ||
+      response.statusCode === API_STATUS_CODES.EMPTY_RESULT
+    ) {
+      return {
+        ...response,
+        statusCode: API_STATUS_CODES.SUCCESS,
+        quantity: 0,
+        data: {
+          "Brand find All": [],
+        },
+      };
+    }
+    return response;
+  }
+
   extractBrands(response: BrandFindAllResponse): BrandListItem[] {
+    return response.data?.["Brand find All"] ?? [];
+  }
+
+  extractSearchBrands(response: BrandSearchAllResponse): BrandListItem[] {
     return response.data?.["Brand find All"] ?? [];
   }
 
@@ -212,6 +267,14 @@ export class BrandServiceApi extends BaseApiService {
   }
 
   isValidBrandList(response: BrandFindAllResponse): boolean {
+    return (
+      isApiSuccess(response.statusCode) &&
+      response.data &&
+      Array.isArray(response.data["Brand find All"])
+    );
+  }
+
+  isValidBrandSearchList(response: BrandSearchAllResponse): boolean {
     return (
       isApiSuccess(response.statusCode) &&
       response.data &&
@@ -261,6 +324,39 @@ export async function getBrands(
   });
 
   const brands = brandServiceApi.extractBrands(response);
+  return transformBrandList(brands);
+}
+
+export async function searchBrands(
+  params: {
+    search?: string;
+    inactive?: number;
+    limit?: number;
+    pe_system_client_id?: number;
+    pe_organization_id?: string;
+    pe_user_id?: string;
+    pe_user_name?: string;
+    pe_user_role?: string;
+    pe_person_id?: number;
+  } = {},
+): Promise<UIBrand[]> {
+  if (!params.pe_system_client_id) {
+    return [];
+  }
+
+  const response = await brandServiceApi.searchAllBrands({
+    pe_search: params.search,
+    pe_inactive: params.inactive,
+    pe_limit: params.limit,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
+
+  const brands = brandServiceApi.extractSearchBrands(response);
   return transformBrandList(brands);
 }
 
