@@ -7,7 +7,7 @@ import type {
   InternalAxiosRequestConfig,
 } from "axios";
 import axios from "axios";
-import { envs } from "@/core/config";
+import { serverEnvs } from "@/core/config/envs.server";
 import {
   API_TIMEOUTS,
   DEFAULT_HEADERS,
@@ -32,7 +32,7 @@ class ServerAxiosClient {
 
   constructor() {
     this.baseURL = EXTERNAL_API_BASE_URL;
-    this.apiKey = envs.API_KEY || "";
+    this.apiKey = serverEnvs.API_KEY || "";
 
     if (!this.apiKey && typeof window === "undefined") {
       logger.warn("API_KEY não configurada no servidor");

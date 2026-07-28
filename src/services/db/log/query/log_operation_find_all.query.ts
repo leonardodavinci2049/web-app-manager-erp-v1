@@ -1,10 +1,10 @@
-import { envs } from "@/core/config";
+import { serverEnvs } from "@/core/config/envs.server";
 import type { LogOperationFindAllDto } from "../dto/log_operation_find_all.dto";
 
 export function LogOperationFindAllQuery(
   dataJsonDto: LogOperationFindAllDto,
 ): string {
-  const PE_APP_ID = envs.APP_ID;
+  const PE_APP_ID = serverEnvs.APP_ID;
   const PE_ORGANIZATION_ID = dataJsonDto.PE_ORGANIZATION_ID || "";
   const PE_USER_ID = dataJsonDto.PE_USER_ID || "";
   const PE_SEARCH_USER = dataJsonDto.PE_SEARCH_USER || "";

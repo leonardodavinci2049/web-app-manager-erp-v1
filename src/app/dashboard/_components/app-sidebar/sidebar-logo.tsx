@@ -11,7 +11,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { publicEnvs } from "@/core/config/envs";
+import { publicEnvs } from "@/core/config/envs.client";
 
 const LOGO_FALLBACK = "/images/logo/logo-sidebar.png";
 

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { envs } from "@/core/config";
+import { serverEnvs } from "@/core/config/envs.server";
 import {
   API_STATUS_CODES,
   BRAND_ENDPOINTS,
@@ -61,8 +61,8 @@ export class BrandServiceApi extends BaseApiService {
     additionalData: Record<string, unknown> = {},
   ): Record<string, unknown> {
     return {
-      pe_app_id: envs.APP_ID,
-      pe_store_id: envs.STORE_ID,
+      pe_app_id: serverEnvs.APP_ID,
+      pe_store_id: serverEnvs.STORE_ID,
       ...additionalData,
     };
   }

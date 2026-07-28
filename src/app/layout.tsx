@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme/theme-provider";
-import { envs } from "@/core/config";
+import { publicEnvs } from "@/core/config/envs.client";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,9 +16,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(envs.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
-  title: `${envs.NEXT_PUBLIC_COMPANY_META_TITLE_MAIN} | ${envs.NEXT_PUBLIC_COMPANY_META_TITLE_CAPTION}`,
-  description: envs.NEXT_PUBLIC_COMPANY_META_DESCRIPTION,
+  metadataBase: new URL(
+    publicEnvs.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+  ),
+  title: `${publicEnvs.NEXT_PUBLIC_COMPANY_META_TITLE_MAIN} | ${publicEnvs.NEXT_PUBLIC_COMPANY_META_TITLE_CAPTION}`,
+  description: publicEnvs.NEXT_PUBLIC_COMPANY_META_DESCRIPTION,
   keywords: [
     "informática",
     "eletrônicos",
@@ -35,23 +37,23 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "pt_BR",
-    url: envs.NEXT_PUBLIC_APP_URL,
-    siteName: envs.NEXT_PUBLIC_COMPANY_NAME,
-    title: `${envs.NEXT_PUBLIC_COMPANY_META_TITLE_MAIN} | ${envs.NEXT_PUBLIC_COMPANY_META_TITLE_CAPTION}`,
-    description: envs.NEXT_PUBLIC_COMPANY_META_DESCRIPTION,
+    url: publicEnvs.NEXT_PUBLIC_APP_URL,
+    siteName: publicEnvs.NEXT_PUBLIC_COMPANY_NAME,
+    title: `${publicEnvs.NEXT_PUBLIC_COMPANY_META_TITLE_MAIN} | ${publicEnvs.NEXT_PUBLIC_COMPANY_META_TITLE_CAPTION}`,
+    description: publicEnvs.NEXT_PUBLIC_COMPANY_META_DESCRIPTION,
     images: [
       {
         url: "/images/logo/logo-horizontal-header1.png",
         width: 1200,
         height: 630,
-        alt: envs.NEXT_PUBLIC_COMPANY_NAME,
+        alt: publicEnvs.NEXT_PUBLIC_COMPANY_NAME,
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: `${envs.NEXT_PUBLIC_COMPANY_META_TITLE_MAIN} | ${envs.NEXT_PUBLIC_COMPANY_META_TITLE_CAPTION}`,
-    description: envs.NEXT_PUBLIC_COMPANY_META_DESCRIPTION,
+    title: `${publicEnvs.NEXT_PUBLIC_COMPANY_META_TITLE_MAIN} | ${publicEnvs.NEXT_PUBLIC_COMPANY_META_TITLE_CAPTION}`,
+    description: publicEnvs.NEXT_PUBLIC_COMPANY_META_DESCRIPTION,
     images: ["/images/logo/logo-horizontal-header1.png"],
   },
 };
