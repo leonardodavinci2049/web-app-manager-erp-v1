@@ -9,6 +9,11 @@ import {
 } from "@/core/constants/api-constants";
 import { createLogger } from "@/core/logger";
 import { BaseApiService } from "@/lib/axios/base-api-service";
+import { generalCallServiceApi } from "@/services/api-main/general-call/general-call-service-api";
+import type {
+  GeneralTableUpdInlFieldRequest,
+  GeneralTableUpdInlFieldResponse,
+} from "@/services/api-main/general-call/types/general-call-types";
 import {
   transformBrand,
   transformBrandList,
@@ -43,6 +48,14 @@ import {
 
 const logger = createLogger("BrandServiceApi");
 
+const BRAND_TABLE_NAME = "tbl_produto_marca";
+const BRAND_PRIMARY_KEY_FIELD = "ID_MARCA";
+
+export type BrandInlineFieldRequest = Omit<
+  GeneralTableUpdInlFieldRequest,
+  "pe_table_name" | "pe_primary_key_field"
+>;
+
 export class BrandServiceApi extends BaseApiService {
   private buildBasePayload(
     additionalData: Record<string, unknown> = {},
@@ -68,7 +81,10 @@ export class BrandServiceApi extends BaseApiService {
         pe_person_id: validatedParams.pe_person_id,
         pe_search: validatedParams.pe_search ?? "",
         pe_inactive: validatedParams.pe_inactive ?? 0,
-        pe_limit: validatedParams.pe_limit ?? 100,
+        pe_qt_records: validatedParams.pe_qt_records ?? 100,
+        pe_page_id: validatedParams.pe_page_id ?? 0,
+        pe_column_id: validatedParams.pe_column_id ?? 2,
+        pe_order_id: validatedParams.pe_order_id ?? 2,
       });
 
       const response = await this.post<BrandFindAllResponse>(
@@ -177,6 +193,16 @@ export class BrandServiceApi extends BaseApiService {
       logger.error("Erro ao atualizar marca", error);
       throw error;
     }
+  }
+
+  async updateBrandInlineField(
+    params: BrandInlineFieldRequest,
+  ): Promise<GeneralTableUpdInlFieldResponse> {
+    return generalCallServiceApi.updateTableInlineField({
+      ...params,
+      pe_table_name: BRAND_TABLE_NAME,
+      pe_primary_key_field: BRAND_PRIMARY_KEY_FIELD,
+    });
   }
 
   async deleteBrand(params: BrandDeleteRequest): Promise<BrandDeleteResponse> {

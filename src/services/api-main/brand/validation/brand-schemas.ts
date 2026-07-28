@@ -19,9 +19,12 @@ export const BrandFindAllSchema = z.object({
   pe_user_name: z.string().max(200).optional(),
   pe_user_role: z.string().max(200).optional(),
   pe_person_id: z.number().optional(),
-  pe_search: z.string().max(200).optional(),
+  pe_search: z.string().max(300).optional(),
   pe_inactive: z.number().int().min(0).max(1).optional(),
-  pe_limit: z.number().int().positive().optional(),
+  pe_qt_records: z.number().int().optional(),
+  pe_page_id: z.number().int().optional(),
+  pe_column_id: z.number().int().optional(),
+  pe_order_id: z.number().int().optional(),
 });
 
 export const BrandFindByIdSchema = z.object({
