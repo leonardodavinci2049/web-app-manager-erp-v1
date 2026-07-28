@@ -40,6 +40,7 @@ src/app/brand/_actions/
 - **Exporta** instância singleton `brandServiceApi`
 - **Fornece** funções de leitura para Server Components (`getBrands`, `getBrandById`) **sem cache** — transformam entidades API → DTOs UI via `transformers` e retornam `UIBrand[]` / `UIBrand | undefined`
 - **Guard check**: `getBrands` retorna `[]` se `pe_system_client_id` não for fornecido; `getBrandById` retorna `undefined` se não for fornecido
+- **`getBrandsPage`**: leitura paginada (sem cache) baseada em `findAllBrands`, retorna `{ brands: UIBrand[]; total: number }`; `total` vem de `response.recordId` com fallback para `quantity`/items carregados. Preserva `getBrands`/`searchBrands` para menus/selects
 - `getBrandById` recebe `id` como 1º parâmetro e um objeto `params` com os campos de contexto da API (`pe_system_client_id`, `pe_organization_id`, `pe_user_id`, `pe_user_name`, `pe_user_role`, `pe_person_id`) como 2º parâmetro
 - **Nota**: Operações de escrita (mutations) estão em `src/app/brand/_actions/`
 
@@ -236,7 +237,7 @@ brandServiceApi = new BrandServiceApi()
 ## Uso em Server Components
 
 ```typescript
-import { getBrands, getBrandById } from "@/services/api-main/brand/brand-service-api";
+import { getBrands, getBrandById, getBrandsPage } from "@/services/api-main/brand/brand-service-api";
 
 async function BrandList() {
   // pe_system_client_id é obrigatório na prática - sem ele retorna []
@@ -253,6 +254,23 @@ async function BrandList() {
     pe_person_id: personId,
   });
   // brand: UIBrand | undefined
+
+  // getBrandsPage: leitura paginada para a central de marcas
+  // (search, page e pageSize). Retorna { brands, total } onde total vem de
+  // response.recordId com fallback para quantity. Sem cache. Baseada em
+  // findAllBrands (preserva getBrands/searchBrands para menus/selects).
+  const page = await getBrandsPage({
+    search: "fer",
+    page: 0,
+    pageSize: 50,
+    pe_system_client_id: systemClientId,
+    pe_organization_id: organizationId,
+    pe_user_id: userId,
+    pe_user_name: memberName,
+    pe_user_role: memberRole,
+    pe_person_id: personId,
+  });
+  // page: { brands: UIBrand[]; total: number }
 
   return <ul>{brands.map(b => <li key={b.id}>{b.name}</li>)}</ul>;
 }
