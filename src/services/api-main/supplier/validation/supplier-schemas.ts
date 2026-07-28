@@ -1,6 +1,8 @@
 import { z } from "zod";
 
 export const SupplierFindAllSchema = z.object({
+  pe_system_client_id: z.number().int().min(0).optional(),
+  pe_organization_id: z.string().max(200).optional(),
   pe_user_id: z.string().max(200).optional(),
   pe_user_name: z.string().max(200).optional(),
   pe_user_role: z.string().max(200).optional(),
@@ -10,6 +12,8 @@ export const SupplierFindAllSchema = z.object({
 });
 
 export const SupplierFindByIdSchema = z.object({
+  pe_system_client_id: z.number().int().min(0).optional(),
+  pe_organization_id: z.string().max(200).optional(),
   pe_user_id: z.string().max(200).optional(),
   pe_user_name: z.string().max(200).optional(),
   pe_user_role: z.string().max(200).optional(),
@@ -18,6 +22,8 @@ export const SupplierFindByIdSchema = z.object({
 });
 
 export const SupplierCreateSchema = z.object({
+  pe_system_client_id: z.number().int().min(0).optional(),
+  pe_organization_id: z.string().max(200).optional(),
   pe_user_id: z.string().max(200).optional(),
   pe_user_name: z.string().max(200).optional(),
   pe_user_role: z.string().max(200).optional(),
@@ -27,6 +33,8 @@ export const SupplierCreateSchema = z.object({
 });
 
 export const SupplierUpdateSchema = z.object({
+  pe_system_client_id: z.number().int().min(0).optional(),
+  pe_organization_id: z.string().max(200).optional(),
   pe_user_id: z.string().max(200).optional(),
   pe_user_name: z.string().max(200).optional(),
   pe_user_role: z.string().max(200).optional(),
@@ -38,6 +46,8 @@ export const SupplierUpdateSchema = z.object({
 });
 
 export const SupplierDeleteSchema = z.object({
+  pe_system_client_id: z.number().int().min(0).optional(),
+  pe_organization_id: z.string().max(200).optional(),
   pe_user_id: z.string().max(200).optional(),
   pe_user_name: z.string().max(200).optional(),
   pe_user_role: z.string().max(200).optional(),
@@ -46,6 +56,8 @@ export const SupplierDeleteSchema = z.object({
 });
 
 export const SupplierRelCreateSchema = z.object({
+  pe_system_client_id: z.number().int().min(0).optional(),
+  pe_organization_id: z.string().max(200).optional(),
   pe_user_id: z.string().max(200).optional(),
   pe_user_name: z.string().max(200).optional(),
   pe_user_role: z.string().max(200).optional(),
@@ -56,6 +68,8 @@ export const SupplierRelCreateSchema = z.object({
 });
 
 export const SupplierRelDeleteSchema = z.object({
+  pe_system_client_id: z.number().int().min(0).optional(),
+  pe_organization_id: z.string().max(200).optional(),
   pe_user_id: z.string().max(200).optional(),
   pe_user_name: z.string().max(200).optional(),
   pe_user_role: z.string().max(200).optional(),
@@ -65,6 +79,8 @@ export const SupplierRelDeleteSchema = z.object({
 });
 
 export const SupplierRelFindProdAllSchema = z.object({
+  pe_system_client_id: z.number().int().min(0).optional(),
+  pe_organization_id: z.string().max(200).optional(),
   pe_user_id: z.string().max(200).optional(),
   pe_user_name: z.string().max(200).optional(),
   pe_user_role: z.string().max(200).optional(),

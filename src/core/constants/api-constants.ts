@@ -152,6 +152,7 @@ export const CUSTOMER_UPD_ENDPOINTS = {
 
 // Endpoints de Cliente (Inline Update - campo individual)
 export const CUSTOMER_INLINE_ENDPOINTS = {
+  UPD_FIELD: "/customer-inline/v2/customer-upd-inline-field",
   UPD_EMAIL: "/customer-inline/v2/customer-upd-inline-email",
   UPD_NAME: "/customer-inline/v2/customer-upd-inline-name",
   UPD_NOTES: "/customer-inline/v2/customer-upd-inline-notes",
@@ -243,6 +244,22 @@ export const SUPPLIER_ENDPOINTS = {
   REL_CREATE: "/supplier/v2/supplier-rel-create",
   REL_DELETE: "/supplier/v2/supplier-rel-delete",
   REL_FIND_PROD_ALL: "/supplier/v2/supplier-rel-find-prod-all",
+} as const;
+
+// Endpoints de Physical Product
+export const PHYSICAL_PRODUCT_ENDPOINTS = {
+  ORDER_ITEM_FIND_ALL_CUSTOMER:
+    "/physical-product/v2/order-item-find-all-customer",
+  ORDER_ITEM_FIND_ID_CUSTOMER:
+    "/physical-product/v2/order-item-find-id-customer",
+  PHYSICAL_PRODUCT_FIND_ALL: "/physical-product/v2/physical-product-find-all",
+  WARRANTY_ID_CUSTOMER:
+    "/physical-product/v2/physical-product-warranty-id-customer",
+  WARRANTY_ID: "/physical-product/v2/physical-product-warranty-id",
+  WARRANTY_MOV_CUSTOMER:
+    "/physical-product/v2/physical-product-warranty-mov-customer",
+  WARRANTY_MOV: "/physical-product/v2/physical-product-warranty-mov",
+  WARRANTY_SEARCH: "/physical-product/v2/physical-product-warranty-search",
 } as const;
 
 // Endpoints de Account (Dashboard da Conta)

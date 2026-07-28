@@ -44,8 +44,6 @@ export class CarrierServiceApi extends BaseApiService {
       pe_app_id: serverEnvs.APP_ID,
       pe_store_id: serverEnvs.STORE_ID,
       ...additionalData,
-      pe_system_client_id: serverEnvs.SYSTEM_CLIENT_ID,
-      pe_organization_id: serverEnvs.ORGANIZATION_ID,
     };
   }
 
@@ -55,6 +53,8 @@ export class CarrierServiceApi extends BaseApiService {
     try {
       const validatedParams = CarrierFindAllSchema.partial().parse(params);
       const requestBody = this.buildBasePayload({
+        pe_system_client_id: validatedParams.pe_system_client_id,
+        pe_organization_id: validatedParams.pe_organization_id,
         pe_user_id: validatedParams.pe_user_id,
         pe_user_name: validatedParams.pe_user_name,
         pe_user_role: validatedParams.pe_user_role,

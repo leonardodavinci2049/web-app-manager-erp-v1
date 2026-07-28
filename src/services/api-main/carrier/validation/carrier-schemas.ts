@@ -1,6 +1,8 @@
 import { z } from "zod";
 
 export const CarrierFindAllSchema = z.object({
+  pe_system_client_id: z.number().int().min(0).optional(),
+  pe_organization_id: z.string().max(200).optional(),
   pe_user_id: z.string().max(200).optional(),
   pe_user_name: z.string().max(200).optional(),
   pe_user_role: z.string().max(200).optional(),
@@ -10,6 +12,8 @@ export const CarrierFindAllSchema = z.object({
 });
 
 export const CarrierFindByIdSchema = z.object({
+  pe_system_client_id: z.number().int().min(0).optional(),
+  pe_organization_id: z.string().max(200).optional(),
   pe_user_id: z.string().max(200).optional(),
   pe_user_name: z.string().max(200).optional(),
   pe_user_role: z.string().max(200).optional(),
@@ -18,6 +22,8 @@ export const CarrierFindByIdSchema = z.object({
 });
 
 export const CarrierCreateSchema = z.object({
+  pe_system_client_id: z.number().int().min(0).optional(),
+  pe_organization_id: z.string().max(200).optional(),
   pe_user_id: z.string().max(200).optional(),
   pe_user_name: z.string().max(200).optional(),
   pe_user_role: z.string().max(200).optional(),
@@ -36,6 +42,8 @@ export const CarrierCreateSchema = z.object({
 });
 
 export const CarrierUpdateSchema = z.object({
+  pe_system_client_id: z.number().int().min(0).optional(),
+  pe_organization_id: z.string().max(200).optional(),
   pe_user_id: z.string().max(200).optional(),
   pe_user_name: z.string().max(200).optional(),
   pe_user_role: z.string().max(200).optional(),
@@ -56,6 +64,8 @@ export const CarrierUpdateSchema = z.object({
 });
 
 export const CarrierDeleteSchema = z.object({
+  pe_system_client_id: z.number().int().min(0).optional(),
+  pe_organization_id: z.string().max(200).optional(),
   pe_user_id: z.string().max(200).optional(),
   pe_user_name: z.string().max(200).optional(),
   pe_user_role: z.string().max(200).optional(),
