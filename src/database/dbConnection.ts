@@ -8,7 +8,7 @@ import {
   type ResultSetHeader,
   type RowDataPacket,
 } from "mysql2/promise";
-import { envs } from "@/core/config/envs";
+import { serverEnvs } from "@/core/config/envs.server";
 import { createLogger } from "@/core/logger";
 
 const logger = createLogger("database-service");
@@ -93,18 +93,18 @@ class DatabaseService {
 
   private createPool(): Pool {
     const config: PoolOptions = {
-      host: envs.DATABASE_ADMIN_HOST,
-      port: envs.DATABASE_ADMIN_PORT,
-      database: envs.DATABASE_ADMIN_NAME,
-      user: envs.DATABASE_ADMIN_USER,
-      password: envs.DATABASE_ADMIN_PASSWORD,
+      host: serverEnvs.DATABASE_ADMIN_HOST,
+      port: serverEnvs.DATABASE_ADMIN_PORT,
+      database: serverEnvs.DATABASE_ADMIN_NAME,
+      user: serverEnvs.DATABASE_ADMIN_USER,
+      password: serverEnvs.DATABASE_ADMIN_PASSWORD,
       waitForConnections: true,
-      connectionLimit: envs.DB_POOL_CONNECTION_LIMIT,
-      maxIdle: envs.DB_POOL_MAX_IDLE,
-      idleTimeout: envs.DB_POOL_IDLE_TIMEOUT,
+      connectionLimit: serverEnvs.DB_POOL_CONNECTION_LIMIT,
+      maxIdle: serverEnvs.DB_POOL_MAX_IDLE,
+      idleTimeout: serverEnvs.DB_POOL_IDLE_TIMEOUT,
       enableKeepAlive: true,
       keepAliveInitialDelay: 5000,
-      queueLimit: envs.DB_POOL_QUEUE_LIMIT,
+      queueLimit: serverEnvs.DB_POOL_QUEUE_LIMIT,
     };
 
     logger.debug("Criando pool de conexões MySQL");

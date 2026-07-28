@@ -1,6 +1,6 @@
 import "server-only";
 
-import { envs } from "@/core/config";
+import { serverEnvs } from "@/core/config/envs.server";
 import { PRODUCT_INLINE_ENDPOINTS } from "@/core/constants/api-constants";
 import { createLogger } from "@/core/logger";
 import { BaseApiService } from "@/lib/axios/base-api-service";
@@ -38,8 +38,8 @@ export class ProductInlineServiceApi extends BaseApiService {
     additionalData: Record<string, unknown> = {},
   ): Record<string, unknown> {
     return {
-      pe_app_id: envs.APP_ID,
-      pe_store_id: envs.STORE_ID,
+      pe_app_id: serverEnvs.APP_ID,
+      pe_store_id: serverEnvs.STORE_ID,
       ...additionalData,
     };
   }

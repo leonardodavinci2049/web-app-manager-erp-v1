@@ -2,11 +2,11 @@
  * Constantes da API para endpoints e configurações
  */
 
-import { envs } from "@/core/config";
+import { serverEnvs } from "@/core/config/envs.server";
 
 // URL base da API Externa (Servidor NestJS) - apenas server-side
 // Esta é a URL do backend que fornece os dados via REST API
-export const EXTERNAL_API_BASE_URL = envs.EXTERNAL_API_MAIN_URL;
+export const EXTERNAL_API_BASE_URL = serverEnvs.EXTERNAL_API_MAIN_URL;
 
 // Configurações de timeout (em milissegundos)
 export const API_TIMEOUTS = {

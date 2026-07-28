@@ -1,6 +1,6 @@
 import "server-only";
 
-import { envs } from "@/core/config";
+import { publicEnvs } from "@/core/config/envs.client";
 import type { OrganizationMeta } from "@/database/schema";
 import { getAuthContext } from "@/server/auth-context";
 import { getOrganizationMetaByOrganizationId } from "./organization-meta-cached-service";
@@ -42,6 +42,6 @@ export async function getOrganizationConfig(): Promise<{
   return {
     organizationId,
     meta: toOrganizationMetaMap(metaList),
-    imageBaseUrl: envs.NEXT_PUBLIC_EXTERNAL_PATH_IMAGES_URL,
+    imageBaseUrl: publicEnvs.NEXT_PUBLIC_EXTERNAL_PATH_IMAGES_URL,
   };
 }
