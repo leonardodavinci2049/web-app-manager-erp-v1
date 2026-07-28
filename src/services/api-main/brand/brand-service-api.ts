@@ -311,7 +311,7 @@ export async function getBrands(
     return [];
   }
 
-  const response = await brandServiceApi.findAllBrands({
+  const response = await brandServiceApi.searchAllBrands({
     pe_search: params.search,
     pe_inactive: params.inactive,
     pe_limit: params.limit,
@@ -323,7 +323,7 @@ export async function getBrands(
     pe_person_id: params.pe_person_id,
   });
 
-  const brands = brandServiceApi.extractBrands(response);
+  const brands = brandServiceApi.extractSearchBrands(response);
   return transformBrandList(brands);
 }
 
