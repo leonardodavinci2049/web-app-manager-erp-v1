@@ -11,6 +11,8 @@ export type {
   BrandFindByIdRequest,
   BrandFindByIdResponse,
   BrandListItem,
+  BrandSearchAllRequest,
+  BrandSearchAllResponse,
   BrandUpdateRequest,
   BrandUpdateResponse,
   StoredProcedureResponse,

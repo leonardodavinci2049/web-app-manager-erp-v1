@@ -74,7 +74,17 @@ export interface StoredProcedureResponse {
   sp_error_id: number;
 }
 
+export interface BrandSearchAllRequest extends BrandBaseRequest {
+  pe_search?: string;
+  pe_inactive?: number;
+  pe_limit?: number;
+}
+
 export interface BrandFindAllResponse extends BrandBaseResponse {
+  data: Record<string, BrandListItem[]>;
+}
+
+export interface BrandSearchAllResponse extends BrandBaseResponse {
   data: Record<string, BrandListItem[]>;
 }
 
