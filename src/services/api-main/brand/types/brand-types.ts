@@ -23,7 +23,10 @@ interface BrandBaseResponse {
 export interface BrandFindAllRequest extends BrandBaseRequest {
   pe_search?: string;
   pe_inactive?: number;
-  pe_limit?: number;
+  pe_qt_records?: number;
+  pe_page_id?: number;
+  pe_column_id?: number;
+  pe_order_id?: number;
 }
 
 export interface BrandListItem {
