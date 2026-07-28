@@ -386,6 +386,56 @@ export async function searchBrands(
   return transformBrandList(brands);
 }
 
+export interface GetBrandsPageParams {
+  search?: string;
+  page?: number;
+  pageSize?: number;
+  pe_system_client_id?: number;
+  pe_organization_id?: string;
+  pe_user_id?: string;
+  pe_user_name?: string;
+  pe_user_role?: string;
+  pe_person_id?: number;
+}
+
+/**
+ * Leitura paginada de marcas para a central de marcas. Baseada em
+ * `findAllBrands`, retorna `{ brands, total }` onde `total` e' derivado do
+ * contrato de paginacao do endpoint (`recordId`) com fallback seguro para
+ * `quantity` ou a quantidade carregada. Sem cache.
+ */
+export async function getBrandsPage(
+  params: GetBrandsPageParams = {},
+): Promise<{ brands: UIBrand[]; total: number }> {
+  if (!params.pe_system_client_id) {
+    return { brands: [], total: 0 };
+  }
+
+  const response = await brandServiceApi.findAllBrands({
+    pe_search: params.search ?? "",
+    pe_inactive: 0,
+    pe_qt_records: params.pageSize ?? 50,
+    pe_page_id: params.page ?? 0,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
+
+  const brands = brandServiceApi.extractBrands(response);
+  const filteredTotal = Number(response.recordId);
+
+  return {
+    brands: transformBrandList(brands),
+    total:
+      Number.isFinite(filteredTotal) && filteredTotal >= 0
+        ? filteredTotal
+        : (response.quantity ?? brands.length),
+  };
+}
+
 export async function getBrandById(
   id: number,
   params: {
