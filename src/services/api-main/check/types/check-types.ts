@@ -2,7 +2,9 @@ import "server-only";
 
 interface CheckBaseRequest {
   pe_app_id?: number;
+  pe_system_client_id?: number;
   pe_store_id?: number;
+  pe_organization_id?: string;
   pe_user_id?: string;
   pe_user_name?: string;
   pe_user_role?: string;

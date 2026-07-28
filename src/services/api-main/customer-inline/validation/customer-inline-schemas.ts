@@ -1,6 +1,8 @@
 import { z } from "zod";
 
 const requestContextSchema = {
+  pe_system_client_id: z.number().int().min(0).optional(),
+  pe_organization_id: z.string().max(200).optional(),
   pe_user_id: z.string().max(200).optional(),
   pe_user_name: z.string().max(200).optional(),
   pe_user_role: z.string().max(200).optional(),
