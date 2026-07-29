@@ -20,8 +20,13 @@ import type {
   CustomerFindByIdResponse,
   CustomerFindLatestProductsRequest,
   CustomerFindLatestProductsResponse,
+  CustomerFindManagerAllRequest,
+  CustomerFindManagerAllResponse,
   CustomerLatestProduct,
   CustomerListItem,
+  CustomerPersonListItem,
+  CustomerSearchAllRequest,
+  CustomerSearchAllResponse,
   StoredProcedureResponse,
 } from "./types/customer-general-types";
 import {
@@ -33,6 +38,8 @@ import {
   CustomerFindAllSchema,
   CustomerFindByIdSchema,
   CustomerFindLatestProductsSchema,
+  CustomerFindManagerAllSchema,
+  CustomerSearchAllSchema,
 } from "./validation/customer-general-schemas";
 
 const logger = createLogger("CustomerGeneralServiceApi");
@@ -82,6 +89,77 @@ export class CustomerGeneralServiceApi extends BaseApiService {
       return this.normalizeEmptyFindAllResponse(response);
     } catch (error) {
       logger.error("Erro ao buscar todos os clientes", error);
+      throw error;
+    }
+  }
+
+  async searchAllCustomers(
+    params: Partial<CustomerSearchAllRequest> = {},
+  ): Promise<CustomerSearchAllResponse> {
+    try {
+      const validatedParams = CustomerSearchAllSchema.partial().parse(params);
+      const requestBody = this.buildBasePayload({
+        pe_system_client_id: validatedParams.pe_system_client_id,
+        pe_organization_id: validatedParams.pe_organization_id,
+        pe_user_id: validatedParams.pe_user_id,
+        pe_user_name: validatedParams.pe_user_name,
+        pe_user_role: validatedParams.pe_user_role,
+        pe_person_id: validatedParams.pe_person_id,
+        pe_search: validatedParams.pe_search ?? "",
+      });
+
+      const response = await this.post<CustomerSearchAllResponse>(
+        CUSTOMER_GENERAL_ENDPOINTS.SEARCH_ALL,
+        requestBody,
+      );
+
+      return this.normalizeEmptySearchAllResponse(response);
+    } catch (error) {
+      logger.error("Erro ao pesquisar clientes", error);
+      throw error;
+    }
+  }
+
+  async findManagerAllCustomers(
+    params: Partial<CustomerFindManagerAllRequest> = {},
+  ): Promise<CustomerFindManagerAllResponse> {
+    try {
+      const validatedParams =
+        CustomerFindManagerAllSchema.partial().parse(params);
+      const requestBody = this.buildBasePayload({
+        pe_system_client_id: validatedParams.pe_system_client_id,
+        pe_organization_id: validatedParams.pe_organization_id,
+        pe_user_id: validatedParams.pe_user_id,
+        pe_user_name: validatedParams.pe_user_name,
+        pe_user_role: validatedParams.pe_user_role,
+        pe_person_id: validatedParams.pe_person_id,
+        pe_search: validatedParams.pe_search ?? "",
+        pe_category_id: validatedParams.pe_category_id ?? 0,
+        pe_client_type: validatedParams.pe_client_type ?? 0,
+        pe_person_type: validatedParams.pe_person_type ?? 0,
+        pe_flag_no_image: validatedParams.pe_flag_no_image ?? 0,
+        pe_flag_approved: validatedParams.pe_flag_approved ?? 0,
+        pe_gender_type: validatedParams.pe_gender_type ?? 0,
+        pe_flag_restricted: validatedParams.pe_flag_restricted ?? 0,
+        pe_flag_enabled: validatedParams.pe_flag_enabled ?? 0,
+        pe_status_id: validatedParams.pe_status_id ?? 0,
+        pe_flag_operation_list: validatedParams.pe_flag_operation_list ?? 0,
+        pe_start_date: validatedParams.pe_start_date ?? "",
+        pe_end_date: validatedParams.pe_end_date ?? "",
+        pe_qt_records: validatedParams.pe_qt_records ?? 100,
+        pe_page_id: validatedParams.pe_page_id ?? 0,
+        pe_column_id: validatedParams.pe_column_id ?? 2,
+        pe_order_id: validatedParams.pe_order_id ?? 2,
+      });
+
+      const response = await this.post<CustomerFindManagerAllResponse>(
+        CUSTOMER_GENERAL_ENDPOINTS.FIND_MANAGER_ALL,
+        requestBody,
+      );
+
+      return this.normalizeEmptyFindManagerAllResponse(response);
+    } catch (error) {
+      logger.error("Erro ao listar clientes (manager)", error);
       throw error;
     }
   }
@@ -198,6 +276,44 @@ export class CustomerGeneralServiceApi extends BaseApiService {
     return response;
   }
 
+  private normalizeEmptySearchAllResponse(
+    response: CustomerSearchAllResponse,
+  ): CustomerSearchAllResponse {
+    if (
+      response.statusCode === API_STATUS_CODES.NOT_FOUND ||
+      response.statusCode === API_STATUS_CODES.EMPTY_RESULT
+    ) {
+      return {
+        ...response,
+        statusCode: API_STATUS_CODES.SUCCESS,
+        quantity: 0,
+        data: {
+          "Customer find All": [],
+        },
+      };
+    }
+    return response;
+  }
+
+  private normalizeEmptyFindManagerAllResponse(
+    response: CustomerFindManagerAllResponse,
+  ): CustomerFindManagerAllResponse {
+    if (
+      response.statusCode === API_STATUS_CODES.NOT_FOUND ||
+      response.statusCode === API_STATUS_CODES.EMPTY_RESULT
+    ) {
+      return {
+        ...response,
+        statusCode: API_STATUS_CODES.SUCCESS,
+        quantity: 0,
+        data: {
+          "Customer find manager All": [],
+        },
+      };
+    }
+    return response;
+  }
+
   private normalizeEmptyLatestProductsResponse(
     response: CustomerFindLatestProductsResponse,
   ): CustomerFindLatestProductsResponse {
@@ -219,6 +335,18 @@ export class CustomerGeneralServiceApi extends BaseApiService {
 
   extractCustomers(response: CustomerFindAllResponse): CustomerListItem[] {
     return response.data?.["Customer find All"] ?? [];
+  }
+
+  extractSearchCustomers(
+    response: CustomerSearchAllResponse,
+  ): CustomerPersonListItem[] {
+    return response.data?.["Customer find All"] ?? [];
+  }
+
+  extractManagerAllCustomers(
+    response: CustomerFindManagerAllResponse,
+  ): CustomerPersonListItem[] {
+    return response.data?.["Customer find manager All"] ?? [];
   }
 
   extractCustomerById(
@@ -250,6 +378,24 @@ export class CustomerGeneralServiceApi extends BaseApiService {
       isApiSuccess(response.statusCode) &&
       !!response.data &&
       Array.isArray(response.data["Customer find All"])
+    );
+  }
+
+  isValidCustomerSearchList(response: CustomerSearchAllResponse): boolean {
+    return (
+      isApiSuccess(response.statusCode) &&
+      !!response.data &&
+      Array.isArray(response.data["Customer find All"])
+    );
+  }
+
+  isValidCustomerManagerList(
+    response: CustomerFindManagerAllResponse,
+  ): boolean {
+    return (
+      isApiSuccess(response.statusCode) &&
+      !!response.data &&
+      Array.isArray(response.data["Customer find manager All"])
     );
   }
 

@@ -29,6 +29,8 @@ import type {
   BrandFindAllResponse,
   BrandFindByIdRequest,
   BrandFindByIdResponse,
+  BrandFindManagerAllRequest,
+  BrandFindManagerAllResponse,
   BrandListItem,
   BrandSearchAllRequest,
   BrandSearchAllResponse,
@@ -42,6 +44,7 @@ import {
   BrandDeleteSchema,
   BrandFindAllSchema,
   BrandFindByIdSchema,
+  BrandFindManagerAllSchema,
   BrandSearchAllSchema,
   BrandUpdateSchema,
 } from "./validation/brand-schemas";
@@ -124,6 +127,38 @@ export class BrandServiceApi extends BaseApiService {
       return this.normalizeEmptyBrandSearchAllResponse(response);
     } catch (error) {
       logger.error("Erro ao pesquisar marcas", error);
+      throw error;
+    }
+  }
+
+  async findManagerAllBrands(
+    params: Partial<BrandFindManagerAllRequest> = {},
+  ): Promise<BrandFindManagerAllResponse> {
+    try {
+      const validatedParams = BrandFindManagerAllSchema.partial().parse(params);
+      const requestBody = this.buildBasePayload({
+        pe_system_client_id: validatedParams.pe_system_client_id,
+        pe_organization_id: validatedParams.pe_organization_id,
+        pe_user_id: validatedParams.pe_user_id,
+        pe_user_name: validatedParams.pe_user_name,
+        pe_user_role: validatedParams.pe_user_role,
+        pe_person_id: validatedParams.pe_person_id,
+        pe_search: validatedParams.pe_search ?? "",
+        pe_inactive: validatedParams.pe_inactive ?? 0,
+        pe_qt_records: validatedParams.pe_qt_records ?? 100,
+        pe_page_id: validatedParams.pe_page_id ?? 0,
+        pe_column_id: validatedParams.pe_column_id ?? 2,
+        pe_order_id: validatedParams.pe_order_id ?? 2,
+      });
+
+      const response = await this.post<BrandFindManagerAllResponse>(
+        BRAND_ENDPOINTS.FIND_MANAGER_ALL,
+        requestBody,
+      );
+
+      return this.normalizeEmptyBrandFindManagerAllResponse(response);
+    } catch (error) {
+      logger.error("Erro ao listar marcas (manager)", error);
       throw error;
     }
   }
@@ -274,12 +309,37 @@ export class BrandServiceApi extends BaseApiService {
     return response;
   }
 
+  private normalizeEmptyBrandFindManagerAllResponse(
+    response: BrandFindManagerAllResponse,
+  ): BrandFindManagerAllResponse {
+    if (
+      response.statusCode === API_STATUS_CODES.NOT_FOUND ||
+      response.statusCode === API_STATUS_CODES.EMPTY_RESULT
+    ) {
+      return {
+        ...response,
+        statusCode: API_STATUS_CODES.SUCCESS,
+        quantity: 0,
+        data: {
+          "Brand find manager All": [],
+        },
+      };
+    }
+    return response;
+  }
+
   extractBrands(response: BrandFindAllResponse): BrandListItem[] {
     return response.data?.["Brand find All"] ?? [];
   }
 
   extractSearchBrands(response: BrandSearchAllResponse): BrandListItem[] {
     return response.data?.["Brand find All"] ?? [];
+  }
+
+  extractManagerAllBrands(
+    response: BrandFindManagerAllResponse,
+  ): BrandListItem[] {
+    return response.data?.["Brand find manager All"] ?? [];
   }
 
   extractBrandById(response: BrandFindByIdResponse): BrandDetail | null {
@@ -305,6 +365,14 @@ export class BrandServiceApi extends BaseApiService {
       isApiSuccess(response.statusCode) &&
       response.data &&
       Array.isArray(response.data["Brand find All"])
+    );
+  }
+
+  isValidBrandManagerList(response: BrandFindManagerAllResponse): boolean {
+    return (
+      isApiSuccess(response.statusCode) &&
+      response.data &&
+      Array.isArray(response.data["Brand find manager All"])
     );
   }
 

@@ -51,6 +51,64 @@ export interface CustomerFindAllResponse extends CustomerBaseResponse {
   data: Record<string, CustomerListItem[]>;
 }
 
+// ===== Search All (V2) =====
+
+export interface CustomerSearchAllRequest extends CustomerBaseRequest {
+  pe_search?: string;
+}
+
+export interface CustomerPersonListItem {
+  ID_CUSTOMER: number;
+  ID_TIPO_CLIENTE: number;
+  ID_PESSOA_TIPO: number;
+  NOME: string;
+  FONE1: string | null;
+  WHATAPP1: string | null;
+  RAZAO_SOCIAL: string | null;
+  CIDADE: string | null;
+  CPF: string | null;
+  CNPJ: string | null;
+  TIPO_CLIENTE: string;
+  TIPO_PESSOA: string;
+  EMAIL: string | null;
+  PATH_IMAGEM: string | null;
+  APROVADO: string;
+  GENERO: string;
+  RESTRICAO: number;
+  ULTIMA_COMPRA: string | null;
+  DATA_CADASTRO: string | null;
+}
+
+export interface CustomerSearchAllResponse extends CustomerBaseResponse {
+  data: Record<string, CustomerPersonListItem[]>;
+}
+
+// ===== Find Manager All (V2) =====
+
+export interface CustomerFindManagerAllRequest extends CustomerBaseRequest {
+  pe_search?: string;
+  pe_category_id?: number;
+  pe_client_type?: number;
+  pe_person_type?: number;
+  pe_flag_no_image?: number;
+  pe_flag_approved?: number;
+  pe_gender_type?: number;
+  pe_flag_restricted?: number;
+  pe_flag_enabled?: number;
+  pe_status_id?: number;
+  pe_flag_operation_list?: number;
+  pe_start_date?: string;
+  pe_end_date?: string;
+  pe_qt_records?: number;
+  pe_page_id?: number;
+  pe_column_id?: number;
+  pe_order_id?: number;
+}
+
+export interface CustomerFindManagerAllResponse extends CustomerBaseResponse {
+  data: Record<string, CustomerPersonListItem[]>;
+}
+
 // ===== Find By ID =====
 
 export interface CustomerFindByIdRequest extends CustomerBaseRequest {

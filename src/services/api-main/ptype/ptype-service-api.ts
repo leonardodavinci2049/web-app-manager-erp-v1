@@ -24,7 +24,11 @@ import type {
   PtypeFindAllResponse,
   PtypeFindByIdRequest,
   PtypeFindByIdResponse,
+  PtypeFindManagerAllRequest,
+  PtypeFindManagerAllResponse,
   PtypeListItem,
+  PtypeSearchAllRequest,
+  PtypeSearchAllResponse,
   PtypeUpdateRequest,
   PtypeUpdateResponse,
   StoredProcedureResponse,
@@ -35,6 +39,8 @@ import {
   PtypeDeleteSchema,
   PtypeFindAllSchema,
   PtypeFindByIdSchema,
+  PtypeFindManagerAllSchema,
+  PtypeSearchAllSchema,
   PtypeUpdateSchema,
 } from "./validation/ptype-schemas";
 
@@ -75,6 +81,65 @@ export class PtypeServiceApi extends BaseApiService {
       return this.normalizeEmptyPtypeFindAllResponse(response);
     } catch (error) {
       logger.error("Erro ao buscar todos os tipos", error);
+      throw error;
+    }
+  }
+
+  async searchAllPtypes(
+    params: Partial<PtypeSearchAllRequest> = {},
+  ): Promise<PtypeSearchAllResponse> {
+    try {
+      const validatedParams = PtypeSearchAllSchema.partial().parse(params);
+      const requestBody = this.buildBasePayload({
+        pe_system_client_id: validatedParams.pe_system_client_id,
+        pe_organization_id: validatedParams.pe_organization_id,
+        pe_user_id: validatedParams.pe_user_id,
+        pe_user_name: validatedParams.pe_user_name,
+        pe_user_role: validatedParams.pe_user_role,
+        pe_person_id: validatedParams.pe_person_id,
+        pe_search: validatedParams.pe_search ?? "",
+      });
+
+      const response = await this.post<PtypeSearchAllResponse>(
+        PTYPE_ENDPOINTS.SEARCH_ALL,
+        requestBody,
+      );
+
+      return this.normalizeEmptyPtypeSearchAllResponse(response);
+    } catch (error) {
+      logger.error("Erro ao pesquisar tipos", error);
+      throw error;
+    }
+  }
+
+  async findManagerAllPtypes(
+    params: Partial<PtypeFindManagerAllRequest> = {},
+  ): Promise<PtypeFindManagerAllResponse> {
+    try {
+      const validatedParams = PtypeFindManagerAllSchema.partial().parse(params);
+      const requestBody = this.buildBasePayload({
+        pe_system_client_id: validatedParams.pe_system_client_id,
+        pe_organization_id: validatedParams.pe_organization_id,
+        pe_user_id: validatedParams.pe_user_id,
+        pe_user_name: validatedParams.pe_user_name,
+        pe_user_role: validatedParams.pe_user_role,
+        pe_person_id: validatedParams.pe_person_id,
+        pe_search: validatedParams.pe_search ?? "",
+        pe_status_id: validatedParams.pe_status_id ?? 0,
+        pe_qt_records: validatedParams.pe_qt_records ?? 100,
+        pe_page_id: validatedParams.pe_page_id ?? 0,
+        pe_column_id: validatedParams.pe_column_id ?? 2,
+        pe_order_id: validatedParams.pe_order_id ?? 2,
+      });
+
+      const response = await this.post<PtypeFindManagerAllResponse>(
+        PTYPE_ENDPOINTS.FIND_MANAGER_ALL,
+        requestBody,
+      );
+
+      return this.normalizeEmptyPtypeFindManagerAllResponse(response);
+    } catch (error) {
+      logger.error("Erro ao listar tipos (manager)", error);
       throw error;
     }
   }
@@ -196,8 +261,56 @@ export class PtypeServiceApi extends BaseApiService {
     return response;
   }
 
+  private normalizeEmptyPtypeSearchAllResponse(
+    response: PtypeSearchAllResponse,
+  ): PtypeSearchAllResponse {
+    if (
+      response.statusCode === API_STATUS_CODES.NOT_FOUND ||
+      response.statusCode === API_STATUS_CODES.EMPTY_RESULT
+    ) {
+      return {
+        ...response,
+        statusCode: API_STATUS_CODES.SUCCESS,
+        quantity: 0,
+        data: {
+          "Type find All": [],
+        },
+      };
+    }
+    return response;
+  }
+
+  private normalizeEmptyPtypeFindManagerAllResponse(
+    response: PtypeFindManagerAllResponse,
+  ): PtypeFindManagerAllResponse {
+    if (
+      response.statusCode === API_STATUS_CODES.NOT_FOUND ||
+      response.statusCode === API_STATUS_CODES.EMPTY_RESULT
+    ) {
+      return {
+        ...response,
+        statusCode: API_STATUS_CODES.SUCCESS,
+        quantity: 0,
+        data: {
+          "Type find manager All": [],
+        },
+      };
+    }
+    return response;
+  }
+
   extractPtypes(response: PtypeFindAllResponse): PtypeListItem[] {
     return response.data?.["Type find All"] ?? [];
+  }
+
+  extractSearchPtypes(response: PtypeSearchAllResponse): PtypeListItem[] {
+    return response.data?.["Type find All"] ?? [];
+  }
+
+  extractManagerAllPtypes(
+    response: PtypeFindManagerAllResponse,
+  ): PtypeListItem[] {
+    return response.data?.["Type find manager All"] ?? [];
   }
 
   extractPtypeById(response: PtypeFindByIdResponse): PtypeDetail | null {
@@ -215,6 +328,22 @@ export class PtypeServiceApi extends BaseApiService {
       isApiSuccess(response.statusCode) &&
       response.data &&
       Array.isArray(response.data["Type find All"])
+    );
+  }
+
+  isValidPtypeSearchList(response: PtypeSearchAllResponse): boolean {
+    return (
+      isApiSuccess(response.statusCode) &&
+      response.data &&
+      Array.isArray(response.data["Type find All"])
+    );
+  }
+
+  isValidPtypeManagerList(response: PtypeFindManagerAllResponse): boolean {
+    return (
+      isApiSuccess(response.statusCode) &&
+      response.data &&
+      Array.isArray(response.data["Type find manager All"])
     );
   }
 

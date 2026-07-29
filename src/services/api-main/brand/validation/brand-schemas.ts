@@ -73,9 +73,27 @@ export const BrandSearchAllSchema = z.object({
   pe_limit: z.number().int().positive().optional(),
 });
 
+export const BrandFindManagerAllSchema = z.object({
+  pe_system_client_id: z.number().int().min(0).optional(),
+  pe_organization_id: z.string().max(200).optional(),
+  pe_user_id: z.string().max(200).optional(),
+  pe_user_name: z.string().max(200).optional(),
+  pe_user_role: z.string().max(200).optional(),
+  pe_person_id: z.number().optional(),
+  pe_search: z.string().max(300).optional(),
+  pe_inactive: z.number().int().min(0).max(1).optional(),
+  pe_qt_records: z.number().int().optional(),
+  pe_page_id: z.number().int().optional(),
+  pe_column_id: z.number().int().optional(),
+  pe_order_id: z.number().int().optional(),
+});
+
 export type BrandCreateInput = z.infer<typeof BrandCreateSchema>;
 export type BrandFindAllInput = z.infer<typeof BrandFindAllSchema>;
 export type BrandSearchAllInput = z.infer<typeof BrandSearchAllSchema>;
+export type BrandFindManagerAllInput = z.infer<
+  typeof BrandFindManagerAllSchema
+>;
 export type BrandFindByIdInput = z.infer<typeof BrandFindByIdSchema>;
 export type BrandUpdateInput = z.infer<typeof BrandUpdateSchema>;
 export type BrandDeleteInput = z.infer<typeof BrandDeleteSchema>;

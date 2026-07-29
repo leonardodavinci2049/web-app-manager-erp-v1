@@ -20,7 +20,11 @@ import type {
   CarrierFindAllResponse,
   CarrierFindByIdRequest,
   CarrierFindByIdResponse,
+  CarrierFindManagerAllRequest,
+  CarrierFindManagerAllResponse,
   CarrierListItem,
+  CarrierSearchAllRequest,
+  CarrierSearchAllResponse,
   CarrierUpdateRequest,
   CarrierUpdateResponse,
   StoredProcedureResponse,
@@ -31,6 +35,8 @@ import {
   CarrierDeleteSchema,
   CarrierFindAllSchema,
   CarrierFindByIdSchema,
+  CarrierFindManagerAllSchema,
+  CarrierSearchAllSchema,
   CarrierUpdateSchema,
 } from "./validation/carrier-schemas";
 
@@ -71,6 +77,66 @@ export class CarrierServiceApi extends BaseApiService {
       return this.normalizeEmptyCarrierFindAllResponse(response);
     } catch (error) {
       logger.error("Erro ao buscar todas as transportadoras", error);
+      throw error;
+    }
+  }
+
+  async searchAllCarriers(
+    params: Partial<CarrierSearchAllRequest> = {},
+  ): Promise<CarrierSearchAllResponse> {
+    try {
+      const validatedParams = CarrierSearchAllSchema.partial().parse(params);
+      const requestBody = this.buildBasePayload({
+        pe_system_client_id: validatedParams.pe_system_client_id,
+        pe_organization_id: validatedParams.pe_organization_id,
+        pe_user_id: validatedParams.pe_user_id,
+        pe_user_name: validatedParams.pe_user_name,
+        pe_user_role: validatedParams.pe_user_role,
+        pe_person_id: validatedParams.pe_person_id,
+        pe_search: validatedParams.pe_search ?? "",
+      });
+
+      const response = await this.post<CarrierSearchAllResponse>(
+        CARRIER_ENDPOINTS.SEARCH_ALL,
+        requestBody,
+      );
+
+      return this.normalizeEmptyCarrierSearchAllResponse(response);
+    } catch (error) {
+      logger.error("Erro ao pesquisar transportadoras", error);
+      throw error;
+    }
+  }
+
+  async findManagerAllCarriers(
+    params: Partial<CarrierFindManagerAllRequest> = {},
+  ): Promise<CarrierFindManagerAllResponse> {
+    try {
+      const validatedParams =
+        CarrierFindManagerAllSchema.partial().parse(params);
+      const requestBody = this.buildBasePayload({
+        pe_system_client_id: validatedParams.pe_system_client_id,
+        pe_organization_id: validatedParams.pe_organization_id,
+        pe_user_id: validatedParams.pe_user_id,
+        pe_user_name: validatedParams.pe_user_name,
+        pe_user_role: validatedParams.pe_user_role,
+        pe_person_id: validatedParams.pe_person_id,
+        pe_search: validatedParams.pe_search ?? "",
+        pe_status_id: validatedParams.pe_status_id ?? 0,
+        pe_qt_records: validatedParams.pe_qt_records ?? 100,
+        pe_page_id: validatedParams.pe_page_id ?? 0,
+        pe_column_id: validatedParams.pe_column_id ?? 2,
+        pe_order_id: validatedParams.pe_order_id ?? 2,
+      });
+
+      const response = await this.post<CarrierFindManagerAllResponse>(
+        CARRIER_ENDPOINTS.FIND_MANAGER_ALL,
+        requestBody,
+      );
+
+      return this.normalizeEmptyCarrierFindManagerAllResponse(response);
+    } catch (error) {
+      logger.error("Erro ao listar transportadoras (manager)", error);
       throw error;
     }
   }
@@ -201,8 +267,56 @@ export class CarrierServiceApi extends BaseApiService {
     return response;
   }
 
+  private normalizeEmptyCarrierSearchAllResponse(
+    response: CarrierSearchAllResponse,
+  ): CarrierSearchAllResponse {
+    if (
+      response.statusCode === API_STATUS_CODES.NOT_FOUND ||
+      response.statusCode === API_STATUS_CODES.EMPTY_RESULT
+    ) {
+      return {
+        ...response,
+        statusCode: API_STATUS_CODES.SUCCESS,
+        quantity: 0,
+        data: {
+          "Carrier find All": [],
+        },
+      };
+    }
+    return response;
+  }
+
+  private normalizeEmptyCarrierFindManagerAllResponse(
+    response: CarrierFindManagerAllResponse,
+  ): CarrierFindManagerAllResponse {
+    if (
+      response.statusCode === API_STATUS_CODES.NOT_FOUND ||
+      response.statusCode === API_STATUS_CODES.EMPTY_RESULT
+    ) {
+      return {
+        ...response,
+        statusCode: API_STATUS_CODES.SUCCESS,
+        quantity: 0,
+        data: {
+          "Carrier find manager All": [],
+        },
+      };
+    }
+    return response;
+  }
+
   extractCarriers(response: CarrierFindAllResponse): CarrierListItem[] {
     return response.data?.["Carrier find All"] ?? [];
+  }
+
+  extractSearchCarriers(response: CarrierSearchAllResponse): CarrierListItem[] {
+    return response.data?.["Carrier find All"] ?? [];
+  }
+
+  extractManagerAllCarriers(
+    response: CarrierFindManagerAllResponse,
+  ): CarrierListItem[] {
+    return response.data?.["Carrier find manager All"] ?? [];
   }
 
   extractCarrierById(response: CarrierFindByIdResponse): CarrierDetail | null {
@@ -223,6 +337,22 @@ export class CarrierServiceApi extends BaseApiService {
       isApiSuccess(response.statusCode) &&
       response.data &&
       Array.isArray(response.data["Carrier find All"])
+    );
+  }
+
+  isValidCarrierSearchList(response: CarrierSearchAllResponse): boolean {
+    return (
+      isApiSuccess(response.statusCode) &&
+      response.data &&
+      Array.isArray(response.data["Carrier find All"])
+    );
+  }
+
+  isValidCarrierManagerList(response: CarrierFindManagerAllResponse): boolean {
+    return (
+      isApiSuccess(response.statusCode) &&
+      response.data &&
+      Array.isArray(response.data["Carrier find manager All"])
     );
   }
 

@@ -136,6 +136,8 @@ export const CUSTOMER_ENDPOINTS = {
 export const CUSTOMER_GENERAL_ENDPOINTS = {
   FIND_ALL: "/customer/v2/customer-find-all",
   FIND_BY_ID: "/customer/v2/customer-find-by-id",
+  SEARCH_ALL: "/customer/v2/customer-search-all",
+  FIND_MANAGER_ALL: "/customer/v2/customer-find-manager-all",
   CREATE: "/customer/v2/customer-create",
   FIND_LATEST_PRODUCTS: "/customer/v2/customer-find-latest-products",
 } as const;
@@ -198,6 +200,8 @@ export const TAXONOMY_ENDPOINTS = {
 export const PTYPE_ENDPOINTS = {
   FIND_ALL: "/ptype/v2/ptype-find-all",
   FIND_BY_ID: "/ptype/v2/ptype-find-id",
+  SEARCH_ALL: "/ptype/v2/ptype-search-all",
+  FIND_MANAGER_ALL: "/ptype/v2/ptype-find-manager-all",
   CREATE: "/ptype/v2/ptype-create",
   UPDATE: "/ptype/v2/ptype-update",
   DELETE: "/ptype/v2/ptype-delete",
@@ -208,6 +212,7 @@ export const BRAND_ENDPOINTS = {
   FIND_ALL: "/brand/v2/brand-find-all",
   FIND_BY_ID: "/brand/v2/brand-find-id",
   SEARCH_ALL: "/brand/v2/brand-search-all",
+  FIND_MANAGER_ALL: "/brand/v2/brand-find-manager-all",
   CREATE: "/brand/v2/brand-create",
   UPDATE: "/brand/v2/brand-update",
   DELETE: "/brand/v2/brand-delete",
@@ -229,6 +234,8 @@ export const PRODUCT_MANAGER_ENDPOINTS = {
 export const CARRIER_ENDPOINTS = {
   FIND_ALL: "/carrier/v2/carrier-find-all",
   FIND_BY_ID: "/carrier/v2/carrier-find-id",
+  SEARCH_ALL: "/carrier/v2/carrier-search-all",
+  FIND_MANAGER_ALL: "/carrier/v2/carrier-find-manager-all",
   CREATE: "/carrier/v2/carrier-create",
   UPDATE: "/carrier/v2/carrier-update",
   DELETE: "/carrier/v2/carrier-delete",
@@ -238,12 +245,20 @@ export const CARRIER_ENDPOINTS = {
 export const SUPPLIER_ENDPOINTS = {
   FIND_ALL: "/supplier/v2/supplier-find-all",
   FIND_BY_ID: "/supplier/v2/supplier-find-id",
+  SEARCH_ALL: "/supplier/v2/supplier-search-all",
+  FIND_MANAGER_ALL: "/supplier/v2/supplier-find-manager-all",
   CREATE: "/supplier/v2/supplier-create",
   UPDATE: "/supplier/v2/supplier-update",
   DELETE: "/supplier/v2/supplier-delete",
   REL_CREATE: "/supplier/v2/supplier-rel-create",
   REL_DELETE: "/supplier/v2/supplier-rel-delete",
   REL_FIND_PROD_ALL: "/supplier/v2/supplier-rel-find-prod-all",
+} as const;
+
+// Endpoints de Seller
+export const SELLER_ENDPOINTS = {
+  SEARCH_ALL: "/seller/v2/seller-search-all",
+  FIND_MANAGER_ALL: "/seller/v2/seller-find-manager-all",
 } as const;
 
 // Endpoints de Physical Product

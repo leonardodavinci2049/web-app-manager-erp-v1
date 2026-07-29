@@ -21,6 +21,8 @@ import type {
   SupplierFindAllResponse,
   SupplierFindByIdRequest,
   SupplierFindByIdResponse,
+  SupplierFindManagerAllRequest,
+  SupplierFindManagerAllResponse,
   SupplierListItem,
   SupplierRelCreateRequest,
   SupplierRelCreateResponse,
@@ -29,6 +31,9 @@ import type {
   SupplierRelFindProdAllRequest,
   SupplierRelFindProdAllResponse,
   SupplierRelProdItem,
+  SupplierSearchAllRequest,
+  SupplierSearchAllResponse,
+  SupplierSearchListItem,
   SupplierUpdateRequest,
   SupplierUpdateResponse,
 } from "./types/supplier-types";
@@ -38,9 +43,11 @@ import {
   SupplierDeleteSchema,
   SupplierFindAllSchema,
   SupplierFindByIdSchema,
+  SupplierFindManagerAllSchema,
   SupplierRelCreateSchema,
   SupplierRelDeleteSchema,
   SupplierRelFindProdAllSchema,
+  SupplierSearchAllSchema,
   SupplierUpdateSchema,
 } from "./validation/supplier-schemas";
 
@@ -83,6 +90,70 @@ export class SupplierServiceApi extends BaseApiService {
       return this.normalizeEmptySupplierFindAllResponse(response);
     } catch (error) {
       logger.error("Erro ao buscar todos os fornecedores", error);
+      throw error;
+    }
+  }
+
+  // --- Search All (V2) ---
+
+  async searchAllSuppliers(
+    params: Partial<SupplierSearchAllRequest> = {},
+  ): Promise<SupplierSearchAllResponse> {
+    try {
+      const validatedParams = SupplierSearchAllSchema.partial().parse(params);
+      const requestBody = this.buildBasePayload({
+        pe_system_client_id: validatedParams.pe_system_client_id,
+        pe_organization_id: validatedParams.pe_organization_id,
+        pe_user_id: validatedParams.pe_user_id,
+        pe_user_name: validatedParams.pe_user_name,
+        pe_user_role: validatedParams.pe_user_role,
+        pe_person_id: validatedParams.pe_person_id,
+        pe_search: validatedParams.pe_search ?? "",
+      });
+
+      const response = await this.post<SupplierSearchAllResponse>(
+        SUPPLIER_ENDPOINTS.SEARCH_ALL,
+        requestBody,
+      );
+
+      return this.normalizeEmptySupplierSearchAllResponse(response);
+    } catch (error) {
+      logger.error("Erro ao pesquisar fornecedores", error);
+      throw error;
+    }
+  }
+
+  // --- Find Manager All (V2) ---
+
+  async findManagerAllSuppliers(
+    params: Partial<SupplierFindManagerAllRequest> = {},
+  ): Promise<SupplierFindManagerAllResponse> {
+    try {
+      const validatedParams =
+        SupplierFindManagerAllSchema.partial().parse(params);
+      const requestBody = this.buildBasePayload({
+        pe_system_client_id: validatedParams.pe_system_client_id,
+        pe_organization_id: validatedParams.pe_organization_id,
+        pe_user_id: validatedParams.pe_user_id,
+        pe_user_name: validatedParams.pe_user_name,
+        pe_user_role: validatedParams.pe_user_role,
+        pe_person_id: validatedParams.pe_person_id,
+        pe_search: validatedParams.pe_search ?? "",
+        pe_status_id: validatedParams.pe_status_id ?? 0,
+        pe_qt_records: validatedParams.pe_qt_records ?? 100,
+        pe_page_id: validatedParams.pe_page_id ?? 0,
+        pe_column_id: validatedParams.pe_column_id ?? 2,
+        pe_order_id: validatedParams.pe_order_id ?? 2,
+      });
+
+      const response = await this.post<SupplierFindManagerAllResponse>(
+        SUPPLIER_ENDPOINTS.FIND_MANAGER_ALL,
+        requestBody,
+      );
+
+      return this.normalizeEmptySupplierFindManagerAllResponse(response);
+    } catch (error) {
+      logger.error("Erro ao listar fornecedores (manager)", error);
       throw error;
     }
   }
@@ -296,6 +367,44 @@ export class SupplierServiceApi extends BaseApiService {
     return response;
   }
 
+  private normalizeEmptySupplierSearchAllResponse(
+    response: SupplierSearchAllResponse,
+  ): SupplierSearchAllResponse {
+    if (
+      response.statusCode === API_STATUS_CODES.NOT_FOUND ||
+      response.statusCode === API_STATUS_CODES.EMPTY_RESULT
+    ) {
+      return {
+        ...response,
+        statusCode: API_STATUS_CODES.SUCCESS,
+        quantity: 0,
+        data: {
+          "Supplier find All": [],
+        },
+      };
+    }
+    return response;
+  }
+
+  private normalizeEmptySupplierFindManagerAllResponse(
+    response: SupplierFindManagerAllResponse,
+  ): SupplierFindManagerAllResponse {
+    if (
+      response.statusCode === API_STATUS_CODES.NOT_FOUND ||
+      response.statusCode === API_STATUS_CODES.EMPTY_RESULT
+    ) {
+      return {
+        ...response,
+        statusCode: API_STATUS_CODES.SUCCESS,
+        quantity: 0,
+        data: {
+          "Supplier find manager All": [],
+        },
+      };
+    }
+    return response;
+  }
+
   private normalizeEmptySupplierRelFindProdAllResponse(
     response: SupplierRelFindProdAllResponse,
   ): SupplierRelFindProdAllResponse {
@@ -319,6 +428,18 @@ export class SupplierServiceApi extends BaseApiService {
 
   extractSuppliers(response: SupplierFindAllResponse): SupplierListItem[] {
     return response.data?.["Supplier find All"] ?? [];
+  }
+
+  extractSearchSuppliers(
+    response: SupplierSearchAllResponse,
+  ): SupplierSearchListItem[] {
+    return response.data?.["Supplier find All"] ?? [];
+  }
+
+  extractManagerAllSuppliers(
+    response: SupplierFindManagerAllResponse,
+  ): SupplierSearchListItem[] {
+    return response.data?.["Supplier find manager All"] ?? [];
   }
 
   extractSupplierById(
@@ -351,6 +472,24 @@ export class SupplierServiceApi extends BaseApiService {
       isApiSuccess(response.statusCode) &&
       response.data &&
       Array.isArray(response.data["Supplier find All"])
+    );
+  }
+
+  isValidSupplierSearchList(response: SupplierSearchAllResponse): boolean {
+    return (
+      isApiSuccess(response.statusCode) &&
+      response.data &&
+      Array.isArray(response.data["Supplier find All"])
+    );
+  }
+
+  isValidSupplierManagerList(
+    response: SupplierFindManagerAllResponse,
+  ): boolean {
+    return (
+      isApiSuccess(response.statusCode) &&
+      response.data &&
+      Array.isArray(response.data["Supplier find manager All"])
     );
   }
 
