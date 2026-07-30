@@ -1,4 +1,12 @@
-export { CarrierServiceApi, carrierServiceApi } from "./carrier-service-api";
+export {
+  CarrierServiceApi,
+  carrierServiceApi,
+  type GetCarriersPageParams,
+  getCarrierById,
+  getCarriersPage,
+} from "./carrier-service-api";
+
+export type { UICarrier } from "./transformers/transformers";
 
 export type {
   CarrierCreateRequest,

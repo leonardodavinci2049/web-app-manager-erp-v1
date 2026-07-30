@@ -9,6 +9,11 @@ import {
 } from "@/core/constants/api-constants";
 import { createLogger } from "@/core/logger";
 import { BaseApiService } from "@/lib/axios/base-api-service";
+import {
+  transformCarrier,
+  transformCarrierList,
+  type UICarrier,
+} from "./transformers/transformers";
 
 import type {
   CarrierCreateRequest,
@@ -367,3 +372,78 @@ export class CarrierServiceApi extends BaseApiService {
 }
 
 export const carrierServiceApi = new CarrierServiceApi();
+
+export interface GetCarriersPageParams {
+  search?: string;
+  statusId?: number;
+  page?: number;
+  pageSize?: number;
+  columnId?: number;
+  orderId?: number;
+  pe_system_client_id?: number;
+  pe_organization_id?: string;
+  pe_user_id?: string;
+  pe_user_name?: string;
+  pe_user_role?: string;
+  pe_person_id?: number;
+}
+
+export async function getCarriersPage(
+  params: GetCarriersPageParams = {},
+): Promise<{ items: UICarrier[]; total: number }> {
+  if (!params.pe_system_client_id) {
+    return { items: [], total: 0 };
+  }
+
+  const response = await carrierServiceApi.findManagerAllCarriers({
+    pe_search: params.search ?? "",
+    pe_status_id: params.statusId ?? 0,
+    pe_qt_records: params.pageSize ?? 50,
+    pe_page_id: params.page ?? 0,
+    pe_column_id: params.columnId ?? 2,
+    pe_order_id: params.orderId ?? 2,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
+
+  const carriers = carrierServiceApi.extractManagerAllCarriers(response);
+  const filteredTotal = Number(response.recordId);
+
+  return {
+    items: transformCarrierList(carriers),
+    total:
+      Number.isFinite(filteredTotal) && filteredTotal >= 0
+        ? filteredTotal
+        : (response.quantity ?? carriers.length),
+  };
+}
+
+export async function getCarrierById(
+  id: number,
+  params: {
+    pe_system_client_id?: number;
+    pe_organization_id?: string;
+    pe_user_id?: string;
+    pe_user_name?: string;
+    pe_user_role?: string;
+    pe_person_id?: number;
+  } = {},
+): Promise<UICarrier | undefined> {
+  if (!params.pe_system_client_id) return undefined;
+
+  const response = await carrierServiceApi.findCarrierById({
+    pe_carrier_id: id,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
+  const carrier = carrierServiceApi.extractCarrierById(response);
+  return transformCarrier(carrier) ?? undefined;
+}
