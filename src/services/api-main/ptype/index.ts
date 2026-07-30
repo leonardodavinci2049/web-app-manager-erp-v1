@@ -1,4 +1,13 @@
-export { PtypeServiceApi, ptypeServiceApi } from "./ptype-service-api";
+export {
+  type GetPtypesPageParams,
+  getPtypeById,
+  getPtypes,
+  getPtypesPage,
+  PtypeServiceApi,
+  ptypeServiceApi,
+} from "./ptype-service-api";
+
+export type { UIPtype } from "./transformers/transformers";
 
 export type {
   PtypeCreateRequest,
