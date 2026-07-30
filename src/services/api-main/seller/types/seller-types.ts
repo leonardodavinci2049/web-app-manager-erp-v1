@@ -14,7 +14,7 @@ interface SellerBaseRequest {
 interface SellerBaseResponse {
   statusCode: number;
   message: string;
-  recordId: number;
+  recordId: number | string;
   quantity: number;
   errorId: number;
   info1?: string;

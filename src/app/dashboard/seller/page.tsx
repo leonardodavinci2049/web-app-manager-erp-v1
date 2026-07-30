@@ -1,19 +1,63 @@
-import DevelopmentPage from "@/components/common/DevelopmentPage";
-import { SiteHeaderWithBreadcrumb } from "../_components/header/site-header-with-breadcrumb";
+import { connection } from "next/server";
+import { SiteHeaderWithBreadcrumb } from "@/components/dashboard/header/site-header-with-breadcrumb";
+import { createLogger } from "@/core/logger";
+import { getAuthContext } from "@/server/auth-context";
+import { getSellersPage } from "@/services/api-main/seller";
+import {
+  mapSellerFiltersToApi,
+  parseSellerSearchParams,
+  SellerDashboard,
+} from "./_components";
 
-const SellerPage = () => {
+const logger = createLogger("SellerDashboardPage");
+
+interface SellerPageProps {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}
+
+export default async function SellerPage({ searchParams }: SellerPageProps) {
+  await connection();
+  const rawSearchParams = await searchParams;
+  const searchState = parseSellerSearchParams(rawSearchParams);
+  const apiFilters = mapSellerFiltersToApi(searchState);
+  const { apiContext } = await getAuthContext();
+
+  let hasLoadError = false;
+  const result = await getSellersPage({
+    search: searchState.search,
+    page: searchState.page,
+    pageSize: searchState.limit,
+    ...apiFilters,
+    ...apiContext,
+  }).catch((error) => {
+    hasLoadError = true;
+    logger.error("Erro ao carregar vendedores", error);
+    return { items: [], total: 0 };
+  });
+
   return (
     <>
       <SiteHeaderWithBreadcrumb
-        title="Dashboard"
+        title="Vendedores"
         breadcrumbItems={[
-          { label: "Dashboard", href: "#" },
-          { label: "Cadastro de Vendedores", isActive: true },
+          { label: "Dashboard", href: "/dashboard" },
+          { label: "Vendedores", isActive: true },
         ]}
       />
-      <DevelopmentPage />
+      <div className="flex flex-1 flex-col">
+        <div className="@container/main flex flex-1 flex-col gap-6">
+          <div className="flex flex-col gap-6 py-6">
+            <div className="px-3 lg:px-6">
+              <SellerDashboard
+                items={result.items}
+                total={result.total}
+                searchState={searchState}
+                hasLoadError={hasLoadError}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
     </>
   );
-};
-
-export default SellerPage;
+}
