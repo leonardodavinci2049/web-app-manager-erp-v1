@@ -51,114 +51,41 @@ const data = {
       isActive: true,
       items: [
         {
-          title: "Catalogo de Produtos",
+          title: "Produtos",
           url: "/dashboard/catalog",
         },
         {
-          title: "Central de Categorias",
+          title: "Categorias",
           url: "/dashboard/category",
         },
         {
-          title: "Central das Marcas",
+          title: "Clientes",
+          url: "/dashboard/customer",
+        },
+        {
+          title: "Vendedores",
+          url: "/dashboard/seller",
+        },
+        {
+          title: "Marcas",
           url: "/dashboard/brand",
         },
+
+        {
+          title: "Tipos de produtos",
+          url: "/dashboard/ptype",
+        },
+        {
+          title: "Fornecedores",
+          url: "/dashboard/suppliers",
+        },
+        {
+          title: "Transportadoras",
+          url: "/dashboard/carriers",
+        },
       ],
     },
 
-    {
-      title: "Clientes",
-      url: "#",
-      icon: Users,
-      items: [
-        {
-          title: "Lista de Clientes",
-          url: "/dashboard/customer/customer-list",
-        },
-
-        {
-          title: "Novo Cadastro",
-          url: "/dashboard/customer/add-customer",
-        },
-
-        {
-          title: "Clientes Premium",
-          url: "/dashboard/customer/premium-customers",
-        },
-
-        {
-          title: "Clientes Inativos",
-          url: "/dashboard/customer/inactive-customers",
-        },
-        {
-          title: "Cadastro Pendente",
-          url: "/dashboard/customer/pending-registrations",
-        },
-      ],
-    },
-    {
-      title: "Marcas",
-      url: "#",
-      icon: Tags,
-      items: [
-        {
-          title: "Lista de Marcas",
-          url: "/dashboard/development",
-        },
-
-        {
-          title: "Nova Marca",
-          url: "/dashboard/development",
-        },
-      ],
-    },
-    {
-      title: "Fornecedores",
-      url: "#",
-      icon: Handshake,
-      items: [
-        {
-          title: "Lista de Fornecedores",
-          url: "/dashboard/development",
-        },
-
-        {
-          title: "Nova Fornecedor",
-          url: "/dashboard/development",
-        },
-      ],
-    },
-    {
-      title: "Transportadoras",
-      url: "#",
-      icon: Truck,
-      items: [
-        {
-          title: "Lista de Transportadoras",
-          url: "/dashboard/development",
-        },
-
-        {
-          title: "Nova Transportadora",
-          url: "/dashboard/development",
-        },
-      ],
-    },
-    {
-      title: "Entradas de Produtos",
-      url: "#",
-      icon: Boxes,
-      items: [
-        {
-          title: "Lista Entradas",
-          url: "/dashboard/development",
-        },
-
-        {
-          title: "Nova Entrada",
-          url: "/dashboard/development",
-        },
-      ],
-    },
     {
       title: "Compras",
       url: "#",
@@ -174,6 +101,26 @@ const data = {
         },
         {
           title: "Nova Compra",
+          url: "/dashboard/development",
+        },
+      ],
+    },
+
+    {
+      title: "Entrada de produtos",
+      url: "#",
+      icon: Truck,
+      items: [
+        {
+          title: "Lista de Entrada",
+          url: "/dashboard/development",
+        },
+        {
+          title: "Nova Entrada",
+          url: "/dashboard/development",
+        },
+        {
+          title: "Ajuste de Entrada",
           url: "/dashboard/development",
         },
       ],

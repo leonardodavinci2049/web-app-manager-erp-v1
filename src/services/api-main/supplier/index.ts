@@ -14,6 +14,8 @@ export type {
   SupplierFindAllResponse,
   SupplierFindByIdRequest,
   SupplierFindByIdResponse,
+  SupplierFindManagerAllRequest,
+  SupplierFindManagerAllResponse,
   SupplierListItem,
   SupplierRelCreateRequest,
   SupplierRelCreateResponse,
@@ -22,6 +24,9 @@ export type {
   SupplierRelFindProdAllRequest,
   SupplierRelFindProdAllResponse,
   SupplierRelProdItem,
+  SupplierSearchAllRequest,
+  SupplierSearchAllResponse,
+  SupplierSearchListItem,
   SupplierUpdateRequest,
   SupplierUpdateResponse,
 } from "./types/supplier-types";
