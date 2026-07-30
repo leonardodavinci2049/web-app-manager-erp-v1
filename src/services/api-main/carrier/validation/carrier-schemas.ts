@@ -11,6 +11,31 @@ export const CarrierFindAllSchema = z.object({
   pe_limit: z.number().int().positive().optional(),
 });
 
+export const CarrierSearchAllSchema = z.object({
+  pe_system_client_id: z.number().int().min(0).optional(),
+  pe_organization_id: z.string().max(200).optional(),
+  pe_user_id: z.string().max(200).optional(),
+  pe_user_name: z.string().max(200).optional(),
+  pe_user_role: z.string().max(200).optional(),
+  pe_person_id: z.number().optional(),
+  pe_search: z.string().max(100).optional(),
+});
+
+export const CarrierFindManagerAllSchema = z.object({
+  pe_system_client_id: z.number().int().min(0).optional(),
+  pe_organization_id: z.string().max(200).optional(),
+  pe_user_id: z.string().max(200).optional(),
+  pe_user_name: z.string().max(200).optional(),
+  pe_user_role: z.string().max(200).optional(),
+  pe_person_id: z.number().optional(),
+  pe_search: z.string().max(100).optional(),
+  pe_status_id: z.number().int().min(0).optional(),
+  pe_qt_records: z.number().int().optional(),
+  pe_page_id: z.number().int().optional(),
+  pe_column_id: z.number().int().optional(),
+  pe_order_id: z.number().int().optional(),
+});
+
 export const CarrierFindByIdSchema = z.object({
   pe_system_client_id: z.number().int().min(0).optional(),
   pe_organization_id: z.string().max(200).optional(),
@@ -74,6 +99,10 @@ export const CarrierDeleteSchema = z.object({
 });
 
 export type CarrierFindAllInput = z.infer<typeof CarrierFindAllSchema>;
+export type CarrierSearchAllInput = z.infer<typeof CarrierSearchAllSchema>;
+export type CarrierFindManagerAllInput = z.infer<
+  typeof CarrierFindManagerAllSchema
+>;
 export type CarrierFindByIdInput = z.infer<typeof CarrierFindByIdSchema>;
 export type CarrierCreateInput = z.infer<typeof CarrierCreateSchema>;
 export type CarrierUpdateInput = z.infer<typeof CarrierUpdateSchema>;

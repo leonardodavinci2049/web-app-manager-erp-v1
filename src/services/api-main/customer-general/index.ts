@@ -13,8 +13,13 @@ export type {
   CustomerFindByIdResponse,
   CustomerFindLatestProductsRequest,
   CustomerFindLatestProductsResponse,
+  CustomerFindManagerAllRequest,
+  CustomerFindManagerAllResponse,
   CustomerLatestProduct,
   CustomerListItem,
+  CustomerPersonListItem,
+  CustomerSearchAllRequest,
+  CustomerSearchAllResponse,
   SellerInfo,
   StoredProcedureResponse,
 } from "./types/customer-general-types";

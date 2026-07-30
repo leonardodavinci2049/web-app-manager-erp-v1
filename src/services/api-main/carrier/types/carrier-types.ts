@@ -25,6 +25,19 @@ export interface CarrierFindAllRequest extends CarrierBaseRequest {
   pe_limit?: number;
 }
 
+export interface CarrierSearchAllRequest extends CarrierBaseRequest {
+  pe_search?: string;
+}
+
+export interface CarrierFindManagerAllRequest extends CarrierBaseRequest {
+  pe_search?: string;
+  pe_status_id?: number;
+  pe_qt_records?: number;
+  pe_page_id?: number;
+  pe_column_id?: number;
+  pe_order_id?: number;
+}
+
 export interface CarrierListItem {
   ID_TRANSPORTADORA: number;
   ID_PESSOA_TIPO: number;
@@ -89,6 +102,14 @@ export interface StoredProcedureResponse {
 }
 
 export interface CarrierFindAllResponse extends CarrierBaseResponse {
+  data: Record<string, CarrierListItem[]>;
+}
+
+export interface CarrierSearchAllResponse extends CarrierBaseResponse {
+  data: Record<string, CarrierListItem[]>;
+}
+
+export interface CarrierFindManagerAllResponse extends CarrierBaseResponse {
   data: Record<string, CarrierListItem[]>;
 }
 

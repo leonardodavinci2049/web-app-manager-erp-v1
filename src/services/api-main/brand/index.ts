@@ -10,6 +10,8 @@ export type {
   BrandFindAllResponse,
   BrandFindByIdRequest,
   BrandFindByIdResponse,
+  BrandFindManagerAllRequest,
+  BrandFindManagerAllResponse,
   BrandListItem,
   BrandSearchAllRequest,
   BrandSearchAllResponse,

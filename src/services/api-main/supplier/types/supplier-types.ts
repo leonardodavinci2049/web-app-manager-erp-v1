@@ -36,6 +36,47 @@ export interface SupplierFindAllResponse extends SupplierBaseResponse {
   data: Record<string, SupplierListItem[]>;
 }
 
+// --- Search All (V2) ---
+
+export interface SupplierSearchAllRequest extends SupplierBaseRequest {
+  pe_search?: string;
+}
+
+export interface SupplierSearchListItem {
+  ID_FORNECEDOR: number;
+  FORNECEDOR: string;
+  FONE1: string | null;
+  WHATAPP1: string | null;
+  RAZAO_SOCIAL: string | null;
+  CPF: string | null;
+  CNPJ: string | null;
+  EMAIL: string | null;
+  ID_IMAGEM: number;
+  ULTIMA_COMPRA: string | null;
+  UF: string | null;
+  CIDADE: string | null;
+  DATA_CADASTRO: string | null;
+}
+
+export interface SupplierSearchAllResponse extends SupplierBaseResponse {
+  data: Record<string, SupplierSearchListItem[]>;
+}
+
+// --- Find Manager All (V2) ---
+
+export interface SupplierFindManagerAllRequest extends SupplierBaseRequest {
+  pe_search?: string;
+  pe_status_id?: number;
+  pe_qt_records?: number;
+  pe_page_id?: number;
+  pe_column_id?: number;
+  pe_order_id?: number;
+}
+
+export interface SupplierFindManagerAllResponse extends SupplierBaseResponse {
+  data: Record<string, SupplierSearchListItem[]>;
+}
+
 // --- Find By Id ---
 
 export interface SupplierFindByIdRequest extends SupplierBaseRequest {

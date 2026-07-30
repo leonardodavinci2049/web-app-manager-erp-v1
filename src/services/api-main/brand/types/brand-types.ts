@@ -83,11 +83,24 @@ export interface BrandSearchAllRequest extends BrandBaseRequest {
   pe_limit?: number;
 }
 
+export interface BrandFindManagerAllRequest extends BrandBaseRequest {
+  pe_search?: string;
+  pe_inactive?: number;
+  pe_qt_records?: number;
+  pe_page_id?: number;
+  pe_column_id?: number;
+  pe_order_id?: number;
+}
+
 export interface BrandFindAllResponse extends BrandBaseResponse {
   data: Record<string, BrandListItem[]>;
 }
 
 export interface BrandSearchAllResponse extends BrandBaseResponse {
+  data: Record<string, BrandListItem[]>;
+}
+
+export interface BrandFindManagerAllResponse extends BrandBaseResponse {
   data: Record<string, BrandListItem[]>;
 }
 

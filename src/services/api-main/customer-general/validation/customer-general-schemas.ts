@@ -18,6 +18,32 @@ export const CustomerFindAllSchema = z.object({
   pe_order_id: z.number().int().min(1).max(2).optional(),
 });
 
+export const CustomerSearchAllSchema = z.object({
+  ...baseContextSchema,
+  pe_search: z.string().max(300).optional(),
+});
+
+export const CustomerFindManagerAllSchema = z.object({
+  ...baseContextSchema,
+  pe_search: z.string().max(300).optional(),
+  pe_category_id: z.number().int().min(0).optional(),
+  pe_client_type: z.number().int().min(0).optional(),
+  pe_person_type: z.number().int().min(0).optional(),
+  pe_flag_no_image: z.number().int().min(0).optional(),
+  pe_flag_approved: z.number().int().min(0).optional(),
+  pe_gender_type: z.number().int().min(0).optional(),
+  pe_flag_restricted: z.number().int().min(0).optional(),
+  pe_flag_enabled: z.number().int().min(0).optional(),
+  pe_status_id: z.number().int().min(0).optional(),
+  pe_flag_operation_list: z.number().int().min(0).optional(),
+  pe_start_date: z.string().optional(),
+  pe_end_date: z.string().optional(),
+  pe_qt_records: z.number().int().optional(),
+  pe_page_id: z.number().int().min(0).optional(),
+  pe_column_id: z.number().int().min(0).optional(),
+  pe_order_id: z.number().int().min(1).max(2).optional(),
+});
+
 export const CustomerFindByIdSchema = z.object({
   ...baseContextSchema,
   pe_customer_id: z.number().int().positive(),
@@ -51,6 +77,10 @@ export const CustomerFindLatestProductsSchema = z.object({
 });
 
 export type CustomerFindAllInput = z.infer<typeof CustomerFindAllSchema>;
+export type CustomerSearchAllInput = z.infer<typeof CustomerSearchAllSchema>;
+export type CustomerFindManagerAllInput = z.infer<
+  typeof CustomerFindManagerAllSchema
+>;
 export type CustomerFindByIdInput = z.infer<typeof CustomerFindByIdSchema>;
 export type CustomerCreateInput = z.infer<typeof CustomerCreateSchema>;
 export type CustomerFindLatestProductsInput = z.infer<

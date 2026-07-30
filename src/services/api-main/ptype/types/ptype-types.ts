@@ -25,6 +25,19 @@ export interface PtypeFindAllRequest extends PtypeBaseRequest {
   pe_limit?: number;
 }
 
+export interface PtypeSearchAllRequest extends PtypeBaseRequest {
+  pe_search?: string;
+}
+
+export interface PtypeFindManagerAllRequest extends PtypeBaseRequest {
+  pe_search?: string;
+  pe_status_id?: number;
+  pe_qt_records?: number;
+  pe_page_id?: number;
+  pe_column_id?: number;
+  pe_order_id?: number;
+}
+
 export interface PtypeListItem {
   ID_TIPO: number;
   TIPO: string;
@@ -65,6 +78,14 @@ export interface StoredProcedureResponse {
 }
 
 export interface PtypeFindAllResponse extends PtypeBaseResponse {
+  data: Record<string, PtypeListItem[]>;
+}
+
+export interface PtypeSearchAllResponse extends PtypeBaseResponse {
+  data: Record<string, PtypeListItem[]>;
+}
+
+export interface PtypeFindManagerAllResponse extends PtypeBaseResponse {
   data: Record<string, PtypeListItem[]>;
 }
 
