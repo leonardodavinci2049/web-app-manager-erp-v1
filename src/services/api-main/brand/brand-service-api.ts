@@ -468,7 +468,7 @@ export interface GetBrandsPageParams {
 
 /**
  * Leitura paginada de marcas para a central de marcas. Baseada em
- * `findAllBrands`, retorna `{ brands, total }` onde `total` e' derivado do
+ * `findManagerAllBrands`, retorna `{ brands, total }` onde `total` e' derivado do
  * contrato de paginacao do endpoint (`recordId`) com fallback seguro para
  * `quantity` ou a quantidade carregada. Sem cache.
  */
@@ -479,7 +479,7 @@ export async function getBrandsPage(
     return { brands: [], total: 0 };
   }
 
-  const response = await brandServiceApi.findAllBrands({
+  const response = await brandServiceApi.findManagerAllBrands({
     pe_search: params.search ?? "",
     pe_inactive: 0,
     pe_qt_records: params.pageSize ?? 50,
@@ -492,7 +492,7 @@ export async function getBrandsPage(
     pe_person_id: params.pe_person_id,
   });
 
-  const brands = brandServiceApi.extractBrands(response);
+  const brands = brandServiceApi.extractManagerAllBrands(response);
   const filteredTotal = Number(response.recordId);
 
   return {
