@@ -156,12 +156,18 @@ export function CustomerFilterPanel({
   ) => setDraft((current) => ({ ...current, [key]: value }));
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (nextOpen) setDraft(filters);
+        onOpenChange(nextOpen);
+      }}
+    >
       <SheetTrigger asChild>
         <Button
           type="button"
           variant={filterCount > 0 ? "default" : "outline"}
-          className="h-11 shrink-0 gap-1.5 px-3 shadow-sm sm:px-4"
+          className="hidden h-11 shrink-0 gap-1.5 px-3 shadow-sm sm:px-4 md:inline-flex"
         >
           <Filter className="size-4" />
           <span className="hidden sm:inline">Filtros e ordenação</span>

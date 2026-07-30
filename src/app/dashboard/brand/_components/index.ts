@@ -8,8 +8,11 @@ export {
 export type {
   BrandActionResult,
   BrandDetailData,
+  BrandOrder,
+  BrandPageLimit,
   BrandProductDto,
   BrandSearchParams,
+  BrandSort,
   BrandViewMode,
 } from "./types/brand-dashboard-types";
 export {

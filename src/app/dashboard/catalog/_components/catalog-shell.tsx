@@ -17,7 +17,7 @@ interface CatalogShellProps {
   newProductTaxonomy: NewProductTaxonomyOption[];
   isNewProductTaxonomyAvailable: boolean;
   catalogReturnTo: string;
-  limit: number;
+  hasProductsLoadError: boolean;
 }
 
 /**
@@ -35,7 +35,7 @@ export function CatalogShell({
   newProductTaxonomy,
   isNewProductTaxonomyAvailable,
   catalogReturnTo,
-  limit,
+  hasProductsLoadError,
 }: CatalogShellProps) {
   return (
     <CatalogToolbar
@@ -51,7 +51,8 @@ export function CatalogShell({
           products={products}
           viewMode="grid"
           catalogReturnTo={catalogReturnTo}
-          limit={limit}
+          total={total}
+          hasLoadError={hasProductsLoadError}
         />
       }
       list={
@@ -59,7 +60,8 @@ export function CatalogShell({
           products={products}
           viewMode="list"
           catalogReturnTo={catalogReturnTo}
-          limit={limit}
+          total={total}
+          hasLoadError={hasProductsLoadError}
         />
       }
     />

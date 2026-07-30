@@ -1,4 +1,4 @@
-import { PackageSearch, SearchX } from "lucide-react";
+import { PackageSearch, SearchX, TriangleAlert } from "lucide-react";
 import type { UIBrand } from "@/services/api-main/brand/transformers/transformers";
 import { buildBrandUrl } from "../lib/search-params";
 import type {
@@ -16,10 +16,11 @@ interface BrandCollectionProps {
   searchState: BrandSearchParams;
   pathname: string;
   viewMode: BrandViewMode;
+  hasLoadError: boolean;
 }
 
 const GRID_CLASS =
-  "grid grid-cols-2 gap-2 sm:grid-cols-[repeat(auto-fill,minmax(160px,1fr))] sm:gap-3 lg:gap-4";
+  "grid grid-cols-2 gap-2 sm:grid-cols-[repeat(auto-fill,minmax(190px,1fr))] sm:gap-3 lg:gap-4";
 const LIST_CLASS = "space-y-2 sm:space-y-3";
 const EAGER_IMAGE_COUNT = 6;
 
@@ -35,12 +36,24 @@ export function BrandCollection({
   searchState,
   pathname,
   viewMode,
+  hasLoadError,
 }: BrandCollectionProps) {
   const buildDetailHref = (brandId: number) =>
-    buildBrandUrl(
-      { search: searchState.search, page: searchState.page, brandId },
-      pathname,
+    buildBrandUrl({ ...searchState, brandId, productPage: 0 }, pathname);
+
+  if (hasLoadError) {
+    return (
+      <div className="flex flex-col items-center py-16 text-center">
+        <TriangleAlert className="text-destructive mb-4 size-14" />
+        <h2 className="text-lg font-semibold">
+          Não foi possível carregar as marcas
+        </h2>
+        <p className="text-muted-foreground mt-2 max-w-md text-sm">
+          Atualize a página para tentar novamente. A pesquisa foi preservada.
+        </p>
+      </div>
     );
+  }
 
   if (total === 0) {
     const hasSearch = searchState.search.trim() !== "";

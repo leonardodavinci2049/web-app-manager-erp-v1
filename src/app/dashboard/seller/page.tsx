@@ -1,5 +1,6 @@
 import { connection } from "next/server";
 import { SiteHeaderWithBreadcrumb } from "@/components/dashboard/header/site-header-with-breadcrumb";
+import { RegistryPageShell } from "@/components/registry";
 import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
 import { getSellersPage } from "@/services/api-main/seller";
@@ -44,20 +45,17 @@ export default async function SellerPage({ searchParams }: SellerPageProps) {
           { label: "Vendedores", isActive: true },
         ]}
       />
-      <div className="flex flex-1 flex-col">
-        <div className="@container/main flex flex-1 flex-col gap-6">
-          <div className="flex flex-col gap-6 py-6">
-            <div className="px-3 lg:px-6">
-              <SellerDashboard
-                items={result.items}
-                total={result.total}
-                searchState={searchState}
-                hasLoadError={hasLoadError}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
+      <RegistryPageShell
+        title="Vendedores"
+        description="Consulte vendedores, contatos, documentos e informações da conta."
+      >
+        <SellerDashboard
+          items={result.items}
+          total={result.total}
+          searchState={searchState}
+          hasLoadError={hasLoadError}
+        />
+      </RegistryPageShell>
     </>
   );
 }

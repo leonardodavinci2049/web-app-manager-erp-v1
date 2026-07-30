@@ -1,4 +1,6 @@
-import { Package } from "lucide-react";
+import { Package, TriangleAlert } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import type { UIProductManager } from "@/services/api-main/product-manager/transformers/transformers";
 import { ProductCard } from "../product-card/product-card";
 import { ProductTable } from "../product-table";
@@ -9,7 +11,8 @@ interface ProductGridProps {
   products: UIProductManager[];
   viewMode: ViewMode;
   catalogReturnTo: string;
-  limit: number;
+  total: number;
+  hasLoadError: boolean;
 }
 
 const GRID_CLASS =
@@ -25,8 +28,27 @@ export function ProductGrid({
   products,
   viewMode,
   catalogReturnTo,
-  limit,
+  total,
+  hasLoadError,
 }: ProductGridProps) {
+  if (hasLoadError) {
+    return (
+      <div className="flex flex-col items-center py-16 text-center">
+        <TriangleAlert className="text-destructive mb-4 size-14" />
+        <h2 className="text-lg font-semibold">
+          Não foi possível carregar os produtos
+        </h2>
+        <p className="text-muted-foreground mt-2 max-w-md text-sm">
+          O catálogo não recebeu uma resposta válida. Os filtros atuais foram
+          preservados.
+        </p>
+        <Button asChild variant="outline" className="mt-5">
+          <Link href={catalogReturnTo}>Tentar novamente</Link>
+        </Button>
+      </div>
+    );
+  }
+
   if (products.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -42,7 +64,7 @@ export function ProductGrid({
     );
   }
 
-  const hasMore = products.length >= limit;
+  const hasMore = products.length < total;
 
   return (
     <div className="space-y-4">
@@ -81,13 +103,16 @@ export function ProductGrid({
       )}
 
       {hasMore ? (
-        <div className="flex justify-center pt-4">
+        <div className="flex flex-col items-center gap-2 pt-4">
+          <p className="text-muted-foreground text-xs tabular-nums">
+            Exibindo {products.length} de {total} produtos
+          </p>
           <LoadMoreButton />
         </div>
       ) : (
         <div className="py-4 text-center">
           <p className="text-muted-foreground text-sm">
-            Todos os produtos foram carregados
+            Exibindo todos os {total} produtos
           </p>
         </div>
       )}

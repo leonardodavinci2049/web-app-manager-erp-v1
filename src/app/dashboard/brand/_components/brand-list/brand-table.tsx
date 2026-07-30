@@ -24,7 +24,7 @@ interface BrandTableProps {
 export function BrandTable({ brands, buildDetailHref }: BrandTableProps) {
   return (
     <div className="overflow-x-auto rounded-lg border">
-      <Table>
+      <Table aria-label="Lista de marcas">
         <TableHeader className="bg-muted/50">
           <TableRow>
             <TableHead className="w-16">Imagem</TableHead>

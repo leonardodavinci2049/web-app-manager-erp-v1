@@ -1,5 +1,6 @@
 import { connection } from "next/server";
 import { SiteHeaderWithBreadcrumb } from "@/components/dashboard/header/site-header-with-breadcrumb";
+import { RegistryPageShell } from "@/components/registry";
 import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
 import { getBrands } from "@/services/api-main/brand/brand-service-api";
@@ -37,6 +38,7 @@ export default async function CatalogPage(props: CatalogPageProps) {
   const rawPage = Number(searchParams.page);
   const page = Number.isInteger(rawPage) && rawPage >= 0 ? rawPage : 0;
   const catalogReturnTo = buildCatalogReturnTo(searchParams, CATALOG_PATHNAME);
+  let hasProductsLoadError = false;
 
   const [productsResult, brands, categories, ptypes, newProductTaxonomy] =
     await Promise.all([
@@ -74,6 +76,7 @@ export default async function CatalogPage(props: CatalogPageProps) {
         orderId: sort.orderId,
         ...apiContext,
       }).catch((error) => {
+        hasProductsLoadError = true;
         logger.error("Erro ao buscar produtos do Manager:", error);
         return {
           products: [],
@@ -128,31 +131,26 @@ export default async function CatalogPage(props: CatalogPageProps) {
       <SiteHeaderWithBreadcrumb
         title="Catálogo de Produtos"
         breadcrumbItems={[
-          { label: "Dashboard", href: "/Catálogo de Produtos" },
+          { label: "Dashboard", href: "/dashboard" },
           { label: "Cadastro de Produtos", isActive: true },
         ]}
       />
-      <div className="flex flex-1 flex-col">
-        <div className="@container/main flex flex-1 flex-col gap-4">
-          <div className="flex flex-col gap-4 py-3">
-            <div className="px-3 lg:px-6">
-              <div className="space-y-4">
-                <CatalogShell
-                  products={products}
-                  total={total}
-                  brands={brands}
-                  categories={categories}
-                  ptypes={ptypes}
-                  newProductTaxonomy={newProductTaxonomy.options}
-                  isNewProductTaxonomyAvailable={newProductTaxonomy.available}
-                  catalogReturnTo={catalogReturnTo}
-                  limit={limit}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <RegistryPageShell
+        title="Catálogo de produtos"
+        description="Consulte, filtre e mantenha os produtos disponíveis no catálogo."
+      >
+        <CatalogShell
+          products={products}
+          total={total}
+          brands={brands}
+          categories={categories}
+          ptypes={ptypes}
+          newProductTaxonomy={newProductTaxonomy.options}
+          isNewProductTaxonomyAvailable={newProductTaxonomy.available}
+          catalogReturnTo={catalogReturnTo}
+          hasProductsLoadError={hasProductsLoadError}
+        />
+      </RegistryPageShell>
     </>
   );
 }

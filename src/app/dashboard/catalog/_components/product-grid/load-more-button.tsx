@@ -28,6 +28,7 @@ export function LoadMoreButton() {
       onClick={handleClick}
       disabled={isPending}
       className="min-w-[200px]"
+      aria-live="polite"
     >
       {isPending ? "Carregando..." : "Carregar mais produtos"}
     </Button>

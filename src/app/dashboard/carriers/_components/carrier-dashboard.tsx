@@ -35,16 +35,5 @@ export function CarrierDashboard({
     />
   );
 
-  return (
-    <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-bold">Transportadoras</h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Gerencie transportadoras, contatos e dados fiscais usados nas
-          entregas.
-        </p>
-      </div>
-      <CarrierToolbar searchState={searchState} grid={grid} list={list} />
-    </div>
-  );
+  return <CarrierToolbar searchState={searchState} grid={grid} list={list} />;
 }

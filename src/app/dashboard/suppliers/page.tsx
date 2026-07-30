@@ -1,5 +1,6 @@
 import { connection } from "next/server";
 import { SiteHeaderWithBreadcrumb } from "@/components/dashboard/header/site-header-with-breadcrumb";
+import { RegistryPageShell } from "@/components/registry";
 import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
 import { getSuppliersPage } from "@/services/api-main/supplier";
@@ -48,20 +49,17 @@ export default async function SupplierPage({
           { label: "Fornecedores", isActive: true },
         ]}
       />
-      <div className="flex flex-1 flex-col">
-        <div className="@container/main flex flex-1 flex-col gap-6">
-          <div className="flex flex-col gap-6 py-6">
-            <div className="px-3 lg:px-6">
-              <SupplierDashboard
-                items={result.items}
-                total={result.total}
-                searchState={searchState}
-                hasLoadError={hasLoadError}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
+      <RegistryPageShell
+        title="Fornecedores"
+        description="Consulte e mantenha os fornecedores utilizados nas operações de compra."
+      >
+        <SupplierDashboard
+          items={result.items}
+          total={result.total}
+          searchState={searchState}
+          hasLoadError={hasLoadError}
+        />
+      </RegistryPageShell>
     </>
   );
 }

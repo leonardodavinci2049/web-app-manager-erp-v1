@@ -71,7 +71,7 @@ function SellerCard({
           className={
             horizontal
               ? "flex items-start gap-3 p-3"
-              : "flex h-full flex-col gap-4 p-4"
+              : "flex h-full flex-col gap-3 p-3 sm:p-4"
           }
         >
           <SellerImage
@@ -95,7 +95,7 @@ function SellerCard({
               className={
                 horizontal
                   ? "hidden gap-2 text-xs sm:grid sm:grid-cols-2"
-                  : "grid gap-2 text-xs"
+                  : "grid gap-2 text-xs [&>*:nth-child(n+3)]:hidden"
               }
             >
               <p className="flex items-center gap-2 truncate">
@@ -193,7 +193,7 @@ export function SellerCollection({
           <p className="font-medium">Esta página não possui registros.</p>
         </div>
       ) : viewMode === "grid" ? (
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-[repeat(auto-fill,minmax(190px,1fr))] sm:gap-3 lg:gap-4">
           {items.map((seller) => (
             <SellerCard
               key={seller.id}
@@ -216,7 +216,7 @@ export function SellerCollection({
             ))}
           </div>
           <div className="hidden overflow-x-auto rounded-xl border lg:block">
-            <Table>
+            <Table aria-label="Lista de vendedores">
               <TableHeader className="bg-muted/50">
                 <TableRow>
                   <TableHead className="w-16">Imagem</TableHead>

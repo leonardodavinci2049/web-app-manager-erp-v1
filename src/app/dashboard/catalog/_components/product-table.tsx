@@ -47,7 +47,7 @@ function parseCategories(raw?: string): ProductCategory[] {
 export function ProductTable({ products, catalogReturnTo }: ProductTableProps) {
   return (
     <div className="overflow-x-auto rounded-lg border">
-      <Table>
+      <Table aria-label="Lista de produtos">
         <TableHeader className="bg-muted/50">
           <TableRow>
             <TableHead className="w-[40%] min-w-72">Produto</TableHead>

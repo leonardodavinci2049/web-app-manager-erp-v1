@@ -1,7 +1,13 @@
 "use client";
 
 import { Filter, Search, X } from "lucide-react";
-import { type FormEvent, type ReactNode, useEffect, useState } from "react";
+import {
+  type FormEvent,
+  type ReactNode,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -55,10 +61,7 @@ interface FilterPanelProps {
   panelActiveFilters: PanelActiveFilter[];
   panelFilterCount: number;
   onOpenChange: (open: boolean) => void;
-  onFilterChange: <K extends PanelFilterType>(
-    key: K,
-    value: CatalogFilters[K],
-  ) => void;
+  onApplyFilters: (filters: CatalogFilters) => void;
   onClearPanelFilters: () => void;
   onRemovePanelFilter: (filterType: PanelFilterType) => void;
 }
@@ -402,7 +405,7 @@ function FilterGroup({
 
 /** Painel lateral com todos os filtros de dados do catalogo. */
 export function FilterPanel({
-  filters,
+  filters: appliedFilters,
   categories,
   brands,
   ptypes,
@@ -411,17 +414,39 @@ export function FilterPanel({
   panelActiveFilters,
   panelFilterCount,
   onOpenChange,
-  onFilterChange,
+  onApplyFilters,
   onClearPanelFilters,
   onRemovePanelFilter,
 }: FilterPanelProps) {
+  const [filters, setFilters] = useState(appliedFilters);
+
+  useEffect(() => {
+    setFilters(appliedFilters);
+  }, [appliedFilters]);
+
+  const onFilterChange = <Key extends PanelFilterType>(
+    key: Key,
+    value: CatalogFilters[Key],
+  ) => setFilters((current) => ({ ...current, [key]: value }));
+
+  const hasDraftChanges = useMemo(
+    () => JSON.stringify(filters) !== JSON.stringify(appliedFilters),
+    [appliedFilters, filters],
+  );
+
   const hasValidRegistrationPeriod =
     filters.startDate !== "" &&
     filters.endDate !== "" &&
     filters.startDate <= filters.endDate;
 
   return (
-    <Sheet open={isOpen} onOpenChange={onOpenChange}>
+    <Sheet
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (open) setFilters(appliedFilters);
+        onOpenChange(open);
+      }}
+    >
       <SheetTrigger asChild>
         <Button
           type="button"
@@ -673,7 +698,7 @@ export function FilterPanel({
                     label="Data inicial"
                     value={filters.startDate}
                     max={filters.endDate || undefined}
-                    disabled={isLoading || filters.operationList !== 1}
+                    disabled={isLoading}
                     onChange={(value) => onFilterChange("startDate", value)}
                   />
                   <DateFilterInput
@@ -681,7 +706,7 @@ export function FilterPanel({
                     label="Data final"
                     value={filters.endDate}
                     min={filters.startDate || undefined}
-                    disabled={isLoading || filters.operationList !== 1}
+                    disabled={isLoading}
                     onChange={(value) => onFilterChange("endDate", value)}
                   />
                 </div>
@@ -778,16 +803,32 @@ export function FilterPanel({
         </Tabs>
 
         <SheetFooter className="supports-[backdrop-filter]:bg-background/80 shrink-0 border-t bg-background/95 p-3 backdrop-blur">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onClearPanelFilters}
-            className="w-full"
-            disabled={isLoading || panelFilterCount === 0}
-          >
-            <X className="h-4 w-4" />
-            Limpar filtros
-          </Button>
+          <div className="flex w-full gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                onClearPanelFilters();
+                onOpenChange(false);
+              }}
+              className="flex-1"
+              disabled={isLoading || panelFilterCount === 0}
+            >
+              <X className="h-4 w-4" />
+              Limpar
+            </Button>
+            <Button
+              type="button"
+              className="flex-1"
+              disabled={isLoading || !hasDraftChanges}
+              onClick={() => {
+                onApplyFilters(filters);
+                onOpenChange(false);
+              }}
+            >
+              Aplicar filtros
+            </Button>
+          </div>
         </SheetFooter>
       </SheetContent>
     </Sheet>

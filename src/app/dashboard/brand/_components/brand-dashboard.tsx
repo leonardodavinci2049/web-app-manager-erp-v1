@@ -16,6 +16,7 @@ interface BrandDashboardProps {
   productPageSize: number;
   searchState: BrandSearchParams;
   detail: BrandDetailData | undefined;
+  hasLoadError: boolean;
 }
 
 /**
@@ -31,6 +32,7 @@ export function BrandDashboard({
   productPageSize,
   searchState,
   detail,
+  hasLoadError,
 }: BrandDashboardProps) {
   const grid = (
     <BrandCollection
@@ -40,6 +42,7 @@ export function BrandDashboard({
       searchState={searchState}
       pathname={BRAND_PATHNAME}
       viewMode="grid"
+      hasLoadError={hasLoadError}
     />
   );
 
@@ -51,18 +54,12 @@ export function BrandDashboard({
       searchState={searchState}
       pathname={BRAND_PATHNAME}
       viewMode="list"
+      hasLoadError={hasLoadError}
     />
   );
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-bold">Marcas</h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Crie, edite e gerencie as marcas dos seus produtos.
-        </p>
-      </div>
-
       <BrandToolbar searchState={searchState} grid={grid} list={list} />
 
       <BrandDetailSheet

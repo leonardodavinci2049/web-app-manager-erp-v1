@@ -1,6 +1,6 @@
 "use client";
 
-import { PackagePlus } from "lucide-react";
+import { FolderTree, PackagePlus } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   type ReactNode,
@@ -11,11 +11,17 @@ import {
   useState,
   useTransition,
 } from "react";
+import {
+  RegistryMobileBottomBar,
+  RegistryResults,
+  RegistrySearch,
+  RegistryViewModeToggle,
+  useRegistryViewMode,
+} from "@/components/registry";
 import { Button } from "@/components/ui/button";
 import type { UIBrand } from "@/services/api-main/brand/transformers/transformers";
 import type { UIProductManager } from "@/services/api-main/product-manager/transformers/transformers";
 import type { UIPtype } from "@/services/api-main/ptype/transformers/transformers";
-import { CatalogMobileBottomBar } from "../catalog-mobile-bottom-bar";
 import {
   buildCatalogUrl,
   parseCatalogSearchParams,
@@ -27,12 +33,9 @@ import type {
   CategoryOption,
   NewProductTaxonomyOption,
   PanelFilterType,
-  ViewMode,
 } from "../types/catalog-types";
 import { CatalogActiveFiltersPanel } from "./catalog-active-filters-panel";
-import { CatalogSearch } from "./catalog-search";
 import { FilterPanel } from "./filter-panel/filter-panel";
-import { ViewModeToggle } from "./view-mode-toggle";
 
 const VIEW_MODE_STORAGE_KEY = "catalog:product-view-mode";
 
@@ -335,64 +338,43 @@ export function CatalogToolbar({
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [pathname, router]);
 
-  const [viewMode, setViewMode] = useState<ViewMode>("grid");
-  const [hydrated, setHydrated] = useState(false);
-
-  useEffect(() => {
-    try {
-      const stored = window.localStorage.getItem(VIEW_MODE_STORAGE_KEY);
-      if (stored === "list" || stored === "grid") setViewMode(stored);
-    } catch {
-      // Storage can be unavailable in private browsing contexts.
-    }
-    setHydrated(true);
-  }, []);
-
-  const handleViewModeChange = useCallback((mode: ViewMode) => {
-    setViewMode(mode);
-    try {
-      window.localStorage.setItem(VIEW_MODE_STORAGE_KEY, mode);
-    } catch {
-      // Storage can be unavailable in private browsing contexts.
-    }
-  }, []);
+  const { viewMode, toggleViewMode } = useRegistryViewMode(
+    VIEW_MODE_STORAGE_KEY,
+  );
 
   return (
     <div className="space-y-4 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0">
       <div className="bg-background/95 supports-[backdrop-filter]:bg-background/80 sticky top-0 z-20 -mx-3 flex border-b px-3 py-3 shadow-sm backdrop-blur lg:-mx-6 lg:px-6">
-        <div className="flex w-full items-center gap-4">
-          <div className="w-full max-w-xl lg:max-w-4xl">
-            <CatalogSearch
-              searchTerm={filters.searchTerm}
-              isLoading={isPending}
-              onSearch={handleSearch}
-              actions={
-                <>
-                  <FilterPanel
-                    filters={filters}
-                    categories={categories}
-                    brands={brands}
-                    ptypes={ptypes}
-                    isOpen={isFilterOpen}
-                    isLoading={isPending}
-                    panelActiveFilters={panelActiveFilters}
-                    panelFilterCount={panelFilterCount}
-                    onOpenChange={setIsFilterOpen}
-                    onFilterChange={updateFilter}
-                    onClearPanelFilters={handleClearPanelFilters}
-                    onRemovePanelFilter={removeActiveFilter}
-                  />
-                  <ViewModeToggle
-                    viewMode={viewMode}
-                    onChange={handleViewModeChange}
-                  />
-                </>
-              }
-            />
-          </div>
+        <div className="flex w-full items-center gap-2">
+          <RegistrySearch
+            value={filters.searchTerm}
+            placeholder="Buscar por ID, nome, referência ou modelo..."
+            accessibleLabel="Pesquisar produtos"
+            pending={isPending}
+            onSearch={handleSearch}
+          />
+          <FilterPanel
+            filters={filters}
+            categories={categories}
+            brands={brands}
+            ptypes={ptypes}
+            isOpen={isFilterOpen}
+            isLoading={isPending}
+            panelActiveFilters={panelActiveFilters}
+            panelFilterCount={panelFilterCount}
+            onOpenChange={setIsFilterOpen}
+            onApplyFilters={updateFilters}
+            onClearPanelFilters={handleClearPanelFilters}
+            onRemovePanelFilter={removeActiveFilter}
+          />
+          <RegistryViewModeToggle
+            viewMode={viewMode}
+            onToggle={toggleViewMode}
+            className="hidden md:inline-flex"
+          />
           <Button
             type="button"
-            className="ml-auto hidden h-11 shrink-0 gap-2 shadow-sm md:inline-flex"
+            className="hidden h-11 shrink-0 gap-2 shadow-sm md:ml-auto md:inline-flex"
             onClick={() => setIsNewProductOpen(true)}
           >
             <PackagePlus className="size-4" aria-hidden="true" />
@@ -416,33 +398,25 @@ export function CatalogToolbar({
         </div>
       )}
 
-      <div className="relative">
-        {isPending && (
-          <div className="bg-background/80 absolute inset-0 z-10 flex items-center justify-center backdrop-blur-sm">
-            <div className="flex flex-col items-center gap-4">
-              <div className="flex items-center gap-3">
-                <div className="border-primary border-t-transparent h-6 w-6 animate-spin rounded-full border-2" />
-                <span className="text-lg font-medium">
-                  Pesquisando produtos...
-                </span>
-              </div>
-              <p className="text-muted-foreground text-sm">
-                Aguarde enquanto carregamos os resultados
-              </p>
-            </div>
-          </div>
-        )}
-        <div className={isPending ? "opacity-50" : undefined}>
-          {hydrated && viewMode === "list" ? list : grid}
-        </div>
-      </div>
+      <RegistryResults pending={isPending}>
+        {viewMode === "list" ? list : grid}
+      </RegistryResults>
 
-      <CatalogMobileBottomBar
+      <RegistryMobileBottomBar
+        label="catálogo"
         filterCount={panelFilterCount}
-        isFilterOpen={isFilterOpen}
-        isNewProductOpen={isNewProductOpen}
+        filterOpen={isFilterOpen}
+        viewMode={viewMode}
+        onToggleView={toggleViewMode}
         onOpenFilters={() => setIsFilterOpen(true)}
-        onOpenNewProduct={() => setIsNewProductOpen(true)}
+        extraAction={{
+          label: "Categorias",
+          href: "/dashboard/category",
+          icon: FolderTree,
+        }}
+        addLabel="Adicionar produto"
+        addOpen={isNewProductOpen}
+        onAdd={() => setIsNewProductOpen(true)}
       />
 
       <NewProductSheet

@@ -71,7 +71,7 @@ export function BrandDetailSheet({
   const [isDiscardOpen, setIsDiscardOpen] = useState(false);
 
   const closeUrl = buildBrandUrl(
-    { search: searchState.search, page: searchState.page },
+    { ...searchState, brandId: undefined, productPage: 0 },
     pathname,
   );
 
@@ -102,7 +102,15 @@ export function BrandDetailSheet({
         ? searchState.page - 1
         : searchState.page;
     router.replace(
-      buildBrandUrl({ search: searchState.search, page: targetPage }, pathname),
+      buildBrandUrl(
+        {
+          ...searchState,
+          page: targetPage,
+          brandId: undefined,
+          productPage: 0,
+        },
+        pathname,
+      ),
     );
     router.refresh();
   };

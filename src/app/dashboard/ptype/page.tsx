@@ -1,5 +1,6 @@
 import { connection } from "next/server";
 import { SiteHeaderWithBreadcrumb } from "@/components/dashboard/header/site-header-with-breadcrumb";
+import { RegistryPageShell } from "@/components/registry";
 import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
 import {
@@ -78,21 +79,18 @@ export default async function PtypePage({ searchParams }: PtypePageProps) {
           { label: "Tipos de produtos", isActive: true },
         ]}
       />
-      <div className="flex flex-1 flex-col">
-        <div className="@container/main flex flex-1 flex-col gap-6">
-          <div className="flex flex-col gap-6 py-6">
-            <div className="px-3 lg:px-6">
-              <PtypeDashboard
-                items={list.items}
-                total={list.total}
-                searchState={searchState}
-                detail={detail}
-                hasLoadError={hasLoadError}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
+      <RegistryPageShell
+        title="Tipos de produtos"
+        description="Organize os tipos usados para classificar os produtos do catálogo."
+      >
+        <PtypeDashboard
+          items={list.items}
+          total={list.total}
+          searchState={searchState}
+          detail={detail}
+          hasLoadError={hasLoadError}
+        />
+      </RegistryPageShell>
     </>
   );
 }
