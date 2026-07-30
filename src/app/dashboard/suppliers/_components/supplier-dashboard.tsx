@@ -35,16 +35,5 @@ export function SupplierDashboard({
     />
   );
 
-  return (
-    <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-bold">Fornecedores</h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Consulte e mantenha os fornecedores utilizados nas operações de
-          compra.
-        </p>
-      </div>
-      <SupplierToolbar searchState={searchState} grid={grid} list={list} />
-    </div>
-  );
+  return <SupplierToolbar searchState={searchState} grid={grid} list={list} />;
 }

@@ -1,13 +1,19 @@
 import type { UIBrand } from "@/services/api-main/brand/transformers/transformers";
 
 export type BrandViewMode = "grid" | "list";
+export type BrandSort = "id" | "name";
+export type BrandOrder = "asc" | "desc";
+export type BrandPageLimit = 25 | 50 | 100;
 
-export const BRAND_PAGE_SIZE = 50;
+export const BRAND_PAGE_SIZE: BrandPageLimit = 50;
 export const BRAND_PRODUCT_PAGE_SIZE = 50;
 
 export interface BrandSearchParams {
   search: string;
+  sort: BrandSort;
+  order: BrandOrder;
   page: number;
+  limit: BrandPageLimit;
   brandId: number | undefined;
   productPage: number;
 }

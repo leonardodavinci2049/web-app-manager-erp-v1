@@ -1,44 +1,57 @@
 "use client";
 
-import {
-  ArrowDownAZ,
-  ArrowUpAZ,
-  Grid3X3,
-  List,
-  Plus,
-  Search,
-  X,
-} from "lucide-react";
+import { Plus } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  type FormEvent,
   type ReactNode,
   useCallback,
   useEffect,
+  useMemo,
   useState,
   useTransition,
 } from "react";
+import {
+  type RegistryActiveFilter,
+  RegistryActiveFilters,
+  RegistryFilterSheet,
+  RegistryMobileBottomBar,
+  RegistryResults,
+  RegistrySearch,
+  RegistryViewModeToggle,
+  useRegistryViewMode,
+} from "@/components/registry";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { CarrierCreateSheet } from "./carrier-create-sheet";
 import { buildCarrierDetailHref, buildCarrierUrl } from "./lib/search-params";
-import type {
-  CarrierOrder,
-  CarrierPageLimit,
-  CarrierSearchParams,
-  CarrierSort,
-  CarrierStatus,
-  CarrierViewMode,
+import {
+  type CarrierOrder,
+  type CarrierPageLimit,
+  type CarrierSearchParams,
+  type CarrierSort,
+  type CarrierStatus,
+  DEFAULT_CARRIER_LIMIT,
 } from "./types/carrier-dashboard-types";
 
 const VIEW_MODE_STORAGE_KEY = "dashboard:carrier-view-mode";
 const SELECT_CLASS =
-  "border-input bg-background h-10 rounded-md border px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]";
+  "border-input bg-background h-10 w-full rounded-md border px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]";
 
 interface CarrierToolbarProps {
   searchState: CarrierSearchParams;
   grid: ReactNode;
   list: ReactNode;
+}
+
+function getDefaultFilters(search: string): CarrierSearchParams {
+  return {
+    search,
+    status: "all",
+    sort: "id",
+    order: "desc",
+    page: 0,
+    limit: DEFAULT_CARRIER_LIMIT,
+  };
 }
 
 export function CarrierToolbar({
@@ -49,51 +62,87 @@ export function CarrierToolbar({
   const router = useRouter();
   const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
-  const [search, setSearch] = useState(searchState.search);
-  const [viewMode, setViewMode] = useState<CarrierViewMode>("grid");
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [draft, setDraft] = useState(searchState);
+  const { viewMode, toggleViewMode } = useRegistryViewMode(
+    VIEW_MODE_STORAGE_KEY,
+  );
 
-  useEffect(() => setSearch(searchState.search), [searchState.search]);
-  useEffect(() => {
-    const stored = window.localStorage.getItem(VIEW_MODE_STORAGE_KEY);
-    if (stored === "grid" || stored === "list") setViewMode(stored);
-  }, []);
+  useEffect(() => setDraft(searchState), [searchState]);
 
   const navigate = useCallback(
-    (
-      changes: Partial<CarrierSearchParams>,
-      options: { resetPage?: boolean } = {},
-    ) => {
-      const nextState: CarrierSearchParams = {
-        ...searchState,
-        ...changes,
-        page: options.resetPage ? 0 : (changes.page ?? searchState.page),
-      };
+    (nextState: CarrierSearchParams) => {
       startTransition(() =>
         router.replace(buildCarrierUrl(nextState, pathname)),
       );
     },
-    [pathname, router, searchState],
+    [pathname, router],
   );
 
-  const handleSearch = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    navigate({ search: search.trim() }, { resetPage: true });
+  const activeFilters = useMemo<RegistryActiveFilter[]>(() => {
+    const filters: RegistryActiveFilter[] = [];
+    if (searchState.status !== "all") {
+      filters.push({
+        key: "status",
+        label: "Status",
+        value: searchState.status === "active" ? "Ativos" : "Inativos",
+      });
+    }
+    if (searchState.sort !== "id") {
+      filters.push({ key: "sort", label: "Ordenação", value: "Nome" });
+    }
+    if (searchState.order !== "desc") {
+      filters.push({
+        key: "order",
+        label: "Direção",
+        value: "Crescente",
+      });
+    }
+    if (searchState.limit !== DEFAULT_CARRIER_LIMIT) {
+      filters.push({
+        key: "limit",
+        label: "Por página",
+        value: String(searchState.limit),
+      });
+    }
+    return filters;
+  }, [searchState]);
+
+  const updateDraft = <Key extends keyof CarrierSearchParams>(
+    key: Key,
+    value: CarrierSearchParams[Key],
+  ) => setDraft((current) => ({ ...current, [key]: value }));
+
+  const clearFilters = () => {
+    navigate(getDefaultFilters(searchState.search));
+    setFilterOpen(false);
   };
 
-  const toggleViewMode = () => {
-    const next: CarrierViewMode = viewMode === "grid" ? "list" : "grid";
-    setViewMode(next);
-    window.localStorage.setItem(VIEW_MODE_STORAGE_KEY, next);
+  const removeFilter = (key: string) => {
+    switch (key) {
+      case "status":
+        navigate({ ...searchState, status: "all", page: 0 });
+        break;
+      case "sort":
+        navigate({ ...searchState, sort: "id", page: 0 });
+        break;
+      case "order":
+        navigate({ ...searchState, order: "desc", page: 0 });
+        break;
+      case "limit":
+        navigate({
+          ...searchState,
+          limit: DEFAULT_CARRIER_LIMIT,
+          page: 0,
+        });
+        break;
+    }
   };
 
   const handleCreated = (carrierId: number) => {
-    const recentState: CarrierSearchParams = {
-      search: "",
-      status: "all",
-      sort: "id",
-      order: "desc",
-      page: 0,
+    const recentState = {
+      ...getDefaultFilters(""),
       limit: searchState.limit,
     };
     startTransition(() => {
@@ -104,173 +153,145 @@ export function CarrierToolbar({
 
   return (
     <div className="space-y-4 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0">
-      <div className="bg-background/95 supports-[backdrop-filter]:bg-background/80 sticky top-0 z-20 -mx-3 space-y-3 border-b px-3 py-3 shadow-sm backdrop-blur lg:-mx-6 lg:px-6">
-        <div className="flex flex-wrap items-center gap-2">
-          <form
-            onSubmit={handleSearch}
-            className="flex min-w-[min(100%,18rem)] flex-1 items-center"
+      <div className="bg-background/95 supports-[backdrop-filter]:bg-background/80 sticky top-0 z-20 -mx-3 border-b px-3 py-3 shadow-sm backdrop-blur lg:-mx-6 lg:px-6">
+        <div className="flex items-center gap-2">
+          <RegistrySearch
+            value={searchState.search}
+            placeholder="Buscar transportadora..."
+            accessibleLabel="Pesquisar transportadoras"
+            maxLength={100}
+            pending={isPending}
+            onSearch={(search) => navigate({ ...searchState, search, page: 0 })}
+          />
+          <RegistryFilterSheet
+            open={filterOpen}
+            pending={isPending}
+            activeCount={activeFilters.length}
+            hasChanges={JSON.stringify(draft) !== JSON.stringify(searchState)}
+            onOpenChange={(open) => {
+              if (open) setDraft(searchState);
+              setFilterOpen(open);
+            }}
+            onClear={clearFilters}
+            onApply={() => {
+              navigate({ ...draft, page: 0 });
+              setFilterOpen(false);
+            }}
           >
-            <div className="relative min-w-0 flex-1">
-              <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
-              <Input
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                maxLength={100}
-                placeholder="Buscar transportadora..."
-                className="h-11 rounded-r-none border-r-0 pr-9 pl-9"
+            <div className="space-y-2">
+              <Label htmlFor="carrier-status">Status</Label>
+              <select
+                id="carrier-status"
+                className={SELECT_CLASS}
+                value={draft.status}
                 disabled={isPending}
-                aria-label="Pesquisar transportadoras"
-              />
-              {search && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSearch("");
-                    if (searchState.search)
-                      navigate({ search: "" }, { resetPage: true });
-                  }}
-                  className="text-muted-foreground hover:text-foreground absolute inset-y-0 right-0 px-3"
-                  aria-label="Limpar pesquisa"
-                >
-                  <X className="size-4" />
-                </button>
-              )}
+                onChange={(event) =>
+                  updateDraft("status", event.target.value as CarrierStatus)
+                }
+              >
+                <option value="all">Todos</option>
+                <option value="active">Ativos</option>
+                <option value="inactive">Inativos</option>
+              </select>
             </div>
-            <Button
-              type="submit"
-              className="h-11 rounded-l-none"
-              disabled={isPending || search.trim() === searchState.search}
-            >
-              <Search className="size-4" />
-              <span className="hidden sm:inline">Pesquisar</span>
-            </Button>
-          </form>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label htmlFor="carrier-sort">Ordenar por</Label>
+                <select
+                  id="carrier-sort"
+                  className={SELECT_CLASS}
+                  value={draft.sort}
+                  disabled={isPending}
+                  onChange={(event) =>
+                    updateDraft("sort", event.target.value as CarrierSort)
+                  }
+                >
+                  <option value="id">ID</option>
+                  <option value="name">Nome</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="carrier-order">Direção</Label>
+                <select
+                  id="carrier-order"
+                  className={SELECT_CLASS}
+                  value={draft.order}
+                  disabled={isPending}
+                  onChange={(event) =>
+                    updateDraft("order", event.target.value as CarrierOrder)
+                  }
+                >
+                  <option value="desc">Decrescente</option>
+                  <option value="asc">Crescente</option>
+                </select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="carrier-limit">Registros por página</Label>
+              <select
+                id="carrier-limit"
+                className={SELECT_CLASS}
+                value={draft.limit}
+                disabled={isPending}
+                onChange={(event) =>
+                  updateDraft(
+                    "limit",
+                    Number(event.target.value) as CarrierPageLimit,
+                  )
+                }
+              >
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+            </div>
+          </RegistryFilterSheet>
+          <RegistryViewModeToggle
+            viewMode={viewMode}
+            onToggle={toggleViewMode}
+            className="hidden md:inline-flex"
+          />
           <Button
             type="button"
-            variant="outline"
-            size="icon-lg"
-            onClick={toggleViewMode}
-            aria-label={
-              viewMode === "grid" ? "Exibir como lista" : "Exibir como grade"
-            }
+            className="hidden h-11 shrink-0 md:ml-auto md:inline-flex"
+            onClick={() => setCreateOpen(true)}
           >
-            {viewMode === "grid" ? (
-              <List className="size-4" />
-            ) : (
-              <Grid3X3 className="size-4" />
-            )}
+            <Plus className="size-4" aria-hidden="true" />
+            <span className="hidden lg:inline">Adicionar transportadora</span>
+            <span className="sr-only lg:hidden">Adicionar transportadora</span>
           </Button>
-          <Button
-            type="button"
-            className="h-10"
-            onClick={() => setIsCreateOpen(true)}
-          >
-            <Plus className="size-4" />
-            <span className="hidden sm:inline">Adicionar transportadora</span>
-            <span className="sr-only sm:hidden">Adicionar transportadora</span>
-          </Button>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          <label className="flex items-center gap-2">
-            <span className="text-muted-foreground text-xs">Status</span>
-            <select
-              className={SELECT_CLASS}
-              value={searchState.status}
-              disabled={isPending}
-              onChange={(event) =>
-                navigate(
-                  { status: event.target.value as CarrierStatus },
-                  { resetPage: true },
-                )
-              }
-            >
-              <option value="all">Todos</option>
-              <option value="active">Ativos</option>
-              <option value="inactive">Inativos</option>
-            </select>
-          </label>
-          <label className="flex items-center gap-2">
-            <span className="text-muted-foreground text-xs">Ordenar</span>
-            <select
-              className={SELECT_CLASS}
-              value={searchState.sort}
-              disabled={isPending}
-              onChange={(event) =>
-                navigate(
-                  { sort: event.target.value as CarrierSort },
-                  { resetPage: true },
-                )
-              }
-            >
-              <option value="id">ID</option>
-              <option value="name">Nome</option>
-            </select>
-          </label>
-          <Button
-            type="button"
-            variant="outline"
-            size="icon-lg"
-            disabled={isPending}
-            onClick={() =>
-              navigate(
-                {
-                  order: (searchState.order === "asc"
-                    ? "desc"
-                    : "asc") satisfies CarrierOrder,
-                },
-                { resetPage: true },
-              )
-            }
-            aria-label={
-              searchState.order === "asc"
-                ? "Alterar para ordem decrescente"
-                : "Alterar para ordem crescente"
-            }
-          >
-            {searchState.order === "asc" ? (
-              <ArrowDownAZ className="size-4" />
-            ) : (
-              <ArrowUpAZ className="size-4" />
-            )}
-          </Button>
-          <label className="ml-auto flex items-center gap-2">
-            <span className="text-muted-foreground text-xs">Por página</span>
-            <select
-              className={SELECT_CLASS}
-              value={searchState.limit}
-              disabled={isPending}
-              onChange={(event) =>
-                navigate(
-                  { limit: Number(event.target.value) as CarrierPageLimit },
-                  { resetPage: true },
-                )
-              }
-            >
-              <option value={25}>25</option>
-              <option value={50}>50</option>
-              <option value={100}>100</option>
-            </select>
-          </label>
         </div>
       </div>
 
-      <div className="relative">
-        {isPending && (
-          <div className="bg-background/70 absolute inset-0 z-10 flex items-start justify-center pt-16 backdrop-blur-sm">
-            <span className="text-muted-foreground text-sm">
-              Atualizando resultados...
-            </span>
-          </div>
-        )}
-        <div className={isPending ? "opacity-50" : undefined}>
-          {viewMode === "grid" ? grid : list}
-        </div>
-      </div>
+      <RegistryActiveFilters
+        filters={activeFilters}
+        pending={isPending}
+        onRemove={removeFilter}
+        onClear={clearFilters}
+      />
+
+      <RegistryResults pending={isPending}>
+        {viewMode === "grid" ? grid : list}
+      </RegistryResults>
+
+      <RegistryMobileBottomBar
+        label="transportadoras"
+        filterCount={activeFilters.length}
+        filterOpen={filterOpen}
+        onOpenFilters={() => {
+          setDraft(searchState);
+          setFilterOpen(true);
+        }}
+        viewMode={viewMode}
+        onToggleView={toggleViewMode}
+        addLabel="Adicionar transportadora"
+        addOpen={createOpen}
+        onAdd={() => setCreateOpen(true)}
+      />
 
       <CarrierCreateSheet
-        open={isCreateOpen}
-        onOpenChange={setIsCreateOpen}
+        open={createOpen}
+        onOpenChange={setCreateOpen}
         onCreated={handleCreated}
       />
     </div>

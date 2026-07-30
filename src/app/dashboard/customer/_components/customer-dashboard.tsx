@@ -35,15 +35,5 @@ export function CustomerDashboard({
     />
   );
 
-  return (
-    <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-bold">Clientes</h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Gerencie cadastros, contatos, endereços e relacionamento comercial.
-        </p>
-      </div>
-      <CustomerToolbar searchState={searchState} grid={grid} list={list} />
-    </div>
-  );
+  return <CustomerToolbar searchState={searchState} grid={grid} list={list} />;
 }

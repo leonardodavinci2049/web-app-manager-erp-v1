@@ -154,7 +154,7 @@ export function PtypeCollection({
           </div>
 
           <div className="hidden overflow-x-auto rounded-xl border lg:block">
-            <Table>
+            <Table aria-label="Lista de tipos de produtos">
               <TableHeader className="bg-muted/50">
                 <TableRow>
                   <TableHead className="w-28">ID</TableHead>

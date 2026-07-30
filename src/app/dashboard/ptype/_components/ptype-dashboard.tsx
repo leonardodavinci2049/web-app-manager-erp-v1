@@ -43,13 +43,6 @@ export function PtypeDashboard({
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-bold">Tipos de produtos</h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Organize os tipos usados para classificar os produtos do catálogo.
-        </p>
-      </div>
-
       <PtypeToolbar searchState={searchState} grid={grid} list={list} />
 
       <PtypeDetailSheet

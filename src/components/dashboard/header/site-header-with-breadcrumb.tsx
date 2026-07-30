@@ -64,8 +64,8 @@ export function SiteHeaderWithBreadcrumb({
           </Breadcrumb>
         </div>
 
-        {/* Title for smaller screens */}
-        <h1 className="text-base font-medium md:hidden">{title}</h1>
+        {/* Compact route identifier. The page content owns the semantic h1. */}
+        <div className="text-base font-medium md:hidden">{title}</div>
         <div className="ml-auto flex items-center gap-2">
           <Suspense>
             <ModeToggle />

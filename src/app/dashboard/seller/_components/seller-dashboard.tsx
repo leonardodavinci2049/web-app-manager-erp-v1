@@ -35,15 +35,5 @@ export function SellerDashboard({
     />
   );
 
-  return (
-    <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-bold">Vendedores</h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Consulte vendedores, contatos, documentos e informações da conta.
-        </p>
-      </div>
-      <SellerToolbar searchState={searchState} grid={grid} list={list} />
-    </div>
-  );
+  return <SellerToolbar searchState={searchState} grid={grid} list={list} />;
 }

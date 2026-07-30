@@ -1,6 +1,15 @@
-import type { BrandSearchParams } from "../types/brand-dashboard-types";
+import {
+  BRAND_PAGE_SIZE,
+  type BrandOrder,
+  type BrandPageLimit,
+  type BrandSearchParams,
+  type BrandSort,
+} from "../types/brand-dashboard-types";
 
 type SearchParamValue = string | string[] | undefined;
+const VALID_SORTS = new Set<BrandSort>(["id", "name"]);
+const VALID_ORDERS = new Set<BrandOrder>(["asc", "desc"]);
+const VALID_LIMITS = new Set<BrandPageLimit>([25, 50, 100]);
 
 function normalizeParams(
   sp: URLSearchParams | Record<string, SearchParamValue>,
@@ -46,9 +55,17 @@ export function parseBrandSearchParams(
   sp: URLSearchParams | Record<string, SearchParamValue>,
 ): BrandSearchParams {
   const params = normalizeParams(sp);
+  const sort = params.get("sort") as BrandSort | null;
+  const order = params.get("order") as BrandOrder | null;
+  const limit = Number(params.get("limit"));
   return {
     search: (params.get("search") ?? "").trim().slice(0, 300),
+    sort: sort && VALID_SORTS.has(sort) ? sort : "id",
+    order: order && VALID_ORDERS.has(order) ? order : "desc",
     page: parseNonNegativeInt(params, "page", 0),
+    limit: VALID_LIMITS.has(limit as BrandPageLimit)
+      ? (limit as BrandPageLimit)
+      : BRAND_PAGE_SIZE,
     brandId: parsePositiveInt(params, "brandId"),
     productPage: parseNonNegativeInt(params, "productPage", 0),
   };
@@ -65,7 +82,11 @@ export function buildBrandUrl(
 ): string {
   const params = new URLSearchParams();
   if (state.search) params.set("search", state.search);
+  if (state.sort && state.sort !== "id") params.set("sort", state.sort);
+  if (state.order && state.order !== "desc") params.set("order", state.order);
   if (state.page && state.page > 0) params.set("page", String(state.page));
+  if (state.limit && state.limit !== BRAND_PAGE_SIZE)
+    params.set("limit", String(state.limit));
   if (state.brandId) params.set("brandId", String(state.brandId));
   if (state.productPage && state.productPage > 0)
     params.set("productPage", String(state.productPage));

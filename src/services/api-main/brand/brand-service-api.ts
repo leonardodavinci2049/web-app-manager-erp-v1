@@ -458,6 +458,8 @@ export interface GetBrandsPageParams {
   search?: string;
   page?: number;
   pageSize?: number;
+  columnId?: 1 | 2;
+  orderId?: 1 | 2;
   pe_system_client_id?: number;
   pe_organization_id?: string;
   pe_user_id?: string;
@@ -484,6 +486,8 @@ export async function getBrandsPage(
     pe_inactive: 0,
     pe_qt_records: params.pageSize ?? 50,
     pe_page_id: params.page ?? 0,
+    pe_column_id: params.columnId ?? 2,
+    pe_order_id: params.orderId ?? 2,
     pe_system_client_id: params.pe_system_client_id,
     pe_organization_id: params.pe_organization_id,
     pe_user_id: params.pe_user_id,

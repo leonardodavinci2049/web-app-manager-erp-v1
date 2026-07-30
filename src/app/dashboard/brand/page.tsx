@@ -1,5 +1,6 @@
 import { connection } from "next/server";
 import { SiteHeaderWithBreadcrumb } from "@/components/dashboard/header/site-header-with-breadcrumb";
+import { RegistryPageShell } from "@/components/registry";
 import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
 import {
@@ -8,7 +9,6 @@ import {
 } from "@/services/api-main/brand/brand-service-api";
 import { getProductsManager } from "@/services/api-main/product-manager/product-manager-service-api";
 import {
-  BRAND_PAGE_SIZE,
   BRAND_PRODUCT_PAGE_SIZE,
   BrandDashboard,
   type BrandDetailData,
@@ -28,12 +28,16 @@ export default async function BrandPage(props: BrandPageProps) {
 
   const searchState = parseBrandSearchParams(searchParams);
 
+  let hasLoadError = false;
   const brandsResultPromise = getBrandsPage({
     search: searchState.search,
     page: searchState.page,
-    pageSize: BRAND_PAGE_SIZE,
+    pageSize: searchState.limit,
+    columnId: searchState.sort === "name" ? 1 : 2,
+    orderId: searchState.order === "asc" ? 1 : 2,
     ...apiContext,
   }).catch((error) => {
+    hasLoadError = true;
     logger.error("Erro ao buscar marcas:", error);
     return { brands: [], total: 0 };
   });
@@ -93,22 +97,20 @@ export default async function BrandPage(props: BrandPageProps) {
           { label: "Marcas", isActive: true },
         ]}
       />
-      <div className="flex flex-1 flex-col">
-        <div className="@container/main flex flex-1 flex-col gap-6">
-          <div className="flex flex-col gap-6 py-6">
-            <div className="px-4 lg:px-6">
-              <BrandDashboard
-                brands={brandsResult.brands}
-                total={brandsResult.total}
-                pageSize={BRAND_PAGE_SIZE}
-                productPageSize={BRAND_PRODUCT_PAGE_SIZE}
-                searchState={searchState}
-                detail={detail}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
+      <RegistryPageShell
+        title="Marcas"
+        description="Crie, edite e gerencie as marcas dos seus produtos."
+      >
+        <BrandDashboard
+          brands={brandsResult.brands}
+          total={brandsResult.total}
+          pageSize={searchState.limit}
+          productPageSize={BRAND_PRODUCT_PAGE_SIZE}
+          searchState={searchState}
+          detail={detail}
+          hasLoadError={hasLoadError}
+        />
+      </RegistryPageShell>
     </>
   );
 }
