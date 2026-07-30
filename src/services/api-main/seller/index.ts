@@ -1,6 +1,9 @@
 export { SellerServiceApi, sellerServiceApi } from "./seller-service-api";
 
 export type {
+  SellerDetail,
+  SellerFindByIdRequest,
+  SellerFindByIdResponse,
   SellerFindManagerAllRequest,
   SellerFindManagerAllResponse,
   SellerListItem,

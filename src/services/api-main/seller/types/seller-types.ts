@@ -66,6 +66,39 @@ export interface SellerFindManagerAllResponse extends SellerBaseResponse {
   data: Record<string, SellerListItem[]>;
 }
 
+// ===== Find By ID (V2) =====
+
+export interface SellerFindByIdRequest extends SellerBaseRequest {
+  pe_seller_id: number;
+}
+
+export interface SellerDetail {
+  ID_SELLER: number;
+  ID_LOJA: number;
+  ID_TIPO_CLIENTE: number;
+  ACCOUNT_STATUS: string;
+  NOME: string;
+  EMAIL: string | null;
+  FONE1: string | null;
+  WHATAPP1: string | null;
+  ID_PESSOA_TIPO: number;
+  ACCOUNT_TIPO: string;
+  CPF: string | null;
+  PRIMEIRO_NOME: string | null;
+  SOBRENOME: string | null;
+  PATH_IMAGEM: string | null;
+  DATADONASCIMENTO: string | null;
+  CNPJ: string | null;
+  RAZAO_SOCIAL: string | null;
+  NOME_FANTASIA: string | null;
+  VENDEDOR: number;
+  DATADOCADASTRO: string;
+}
+
+export interface SellerFindByIdResponse extends SellerBaseResponse {
+  data: Record<string, SellerDetail[]>;
+}
+
 // ===== Error Classes =====
 
 export class SellerError extends Error {

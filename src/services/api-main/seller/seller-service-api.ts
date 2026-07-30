@@ -3,6 +3,7 @@ import "server-only";
 import { serverEnvs } from "@/core/config/envs.server";
 import {
   API_STATUS_CODES,
+  isApiError,
   isApiSuccess,
   SELLER_ENDPOINTS,
 } from "@/core/constants/api-constants";
@@ -10,13 +11,17 @@ import { createLogger } from "@/core/logger";
 import { BaseApiService } from "@/lib/axios/base-api-service";
 
 import type {
+  SellerFindByIdRequest,
+  SellerFindByIdResponse,
   SellerFindManagerAllRequest,
   SellerFindManagerAllResponse,
   SellerListItem,
   SellerSearchAllRequest,
   SellerSearchAllResponse,
 } from "./types/seller-types";
+import { SellerError, SellerNotFoundError } from "./types/seller-types";
 import {
+  SellerFindByIdSchema,
   SellerFindManagerAllSchema,
   SellerSearchAllSchema,
 } from "./validation/seller-schemas";
@@ -92,6 +97,37 @@ export class SellerServiceApi extends BaseApiService {
       return this.normalizeEmptySellerFindManagerAllResponse(response);
     } catch (error) {
       logger.error("Erro ao listar vendedores (manager)", error);
+      throw error;
+    }
+  }
+
+  async findSellerById(
+    params: SellerFindByIdRequest,
+  ): Promise<SellerFindByIdResponse> {
+    try {
+      const validatedParams = SellerFindByIdSchema.parse(params);
+      const requestBody = this.buildBasePayload(validatedParams);
+
+      const response = await this.post<SellerFindByIdResponse>(
+        SELLER_ENDPOINTS.FIND_BY_ID,
+        requestBody,
+      );
+
+      if (response.statusCode === API_STATUS_CODES.NOT_FOUND) {
+        throw new SellerNotFoundError(validatedParams);
+      }
+
+      if (isApiError(response.statusCode)) {
+        throw new SellerError(
+          response.message || "Erro ao buscar vendedor por ID",
+          "SELLER_FIND_BY_ID_ERROR",
+          response.statusCode,
+        );
+      }
+
+      return response;
+    } catch (error) {
+      logger.error("Erro ao buscar vendedor por ID", error);
       throw error;
     }
   }

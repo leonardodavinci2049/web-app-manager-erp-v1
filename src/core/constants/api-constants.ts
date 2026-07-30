@@ -257,6 +257,7 @@ export const SUPPLIER_ENDPOINTS = {
 
 // Endpoints de Seller
 export const SELLER_ENDPOINTS = {
+  FIND_BY_ID: "/seller/v2/seller-find-id",
   SEARCH_ALL: "/seller/v2/seller-search-all",
   FIND_MANAGER_ALL: "/seller/v2/seller-find-manager-all",
 } as const;
