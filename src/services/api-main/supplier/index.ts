@@ -1,7 +1,12 @@
 export {
+  type GetSuppliersPageParams,
+  getSupplierById,
+  getSuppliersPage,
   SupplierServiceApi,
   supplierServiceApi,
 } from "./supplier-service-api";
+
+export type { UISupplier } from "./transformers/transformers";
 
 export type {
   StoredProcedureResponse,

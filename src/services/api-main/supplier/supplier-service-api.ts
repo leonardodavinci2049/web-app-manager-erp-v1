@@ -9,6 +9,11 @@ import {
 } from "@/core/constants/api-constants";
 import { createLogger } from "@/core/logger";
 import { BaseApiService } from "@/lib/axios/base-api-service";
+import {
+  transformSupplier,
+  transformSupplierSearchList,
+  type UISupplier,
+} from "./transformers/transformers";
 
 import type {
   StoredProcedureResponse,
@@ -514,3 +519,81 @@ export class SupplierServiceApi extends BaseApiService {
 }
 
 export const supplierServiceApi = new SupplierServiceApi();
+
+export interface GetSuppliersPageParams {
+  search?: string;
+  statusId?: number;
+  page?: number;
+  pageSize?: number;
+  columnId?: number;
+  orderId?: number;
+  pe_system_client_id?: number;
+  pe_organization_id?: string;
+  pe_user_id?: string;
+  pe_user_name?: string;
+  pe_user_role?: string;
+  pe_person_id?: number;
+}
+
+export async function getSuppliersPage(
+  params: GetSuppliersPageParams = {},
+): Promise<{ items: UISupplier[]; total: number }> {
+  if (!params.pe_system_client_id) {
+    return { items: [], total: 0 };
+  }
+
+  const response = await supplierServiceApi.findManagerAllSuppliers({
+    pe_search: params.search ?? "",
+    pe_status_id: params.statusId ?? 0,
+    pe_qt_records: params.pageSize ?? 50,
+    pe_page_id: params.page ?? 0,
+    pe_column_id: params.columnId ?? 2,
+    pe_order_id: params.orderId ?? 2,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
+
+  const suppliers = supplierServiceApi.extractManagerAllSuppliers(response);
+  const filteredTotal = Number(response.recordId);
+
+  return {
+    items: transformSupplierSearchList(suppliers),
+    total:
+      Number.isFinite(filteredTotal) && filteredTotal >= 0
+        ? filteredTotal
+        : (response.quantity ?? suppliers.length),
+  };
+}
+
+export async function getSupplierById(
+  id: number,
+  params: {
+    pe_system_client_id?: number;
+    pe_organization_id?: string;
+    pe_user_id?: string;
+    pe_user_name?: string;
+    pe_user_role?: string;
+    pe_person_id?: number;
+  } = {},
+): Promise<UISupplier | undefined> {
+  if (!params.pe_system_client_id) {
+    return undefined;
+  }
+
+  const response = await supplierServiceApi.findSupplierById({
+    pe_supplier_id: id,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
+
+  const supplier = supplierServiceApi.extractSupplierById(response);
+  return transformSupplier(supplier) ?? undefined;
+}
