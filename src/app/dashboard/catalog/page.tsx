@@ -126,8 +126,11 @@ export default async function CatalogPage(props: CatalogPageProps) {
   return (
     <>
       <SiteHeaderWithBreadcrumb
-        title="Catálogo"
-        breadcrumbItems={[{ label: "Início", isActive: true }]}
+        title="Catálogo de Produtos"
+        breadcrumbItems={[
+          { label: "Dashboard", href: "/Catálogo de Produtos" },
+          { label: "Cadastro de Produtos", isActive: true },
+        ]}
       />
       <div className="flex flex-1 flex-col">
         <div className="@container/main flex flex-1 flex-col gap-4">

@@ -5,7 +5,7 @@ const CarriersPage = () => {
   return (
     <>
       <SiteHeaderWithBreadcrumb
-        title="Dashboard"
+        title="Transportadoras"
         breadcrumbItems={[
           { label: "Dashboard", href: "#" },
           { label: "Cadastro de Transportadoras", isActive: true },
