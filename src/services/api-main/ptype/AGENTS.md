@@ -25,11 +25,11 @@ ptype/
 ### 1. `ptype-service-api.ts` (Camada de Integração + Leitura)
 - **Extende** `BaseApiService` para comunicação HTTP
 - **Valida** todos os parâmetros de entrada com Zod
-- **Métodos de leitura**: `findAllPtypes`, `findPtypeById`
+- **Métodos de leitura**: `findAllPtypes`, `findManagerAllPtypes`, `findPtypeById`
 - **Métodos de mutação**: `createPtype`, `updatePtype`, `deletePtype`
 - **Helpers**: `extractPtypes`, `extractPtypeById`
 - **Exporta** instância singleton `ptypeServiceApi`
-- **Fornece** funções de leitura para Server Components (`getPtypes`, `getPtypeById`) **sem cache** — transformam entidades API → DTOs UI (`UIPtype[]` / `UIPtype | undefined`)
+- **Fornece** funções de leitura para Server Components (`getPtypes`, `getPtypesPage`, `getPtypeById`) **sem cache** — transformam entidades API → DTOs UI. `getPtypesPage` usa a listagem manager e retorna `{ items, total }`, derivando o total de `recordId` com fallback defensivo.
 - **Guard check**: `getPtypes` retorna `[]` e `getPtypeById` retorna `undefined` se `pe_system_client_id` não for fornecido
 
 ### 2. `types/ptype-types.ts`

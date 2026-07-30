@@ -390,6 +390,60 @@ export async function getPtypes(
   return transformPtypeList(ptypes);
 }
 
+export interface GetPtypesPageParams {
+  search?: string;
+  statusId?: number;
+  page?: number;
+  pageSize?: number;
+  columnId?: number;
+  orderId?: number;
+  pe_system_client_id?: number;
+  pe_organization_id?: string;
+  pe_user_id?: string;
+  pe_user_name?: string;
+  pe_user_role?: string;
+  pe_person_id?: number;
+}
+
+/**
+ * Leitura paginada para a central de tipos de produtos. O total filtrado vem
+ * de `recordId`, com fallback defensivo para `quantity` ou para a quantidade
+ * efetivamente carregada.
+ */
+export async function getPtypesPage(
+  params: GetPtypesPageParams = {},
+): Promise<{ items: UIPtype[]; total: number }> {
+  if (!params.pe_system_client_id) {
+    return { items: [], total: 0 };
+  }
+
+  const response = await ptypeServiceApi.findManagerAllPtypes({
+    pe_search: params.search ?? "",
+    pe_status_id: params.statusId ?? 0,
+    pe_qt_records: params.pageSize ?? 50,
+    pe_page_id: params.page ?? 0,
+    pe_column_id: params.columnId ?? 2,
+    pe_order_id: params.orderId ?? 2,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
+
+  const ptypes = ptypeServiceApi.extractManagerAllPtypes(response);
+  const filteredTotal = Number(response.recordId);
+
+  return {
+    items: transformPtypeList(ptypes),
+    total:
+      Number.isFinite(filteredTotal) && filteredTotal >= 0
+        ? filteredTotal
+        : (response.quantity ?? ptypes.length),
+  };
+}
+
 export async function getPtypeById(
   id: number,
   params: {
