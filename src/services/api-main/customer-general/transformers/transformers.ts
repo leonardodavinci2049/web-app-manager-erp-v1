@@ -2,6 +2,7 @@ import type {
   CustomerDetail,
   CustomerLatestProduct,
   CustomerListItem,
+  CustomerPersonListItem,
   SellerInfo,
 } from "../types/customer-general-types";
 
@@ -22,6 +23,11 @@ export interface UICustomerListItem {
   email: string;
   imagePath?: string;
   lastPurchase?: string;
+  city?: string;
+  approved?: string;
+  gender?: string;
+  restricted?: boolean;
+  createdAt?: string;
 }
 
 export interface UICustomerDetail {
@@ -142,6 +148,38 @@ export function transformCustomerList(
   items: CustomerListItem[],
 ): UICustomerListItem[] {
   return items.map(transformCustomerListItem);
+}
+
+export function transformCustomerPersonListItem(
+  entity: CustomerPersonListItem,
+): UICustomerListItem {
+  return {
+    customerId: entity.ID_CUSTOMER,
+    customerTypeId: entity.ID_TIPO_CLIENTE,
+    personTypeId: entity.ID_PESSOA_TIPO,
+    name: entity.NOME,
+    phone: entity.FONE1 ?? "",
+    whatsapp: entity.WHATAPP1 ?? "",
+    companyName: entity.RAZAO_SOCIAL ?? "",
+    cpf: entity.CPF ?? "",
+    cnpj: entity.CNPJ ?? "",
+    customerType: entity.TIPO_CLIENTE,
+    personType: entity.TIPO_PESSOA,
+    email: entity.EMAIL ?? "",
+    imagePath: entity.PATH_IMAGEM ?? undefined,
+    lastPurchase: entity.ULTIMA_COMPRA ?? undefined,
+    city: entity.CIDADE ?? undefined,
+    approved: entity.APROVADO || undefined,
+    gender: entity.GENERO || undefined,
+    restricted: entity.RESTRICAO === 1,
+    createdAt: entity.DATA_CADASTRO ?? undefined,
+  };
+}
+
+export function transformCustomerPersonList(
+  items: CustomerPersonListItem[],
+): UICustomerListItem[] {
+  return items.map(transformCustomerPersonListItem);
 }
 
 export function transformCustomerDetail(

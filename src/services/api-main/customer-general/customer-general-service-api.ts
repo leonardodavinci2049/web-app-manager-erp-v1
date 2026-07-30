@@ -9,6 +9,16 @@ import {
 } from "@/core/constants/api-constants";
 import { createLogger } from "@/core/logger";
 import { BaseApiService } from "@/lib/axios/base-api-service";
+import {
+  transformCustomerDetail,
+  transformCustomerLatestProductList,
+  transformCustomerPersonList,
+  transformSellerInfo,
+  type UICustomerDetail,
+  type UICustomerLatestProduct,
+  type UICustomerListItem,
+  type UISellerInfo,
+} from "./transformers/transformers";
 
 import type {
   CustomerCreateRequest,
@@ -410,3 +420,117 @@ export class CustomerGeneralServiceApi extends BaseApiService {
 }
 
 export const customerGeneralServiceApi = new CustomerGeneralServiceApi();
+
+interface CustomerApiContext {
+  pe_system_client_id?: number;
+  pe_organization_id?: string;
+  pe_user_id?: string;
+  pe_user_name?: string;
+  pe_user_role?: string;
+  pe_person_id?: number;
+}
+
+export interface GetCustomersPageParams extends CustomerApiContext {
+  search?: string;
+  categoryId?: number;
+  clientType?: number;
+  personType?: number;
+  noImage?: number;
+  approved?: number;
+  gender?: number;
+  restricted?: number;
+  enabled?: number;
+  statusId?: number;
+  operation?: number;
+  startDate?: string;
+  endDate?: string;
+  page?: number;
+  pageSize?: number;
+  columnId?: number;
+  orderId?: number;
+}
+
+export interface UICustomerDetailsBundle {
+  customer: UICustomerDetail;
+  seller?: UISellerInfo;
+}
+
+export async function getCustomersPage(
+  params: GetCustomersPageParams = {},
+): Promise<{ items: UICustomerListItem[]; total: number }> {
+  if (!params.pe_system_client_id) return { items: [], total: 0 };
+
+  const response = await customerGeneralServiceApi.findManagerAllCustomers({
+    pe_search: params.search ?? "",
+    pe_category_id: params.categoryId ?? 0,
+    pe_client_type: params.clientType ?? 0,
+    pe_person_type: params.personType ?? 0,
+    pe_flag_no_image: params.noImage ?? 0,
+    pe_flag_approved: params.approved ?? 0,
+    pe_gender_type: params.gender ?? 0,
+    pe_flag_restricted: params.restricted ?? 0,
+    pe_flag_enabled: params.enabled ?? 0,
+    pe_status_id: params.statusId ?? 0,
+    pe_flag_operation_list: params.operation ?? 0,
+    pe_start_date: params.startDate ?? "",
+    pe_end_date: params.endDate ?? "",
+    pe_qt_records: params.pageSize ?? 50,
+    pe_page_id: params.page ?? 0,
+    pe_column_id: params.columnId ?? 2,
+    pe_order_id: params.orderId ?? 2,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
+  const customers =
+    customerGeneralServiceApi.extractManagerAllCustomers(response);
+  const normalizedTotal = Number(response.recordId);
+
+  return {
+    items: transformCustomerPersonList(customers),
+    total:
+      Number.isFinite(normalizedTotal) && normalizedTotal >= 0
+        ? normalizedTotal
+        : (response.quantity ?? customers.length),
+  };
+}
+
+export async function getCustomerById(
+  id: number,
+  params: CustomerApiContext = {},
+): Promise<UICustomerDetailsBundle | undefined> {
+  if (!params.pe_system_client_id) return undefined;
+
+  const response = await customerGeneralServiceApi.findCustomerById({
+    pe_customer_id: id,
+    ...params,
+  });
+  const customer = customerGeneralServiceApi.extractCustomerById(response);
+  if (!customer) return undefined;
+  const seller = customerGeneralServiceApi.extractSellerInfo(response);
+
+  return {
+    customer: transformCustomerDetail(customer),
+    seller: seller ? transformSellerInfo(seller) : undefined,
+  };
+}
+
+export async function getCustomerLatestProducts(
+  customerId: number,
+  params: CustomerApiContext = {},
+  limit = 10,
+): Promise<UICustomerLatestProduct[]> {
+  if (!params.pe_system_client_id) return [];
+
+  const response = await customerGeneralServiceApi.findLatestProducts({
+    pe_customer_id: customerId,
+    pe_limit: limit,
+    ...params,
+  });
+  return transformCustomerLatestProductList(
+    customerGeneralServiceApi.extractLatestProducts(response),
+  );
+}
