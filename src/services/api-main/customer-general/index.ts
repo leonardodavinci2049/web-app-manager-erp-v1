@@ -1,7 +1,19 @@
 export {
   CustomerGeneralServiceApi,
   customerGeneralServiceApi,
+  type GetCustomersPageParams,
+  getCustomerById,
+  getCustomerLatestProducts,
+  getCustomersPage,
+  type UICustomerDetailsBundle,
 } from "./customer-general-service-api";
+
+export type {
+  UICustomerDetail,
+  UICustomerLatestProduct,
+  UICustomerListItem,
+  UISellerInfo,
+} from "./transformers/transformers";
 
 export type {
   CustomerCreateRequest,

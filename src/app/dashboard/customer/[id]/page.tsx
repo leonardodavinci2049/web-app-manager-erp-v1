@@ -1,7 +1,85 @@
-import UnderDevelopment from "@/components/common/under-development";
+import { notFound } from "next/navigation";
+import { connection } from "next/server";
+import { SiteHeaderWithBreadcrumb } from "@/components/dashboard/header/site-header-with-breadcrumb";
+import { createLogger } from "@/core/logger";
+import { getAuthContext } from "@/server/auth-context";
+import {
+  CustomerNotFoundError,
+  getCustomerById,
+  getCustomerLatestProducts,
+} from "@/services/api-main/customer-general";
+import { CustomerDetails, getSafeCustomerReturnTo } from "../_components";
 
-const CustomerDetailsPage = () => {
-  return <UnderDevelopment title="Detalhes do Cliente" />;
-};
+const logger = createLogger("CustomerDetailsPage");
 
-export default CustomerDetailsPage;
+interface CustomerDetailsPageProps {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}
+
+export default async function CustomerDetailsPage({
+  params,
+  searchParams,
+}: CustomerDetailsPageProps) {
+  await connection();
+  const [{ id }, rawSearchParams] = await Promise.all([params, searchParams]);
+  if (!/^\d+$/.test(id)) notFound();
+  const customerId = Number(id);
+  if (!Number.isSafeInteger(customerId) || customerId <= 0) notFound();
+
+  const rawReturnTo = rawSearchParams.returnTo;
+  const returnTo = getSafeCustomerReturnTo(
+    typeof rawReturnTo === "string" ? rawReturnTo : rawReturnTo?.[0],
+  );
+  const { apiContext } = await getAuthContext();
+  const detailPromise = getCustomerById(customerId, apiContext).catch(
+    (error) => {
+      if (error instanceof CustomerNotFoundError) notFound();
+      logger.error("Erro ao carregar detalhe do cliente", error);
+      throw error;
+    },
+  );
+  let hasProductsError = false;
+  const productsPromise = getCustomerLatestProducts(
+    customerId,
+    apiContext,
+    10,
+  ).catch((error) => {
+    hasProductsError = true;
+    logger.error("Erro ao carregar produtos recentes do cliente", error);
+    return [];
+  });
+  const [bundle, products] = await Promise.all([
+    detailPromise,
+    productsPromise,
+  ]);
+  if (!bundle) notFound();
+
+  return (
+    <>
+      <SiteHeaderWithBreadcrumb
+        title="Detalhes do cliente"
+        breadcrumbItems={[
+          { label: "Dashboard", href: "/dashboard" },
+          { label: "Clientes", href: returnTo },
+          { label: bundle.customer.name, isActive: true },
+        ]}
+      />
+      <div className="flex flex-1 flex-col">
+        <div className="@container/main flex flex-1 flex-col gap-6">
+          <div className="flex flex-col gap-6 py-6">
+            <div className="px-3 lg:px-6">
+              <CustomerDetails
+                customer={bundle.customer}
+                seller={bundle.seller}
+                products={products}
+                hasProductsError={hasProductsError}
+                returnTo={returnTo}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
