@@ -9,8 +9,15 @@ import {
 } from "@/core/constants/api-constants";
 import { createLogger } from "@/core/logger";
 import { BaseApiService } from "@/lib/axios/base-api-service";
+import {
+  transformSellerDetail,
+  transformSellerList,
+  type UISellerDetail,
+  type UISellerListItem,
+} from "./transformers/transformers";
 
 import type {
+  SellerDetail,
   SellerFindByIdRequest,
   SellerFindByIdResponse,
   SellerFindManagerAllRequest,
@@ -180,6 +187,14 @@ export class SellerServiceApi extends BaseApiService {
     return response.data?.["Seller find manager All"] ?? [];
   }
 
+  extractSellerById(response: SellerFindByIdResponse): SellerDetail | null {
+    return (
+      response.data?.["Seller find ID"]?.[0] ??
+      response.data?.["Seller find Id"]?.[0] ??
+      null
+    );
+  }
+
   isValidSellerSearchList(response: SellerSearchAllResponse): boolean {
     return (
       isApiSuccess(response.statusCode) &&
@@ -195,6 +210,96 @@ export class SellerServiceApi extends BaseApiService {
       Array.isArray(response.data["Seller find manager All"])
     );
   }
+
+  isValidSellerDetail(response: SellerFindByIdResponse): boolean {
+    return (
+      isApiSuccess(response.statusCode) &&
+      this.extractSellerById(response) !== null
+    );
+  }
 }
 
 export const sellerServiceApi = new SellerServiceApi();
+
+export interface GetSellersPageParams {
+  search?: string;
+  categoryId?: number;
+  noImage?: number;
+  statusId?: number;
+  page?: number;
+  pageSize?: number;
+  columnId?: number;
+  orderId?: number;
+  pe_system_client_id?: number;
+  pe_organization_id?: string;
+  pe_user_id?: string;
+  pe_user_name?: string;
+  pe_user_role?: string;
+  pe_person_id?: number;
+}
+
+export async function getSellersPage(
+  params: GetSellersPageParams = {},
+): Promise<{ items: UISellerListItem[]; total: number }> {
+  if (!params.pe_system_client_id) {
+    return { items: [], total: 0 };
+  }
+
+  const response = await sellerServiceApi.findManagerAllSellers({
+    pe_search: params.search ?? "",
+    pe_category_id: params.categoryId ?? 0,
+    pe_flag_no_image: params.noImage ?? 0,
+    pe_status_id: params.statusId ?? 0,
+    pe_qt_records: params.pageSize ?? 50,
+    pe_page_id: params.page ?? 0,
+    pe_column_id: params.columnId ?? 2,
+    pe_order_id: params.orderId ?? 2,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
+
+  const sellers = sellerServiceApi.extractManagerAllSellers(response);
+  const normalizedTotal = Number(response.recordId);
+  const fallbackTotal =
+    Number.isFinite(response.quantity) && response.quantity >= 0
+      ? response.quantity
+      : sellers.length;
+
+  return {
+    items: transformSellerList(sellers),
+    total:
+      Number.isFinite(normalizedTotal) && normalizedTotal >= 0
+        ? normalizedTotal
+        : fallbackTotal,
+  };
+}
+
+export async function getSellerById(
+  id: number,
+  params: {
+    pe_system_client_id?: number;
+    pe_organization_id?: string;
+    pe_user_id?: string;
+    pe_user_name?: string;
+    pe_user_role?: string;
+    pe_person_id?: number;
+  } = {},
+): Promise<UISellerDetail | undefined> {
+  if (!params.pe_system_client_id) return undefined;
+
+  const response = await sellerServiceApi.findSellerById({
+    pe_seller_id: id,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
+  const seller = sellerServiceApi.extractSellerById(response);
+  return seller ? transformSellerDetail(seller) : undefined;
+}
