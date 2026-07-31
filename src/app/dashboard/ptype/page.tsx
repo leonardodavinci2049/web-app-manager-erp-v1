@@ -3,15 +3,10 @@ import { SiteHeaderWithBreadcrumb } from "@/components/dashboard/header/site-hea
 import { RegistryPageShell } from "@/components/registry";
 import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
-import {
-  getPtypeById,
-  getPtypesPage,
-  PtypeNotFoundError,
-} from "@/services/api-main/ptype";
+import { getPtypesPage } from "@/services/api-main/ptype";
 import {
   mapPtypeFiltersToApi,
   PtypeDashboard,
-  type PtypeDetailData,
   parsePtypeSearchParams,
 } from "./_components";
 
@@ -43,32 +38,7 @@ export default async function PtypePage({ searchParams }: PtypePageProps) {
     return { items: [], total: 0 };
   });
 
-  let detailPromise: Promise<PtypeDetailData | undefined> =
-    Promise.resolve(undefined);
-
-  if (searchState.ptypeId) {
-    const ptypeId = searchState.ptypeId;
-    detailPromise = getPtypeById(ptypeId, apiContext)
-      .then(
-        (item) =>
-          ({
-            state: item ? "ready" : "not-found",
-            item,
-          }) satisfies PtypeDetailData,
-      )
-      .catch((error) => {
-        if (error instanceof PtypeNotFoundError) {
-          return { state: "not-found" } satisfies PtypeDetailData;
-        }
-        logger.warn("Erro ao carregar detalhe do tipo de produto", {
-          ptypeId,
-          error,
-        });
-        return { state: "error" } satisfies PtypeDetailData;
-      });
-  }
-
-  const [list, detail] = await Promise.all([listPromise, detailPromise]);
+  const list = await listPromise;
 
   return (
     <>
@@ -87,7 +57,6 @@ export default async function PtypePage({ searchParams }: PtypePageProps) {
           items={list.items}
           total={list.total}
           searchState={searchState}
-          detail={detail}
           hasLoadError={hasLoadError}
         />
       </RegistryPageShell>

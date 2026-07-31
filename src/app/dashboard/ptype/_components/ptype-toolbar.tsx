@@ -22,7 +22,7 @@ import {
 } from "@/components/registry";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { buildPtypeUrl } from "./lib/search-params";
+import { buildPtypeDetailHref, buildPtypeUrl } from "./lib/search-params";
 import { PtypeCreateSheet } from "./ptype-create-sheet";
 import {
   DEFAULT_PTYPE_LIMIT,
@@ -43,10 +43,7 @@ interface PtypeToolbarProps {
   list: ReactNode;
 }
 
-function getDefaultFilters(
-  search: string,
-  ptypeId: number | undefined,
-): PtypeSearchParams {
+function getDefaultFilters(search: string): PtypeSearchParams {
   return {
     search,
     status: "all",
@@ -54,7 +51,6 @@ function getDefaultFilters(
     order: "desc",
     page: 0,
     limit: DEFAULT_PTYPE_LIMIT,
-    ptypeId,
   };
 }
 
@@ -113,12 +109,12 @@ export function PtypeToolbar({ searchState, grid, list }: PtypeToolbarProps) {
   ) => setDraft((current) => ({ ...current, [key]: value }));
 
   const clearFilters = () => {
-    navigate(getDefaultFilters(searchState.search, searchState.ptypeId));
+    navigate(getDefaultFilters(searchState.search));
     setFilterOpen(false);
   };
 
   const removeFilter = (key: string) => {
-    const defaults = getDefaultFilters(searchState.search, searchState.ptypeId);
+    const defaults = getDefaultFilters(searchState.search);
     switch (key) {
       case "status":
         navigate({ ...searchState, status: defaults.status, page: 0 });
@@ -138,13 +134,10 @@ export function PtypeToolbar({ searchState, grid, list }: PtypeToolbarProps) {
   const handleCreated = (ptypeId: number) => {
     startTransition(() => {
       router.replace(
-        buildPtypeUrl(
-          {
-            ...getDefaultFilters("", ptypeId),
-            limit: searchState.limit,
-          },
-          pathname,
-        ),
+        buildPtypeDetailHref(ptypeId, {
+          ...getDefaultFilters(""),
+          limit: searchState.limit,
+        }),
       );
       router.refresh();
     });

@@ -3,12 +3,12 @@
 import { Save } from "lucide-react";
 import { type FormEvent, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { updateBrandAction } from "@/app/dashboard/brand/_actions/brand-actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import type { UIBrand } from "@/services/api-main/brand/transformers/transformers";
+import { updateBrandAction } from "../_actions/brand-detail-actions";
 
 interface BrandDetailFormProps {
   brand: UIBrand;

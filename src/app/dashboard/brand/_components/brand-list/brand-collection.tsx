@@ -1,6 +1,6 @@
 import { PackageSearch, SearchX, TriangleAlert } from "lucide-react";
 import type { UIBrand } from "@/services/api-main/brand/transformers/transformers";
-import { buildBrandUrl } from "../lib/search-params";
+import { buildBrandDetailHref } from "../lib/search-params";
 import type {
   BrandSearchParams,
   BrandViewMode,
@@ -39,7 +39,7 @@ export function BrandCollection({
   hasLoadError,
 }: BrandCollectionProps) {
   const buildDetailHref = (brandId: number) =>
-    buildBrandUrl({ ...searchState, brandId, productPage: 0 }, pathname);
+    buildBrandDetailHref(brandId, searchState, pathname);
 
   if (hasLoadError) {
     return (
