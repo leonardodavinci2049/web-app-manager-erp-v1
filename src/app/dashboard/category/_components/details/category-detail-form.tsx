@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ImagePlus } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useTransition } from "react";
 import { useForm } from "react-hook-form";
@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+import { getValidImageUrl } from "@/utils/image-utils";
 import {
   toggleCategoryStatusAction,
   updateCategoryAction,
@@ -134,22 +135,26 @@ export function CategoryDetailForm({
             arquivos.
           </p>
         </div>
-        <div className="flex min-h-28 items-center justify-center rounded-md border border-dashed bg-muted/30 p-4">
-          <div className="text-center">
-            <ImagePlus className="mx-auto mb-2 size-6 text-muted-foreground" />
-            <p className="text-xs">
-              {detail.imagePath || "Nenhuma imagem cadastrada"}
-            </p>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="mt-3"
-              disabled
-            >
-              Selecionar imagem
-            </Button>
+        <div className="space-y-3">
+          <div className="relative aspect-[3/1] w-full overflow-hidden rounded-md border bg-muted/30">
+            <Image
+              src={
+                detail.imagePath && detail.imagePath.trim() !== ""
+                  ? getValidImageUrl(detail.imagePath)
+                  : "/default-images/category-banner.webp"
+              }
+              alt={`Imagem da categoria ${detail.name}`}
+              fill
+              sizes="(max-width: 768px) 100vw, 480px"
+              className="object-cover"
+            />
           </div>
+          <p className="text-xs text-muted-foreground">
+            {detail.imagePath || "Nenhuma imagem cadastrada"}
+          </p>
+          <Button type="button" variant="outline" size="sm" disabled>
+            Selecionar imagem
+          </Button>
         </div>
       </section>
       <Separator />
