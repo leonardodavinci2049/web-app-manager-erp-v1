@@ -12,9 +12,9 @@ export function RegistryPageShell({
   children,
 }: RegistryPageShellProps) {
   return (
-    <main className="flex flex-1 flex-col">
-      <div className="@container/main flex flex-1 flex-col">
-        <div className="flex flex-col gap-4 px-3 py-4 md:py-6 lg:px-6">
+    <main className="flex min-w-0 flex-1 flex-col">
+      <div className="@container/main flex min-w-0 flex-1 flex-col">
+        <div className="flex min-w-0 flex-col gap-4 px-3 py-4 md:py-6 lg:px-6">
           <div className="space-y-1">
             <h1 className="text-xl font-bold tracking-tight sm:text-2xl">
               {title}

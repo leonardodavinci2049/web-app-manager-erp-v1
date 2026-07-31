@@ -245,25 +245,27 @@ export function CustomerCollection({
               />
             ))}
           </div>
-          <div className="hidden overflow-x-auto rounded-xl border lg:block">
+          <div className="hidden min-w-0 max-w-full rounded-xl border lg:block">
             <Table aria-label="Lista de clientes">
               <TableHeader className="bg-muted/50">
                 <TableRow>
-                  <TableHead className="w-16">Imagem</TableHead>
-                  <TableHead className="w-24">ID</TableHead>
-                  <TableHead className="min-w-52">Cliente</TableHead>
-                  <TableHead className="min-w-36">Tipo</TableHead>
-                  <TableHead className="min-w-40">Documento</TableHead>
-                  <TableHead className="min-w-40">Contato</TableHead>
-                  <TableHead className="min-w-36">Cidade</TableHead>
-                  <TableHead className="min-w-40">Situação</TableHead>
-                  <TableHead className="min-w-36">Última compra</TableHead>
+                  <TableHead className="w-14">Imagem</TableHead>
+                  <TableHead className="w-20">ID</TableHead>
+                  <TableHead className="w-56 max-w-[300px] whitespace-normal">
+                    Cliente
+                  </TableHead>
+                  <TableHead className="w-24">Tipo</TableHead>
+                  <TableHead className="w-32">Documento</TableHead>
+                  <TableHead className="w-32">Contato</TableHead>
+                  <TableHead className="w-28">Cidade</TableHead>
+                  <TableHead className="w-32">Situação</TableHead>
+                  <TableHead className="w-28">Última compra</TableHead>
                   <TableHead className="w-16">
                     <span className="sr-only">Ações</span>
                   </TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody>
+              <TableBody className="[&_tr:nth-child(even)]:bg-muted/30">
                 {items.map((customer) => (
                   <TableRow key={customer.customerId}>
                     <TableCell>
@@ -277,14 +279,14 @@ export function CustomerCollection({
                     <TableCell className="text-muted-foreground tabular-nums">
                       {customer.customerId}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="max-w-[300px] whitespace-normal break-words">
                       <Link
                         href={detailHref(customer.customerId)}
                         className="font-medium hover:text-primary focus-visible:underline focus-visible:outline-none"
                       >
                         {customer.name}
                       </Link>
-                      <p className="text-muted-foreground max-w-64 truncate text-xs">
+                      <p className="text-muted-foreground max-w-[300px] truncate text-xs">
                         {customer.email ||
                           customer.companyName ||
                           "Sem complemento"}
