@@ -65,71 +65,80 @@ function SellerCard({
 }) {
   const horizontal = viewMode === "list";
   return (
-    <Link href={href} className="block h-full focus-visible:outline-none">
-      <Card className="h-full gap-0 py-0 transition-all hover:-translate-y-0.5 hover:shadow-md focus-within:ring-2 focus-within:ring-ring">
-        <CardContent
-          className={
-            horizontal
-              ? "flex items-start gap-3 p-3"
-              : "flex h-full flex-col gap-3 p-3 sm:p-4"
-          }
-        >
-          <SellerImage
-            name={seller.name}
-            imagePath={seller.imagePath}
-            size={horizontal ? "sm" : "md"}
-          />
-          <div className="min-w-0 flex-1 space-y-3">
-            <div>
-              <p className="line-clamp-2 font-semibold">{seller.name}</p>
-              <p className="text-muted-foreground text-xs tabular-nums">
-                ID: {seller.id} · {seller.personType || "Tipo não informado"}
+    <Card className="group h-full gap-0 py-0 transition-all hover:-translate-y-0.5 hover:shadow-md">
+      <CardContent
+        className={
+          horizontal
+            ? "flex items-start gap-3 p-3"
+            : "flex h-full flex-col gap-3 p-3 sm:p-4"
+        }
+      >
+        <SellerImage
+          name={seller.name}
+          imagePath={seller.imagePath}
+          viewMode={viewMode}
+        />
+        <div className="min-w-0 flex-1 space-y-3">
+          <div>
+            <p className="line-clamp-2 font-semibold">{seller.name}</p>
+            <p className="text-muted-foreground text-xs tabular-nums">
+              ID: {seller.id} · {seller.personType || "Tipo não informado"}
+            </p>
+            {seller.legalName && (
+              <p className="text-muted-foreground mt-1 line-clamp-1 text-xs">
+                {seller.legalName}
               </p>
-              {seller.legalName && (
-                <p className="text-muted-foreground mt-1 line-clamp-1 text-xs">
-                  {seller.legalName}
-                </p>
-              )}
-            </div>
-            <div
-              className={
-                horizontal
-                  ? "hidden gap-2 text-xs sm:grid sm:grid-cols-2"
-                  : "grid gap-2 text-xs [&>*:nth-child(n+3)]:hidden"
-              }
-            >
-              <p className="flex items-center gap-2 truncate">
-                <Phone className="text-muted-foreground size-3.5 shrink-0" />
-                {getPhone(seller)}
-              </p>
-              <p className="flex items-center gap-2 truncate">
-                <Mail className="text-muted-foreground size-3.5 shrink-0" />
-                {seller.email || "E-mail não informado"}
-              </p>
-              <p className="flex items-center gap-2 truncate">
-                <MapPin className="text-muted-foreground size-3.5 shrink-0" />
-                {seller.city || "Cidade não informada"}
-              </p>
-              <p className="flex items-center gap-2 truncate">
-                <CalendarClock className="text-muted-foreground size-3.5 shrink-0" />
-                Última compra: {formatDate(seller.lastPurchaseAt)}
-              </p>
-            </div>
-            {!horizontal && (
-              <div className="flex flex-wrap gap-2">
-                <Badge variant="secondary">
-                  {seller.customerType || "Categoria não informada"}
-                </Badge>
-                <Badge variant="outline">{getDocument(seller)}</Badge>
-              </div>
             )}
           </div>
-          {horizontal && (
-            <Eye className="text-muted-foreground mt-3 size-4 shrink-0" />
+          <div
+            className={
+              horizontal
+                ? "hidden gap-2 text-xs sm:grid sm:grid-cols-2"
+                : "grid gap-2 text-xs [&>*:nth-child(n+3)]:hidden"
+            }
+          >
+            <p className="flex items-center gap-2 truncate">
+              <Phone className="text-muted-foreground size-3.5 shrink-0" />
+              {getPhone(seller)}
+            </p>
+            <p className="flex items-center gap-2 truncate">
+              <Mail className="text-muted-foreground size-3.5 shrink-0" />
+              {seller.email || "E-mail não informado"}
+            </p>
+            <p className="flex items-center gap-2 truncate">
+              <MapPin className="text-muted-foreground size-3.5 shrink-0" />
+              {seller.city || "Cidade não informada"}
+            </p>
+            <p className="flex items-center gap-2 truncate">
+              <CalendarClock className="text-muted-foreground size-3.5 shrink-0" />
+              Última compra: {formatDate(seller.lastPurchaseAt)}
+            </p>
+          </div>
+          {!horizontal && (
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="secondary">
+                {seller.customerType || "Categoria não informada"}
+              </Badge>
+              <Badge variant="outline">{getDocument(seller)}</Badge>
+            </div>
           )}
-        </CardContent>
-      </Card>
-    </Link>
+        </div>
+        <Button
+          asChild
+          size="sm"
+          variant={horizontal ? "ghost" : undefined}
+          className={
+            horizontal ? "ml-auto gap-1 self-center" : "mt-0.5 w-full gap-1"
+          }
+        >
+          <Link href={href}>
+            <Eye className={horizontal ? "size-4" : "size-3.5"} />
+            <span className="sm:hidden">Detalhes</span>
+            <span className="hidden sm:inline">Ver detalhes</span>
+          </Link>
+        </Button>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -239,6 +248,7 @@ export function SellerCollection({
                       <SellerImage
                         name={seller.name}
                         imagePath={seller.imagePath}
+                        viewMode="list"
                         size="sm"
                       />
                     </TableCell>

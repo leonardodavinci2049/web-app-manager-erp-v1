@@ -42,6 +42,7 @@ export function BrandTable({ brands, buildDetailHref }: BrandTableProps) {
                 <BrandImage
                   name={brand.name}
                   imagePath={brand.imagePath}
+                  viewMode="list"
                   size="sm"
                   eager={index === 0}
                 />

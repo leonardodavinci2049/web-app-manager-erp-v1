@@ -1,49 +1,45 @@
 "use client";
 
-import Image from "next/image";
-import { useState } from "react";
-import { getValidImageUrl } from "@/utils/image-utils";
+import { RegistryEntityImage } from "@/components/registry";
 
-const PRODUCT_FALLBACK = "/images/product/no-image.jpeg";
 const DEFAULT_IMAGE = "/default-images/ptype.webp";
 
 interface PtypeImageProps {
   name: string;
   imagePath?: string;
-  size?: "sm" | "md" | "lg";
+  viewMode: "grid" | "list";
+  size?: "sm" | "md";
+  compact?: boolean;
+  eager?: boolean;
+  className?: string;
 }
 
-const SIZE_CLASSES = {
-  sm: "size-10 text-xs",
-  md: "size-12 text-sm",
-  lg: "size-24 text-lg",
-} as const;
-
 /**
- * Imagem do tipo de produto (Client). Ainda nao existe `imagePath` neste
- * cadastro, portanto exibe a imagem padrao do tipo de produto. Quando o
- * campo for integrado, passara a exibi-lo com fallback automatico.
+ * Imagem do tipo de produto (Client). Delega a exibicao padronizada ao
+ * componente compartilhado, preservando a imagem padrao do tipo de produto.
+ * Ainda nao ha `imagePath` neste cadastro, portanto exibe o fallback ate a
+ * integracao do campo.
  */
-export function PtypeImage({ name, imagePath, size = "md" }: PtypeImageProps) {
-  const [hasError, setHasError] = useState(false);
-  const containerClass = `relative flex shrink-0 items-center justify-center overflow-hidden rounded-xl bg-muted ${SIZE_CLASSES[size]}`;
-  const hasRealImage =
-    !!imagePath &&
-    imagePath.trim() !== "" &&
-    imagePath !== PRODUCT_FALLBACK &&
-    !hasError;
-  const src = hasRealImage ? getValidImageUrl(imagePath) : DEFAULT_IMAGE;
-
+export function PtypeImage({
+  name,
+  imagePath,
+  viewMode,
+  size = "md",
+  compact = false,
+  eager = false,
+  className,
+}: PtypeImageProps) {
   return (
-    <div className={containerClass}>
-      <Image
-        src={src}
-        alt={`Imagem do tipo de produto ${name}`}
-        fill
-        sizes={size === "lg" ? "96px" : size === "md" ? "48px" : "40px"}
-        className="object-cover"
-        onError={() => setHasError(true)}
-      />
-    </div>
+    <RegistryEntityImage
+      name={name}
+      imagePath={imagePath}
+      defaultImage={DEFAULT_IMAGE}
+      entityLabel="do tipo de produto"
+      viewMode={viewMode}
+      size={size}
+      compact={compact}
+      eager={eager}
+      className={className}
+    />
   );
 }

@@ -1,52 +1,43 @@
 "use client";
 
-import Image from "next/image";
-import { useState } from "react";
-import { getValidImageUrl } from "@/utils/image-utils";
+import { RegistryEntityImage } from "@/components/registry";
 
-const PRODUCT_FALLBACK = "/images/product/no-image.jpeg";
 const DEFAULT_IMAGE = "/default-images/seller.webp";
 
 interface SellerImageProps {
   name: string;
   imagePath?: string;
-  size?: "sm" | "md" | "lg";
+  viewMode: "grid" | "list";
+  size?: "sm" | "md";
+  compact?: boolean;
+  eager?: boolean;
+  className?: string;
 }
 
-const SIZE_CLASSES = {
-  sm: "size-10 text-xs",
-  md: "size-14 text-sm",
-  lg: "size-24 text-lg",
-} as const;
-
 /**
- * Imagem do vendedor (Client). Exibe `imagePath` quando valido e a imagem
- * padrao do vendedor quando ausente, invalida ou em erro de carregamento.
+ * Imagem do vendedor (Client). Delega a exibicao padronizada ao componente
+ * compartilhado, preservando a imagem padrao do vendedor.
  */
 export function SellerImage({
   name,
   imagePath,
+  viewMode,
   size = "md",
+  compact = false,
+  eager = false,
+  className,
 }: SellerImageProps) {
-  const [hasError, setHasError] = useState(false);
-  const containerClass = `relative flex shrink-0 items-center justify-center overflow-hidden rounded-xl bg-muted ${SIZE_CLASSES[size]}`;
-  const hasRealImage =
-    !!imagePath &&
-    imagePath.trim() !== "" &&
-    imagePath !== PRODUCT_FALLBACK &&
-    !hasError;
-  const src = hasRealImage ? getValidImageUrl(imagePath) : DEFAULT_IMAGE;
-
   return (
-    <div className={containerClass}>
-      <Image
-        src={src}
-        alt={`Imagem do vendedor ${name}`}
-        fill
-        sizes={size === "lg" ? "96px" : size === "md" ? "56px" : "40px"}
-        className="object-cover"
-        onError={() => setHasError(true)}
-      />
-    </div>
+    <RegistryEntityImage
+      name={name}
+      imagePath={imagePath}
+      defaultImage={DEFAULT_IMAGE}
+      entityLabel="do vendedor"
+      viewMode={viewMode}
+      size={size}
+      compact={compact}
+      eager={eager}
+      className={className}
+    />
   );
 }

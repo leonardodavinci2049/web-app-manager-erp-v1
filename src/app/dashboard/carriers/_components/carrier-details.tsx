@@ -128,7 +128,7 @@ export function CarrierDetails({ carrier, returnTo }: CarrierDetailsProps) {
               key={carrier.imagePath}
               name={carrier.name}
               imagePath={carrier.imagePath}
-              size="lg"
+              viewMode="list"
             />
             <div className="min-w-0">
               <h1 className="break-words text-2xl font-bold">{carrier.name}</h1>

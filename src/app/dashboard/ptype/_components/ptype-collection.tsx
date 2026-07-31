@@ -92,54 +92,61 @@ export function PtypeCollection({
       ) : viewMode === "grid" ? (
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-[repeat(auto-fill,minmax(190px,1fr))] sm:gap-3 lg:gap-4">
           {items.map((item) => (
-            <Link
+            <Card
               key={item.id}
-              href={detailHref(item.id)}
-              className="block focus-visible:outline-none"
+              className="group h-full gap-3 py-4 transition-all hover:-translate-y-0.5 hover:shadow-md"
             >
-              <Card className="group h-full gap-3 py-4 transition-all hover:-translate-y-0.5 hover:shadow-md focus-within:ring-2 focus-within:ring-ring">
-                <CardContent className="flex h-full flex-col items-center gap-3 px-3 text-center">
-                  <PtypeImage name={item.name} />
-                  <div className="min-w-0">
-                    <p className="line-clamp-2 text-sm font-medium">
-                      {item.name}
-                    </p>
-                    <p className="text-muted-foreground mt-1 text-xs tabular-nums">
-                      ID: {item.id}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
+              <CardContent className="flex h-full flex-col gap-3 px-3 text-center">
+                <PtypeImage name={item.name} viewMode="grid" />
+                <div className="min-w-0">
+                  <p className="line-clamp-2 text-sm font-medium">
+                    {item.name}
+                  </p>
+                  <p className="text-muted-foreground mt-1 text-xs tabular-nums">
+                    ID: {item.id}
+                  </p>
+                </div>
+                <Button asChild size="sm" className="mt-auto w-full gap-1">
+                  <Link href={detailHref(item.id)}>
+                    <Eye className="size-3.5" />
+                    <span className="sm:hidden">Detalhes</span>
+                    <span className="hidden sm:inline">Ver detalhes</span>
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
           ))}
         </div>
       ) : (
         <>
           <div className="space-y-2 lg:hidden">
             {items.map((item) => (
-              <Link
+              <Card
                 key={item.id}
-                href={detailHref(item.id)}
-                className="block focus-visible:outline-none"
+                className="gap-0 py-0 transition-shadow hover:shadow-md"
               >
-                <Card className="gap-0 py-0 transition-shadow hover:shadow-md focus-within:ring-2 focus-within:ring-ring">
-                  <CardContent className="flex items-center gap-3 p-3">
-                    <PtypeImage name={item.name} size="sm" />
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium">
-                        {item.name}
-                      </p>
-                      <p className="text-muted-foreground text-xs tabular-nums">
-                        ID: {item.id}
-                      </p>
-                    </div>
-                    <Eye
-                      className="text-muted-foreground size-4"
-                      aria-hidden="true"
-                    />
-                  </CardContent>
-                </Card>
-              </Link>
+                <CardContent className="flex items-center gap-3 p-3">
+                  <PtypeImage name={item.name} viewMode="list" />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium">{item.name}</p>
+                    <p className="text-muted-foreground text-xs tabular-nums">
+                      ID: {item.id}
+                    </p>
+                  </div>
+                  <Button
+                    asChild
+                    size="sm"
+                    variant="ghost"
+                    className="ml-auto gap-1 self-center"
+                  >
+                    <Link href={detailHref(item.id)}>
+                      <Eye className="size-4" />
+                      <span className="sm:hidden">Detalhes</span>
+                      <span className="hidden sm:inline">Ver detalhes</span>
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
             ))}
           </div>
 
