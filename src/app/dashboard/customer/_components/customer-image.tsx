@@ -1,9 +1,11 @@
 "use client";
 
-import { ImageOff } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { getValidImageUrl } from "@/utils/image-utils";
+
+const PRODUCT_FALLBACK = "/images/product/no-image.jpeg";
+const DEFAULT_IMAGE = "/default-images/customer.webp";
 
 interface CustomerImageProps {
   name: string;
@@ -17,32 +19,28 @@ const SIZE_CLASSES = {
   lg: "size-24 text-lg",
 } as const;
 
+/**
+ * Imagem do cliente (Client). Exibe `imagePath` quando valido e a imagem
+ * padrao do cliente quando ausente, invalida ou em erro de carregamento.
+ */
 export function CustomerImage({
   name,
   imagePath,
   size = "md",
 }: CustomerImageProps) {
   const [hasError, setHasError] = useState(false);
-  const initials = name
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((word) => word.charAt(0).toLocaleUpperCase("pt-BR"))
-    .join("");
-  const containerClass = `bg-muted text-muted-foreground relative flex shrink-0 items-center justify-center overflow-hidden rounded-xl font-semibold ${SIZE_CLASSES[size]}`;
-
-  if (!imagePath?.trim() || hasError) {
-    return (
-      <div className={containerClass} aria-hidden="true">
-        {initials || <ImageOff className="size-5 opacity-60" />}
-      </div>
-    );
-  }
+  const containerClass = `relative flex shrink-0 items-center justify-center overflow-hidden rounded-xl bg-muted ${SIZE_CLASSES[size]}`;
+  const hasRealImage =
+    !!imagePath &&
+    imagePath.trim() !== "" &&
+    imagePath !== PRODUCT_FALLBACK &&
+    !hasError;
+  const src = hasRealImage ? getValidImageUrl(imagePath) : DEFAULT_IMAGE;
 
   return (
     <div className={containerClass}>
       <Image
-        src={getValidImageUrl(imagePath)}
+        src={src}
         alt={`Imagem do cliente ${name}`}
         fill
         sizes={size === "lg" ? "96px" : size === "md" ? "56px" : "40px"}

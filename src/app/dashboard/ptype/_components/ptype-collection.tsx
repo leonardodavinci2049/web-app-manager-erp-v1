@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/table";
 import type { UIPtype } from "@/services/api-main/ptype";
 import { buildPtypeUrl } from "./lib/search-params";
+import { PtypeImage } from "./ptype-image";
 import { PtypePagination } from "./ptype-pagination";
 import type {
   PtypeSearchParams,
@@ -24,17 +25,6 @@ interface PtypeCollectionProps {
   searchState: PtypeSearchParams;
   viewMode: PtypeViewMode;
   hasLoadError: boolean;
-}
-
-function TypeGlyph({ name }: { name: string }) {
-  return (
-    <div
-      className="bg-primary/10 text-primary flex size-12 shrink-0 items-center justify-center rounded-xl text-lg font-semibold"
-      aria-hidden="true"
-    >
-      {name.trim().charAt(0).toLocaleUpperCase("pt-BR") || "T"}
-    </div>
-  );
 }
 
 export function PtypeCollection({
@@ -109,7 +99,7 @@ export function PtypeCollection({
             >
               <Card className="group h-full gap-3 py-4 transition-all hover:-translate-y-0.5 hover:shadow-md focus-within:ring-2 focus-within:ring-ring">
                 <CardContent className="flex h-full flex-col items-center gap-3 px-3 text-center">
-                  <TypeGlyph name={item.name} />
+                  <PtypeImage name={item.name} />
                   <div className="min-w-0">
                     <p className="line-clamp-2 text-sm font-medium">
                       {item.name}
@@ -134,7 +124,7 @@ export function PtypeCollection({
               >
                 <Card className="gap-0 py-0 transition-shadow hover:shadow-md focus-within:ring-2 focus-within:ring-ring">
                   <CardContent className="flex items-center gap-3 p-3">
-                    <TypeGlyph name={item.name} />
+                    <PtypeImage name={item.name} size="sm" />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium">
                         {item.name}

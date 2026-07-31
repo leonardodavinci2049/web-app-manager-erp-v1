@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/table";
 import type { UISupplier } from "@/services/api-main/supplier";
 import { buildSupplierDetailHref } from "./lib/search-params";
+import { SupplierImage } from "./supplier-image";
 import { SupplierPagination } from "./supplier-pagination";
 import type {
   SupplierSearchParams,
@@ -79,9 +80,7 @@ function SupplierCard({
               : "flex h-full flex-col gap-3 p-3 sm:p-4"
           }
         >
-          <div className="bg-primary/10 text-primary flex size-11 shrink-0 items-center justify-center rounded-xl">
-            <Building2 className="size-5" />
-          </div>
+          <SupplierImage name={supplier.name} size="sm" />
           <div className="min-w-0 flex-1 space-y-3">
             <div>
               <p className="line-clamp-2 font-semibold">{supplier.name}</p>
