@@ -15,7 +15,7 @@ interface BrandCardProps {
 /**
  * Card de marca (Server Component). Apresenta imagem/fallback, nome e ID. No
  * modo lista e' um card horizontal; no modo grid e' um card vertical. Toda a
- * area e' um link acessivel para o painel de detalhes.
+ * area e' um link acessivel para a pagina de detalhes.
  */
 export function BrandCard({
   brandId,

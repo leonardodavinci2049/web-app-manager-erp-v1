@@ -41,16 +41,6 @@ function parseNonNegativeInt(
   return Number.isSafeInteger(value) && value >= 0 ? value : fallback;
 }
 
-function parsePositiveInt(
-  params: URLSearchParams,
-  key: string,
-): number | undefined {
-  const raw = params.get(key);
-  if (!raw || !/^\d+$/.test(raw)) return undefined;
-  const value = Number(raw);
-  return Number.isSafeInteger(value) && value > 0 ? value : undefined;
-}
-
 export function parsePtypeSearchParams(
   searchParams: URLSearchParams | Record<string, SearchParamValue>,
 ): PtypeSearchParams {
@@ -69,7 +59,6 @@ export function parsePtypeSearchParams(
     limit: VALID_LIMITS.has(rawLimit as PtypePageLimit)
       ? (rawLimit as PtypePageLimit)
       : DEFAULT_PTYPE_LIMIT,
-    ptypeId: parsePositiveInt(params, "ptypeId"),
   };
 }
 
@@ -87,10 +76,30 @@ export function buildPtypeUrl(
   if (state.page && state.page > 0) params.set("page", String(state.page));
   if (state.limit && state.limit !== DEFAULT_PTYPE_LIMIT)
     params.set("limit", String(state.limit));
-  if (state.ptypeId) params.set("ptypeId", String(state.ptypeId));
-
   const query = params.toString();
   return query ? `${pathname}?${query}` : pathname;
+}
+
+export function buildPtypeDetailHref(
+  ptypeId: number,
+  listState: PtypeSearchParams,
+): string {
+  const returnTo = buildPtypeUrl(listState);
+  return `/dashboard/ptype/${ptypeId}?returnTo=${encodeURIComponent(returnTo)}`;
+}
+
+export function getSafePtypeReturnTo(value?: string): string {
+  const pathname = "/dashboard/ptype";
+  if (!value) return pathname;
+  try {
+    const url = new URL(value, "http://manager.local");
+    if (url.origin === "http://manager.local" && url.pathname === pathname) {
+      return `${url.pathname}${url.search}`;
+    }
+  } catch {
+    return pathname;
+  }
+  return pathname;
 }
 
 export function mapPtypeFiltersToApi(state: PtypeSearchParams): {

@@ -37,16 +37,6 @@ function parseNonNegativeInt(
   return Number.isSafeInteger(value) && value >= 0 ? value : defaultValue;
 }
 
-function parsePositiveInt(
-  params: URLSearchParams,
-  key: string,
-): number | undefined {
-  const raw = params.get(key);
-  if (!raw || !/^\d+$/.test(raw)) return undefined;
-  const value = Number(raw);
-  return Number.isSafeInteger(value) && value > 0 ? value : undefined;
-}
-
 /**
  * Constroi o estado de filtros da central de marcas a partir de searchParams.
  * Fonte unica de verdade para a leitura URL -> objeto.
@@ -66,8 +56,6 @@ export function parseBrandSearchParams(
     limit: VALID_LIMITS.has(limit as BrandPageLimit)
       ? (limit as BrandPageLimit)
       : BRAND_PAGE_SIZE,
-    brandId: parsePositiveInt(params, "brandId"),
-    productPage: parseNonNegativeInt(params, "productPage", 0),
   };
 }
 
@@ -87,9 +75,6 @@ export function buildBrandUrl(
   if (state.page && state.page > 0) params.set("page", String(state.page));
   if (state.limit && state.limit !== BRAND_PAGE_SIZE)
     params.set("limit", String(state.limit));
-  if (state.brandId) params.set("brandId", String(state.brandId));
-  if (state.productPage && state.productPage > 0)
-    params.set("productPage", String(state.productPage));
   const qs = params.toString();
   return qs ? `${pathname}?${qs}` : pathname;
 }
@@ -108,6 +93,29 @@ export function buildBrandReturnTo(
   }
   const qs = params.toString();
   return qs ? `${pathname}?${qs}` : pathname;
+}
+
+export function buildBrandDetailHref(
+  brandId: number,
+  listState: BrandSearchParams,
+  pathname = "/dashboard/brand",
+): string {
+  const returnTo = buildBrandUrl(listState, pathname);
+  return `${pathname}/${brandId}?returnTo=${encodeURIComponent(returnTo)}`;
+}
+
+export function getSafeBrandReturnTo(value?: string): string {
+  const pathname = "/dashboard/brand";
+  if (!value) return pathname;
+  try {
+    const url = new URL(value, "http://manager.local");
+    if (url.origin === "http://manager.local" && url.pathname === pathname) {
+      return `${url.pathname}${url.search}`;
+    }
+  } catch {
+    return pathname;
+  }
+  return pathname;
 }
 
 /**

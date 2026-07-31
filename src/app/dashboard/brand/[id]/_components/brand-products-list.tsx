@@ -4,9 +4,9 @@ import { PackageSearch } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { BrandPagination } from "../brand-list/brand-pagination";
-import { buildProductDetailsHref } from "../lib/search-params";
-import type { BrandProductDto } from "../types/brand-dashboard-types";
+import { BrandPagination } from "../../_components/brand-list/brand-pagination";
+import { buildProductDetailsHref } from "../../_components/lib/search-params";
+import type { BrandProductDto } from "../../_components/types/brand-dashboard-types";
 
 interface BrandProductsListProps {
   brandId: number;

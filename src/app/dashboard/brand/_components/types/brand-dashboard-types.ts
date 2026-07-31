@@ -14,8 +14,6 @@ export interface BrandSearchParams {
   order: BrandOrder;
   page: number;
   limit: BrandPageLimit;
-  brandId: number | undefined;
-  productPage: number;
 }
 
 export interface BrandProductDto {

@@ -23,7 +23,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { BrandCreateSheet } from "../brand-create/brand-create-sheet";
-import { buildBrandUrl } from "../lib/search-params";
+import { buildBrandDetailHref, buildBrandUrl } from "../lib/search-params";
 import {
   BRAND_PAGE_SIZE,
   type BrandOrder,
@@ -123,16 +123,7 @@ export function BrandToolbar({ searchState, grid, list }: BrandToolbarProps) {
   const handleCreated = useCallback(
     (brandId: number) => {
       startTransition(() => {
-        router.replace(
-          buildBrandUrl(
-            {
-              ...searchState,
-              brandId,
-              productPage: 0,
-            },
-            pathname,
-          ),
-        );
+        router.replace(buildBrandDetailHref(brandId, searchState, pathname));
         router.refresh();
       });
     },
@@ -148,9 +139,7 @@ export function BrandToolbar({ searchState, grid, list }: BrandToolbarProps) {
             placeholder="Buscar marca..."
             accessibleLabel="Pesquisar marcas"
             pending={isPending}
-            onSearch={(search) =>
-              navigate({ ...searchState, search, page: 0, productPage: 0 })
-            }
+            onSearch={(search) => navigate({ ...searchState, search, page: 0 })}
           />
           <RegistryFilterSheet
             open={filterOpen}

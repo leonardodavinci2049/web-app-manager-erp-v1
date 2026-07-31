@@ -3,7 +3,6 @@
 import { Loader2, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { deleteBrandAction } from "@/app/dashboard/brand/_actions/brand-actions";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,6 +15,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { deleteBrandAction } from "../_actions/brand-detail-actions";
 
 interface BrandDeleteDialogProps {
   brandId: number;

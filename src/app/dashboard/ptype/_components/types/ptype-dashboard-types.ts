@@ -1,11 +1,8 @@
-import type { UIPtype } from "@/services/api-main/ptype";
-
 export type PtypeViewMode = "grid" | "list";
 export type PtypeStatus = "all" | "active" | "inactive";
 export type PtypeSort = "id" | "name";
 export type PtypeOrder = "asc" | "desc";
 export type PtypePageLimit = 25 | 50 | 100;
-export type PtypeDetailState = "ready" | "not-found" | "error";
 
 export const DEFAULT_PTYPE_LIMIT: PtypePageLimit = 50;
 
@@ -16,12 +13,6 @@ export interface PtypeSearchParams {
   order: PtypeOrder;
   page: number;
   limit: PtypePageLimit;
-  ptypeId: number | undefined;
-}
-
-export interface PtypeDetailData {
-  state: PtypeDetailState;
-  item?: UIPtype;
 }
 
 export interface PtypeActionResult {

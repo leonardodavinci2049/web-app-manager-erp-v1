@@ -1,8 +1,10 @@
 export { BrandDashboard } from "./brand-dashboard";
 export {
+  buildBrandDetailHref,
   buildBrandReturnTo,
   buildBrandUrl,
   buildProductDetailsHref,
+  getSafeBrandReturnTo,
   parseBrandSearchParams,
 } from "./lib/search-params";
 export type {

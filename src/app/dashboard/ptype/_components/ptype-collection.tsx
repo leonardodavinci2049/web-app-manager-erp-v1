@@ -11,7 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { UIPtype } from "@/services/api-main/ptype";
-import { buildPtypeUrl } from "./lib/search-params";
+import { buildPtypeDetailHref } from "./lib/search-params";
 import { PtypeImage } from "./ptype-image";
 import { PtypePagination } from "./ptype-pagination";
 import type {
@@ -35,7 +35,7 @@ export function PtypeCollection({
   hasLoadError,
 }: PtypeCollectionProps) {
   const detailHref = (ptypeId: number) =>
-    buildPtypeUrl({ ...searchState, ptypeId });
+    buildPtypeDetailHref(ptypeId, searchState);
 
   if (hasLoadError) {
     return (

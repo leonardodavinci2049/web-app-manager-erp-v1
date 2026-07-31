@@ -19,7 +19,7 @@ interface BrandTableProps {
 
 /**
  * Tabela de marcas para o modo lista em telas desktop (Server Component).
- * Colunas: Imagem, ID, Marca e Acoes. A acao abre o painel de detalhes.
+ * Colunas: Imagem, ID, Marca e Acoes. A acao abre a pagina de detalhes.
  */
 export function BrandTable({ brands, buildDetailHref }: BrandTableProps) {
   return (

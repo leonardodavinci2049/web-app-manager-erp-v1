@@ -115,3 +115,7 @@ This project does not currently use automated tests. Do not invent or suggest te
 - Route, build, Server Action, cache, config, or integration change: run `pnpm build` when viable.
 - Visual/interactive change: validate in the browser/dev server; if the Next.js MCP is available, use it for errors, routes, and logs.
 - If you cannot run an expected verification, state the reason in the final summary.
+
+## Communication and Delivery
+
+- After completing a task, suggest one to three related follow-up tasks that represent the natural next steps. Do not execute these additional tasks without my authorization.
