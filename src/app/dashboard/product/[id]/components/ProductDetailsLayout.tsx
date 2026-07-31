@@ -128,16 +128,13 @@ export function ProductDetailsLayout({
         <BackToCatalogButton />
       </div>
 
-      {/* Main Product Layout */}
       <div className="grid gap-8 lg:grid-cols-2">
-        {/* Left Column - Images Gallery (Server Component with Client Component) */}
         <ProductImageGalleryServer
           productId={productId}
           productName={product.name}
           fallbackImage={productImage}
         />
 
-        {/* Right Column - Product Info (Server Component) */}
         <ProductInfoDisplay
           product={product}
           relatedCategories={relatedCategories}
@@ -154,7 +151,6 @@ export function ProductDetailsLayout({
         />
       </div>
 
-      {/* Tabs Section */}
       <ProductDetailsTabs product={product} productId={productId} />
     </div>
   );
@@ -164,14 +160,7 @@ export function ProductDetailsLayoutSkeleton() {
   return (
     <div className="space-y-6">
       {/* Action Buttons Skeleton */}
-      <div className="flex items-center justify-between">
-        <Skeleton className="h-10 w-40" />
-        <div className="flex items-center gap-2">
-          <Skeleton className="h-9 w-20" />
-          <Skeleton className="h-9 w-10" />
-          <Skeleton className="h-9 w-24" />
-        </div>
-      </div>
+      <Skeleton className="h-9 w-40" />
 
       {/* Main Layout Skeleton */}
       <div className="grid gap-8 lg:grid-cols-2">
@@ -216,10 +205,7 @@ export function ProductDetailsLayoutSkeleton() {
       </div>
 
       {/* Tabs Skeleton */}
-      <div className="space-y-4">
-        <Skeleton className="h-10 w-full" />
-        <Skeleton className="h-64 w-full" />
-      </div>
+      <Skeleton className="h-20 w-full sm:h-10" />
     </div>
   );
 }

@@ -16,6 +16,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { UISellerDetail } from "@/services/api-main/seller";
 import { SellerImage } from "./seller-image";
 
@@ -60,34 +61,38 @@ export function SellerDetails({ seller, returnTo }: SellerDetailsProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex min-w-0 items-start gap-3">
-          <SellerImage
-            name={seller.name}
-            imagePath={seller.imagePath}
-            viewMode="list"
-          />
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <h1 className="break-words text-2xl font-bold">{seller.name}</h1>
-              <Badge variant="secondary">
-                {seller.accountStatus || "Status não informado"}
-              </Badge>
-            </div>
-            <p className="text-muted-foreground text-sm tabular-nums">
-              Vendedor ID {seller.id}
-            </p>
-            <p className="text-muted-foreground text-sm">
-              {seller.accountType || "Tipo de conta não informado"}
-            </p>
+      <Button
+        asChild
+        variant="outline"
+        size="sm"
+        className="h-8 px-2 text-xs sm:h-9 sm:px-3 sm:text-sm"
+      >
+        <Link href={returnTo}>
+          <ArrowLeft className="size-4" />
+          Voltar aos vendedores
+        </Link>
+      </Button>
+
+      <div className="flex min-w-0 items-start gap-3">
+        <SellerImage
+          name={seller.name}
+          imagePath={seller.imagePath}
+          viewMode="list"
+        />
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="break-words text-2xl font-bold">{seller.name}</h1>
+            <Badge variant="secondary">
+              {seller.accountStatus || "Status não informado"}
+            </Badge>
           </div>
+          <p className="text-muted-foreground text-sm tabular-nums">
+            Vendedor ID {seller.id}
+          </p>
+          <p className="text-muted-foreground text-sm">
+            {seller.accountType || "Tipo de conta não informado"}
+          </p>
         </div>
-        <Button asChild variant="outline">
-          <Link href={returnTo}>
-            <ArrowLeft className="size-4" />
-            Voltar aos vendedores
-          </Link>
-        </Button>
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)]">
@@ -190,23 +195,6 @@ export function SellerDetails({ seller, returnTo }: SellerDetailsProps) {
               </div>
             </CardContent>
           </Card>
-        </div>
-
-        <div className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <CalendarDays className="size-4" />
-                Cadastro
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <DetailField
-                label="Data de cadastro"
-                value={formatDate(seller.createdAt)}
-              />
-            </CardContent>
-          </Card>
 
           <Card>
             <CardHeader className="flex-row items-center justify-between">
@@ -248,19 +236,55 @@ export function SellerDetails({ seller, returnTo }: SellerDetailsProps) {
                 <PowerOff className="size-4" />
                 Inativar — Pendente de API
               </Button>
-              <Button
-                type="button"
-                variant="destructive"
-                className="w-full"
-                disabled
-              >
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <CalendarDays className="size-4" />
+                Cadastro
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <DetailField
+                label="Data de cadastro"
+                value={formatDate(seller.createdAt)}
+              />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      <Tabs defaultValue="deletion" className="w-full">
+        <TabsList className="grid h-auto w-full grid-cols-1">
+          <TabsTrigger value="deletion">Exclusão</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="deletion">
+          <Card className="border-destructive/40 bg-destructive/5">
+            <CardHeader className="flex-row items-center justify-between">
+              <CardTitle className="text-destructive flex items-center gap-2 text-base">
+                <LockKeyhole className="size-4" />
+                Zona de exclusão
+              </CardTitle>
+              <Badge variant="secondary">Pendente de API</Badge>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-muted-foreground text-sm">
+                Os contratos disponíveis permitem apenas consultar vendedores. A
+                exclusão permanece indisponível e não envia dados à API.
+              </p>
+              <Button type="button" variant="destructive" disabled>
                 <Trash2 className="size-4" />
                 Excluir — Pendente de API
               </Button>
             </CardContent>
           </Card>
-        </div>
-      </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

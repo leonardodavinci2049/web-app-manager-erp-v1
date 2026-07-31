@@ -1,19 +1,15 @@
 "use client";
 
 import {
-  Boxes,
   ChartColumn,
   Frame,
   GalleryVerticalEnd,
-  Handshake,
   House,
   LayoutDashboard,
   PieChart,
   Settings,
   ShoppingCart,
-  Tags,
   Truck,
-  Users,
 } from "lucide-react";
 import type * as React from "react";
 

@@ -34,6 +34,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import type { UISupplier } from "@/services/api-main/supplier";
 import { SupplierImage } from "./supplier-image";
@@ -148,24 +149,26 @@ export function SupplierDetails({ supplier, returnTo }: SupplierDetailsProps) {
   return (
     <>
       <div className="space-y-6">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="flex min-w-0 items-start gap-3">
-            <SupplierImage name={supplier.name} viewMode="list" />
-            <div className="min-w-0">
-              <h1 className="break-words text-2xl font-bold">
-                {supplier.name}
-              </h1>
-              <p className="text-muted-foreground text-sm tabular-nums">
-                Fornecedor ID {supplier.id}
-              </p>
-            </div>
+        <Button
+          asChild
+          variant="outline"
+          size="sm"
+          className="h-8 px-2 text-xs sm:h-9 sm:px-3 sm:text-sm"
+        >
+          <Link href={returnTo}>
+            <ArrowLeft className="size-4" />
+            Voltar aos fornecedores
+          </Link>
+        </Button>
+
+        <div className="flex min-w-0 items-start gap-3">
+          <SupplierImage name={supplier.name} viewMode="list" />
+          <div className="min-w-0">
+            <h1 className="break-words text-2xl font-bold">{supplier.name}</h1>
+            <p className="text-muted-foreground text-sm tabular-nums">
+              Fornecedor ID {supplier.id}
+            </p>
           </div>
-          <Button asChild variant="outline">
-            <Link href={returnTo}>
-              <ArrowLeft className="size-4" />
-              Voltar aos fornecedores
-            </Link>
-          </Button>
         </div>
 
         <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)]">
@@ -302,7 +305,15 @@ export function SupplierDetails({ supplier, returnTo }: SupplierDetailsProps) {
                 </Button>
               </CardContent>
             </Card>
+          </div>
+        </div>
 
+        <Tabs defaultValue="deletion" className="w-full">
+          <TabsList className="grid h-auto w-full grid-cols-1">
+            <TabsTrigger value="deletion">Exclusão</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="deletion">
             <Card className="border-destructive/40 bg-destructive/5">
               <CardHeader>
                 <CardTitle className="text-destructive text-base">
@@ -310,7 +321,7 @@ export function SupplierDetails({ supplier, returnTo }: SupplierDetailsProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <p className="text-muted-foreground text-xs">
+                <p className="text-muted-foreground text-sm">
                   A API validará relações existentes antes de aceitar a
                   exclusão.
                 </p>
@@ -318,7 +329,6 @@ export function SupplierDetails({ supplier, returnTo }: SupplierDetailsProps) {
                 <Button
                   type="button"
                   variant="destructive"
-                  className="w-full"
                   disabled={isSaving || isMutating}
                   onClick={() => setConfirmation("delete")}
                 >
@@ -327,8 +337,8 @@ export function SupplierDetails({ supplier, returnTo }: SupplierDetailsProps) {
                 </Button>
               </CardContent>
             </Card>
-          </div>
-        </div>
+          </TabsContent>
+        </Tabs>
       </div>
 
       <AlertDialog
