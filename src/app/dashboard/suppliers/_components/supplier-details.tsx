@@ -150,7 +150,7 @@ export function SupplierDetails({ supplier, returnTo }: SupplierDetailsProps) {
       <div className="space-y-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex min-w-0 items-start gap-3">
-            <SupplierImage name={supplier.name} size="md" />
+            <SupplierImage name={supplier.name} viewMode="list" />
             <div className="min-w-0">
               <h1 className="break-words text-2xl font-bold">
                 {supplier.name}

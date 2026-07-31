@@ -77,7 +77,7 @@ export function CustomerDetails({
           <CustomerImage
             name={customer.name}
             imagePath={customer.imagePath}
-            size="lg"
+            viewMode="list"
           />
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
@@ -225,6 +225,7 @@ export function CustomerDetails({
                   <CustomerImage
                     name={seller.name}
                     imagePath={seller.imagePath}
+                    viewMode="list"
                     size="sm"
                   />
                   <div className="min-w-0">

@@ -71,65 +71,74 @@ function SupplierCard({
 }) {
   const horizontal = viewMode === "list";
   return (
-    <Link href={href} className="block h-full focus-visible:outline-none">
-      <Card className="h-full gap-0 py-0 transition-all hover:-translate-y-0.5 hover:shadow-md focus-within:ring-2 focus-within:ring-ring">
-        <CardContent
+    <Card className="group h-full gap-0 py-0 transition-all hover:-translate-y-0.5 hover:shadow-md">
+      <CardContent
+        className={
+          horizontal
+            ? "flex items-start gap-3 p-3"
+            : "flex h-full flex-col gap-3 p-3 sm:p-4"
+        }
+      >
+        <SupplierImage name={supplier.name} viewMode={viewMode} />
+        <div className="min-w-0 flex-1 space-y-3">
+          <div>
+            <p className="line-clamp-2 font-semibold">{supplier.name}</p>
+            <p className="text-muted-foreground text-xs tabular-nums">
+              ID: {supplier.id}
+            </p>
+            {supplier.legalName && (
+              <p className="text-muted-foreground mt-1 line-clamp-1 text-xs">
+                {supplier.legalName}
+              </p>
+            )}
+          </div>
+          <dl
+            className={
+              horizontal
+                ? "hidden text-xs sm:grid sm:grid-cols-2 sm:gap-x-4 sm:gap-y-2"
+                : "grid gap-2 text-xs [&>*:nth-child(n+3)]:hidden"
+            }
+          >
+            <div className="flex min-w-0 items-center gap-2">
+              <Hash className="text-muted-foreground size-3.5 shrink-0" />
+              <dd className="truncate">{getDocument(supplier)}</dd>
+            </div>
+            <div className="flex min-w-0 items-center gap-2">
+              <MapPin className="text-muted-foreground size-3.5 shrink-0" />
+              <dd className="truncate">{getLocation(supplier)}</dd>
+            </div>
+            <div className="flex min-w-0 items-center gap-2">
+              {supplier.email && !supplier.whatsapp && !supplier.phone ? (
+                <Mail className="text-muted-foreground size-3.5 shrink-0" />
+              ) : (
+                <Phone className="text-muted-foreground size-3.5 shrink-0" />
+              )}
+              <dd className="truncate">{getContact(supplier)}</dd>
+            </div>
+            <div className="flex min-w-0 items-center gap-2">
+              <CalendarDays className="text-muted-foreground size-3.5 shrink-0" />
+              <dd className="truncate">
+                Última compra: {formatDate(supplier.lastPurchaseAt)}
+              </dd>
+            </div>
+          </dl>
+        </div>
+        <Button
+          asChild
+          size="sm"
+          variant={horizontal ? "ghost" : undefined}
           className={
-            horizontal
-              ? "flex items-start gap-3 p-3"
-              : "flex h-full flex-col gap-3 p-3 sm:p-4"
+            horizontal ? "ml-auto gap-1 self-center" : "mt-0.5 w-full gap-1"
           }
         >
-          <SupplierImage name={supplier.name} size="sm" />
-          <div className="min-w-0 flex-1 space-y-3">
-            <div>
-              <p className="line-clamp-2 font-semibold">{supplier.name}</p>
-              <p className="text-muted-foreground text-xs tabular-nums">
-                ID: {supplier.id}
-              </p>
-              {supplier.legalName && (
-                <p className="text-muted-foreground mt-1 line-clamp-1 text-xs">
-                  {supplier.legalName}
-                </p>
-              )}
-            </div>
-            <dl
-              className={
-                horizontal
-                  ? "hidden text-xs sm:grid sm:grid-cols-2 sm:gap-x-4 sm:gap-y-2"
-                  : "grid gap-2 text-xs [&>*:nth-child(n+3)]:hidden"
-              }
-            >
-              <div className="flex min-w-0 items-center gap-2">
-                <Hash className="text-muted-foreground size-3.5 shrink-0" />
-                <dd className="truncate">{getDocument(supplier)}</dd>
-              </div>
-              <div className="flex min-w-0 items-center gap-2">
-                <MapPin className="text-muted-foreground size-3.5 shrink-0" />
-                <dd className="truncate">{getLocation(supplier)}</dd>
-              </div>
-              <div className="flex min-w-0 items-center gap-2">
-                {supplier.email && !supplier.whatsapp && !supplier.phone ? (
-                  <Mail className="text-muted-foreground size-3.5 shrink-0" />
-                ) : (
-                  <Phone className="text-muted-foreground size-3.5 shrink-0" />
-                )}
-                <dd className="truncate">{getContact(supplier)}</dd>
-              </div>
-              <div className="flex min-w-0 items-center gap-2">
-                <CalendarDays className="text-muted-foreground size-3.5 shrink-0" />
-                <dd className="truncate">
-                  Última compra: {formatDate(supplier.lastPurchaseAt)}
-                </dd>
-              </div>
-            </dl>
-          </div>
-          {horizontal && (
-            <Eye className="text-muted-foreground mt-3 size-4 shrink-0" />
-          )}
-        </CardContent>
-      </Card>
-    </Link>
+          <Link href={href}>
+            <Eye className={horizontal ? "size-4" : "size-3.5"} />
+            <span className="sm:hidden">Detalhes</span>
+            <span className="hidden sm:inline">Ver detalhes</span>
+          </Link>
+        </Button>
+      </CardContent>
+    </Card>
   );
 }
 

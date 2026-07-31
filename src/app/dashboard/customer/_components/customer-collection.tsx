@@ -85,65 +85,74 @@ function CustomerCard({
 }) {
   const horizontal = viewMode === "list";
   return (
-    <Link href={href} className="block h-full focus-visible:outline-none">
-      <Card className="h-full gap-0 py-0 transition-all hover:-translate-y-0.5 hover:shadow-md focus-within:ring-2 focus-within:ring-ring">
-        <CardContent
+    <Card className="group h-full gap-0 py-0 transition-all hover:-translate-y-0.5 hover:shadow-md">
+      <CardContent
+        className={
+          horizontal
+            ? "flex items-start gap-3 p-3"
+            : "flex h-full flex-col gap-3 p-3 sm:p-4"
+        }
+      >
+        <CustomerImage
+          name={customer.name}
+          imagePath={customer.imagePath}
+          viewMode={viewMode}
+        />
+        <div className="min-w-0 flex-1 space-y-3">
+          <div>
+            <p className="line-clamp-2 font-semibold">{customer.name}</p>
+            <p className="text-muted-foreground text-xs tabular-nums">
+              ID: {customer.customerId} ·{" "}
+              {customer.personType || "Tipo não informado"}
+            </p>
+            {customer.companyName && (
+              <p className="text-muted-foreground mt-1 line-clamp-1 text-xs">
+                {customer.companyName}
+              </p>
+            )}
+          </div>
+          <CustomerBadges customer={customer} />
+          <div
+            className={
+              horizontal
+                ? "hidden gap-2 text-xs sm:grid sm:grid-cols-2"
+                : "grid gap-2 text-xs [&>*:nth-child(n+3)]:hidden"
+            }
+          >
+            <p className="flex items-center gap-2 truncate">
+              <Phone className="text-muted-foreground size-3.5 shrink-0" />
+              {getPhone(customer)}
+            </p>
+            <p className="flex items-center gap-2 truncate">
+              <Mail className="text-muted-foreground size-3.5 shrink-0" />
+              {customer.email || "E-mail não informado"}
+            </p>
+            <p className="flex items-center gap-2 truncate">
+              <MapPin className="text-muted-foreground size-3.5 shrink-0" />
+              {customer.city || "Cidade não informada"}
+            </p>
+            <p className="flex items-center gap-2 truncate">
+              <CalendarClock className="text-muted-foreground size-3.5 shrink-0" />
+              Última compra: {formatDate(customer.lastPurchase)}
+            </p>
+          </div>
+        </div>
+        <Button
+          asChild
+          size="sm"
+          variant={horizontal ? "ghost" : undefined}
           className={
-            horizontal
-              ? "flex items-start gap-3 p-3"
-              : "flex h-full flex-col gap-3 p-3 sm:p-4"
+            horizontal ? "ml-auto gap-1 self-center" : "mt-0.5 w-full gap-1"
           }
         >
-          <CustomerImage
-            name={customer.name}
-            imagePath={customer.imagePath}
-            size={horizontal ? "sm" : "md"}
-          />
-          <div className="min-w-0 flex-1 space-y-3">
-            <div>
-              <p className="line-clamp-2 font-semibold">{customer.name}</p>
-              <p className="text-muted-foreground text-xs tabular-nums">
-                ID: {customer.customerId} ·{" "}
-                {customer.personType || "Tipo não informado"}
-              </p>
-              {customer.companyName && (
-                <p className="text-muted-foreground mt-1 line-clamp-1 text-xs">
-                  {customer.companyName}
-                </p>
-              )}
-            </div>
-            <CustomerBadges customer={customer} />
-            <div
-              className={
-                horizontal
-                  ? "hidden gap-2 text-xs sm:grid sm:grid-cols-2"
-                  : "grid gap-2 text-xs [&>*:nth-child(n+3)]:hidden"
-              }
-            >
-              <p className="flex items-center gap-2 truncate">
-                <Phone className="text-muted-foreground size-3.5 shrink-0" />
-                {getPhone(customer)}
-              </p>
-              <p className="flex items-center gap-2 truncate">
-                <Mail className="text-muted-foreground size-3.5 shrink-0" />
-                {customer.email || "E-mail não informado"}
-              </p>
-              <p className="flex items-center gap-2 truncate">
-                <MapPin className="text-muted-foreground size-3.5 shrink-0" />
-                {customer.city || "Cidade não informada"}
-              </p>
-              <p className="flex items-center gap-2 truncate">
-                <CalendarClock className="text-muted-foreground size-3.5 shrink-0" />
-                Última compra: {formatDate(customer.lastPurchase)}
-              </p>
-            </div>
-          </div>
-          {horizontal && (
-            <Eye className="text-muted-foreground mt-3 size-4 shrink-0" />
-          )}
-        </CardContent>
-      </Card>
-    </Link>
+          <Link href={href}>
+            <Eye className={horizontal ? "size-4" : "size-3.5"} />
+            <span className="sm:hidden">Detalhes</span>
+            <span className="hidden sm:inline">Ver detalhes</span>
+          </Link>
+        </Button>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -261,6 +270,7 @@ export function CustomerCollection({
                       <CustomerImage
                         name={customer.name}
                         imagePath={customer.imagePath}
+                        viewMode="list"
                         size="sm"
                       />
                     </TableCell>
