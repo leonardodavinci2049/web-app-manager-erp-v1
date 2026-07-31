@@ -2,7 +2,6 @@
 
 import {
   ArrowLeft,
-  Building2,
   CheckCircle2,
   CircleOff,
   Clock3,
@@ -37,6 +36,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import type { UISupplier } from "@/services/api-main/supplier";
+import { SupplierImage } from "./supplier-image";
 
 type Confirmation = "activate" | "deactivate" | "delete";
 
@@ -150,9 +150,7 @@ export function SupplierDetails({ supplier, returnTo }: SupplierDetailsProps) {
       <div className="space-y-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex min-w-0 items-start gap-3">
-            <div className="bg-primary/10 text-primary flex size-12 shrink-0 items-center justify-center rounded-xl">
-              <Building2 className="size-6" />
-            </div>
+            <SupplierImage name={supplier.name} size="md" />
             <div className="min-w-0">
               <h1 className="break-words text-2xl font-bold">
                 {supplier.name}
