@@ -22,6 +22,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { UICarrier } from "@/services/api-main/carrier";
 import { CarrierFormFields } from "./carrier-form-fields";
 import { CarrierImage } from "./carrier-image";
@@ -122,30 +123,34 @@ export function CarrierDetails({ carrier, returnTo }: CarrierDetailsProps) {
   return (
     <>
       <div className="space-y-6">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="flex min-w-0 items-start gap-3">
-            <CarrierImage
-              key={carrier.imagePath}
-              name={carrier.name}
-              imagePath={carrier.imagePath}
-              viewMode="list"
-            />
-            <div className="min-w-0">
-              <h1 className="break-words text-2xl font-bold">{carrier.name}</h1>
-              <p className="text-muted-foreground text-sm tabular-nums">
-                Transportadora ID {carrier.id}
-              </p>
-              <p className="text-muted-foreground text-sm">
-                {carrier.typePerson || "Tipo de pessoa não informado"}
-              </p>
-            </div>
+        <Button
+          asChild
+          variant="outline"
+          size="sm"
+          className="h-8 px-2 text-xs sm:h-9 sm:px-3 sm:text-sm"
+        >
+          <Link href={returnTo}>
+            <ArrowLeft className="size-4" />
+            Voltar às transportadoras
+          </Link>
+        </Button>
+
+        <div className="flex min-w-0 items-start gap-3">
+          <CarrierImage
+            key={carrier.imagePath}
+            name={carrier.name}
+            imagePath={carrier.imagePath}
+            viewMode="list"
+          />
+          <div className="min-w-0">
+            <h1 className="break-words text-2xl font-bold">{carrier.name}</h1>
+            <p className="text-muted-foreground text-sm tabular-nums">
+              Transportadora ID {carrier.id}
+            </p>
+            <p className="text-muted-foreground text-sm">
+              {carrier.typePerson || "Tipo de pessoa não informado"}
+            </p>
           </div>
-          <Button asChild variant="outline">
-            <Link href={returnTo}>
-              <ArrowLeft className="size-4" />
-              Voltar às transportadoras
-            </Link>
-          </Button>
         </div>
 
         <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)]">
@@ -221,7 +226,15 @@ export function CarrierDetails({ carrier, returnTo }: CarrierDetailsProps) {
                 </Button>
               </CardContent>
             </Card>
+          </div>
+        </div>
 
+        <Tabs defaultValue="deletion" className="w-full">
+          <TabsList className="grid h-auto w-full grid-cols-1">
+            <TabsTrigger value="deletion">Exclusão</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="deletion">
             <Card className="border-destructive/40 bg-destructive/5">
               <CardHeader>
                 <CardTitle className="text-destructive text-base">
@@ -229,13 +242,12 @@ export function CarrierDetails({ carrier, returnTo }: CarrierDetailsProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <p className="text-muted-foreground text-xs">
+                <p className="text-muted-foreground text-sm">
                   A API validará eventuais vínculos antes de aceitar a exclusão.
                 </p>
                 <Button
                   type="button"
                   variant="destructive"
-                  className="w-full"
                   disabled={isSaving || isDeleting}
                   onClick={() => setIsDeleteOpen(true)}
                 >
@@ -244,8 +256,8 @@ export function CarrierDetails({ carrier, returnTo }: CarrierDetailsProps) {
                 </Button>
               </CardContent>
             </Card>
-          </div>
-        </div>
+          </TabsContent>
+        </Tabs>
       </div>
 
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>

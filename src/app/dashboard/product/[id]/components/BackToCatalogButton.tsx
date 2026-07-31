@@ -43,8 +43,13 @@ export function BackToCatalogButton() {
   };
 
   return (
-    <Button variant="outline" onClick={handleBackToCatalog}>
-      <ArrowLeft className="mr-2 h-4 w-4" />
+    <Button
+      variant="outline"
+      size="sm"
+      className="h-8 px-2 text-xs sm:h-9 sm:px-3 sm:text-sm"
+      onClick={handleBackToCatalog}
+    >
+      <ArrowLeft className="size-4" />
       Voltar ao Catálogo
     </Button>
   );

@@ -28,6 +28,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import type { UIPtype } from "@/services/api-main/ptype";
 import {
@@ -138,19 +139,23 @@ export function PtypeDetails({ item, returnTo }: PtypeDetailsProps) {
   return (
     <>
       <div className="space-y-6">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="min-w-0">
-            <h1 className="break-words text-2xl font-bold">{item.name}</h1>
-            <p className="text-muted-foreground mt-1 text-sm tabular-nums">
-              Tipo de produto ID {item.id}
-            </p>
-          </div>
-          <Button asChild variant="outline">
-            <Link href={returnTo}>
-              <ArrowLeft className="size-4" />
-              Voltar aos tipos
-            </Link>
-          </Button>
+        <Button
+          asChild
+          variant="outline"
+          size="sm"
+          className="h-8 px-2 text-xs sm:h-9 sm:px-3 sm:text-sm"
+        >
+          <Link href={returnTo}>
+            <ArrowLeft className="size-4" />
+            Voltar aos tipos
+          </Link>
+        </Button>
+
+        <div className="min-w-0">
+          <h1 className="break-words text-2xl font-bold">{item.name}</h1>
+          <p className="text-muted-foreground mt-1 text-sm tabular-nums">
+            Tipo de produto ID {item.id}
+          </p>
         </div>
 
         <form
@@ -271,22 +276,29 @@ export function PtypeDetails({ item, returnTo }: PtypeDetailsProps) {
                 </Button>
               </CardContent>
             </Card>
+          </div>
+        </form>
 
-            <Card>
+        <Tabs defaultValue="deletion" className="w-full">
+          <TabsList className="grid h-auto w-full grid-cols-1">
+            <TabsTrigger value="deletion">Exclusão</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="deletion">
+            <Card className="border-destructive/40 bg-destructive/5">
               <CardHeader>
                 <CardTitle className="text-destructive text-base">
                   Zona de exclusão
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <p className="text-muted-foreground text-xs">
+                <p className="text-muted-foreground text-sm">
                   A API verificará vínculos existentes e informará quando a
                   exclusão não for permitida.
                 </p>
                 <Button
                   type="button"
                   variant="destructive"
-                  className="w-full"
                   onClick={() => setConfirmation("delete")}
                   disabled={isSaving || isMutating}
                 >
@@ -295,8 +307,8 @@ export function PtypeDetails({ item, returnTo }: PtypeDetailsProps) {
                 </Button>
               </CardContent>
             </Card>
-          </div>
-        </form>
+          </TabsContent>
+        </Tabs>
       </div>
 
       <AlertDialog

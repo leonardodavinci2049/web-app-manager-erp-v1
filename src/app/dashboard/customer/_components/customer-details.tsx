@@ -72,36 +72,38 @@ export function CustomerDetails({
 }: CustomerDetailsProps) {
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex min-w-0 items-start gap-3">
-          <CustomerImage
-            name={customer.name}
-            imagePath={customer.imagePath}
-            viewMode="list"
-          />
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <h1 className="break-words text-2xl font-bold">
-                {customer.name}
-              </h1>
-              <Badge variant="secondary">
-                {customer.accountStatus || "Status não informado"}
-              </Badge>
-            </div>
-            <p className="text-muted-foreground text-sm tabular-nums">
-              Cliente ID {customer.id}
-            </p>
-            <p className="text-muted-foreground text-sm">
-              {customer.accountType || "Tipo de conta não informado"}
-            </p>
+      <Button
+        asChild
+        variant="outline"
+        size="sm"
+        className="h-8 px-2 text-xs sm:h-9 sm:px-3 sm:text-sm"
+      >
+        <Link href={returnTo}>
+          <ArrowLeft className="size-4" />
+          Voltar aos clientes
+        </Link>
+      </Button>
+
+      <div className="flex min-w-0 items-start gap-3">
+        <CustomerImage
+          name={customer.name}
+          imagePath={customer.imagePath}
+          viewMode="list"
+        />
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="break-words text-2xl font-bold">{customer.name}</h1>
+            <Badge variant="secondary">
+              {customer.accountStatus || "Status não informado"}
+            </Badge>
           </div>
+          <p className="text-muted-foreground text-sm tabular-nums">
+            Cliente ID {customer.id}
+          </p>
+          <p className="text-muted-foreground text-sm">
+            {customer.accountType || "Tipo de conta não informado"}
+          </p>
         </div>
-        <Button asChild variant="outline">
-          <Link href={returnTo}>
-            <ArrowLeft className="size-4" />
-            Voltar aos clientes
-          </Link>
-        </Button>
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)]">
@@ -145,15 +147,6 @@ export function CustomerDetails({
                   value={formatDate(customer.createdAt)}
                 />
               </dl>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Editar cadastro por seção</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CustomerDetailForms customer={customer} />
             </CardContent>
           </Card>
 
@@ -209,6 +202,38 @@ export function CustomerDetails({
               )}
             </CardContent>
           </Card>
+
+          <Card>
+            <CardHeader className="flex-row items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <LockKeyhole className="size-4" />
+                Status do cadastro
+              </CardTitle>
+              <Badge variant="secondary">Pendente de API</Badge>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-muted-foreground text-xs">
+                A API atual não oferece contratos seguros para ativar ou
+                inativar clientes.
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                disabled
+              >
+                Ativar — Pendente de API
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                disabled
+              >
+                Inativar — Pendente de API
+              </Button>
+            </CardContent>
+          </Card>
         </div>
 
         <div className="space-y-4">
@@ -260,48 +285,19 @@ export function CustomerDetails({
               />
             </CardContent>
           </Card>
+        </div>
+      </div>
 
-          <Card>
-            <CardHeader className="flex-row items-center justify-between">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <LockKeyhole className="size-4" />
-                Status e exclusão
-              </CardTitle>
-              <Badge variant="secondary">Pendente de API</Badge>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <p className="text-muted-foreground text-xs">
-                A API atual não oferece contratos seguros para ativar, inativar
-                ou excluir clientes.
-              </p>
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                disabled
-              >
-                Ativar — Pendente de API
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                disabled
-              >
-                Inativar — Pendente de API
-              </Button>
-              <Button
-                type="button"
-                variant="destructive"
-                className="w-full"
-                disabled
-              >
-                <Trash2 className="size-4" />
-                Excluir — Pendente de API
-              </Button>
-            </CardContent>
-          </Card>
+      <div className="space-y-1">
+        <h2 className="text-lg font-semibold">Editar cadastro por seção</h2>
+        <p className="text-muted-foreground text-sm">
+          Selecione uma seção para consultar e atualizar os dados do cliente.
+        </p>
+      </div>
 
+      <CustomerDetailForms
+        customer={customer}
+        addressSummary={
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
@@ -322,8 +318,29 @@ export function CustomerDetails({
               </p>
             </CardContent>
           </Card>
-        </div>
-      </div>
+        }
+        deletionContent={
+          <Card className="border-destructive/40 bg-destructive/5">
+            <CardHeader className="flex-row items-center justify-between">
+              <CardTitle className="text-destructive flex items-center gap-2 text-base">
+                <LockKeyhole className="size-4" />
+                Zona de exclusão
+              </CardTitle>
+              <Badge variant="secondary">Pendente de API</Badge>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-muted-foreground text-sm">
+                A API atual não oferece um contrato seguro para excluir
+                clientes.
+              </p>
+              <Button type="button" variant="destructive" disabled>
+                <Trash2 className="size-4" />
+                Excluir — Pendente de API
+              </Button>
+            </CardContent>
+          </Card>
+        }
+      />
     </div>
   );
 }

@@ -1,6 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { UIProductManager } from "@/services/api-main/product-manager/transformers/transformers";
 import { ProductCharacteristicsCard } from "./ProductCharacteristicsCard";
@@ -29,37 +31,28 @@ export function ProductDetailsTabs({
 
   return (
     <Tabs defaultValue="description" className="w-full">
-      <TabsList className="w-full justify-start overflow-x-auto">
-        <TabsTrigger
-          value="description"
-          className="flex items-center gap-2 whitespace-nowrap"
-        >
+      <TabsList className="grid h-auto w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
+        <TabsTrigger value="description" className="min-h-9 whitespace-normal">
           Descrição
         </TabsTrigger>
-        <TabsTrigger
-          value="images"
-          className="flex items-center gap-2 whitespace-nowrap"
-        >
+        <TabsTrigger value="images" className="min-h-9 whitespace-normal">
           Imagens
         </TabsTrigger>
 
         <TabsTrigger
           value="specifications"
-          className="flex items-center gap-2 whitespace-nowrap"
+          className="min-h-9 whitespace-normal"
         >
           Especificações
         </TabsTrigger>
-        <TabsTrigger
-          value="technical"
-          className="flex items-center gap-2 whitespace-nowrap"
-        >
+        <TabsTrigger value="technical" className="min-h-9 whitespace-normal">
           Dados Técnicos
         </TabsTrigger>
-        <TabsTrigger
-          value="metadata"
-          className="flex items-center gap-2 whitespace-nowrap"
-        >
+        <TabsTrigger value="metadata" className="min-h-9 whitespace-normal">
           Metadados
+        </TabsTrigger>
+        <TabsTrigger value="deletion" className="min-h-9 whitespace-normal">
+          Exclusão
         </TabsTrigger>
       </TabsList>
 
@@ -125,6 +118,24 @@ export function ProductDetailsTabs({
           updatedAt={product.updatedAt ?? null}
           slug={product.slug ?? null}
         />
+      </TabsContent>
+
+      <TabsContent value="deletion">
+        <Card className="border-destructive/40 bg-destructive/5">
+          <CardHeader>
+            <CardTitle className="text-destructive text-base">
+              Zona de exclusão
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-muted-foreground text-sm">
+              A exclusão de produtos ainda não está disponível nesta tela.
+            </p>
+            <Button type="button" variant="destructive" disabled>
+              Excluir produto — Pendente de API
+            </Button>
+          </CardContent>
+        </Card>
       </TabsContent>
     </Tabs>
   );

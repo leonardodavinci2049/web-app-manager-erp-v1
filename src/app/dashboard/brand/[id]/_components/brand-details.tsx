@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { UIBrand } from "@/services/api-main/brand/transformers/transformers";
 import type { BrandProductDto } from "../../_components/types/brand-dashboard-types";
 import { BrandDeleteDialog } from "./brand-delete-dialog";
@@ -47,69 +48,44 @@ export function BrandDetails({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <Tag className="text-primary size-6" aria-hidden="true" />
-            <h1 className="break-words text-2xl font-bold">{brand.name}</h1>
-            <Badge variant={brand.inactive ? "secondary" : "outline"}>
-              {brand.inactive ? "Inativa" : "Ativa"}
-            </Badge>
-          </div>
-          <p className="text-muted-foreground mt-1 text-sm tabular-nums">
-            Marca ID {brand.id}
-          </p>
+      <Button
+        asChild
+        variant="outline"
+        size="sm"
+        className="h-8 px-2 text-xs sm:h-9 sm:px-3 sm:text-sm"
+      >
+        <Link href={returnTo}>
+          <ArrowLeft className="size-4" />
+          Voltar às marcas
+        </Link>
+      </Button>
+
+      <div className="min-w-0">
+        <div className="flex flex-wrap items-center gap-2">
+          <Tag className="text-primary size-6" aria-hidden="true" />
+          <h1 className="break-words text-2xl font-bold">{brand.name}</h1>
+          <Badge variant={brand.inactive ? "secondary" : "outline"}>
+            {brand.inactive ? "Inativa" : "Ativa"}
+          </Badge>
         </div>
-        <Button asChild variant="outline">
-          <Link href={returnTo}>
-            <ArrowLeft className="size-4" />
-            Voltar às marcas
-          </Link>
-        </Button>
+        <p className="text-muted-foreground mt-1 text-sm tabular-nums">
+          Marca ID {brand.id}
+        </p>
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)]">
-        <div className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Dados do cadastro</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <BrandDetailForm
-                key={brand.id}
-                brand={brand}
-                onSaved={() => router.refresh()}
-              />
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Produtos relacionados</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {hasProductsError ? (
-                <div className="rounded-lg border border-dashed p-6 text-center">
-                  <p className="font-medium">
-                    Não foi possível carregar os produtos relacionados.
-                  </p>
-                  <p className="text-muted-foreground mt-1 text-xs">
-                    Os demais dados da marca permanecem disponíveis.
-                  </p>
-                </div>
-              ) : (
-                <BrandProductsList
-                  brandId={brand.id}
-                  products={products}
-                  productTotal={productTotal}
-                  productPage={productPage}
-                  pageSize={productPageSize}
-                  brandReturnTo={productReturnTo}
-                />
-              )}
-            </CardContent>
-          </Card>
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Dados do cadastro</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <BrandDetailForm
+              key={brand.id}
+              brand={brand}
+              onSaved={() => router.refresh()}
+            />
+          </CardContent>
+        </Card>
 
         <div className="space-y-4">
           <Card>
@@ -140,8 +116,46 @@ export function BrandDetails({
               </dl>
             </CardContent>
           </Card>
+        </div>
+      </div>
 
+      <Tabs defaultValue="products" className="w-full">
+        <TabsList className="grid h-auto w-full grid-cols-2">
+          <TabsTrigger value="products">Produtos</TabsTrigger>
+          <TabsTrigger value="deletion">Exclusão</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="products">
           <Card>
+            <CardHeader>
+              <CardTitle>Produtos relacionados</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {hasProductsError ? (
+                <div className="rounded-lg border border-dashed p-6 text-center">
+                  <p className="font-medium">
+                    Não foi possível carregar os produtos relacionados.
+                  </p>
+                  <p className="text-muted-foreground mt-1 text-xs">
+                    Os demais dados da marca permanecem disponíveis.
+                  </p>
+                </div>
+              ) : (
+                <BrandProductsList
+                  brandId={brand.id}
+                  products={products}
+                  productTotal={productTotal}
+                  productPage={productPage}
+                  pageSize={productPageSize}
+                  brandReturnTo={productReturnTo}
+                />
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="deletion">
+          <Card className="border-destructive/40 bg-destructive/5">
             <CardHeader>
               <CardTitle className="text-destructive text-base">
                 Zona de exclusão
@@ -174,8 +188,8 @@ export function BrandDetails({
               />
             </CardContent>
           </Card>
-        </div>
-      </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

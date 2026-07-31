@@ -2,7 +2,7 @@
 
 import { Loader2, Save, ShieldAlert, ShieldCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { type FormEvent, useState } from "react";
+import { type FormEvent, type ReactNode, useState } from "react";
 import { toast } from "sonner";
 import {
   updateCustomerAddressAction,
@@ -56,7 +56,9 @@ interface DetailValues {
 }
 
 interface CustomerDetailFormsProps {
+  addressSummary: ReactNode;
   customer: UICustomerDetail;
+  deletionContent: ReactNode;
 }
 
 function toValues(customer: UICustomerDetail): DetailValues {
@@ -108,7 +110,11 @@ function SectionButton({ saving, label }: { saving: boolean; label: string }) {
   );
 }
 
-export function CustomerDetailForms({ customer }: CustomerDetailFormsProps) {
+export function CustomerDetailForms({
+  addressSummary,
+  customer,
+  deletionContent,
+}: CustomerDetailFormsProps) {
   const router = useRouter();
   const [values, setValues] = useState<DetailValues>(() => toValues(customer));
   const [errors, setErrors] = useState<Record<string, string[] | undefined>>(
@@ -182,259 +188,270 @@ export function CustomerDetailForms({ customer }: CustomerDetailFormsProps) {
   );
 
   return (
-    <div className="space-y-5">
-      <Tabs defaultValue="general">
-        <TabsList className="grid h-auto w-full grid-cols-2 sm:grid-cols-4">
-          <TabsTrigger value="general">Geral</TabsTrigger>
-          <TabsTrigger value="person">
-            {isBusiness ? "Empresa" : "Pessoa"}
-          </TabsTrigger>
-          <TabsTrigger value="address">Endereço</TabsTrigger>
-          <TabsTrigger value="internet">Internet</TabsTrigger>
-        </TabsList>
+    <Tabs defaultValue="general" className="w-full">
+      <TabsList className="grid h-auto w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
+        <TabsTrigger value="general">Contato</TabsTrigger>
+        <TabsTrigger value="person">
+          {isBusiness ? "Empresa" : "Pessoa"}
+        </TabsTrigger>
+        <TabsTrigger value="internet">Internet</TabsTrigger>
+        <TabsTrigger value="address">Endereço</TabsTrigger>
+        <TabsTrigger value="restriction">Restrição</TabsTrigger>
+        <TabsTrigger value="deletion">Exclusão</TabsTrigger>
+      </TabsList>
 
-        <TabsContent value="general">
+      <TabsContent value="general">
+        <form
+          className="space-y-4 rounded-lg border p-4"
+          onSubmit={(event: FormEvent<HTMLFormElement>) => {
+            event.preventDefault();
+            runAction(
+              "general",
+              updateCustomerGeneralAction({
+                customerId: customer.id,
+                name: values.name,
+                email: values.email,
+                phone: values.phone,
+                whatsapp: values.whatsapp,
+                imagePath: values.imagePath,
+              }),
+            );
+          }}
+        >
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              {field("name", "Nome", { maxLength: 300, required: true })}
+            </div>
+            {field("email", "E-mail", { type: "email", maxLength: 255 })}
+            {field("phone", "Telefone", { maxLength: 100 })}
+            {field("whatsapp", "WhatsApp", { maxLength: 100 })}
+            <div className="sm:col-span-2">
+              {field("imagePath", "Caminho da imagem", {
+                maxLength: 500,
+              })}
+            </div>
+          </div>
+          <SectionButton
+            saving={savingSection === "general"}
+            label="Salvar dados gerais"
+          />
+        </form>
+      </TabsContent>
+
+      <TabsContent value="person">
+        {isBusiness ? (
           <form
             className="space-y-4 rounded-lg border p-4"
             onSubmit={(event: FormEvent<HTMLFormElement>) => {
               event.preventDefault();
               runAction(
-                "general",
-                updateCustomerGeneralAction({
+                "person",
+                updateCustomerBusinessAction({
                   customerId: customer.id,
-                  name: values.name,
-                  email: values.email,
-                  phone: values.phone,
-                  whatsapp: values.whatsapp,
+                  cnpj: values.cnpj,
+                  companyName: values.companyName,
+                  stateRegistration: values.stateRegistration,
+                  municipalRegistration: values.municipalRegistration,
+                  responsibleName: values.responsibleName,
+                  mainActivity: values.mainActivity,
+                }),
+              );
+            }}
+          >
+            <div className="grid gap-4 sm:grid-cols-2">
+              {field("cnpj", "CNPJ", { maxLength: 100, required: true })}
+              {field("companyName", "Razão social", {
+                maxLength: 300,
+                required: true,
+              })}
+              {field("stateRegistration", "Inscrição estadual", {
+                maxLength: 100,
+              })}
+              {field("municipalRegistration", "Inscrição municipal", {
+                maxLength: 100,
+              })}
+              {field("responsibleName", "Responsável", {
+                maxLength: 300,
+              })}
+              {field("mainActivity", "Atividade principal", {
+                maxLength: 300,
+              })}
+            </div>
+            <SectionButton
+              saving={savingSection === "person"}
+              label="Salvar dados empresariais"
+            />
+          </form>
+        ) : (
+          <form
+            className="space-y-4 rounded-lg border p-4"
+            onSubmit={(event: FormEvent<HTMLFormElement>) => {
+              event.preventDefault();
+              runAction(
+                "person",
+                updateCustomerPersonalAction({
+                  customerId: customer.id,
+                  cpf: values.cpf,
+                  firstName: values.firstName,
+                  lastName: values.lastName,
                   imagePath: values.imagePath,
+                  birthDate: values.birthDate,
                 }),
               );
             }}
           >
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="sm:col-span-2">
-                {field("name", "Nome", { maxLength: 300, required: true })}
-              </div>
-              {field("email", "E-mail", { type: "email", maxLength: 255 })}
-              {field("phone", "Telefone", { maxLength: 100 })}
-              {field("whatsapp", "WhatsApp", { maxLength: 100 })}
-              <div className="sm:col-span-2">
-                {field("imagePath", "Caminho da imagem", { maxLength: 500 })}
-              </div>
+              {field("cpf", "CPF", { maxLength: 100 })}
+              {field("birthDate", "Data de nascimento", { type: "date" })}
+              {field("firstName", "Primeiro nome", { maxLength: 300 })}
+              {field("lastName", "Sobrenome", { maxLength: 100 })}
             </div>
             <SectionButton
-              saving={savingSection === "general"}
-              label="Salvar dados gerais"
+              saving={savingSection === "person"}
+              label="Salvar dados pessoais"
             />
           </form>
-        </TabsContent>
+        )}
+      </TabsContent>
 
-        <TabsContent value="person">
-          {isBusiness ? (
-            <form
-              className="space-y-4 rounded-lg border p-4"
-              onSubmit={(event: FormEvent<HTMLFormElement>) => {
-                event.preventDefault();
+      <TabsContent value="internet">
+        <form
+          className="space-y-4 rounded-lg border p-4"
+          onSubmit={(event: FormEvent<HTMLFormElement>) => {
+            event.preventDefault();
+            runAction(
+              "internet",
+              updateCustomerInternetAction({
+                customerId: customer.id,
+                website: values.website,
+                facebook: values.facebook,
+                twitter: values.twitter,
+                linkedin: values.linkedin,
+                instagram: values.instagram,
+                tiktok: values.tiktok,
+                telegram: values.telegram,
+              }),
+            );
+          }}
+        >
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              {field("website", "Website", { maxLength: 500 })}
+            </div>
+            {field("facebook", "Facebook", { maxLength: 500 })}
+            {field("twitter", "X/Twitter", { maxLength: 500 })}
+            {field("linkedin", "LinkedIn", { maxLength: 500 })}
+            {field("instagram", "Instagram", { maxLength: 500 })}
+            {field("tiktok", "TikTok", { maxLength: 500 })}
+            {field("telegram", "Telegram", { maxLength: 500 })}
+          </div>
+          <SectionButton
+            saving={savingSection === "internet"}
+            label="Salvar presença digital"
+          />
+        </form>
+      </TabsContent>
+
+      <TabsContent value="restriction">
+        <div className="space-y-3 rounded-lg border p-4">
+          <div>
+            <h3 className="font-semibold">Restrição comercial</h3>
+            <p className="text-muted-foreground text-xs">
+              O detalhe não informa o estado atual. Escolha explicitamente o
+              estado desejado; somente a flag de restrição será enviada.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={savingSection !== null}
+              onClick={() => {
+                if (!window.confirm("Marcar este cliente com restrição?"))
+                  return;
                 runAction(
-                  "person",
-                  updateCustomerBusinessAction({
+                  "restriction",
+                  updateCustomerRestrictionAction({
                     customerId: customer.id,
-                    cnpj: values.cnpj,
-                    companyName: values.companyName,
-                    stateRegistration: values.stateRegistration,
-                    municipalRegistration: values.municipalRegistration,
-                    responsibleName: values.responsibleName,
-                    mainActivity: values.mainActivity,
+                    restricted: true,
                   }),
                 );
               }}
             >
-              <div className="grid gap-4 sm:grid-cols-2">
-                {field("cnpj", "CNPJ", { maxLength: 100, required: true })}
-                {field("companyName", "Razão social", {
-                  maxLength: 300,
-                  required: true,
-                })}
-                {field("stateRegistration", "Inscrição estadual", {
-                  maxLength: 100,
-                })}
-                {field("municipalRegistration", "Inscrição municipal", {
-                  maxLength: 100,
-                })}
-                {field("responsibleName", "Responsável", { maxLength: 300 })}
-                {field("mainActivity", "Atividade principal", {
-                  maxLength: 300,
-                })}
-              </div>
-              <SectionButton
-                saving={savingSection === "person"}
-                label="Salvar dados empresariais"
-              />
-            </form>
-          ) : (
-            <form
-              className="space-y-4 rounded-lg border p-4"
-              onSubmit={(event: FormEvent<HTMLFormElement>) => {
-                event.preventDefault();
+              {savingSection === "restriction" ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <ShieldAlert className="size-4" />
+              )}
+              Marcar com restrição
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={savingSection !== null}
+              onClick={() => {
+                if (!window.confirm("Remover a restrição deste cliente?"))
+                  return;
                 runAction(
-                  "person",
-                  updateCustomerPersonalAction({
+                  "restriction",
+                  updateCustomerRestrictionAction({
                     customerId: customer.id,
-                    cpf: values.cpf,
-                    firstName: values.firstName,
-                    lastName: values.lastName,
-                    imagePath: values.imagePath,
-                    birthDate: values.birthDate,
+                    restricted: false,
                   }),
                 );
               }}
             >
-              <div className="grid gap-4 sm:grid-cols-2">
-                {field("cpf", "CPF", { maxLength: 100 })}
-                {field("birthDate", "Data de nascimento", { type: "date" })}
-                {field("firstName", "Primeiro nome", { maxLength: 300 })}
-                {field("lastName", "Sobrenome", { maxLength: 100 })}
-              </div>
-              <SectionButton
-                saving={savingSection === "person"}
-                label="Salvar dados pessoais"
-              />
-            </form>
-          )}
-        </TabsContent>
-
-        <TabsContent value="address">
-          <form
-            className="space-y-4 rounded-lg border p-4"
-            onSubmit={(event: FormEvent<HTMLFormElement>) => {
-              event.preventDefault();
-              runAction(
-                "address",
-                updateCustomerAddressAction({
-                  customerId: customer.id,
-                  zipCode: values.zipCode,
-                  address: values.address,
-                  addressNumber: values.addressNumber,
-                  complement: values.complement,
-                  neighborhood: values.neighborhood,
-                  city: values.city,
-                  state: values.state,
-                  cityCode: values.cityCode,
-                  stateCode: values.stateCode,
-                }),
-              );
-            }}
-          >
-            <div className="grid gap-4 sm:grid-cols-2">
-              {field("zipCode", "CEP", { maxLength: 100 })}
-              {field("state", "UF", { maxLength: 100 })}
-              <div className="sm:col-span-2">
-                {field("address", "Endereço", { maxLength: 300 })}
-              </div>
-              {field("addressNumber", "Número", { maxLength: 100 })}
-              {field("complement", "Complemento", { maxLength: 100 })}
-              {field("neighborhood", "Bairro", { maxLength: 300 })}
-              {field("city", "Cidade", { maxLength: 300 })}
-              {field("cityCode", "Código do município", { maxLength: 100 })}
-              {field("stateCode", "Código da UF", { maxLength: 100 })}
-            </div>
-            <SectionButton
-              saving={savingSection === "address"}
-              label="Salvar endereço"
-            />
-          </form>
-        </TabsContent>
-
-        <TabsContent value="internet">
-          <form
-            className="space-y-4 rounded-lg border p-4"
-            onSubmit={(event: FormEvent<HTMLFormElement>) => {
-              event.preventDefault();
-              runAction(
-                "internet",
-                updateCustomerInternetAction({
-                  customerId: customer.id,
-                  website: values.website,
-                  facebook: values.facebook,
-                  twitter: values.twitter,
-                  linkedin: values.linkedin,
-                  instagram: values.instagram,
-                  tiktok: values.tiktok,
-                  telegram: values.telegram,
-                }),
-              );
-            }}
-          >
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="sm:col-span-2">
-                {field("website", "Website", { maxLength: 500 })}
-              </div>
-              {field("facebook", "Facebook", { maxLength: 500 })}
-              {field("twitter", "X/Twitter", { maxLength: 500 })}
-              {field("linkedin", "LinkedIn", { maxLength: 500 })}
-              {field("instagram", "Instagram", { maxLength: 500 })}
-              {field("tiktok", "TikTok", { maxLength: 500 })}
-              {field("telegram", "Telegram", { maxLength: 500 })}
-            </div>
-            <SectionButton
-              saving={savingSection === "internet"}
-              label="Salvar presença digital"
-            />
-          </form>
-        </TabsContent>
-      </Tabs>
-
-      <div className="space-y-3 rounded-lg border p-4">
-        <div>
-          <h3 className="font-semibold">Restrição comercial</h3>
-          <p className="text-muted-foreground text-xs">
-            O detalhe não informa o estado atual. Escolha explicitamente o
-            estado desejado; somente a flag de restrição será enviada.
-          </p>
+              <ShieldCheck className="size-4" />
+              Remover restrição
+            </Button>
+          </div>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Button
-            type="button"
-            variant="destructive"
-            disabled={savingSection !== null}
-            onClick={() => {
-              if (!window.confirm("Marcar este cliente com restrição?")) return;
-              runAction(
-                "restriction",
-                updateCustomerRestrictionAction({
-                  customerId: customer.id,
-                  restricted: true,
-                }),
-              );
-            }}
-          >
-            {savingSection === "restriction" ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <ShieldAlert className="size-4" />
-            )}
-            Marcar com restrição
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            disabled={savingSection !== null}
-            onClick={() => {
-              if (!window.confirm("Remover a restrição deste cliente?")) return;
-              runAction(
-                "restriction",
-                updateCustomerRestrictionAction({
-                  customerId: customer.id,
-                  restricted: false,
-                }),
-              );
-            }}
-          >
-            <ShieldCheck className="size-4" />
-            Remover restrição
-          </Button>
-        </div>
-      </div>
-    </div>
+      </TabsContent>
+
+      <TabsContent value="address" className="space-y-4">
+        <form
+          className="space-y-4 rounded-lg border p-4"
+          onSubmit={(event: FormEvent<HTMLFormElement>) => {
+            event.preventDefault();
+            runAction(
+              "address",
+              updateCustomerAddressAction({
+                customerId: customer.id,
+                zipCode: values.zipCode,
+                address: values.address,
+                addressNumber: values.addressNumber,
+                complement: values.complement,
+                neighborhood: values.neighborhood,
+                city: values.city,
+                state: values.state,
+                cityCode: values.cityCode,
+                stateCode: values.stateCode,
+              }),
+            );
+          }}
+        >
+          <div className="grid gap-4 sm:grid-cols-2">
+            {field("zipCode", "CEP", { maxLength: 100 })}
+            {field("state", "UF", { maxLength: 100 })}
+            <div className="sm:col-span-2">
+              {field("address", "Endereço", { maxLength: 300 })}
+            </div>
+            {field("addressNumber", "Número", { maxLength: 100 })}
+            {field("complement", "Complemento", { maxLength: 100 })}
+            {field("neighborhood", "Bairro", { maxLength: 300 })}
+            {field("city", "Cidade", { maxLength: 300 })}
+            {field("cityCode", "Código do município", { maxLength: 100 })}
+            {field("stateCode", "Código da UF", { maxLength: 100 })}
+          </div>
+          <SectionButton
+            saving={savingSection === "address"}
+            label="Salvar endereço"
+          />
+        </form>
+        {addressSummary}
+      </TabsContent>
+
+      <TabsContent value="deletion">{deletionContent}</TabsContent>
+    </Tabs>
   );
 }
