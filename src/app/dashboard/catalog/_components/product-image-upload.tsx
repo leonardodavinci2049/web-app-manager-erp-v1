@@ -1,30 +1,38 @@
 "use client";
 
-import { Loader2, Package, Upload } from "lucide-react";
+import { Loader2, Upload } from "lucide-react";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { uploadProductImageAction } from "@/app/actions/action-product-images";
-import { Badge } from "@/components/ui/badge";
 
 interface ProductImageUploadProps {
   productId: string;
   productName: string;
   viewMode: "grid" | "list";
   compact?: boolean;
-  isOutOfStock?: boolean;
   onUploadSuccess?: () => void | Promise<void>;
 }
 
+/**
+ * Gatilho de upload de imagem (Client): botao compacto posicionado no canto
+ * superior direito do container de imagem do produto. Mantem toda a logica de
+ * validacao, envio (Server Action) e drag-and-drop. Visivel apenas quando o
+ * produto exibe a imagem padrao de fallback (controlado pelo componente pai).
+ */
 export function ProductImageUpload({
   productId,
   productName,
   viewMode,
   compact = false,
-  isOutOfStock = false,
   onUploadSuccess,
 }: ProductImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
+
+  const inputId =
+    viewMode === "grid"
+      ? `file-input-${productId}`
+      : `file-input-list-${productId}`;
 
   const handleImageUpload = useCallback(
     async (files: FileList | null) => {
@@ -99,141 +107,45 @@ export function ProductImageUpload({
     [handleImageUpload],
   );
 
-  if (viewMode === "grid") {
-    return (
-      <button
-        type="button"
-        className={`
-          relative aspect-[3/2] rounded-md overflow-hidden cursor-pointer transition-all duration-200
-          border-2 border-dashed border-muted-foreground/30 hover:border-primary/50
-          bg-muted/50 hover:bg-muted/80 w-full
-          ${isDragOver ? "border-primary bg-primary/10" : ""}
-          ${isUploading ? "pointer-events-none opacity-60" : ""}
-        `}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        disabled={isUploading}
-        onClick={() =>
-          document.getElementById(`file-input-${productId}`)?.click()
-        }
-      >
-        <input
-          id={`file-input-${productId}`}
-          type="file"
-          accept="image/*"
-          onChange={handleFileInputChange}
-          className="pointer-events-none absolute inset-0 h-full w-full opacity-0"
-          disabled={isUploading}
-          aria-label="Enviar imagem do produto"
-        />
+  const isList = viewMode === "list";
 
-        {isOutOfStock && (
-          <Badge
-            variant="destructive"
-            className="pointer-events-none absolute top-1 right-1 z-10 whitespace-nowrap px-1 py-0 text-[9px] sm:top-2 sm:right-2 sm:text-[10px]"
-          >
-            SEM ESTOQUE
-          </Badge>
-        )}
+  const buttonClass = isList
+    ? compact
+      ? "top-0.5 right-0.5 h-5 w-5"
+      : "top-1 right-1 h-6 w-6"
+    : "top-1.5 right-1.5 h-7 w-7 sm:top-2 sm:right-2 sm:h-8 sm:w-8";
 
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 p-4 text-center">
-          {isUploading ? (
-            <>
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <span className="text-muted-foreground text-xs font-medium">
-                Enviando...
-              </span>
-            </>
-          ) : isDragOver ? (
-            <>
-              <Package className="h-8 w-8 text-primary" />
-              <span className="text-primary text-xs font-medium">
-                Soltar aqui
-              </span>
-            </>
-          ) : (
-            <>
-              <Upload className="group-hover:text-primary h-8 w-8 text-muted-foreground transition-colors" />
-              <span className="text-muted-foreground text-xs font-medium">
-                Adicionar Imagem
-              </span>
-              <span className="text-muted-foreground/70 text-xs">
-                Clique ou arraste
-              </span>
-            </>
-          )}
-        </div>
-      </button>
-    );
-  }
+  const iconClass = isList
+    ? compact
+      ? "h-3 w-3"
+      : "h-3.5 w-3.5"
+    : "h-3.5 w-3.5 sm:h-4 sm:w-4";
 
   return (
     <button
       type="button"
-      className={`
-        relative flex-shrink-0 rounded-md overflow-hidden cursor-pointer transition-all duration-200
-        border-2 border-dashed border-muted-foreground/30 hover:border-primary/50
-        bg-muted/50 hover:bg-muted/80
-        ${compact ? "h-14 w-14 sm:h-16 sm:w-16" : "h-16 w-16 sm:h-20 sm:w-20"}
-        ${isDragOver ? "border-primary bg-primary/10" : ""}
-        ${isUploading ? "pointer-events-none opacity-60" : ""}
-      `}
+      aria-label="Enviar imagem do produto"
+      title="Adicionar imagem"
+      className={`absolute z-20 flex items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-sm transition-all duration-200 hover:scale-105 hover:bg-black/75 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 ${buttonClass} ${isUploading ? "pointer-events-none" : ""} ${isDragOver ? "ring-2 ring-primary ring-offset-1" : ""}`}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       disabled={isUploading}
-      onClick={() =>
-        document.getElementById(`file-input-list-${productId}`)?.click()
-      }
+      onClick={() => document.getElementById(inputId)?.click()}
     >
       <input
-        id={`file-input-list-${productId}`}
+        id={inputId}
         type="file"
         accept="image/*"
         onChange={handleFileInputChange}
-        className="pointer-events-none absolute inset-0 h-full w-full opacity-0"
+        className="hidden"
         disabled={isUploading}
-        aria-label="Enviar imagem do produto"
       />
-
-      {isOutOfStock && (
-        <Badge
-          variant="destructive"
-          className={`pointer-events-none absolute z-10 whitespace-nowrap py-0 ${
-            compact
-              ? "top-0.5 right-0.5 px-0.5 text-[7px] sm:text-[8px]"
-              : "top-1 right-1 px-1 text-[9px]"
-          }`}
-        >
-          SEM ESTOQUE
-        </Badge>
+      {isUploading ? (
+        <Loader2 className={`${iconClass} animate-spin`} />
+      ) : (
+        <Upload className={iconClass} />
       )}
-
-      <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
-        {isUploading ? (
-          <>
-            <Loader2 className="h-5 w-5 animate-spin text-primary" />
-            <span className="text-muted-foreground text-xs font-medium">
-              Enviando...
-            </span>
-          </>
-        ) : isDragOver ? (
-          <>
-            <Package className="h-5 w-5 text-primary" />
-            <span className="text-primary text-xs font-medium">
-              Soltar aqui
-            </span>
-          </>
-        ) : (
-          <>
-            <Upload className="h-5 w-5 text-muted-foreground transition-colors hover:text-primary" />
-            <span className="text-muted-foreground text-center text-xs font-medium leading-tight">
-              Adicionar Imagem
-            </span>
-          </>
-        )}
-      </div>
     </button>
   );
 }

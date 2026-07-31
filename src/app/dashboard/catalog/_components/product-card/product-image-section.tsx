@@ -20,6 +20,7 @@ interface ProductImageSectionProps {
 }
 
 const ONE_WEEK_IN_MS = 7 * 24 * 60 * 60 * 1000;
+const PLACEHOLDER_PRODUCT_IMAGE = "/default-images/no-product-image.png";
 
 function wasCreatedWithinLastWeek(createdAt?: string): boolean {
   if (!createdAt) return false;
@@ -32,9 +33,10 @@ function wasCreatedWithinLastWeek(createdAt?: string): boolean {
 }
 
 /**
- * Secao de imagem do card (Client): exibe a imagem do produto ou o uploader,
- * com badges de estado (promocao/novo/importado/esgotado). Dispara
- * `router.refresh()` apos upload para refletir a nova imagem.
+ * Secao de imagem do card (Client): exibe a imagem do produto ou a imagem
+ * padrao de fallback, com badges de estado (promocao/novo/importado/esgotado).
+ * Quando nao ha imagem propria, sobrepoe o gatilho de upload no canto superior
+ * direito. Dispara `router.refresh()` apos upload para refletir a nova imagem.
  */
 export function ProductImageSection({
   product,
@@ -49,7 +51,6 @@ export function ProductImageSection({
   const isOutOfStock = product.storeStock === 0;
   const isNew = wasCreatedWithinLastWeek(product.createdAt);
 
-  const imageUrl = getValidImageUrl(product.imagePath);
   const imageErrorHandler = createImageErrorHandler();
   const detailsHref = productDetailsHref ?? `/dashboard/product/${product.id}`;
 
@@ -59,74 +60,82 @@ export function ProductImageSection({
     product.imagePath !== "/images/product/no-image.jpeg" &&
     !imageError;
 
-  if (!hasRealImage) {
-    return (
-      <ProductImageUpload
-        productId={String(product.id)}
-        productName={product.name}
-        viewMode={viewMode}
-        compact={compact}
-        isOutOfStock={isOutOfStock}
-        onUploadSuccess={() => router.refresh()}
-      />
-    );
-  }
+  const imageSrc = hasRealImage
+    ? getValidImageUrl(product.imagePath)
+    : PLACEHOLDER_PRODUCT_IMAGE;
+
+  const handleImageError = hasRealImage
+    ? (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+        setImageError(true);
+        imageErrorHandler.onError(e);
+      }
+    : undefined;
+  const handleImageLoad = hasRealImage ? () => setImageError(false) : undefined;
 
   if (viewMode === "list") {
-    const imageContent = (
+    return (
       <div
         className={`relative flex-shrink-0 ${
           compact ? "h-14 w-14 sm:h-16 sm:w-16" : "h-16 w-16 sm:h-20 sm:w-20"
         }`}
       >
-        <Image
-          src={imageUrl}
-          alt={`Imagem do produto ${product.name}`}
-          fill
-          className="rounded-md object-cover"
-          sizes="80px"
-          loading={eager ? "eager" : "lazy"}
-          onError={(e) => {
-            setImageError(true);
-            imageErrorHandler.onError(e);
-          }}
-          onLoad={() => setImageError(false)}
-        />
+        <Link href={detailsHref}>
+          <Image
+            src={imageSrc}
+            alt={`Imagem do produto ${product.name}`}
+            fill
+            className="rounded-md object-cover"
+            sizes="80px"
+            loading={eager ? "eager" : "lazy"}
+            onError={handleImageError}
+            onLoad={handleImageLoad}
+          />
+        </Link>
+
         {isOutOfStock && (
           <Badge
             variant="destructive"
             className={`absolute z-10 whitespace-nowrap py-0 ${
-              compact
-                ? "top-0.5 right-0.5 px-0.5 text-[7px] sm:text-[8px]"
-                : "top-1 right-1 px-1 text-[9px]"
+              hasRealImage
+                ? compact
+                  ? "top-0.5 right-0.5 px-0.5 text-[7px] sm:text-[8px]"
+                  : "top-1 right-1 px-1 text-[9px]"
+                : "bottom-0.5 left-0.5 px-0.5 text-[7px] sm:text-[8px]"
             }`}
           >
             SEM ESTOQUE
           </Badge>
         )}
+
+        {!hasRealImage && (
+          <ProductImageUpload
+            productId={String(product.id)}
+            productName={product.name}
+            viewMode={viewMode}
+            compact={compact}
+            onUploadSuccess={() => router.refresh()}
+          />
+        )}
       </div>
     );
-
-    return <Link href={detailsHref}>{imageContent}</Link>;
   }
 
-  const gridImageContent = (
+  return (
     <div className="relative aspect-[3/2] overflow-hidden rounded-md">
-      <Image
-        src={imageUrl}
-        alt={`Imagem do produto ${product.name}`}
-        fill
-        className="object-cover transition-transform duration-200 group-hover:scale-105"
-        sizes="(max-width: 640px) 45vw, (max-width: 768px) 30vw, (max-width: 1200px) 25vw, 20vw"
-        loading={eager ? "eager" : "lazy"}
-        onError={(e) => {
-          setImageError(true);
-          imageErrorHandler.onError(e);
-        }}
-        onLoad={() => setImageError(false)}
-      />
+      <Link href={detailsHref}>
+        <Image
+          src={imageSrc}
+          alt={`Imagem do produto ${product.name}`}
+          fill
+          className="object-cover transition-transform duration-200 group-hover:scale-105"
+          sizes="(max-width: 640px) 45vw, (max-width: 768px) 30vw, (max-width: 1200px) 25vw, 20vw"
+          loading={eager ? "eager" : "lazy"}
+          onError={handleImageError}
+          onLoad={handleImageLoad}
+        />
+      </Link>
 
-      <div className="absolute top-2 left-2 flex flex-col gap-1">
+      <div className="absolute top-2 left-2 z-10 flex flex-col gap-1">
         {hasPromotion && (
           <Badge className="bg-red-500 text-xs hover:bg-red-600">
             Promoção
@@ -144,9 +153,17 @@ export function ProductImageSection({
             Importado
           </Badge>
         )}
+        {!hasRealImage && isOutOfStock && (
+          <Badge
+            variant="destructive"
+            className="whitespace-nowrap px-1 py-0 text-[9px] sm:text-[10px]"
+          >
+            SEM ESTOQUE
+          </Badge>
+        )}
       </div>
 
-      {isOutOfStock && (
+      {hasRealImage && isOutOfStock && (
         <Badge
           variant="destructive"
           className="absolute top-1 right-1 z-10 whitespace-nowrap px-1 py-0 text-[9px] sm:top-2 sm:right-2 sm:text-[10px]"
@@ -154,8 +171,16 @@ export function ProductImageSection({
           SEM ESTOQUE
         </Badge>
       )}
+
+      {!hasRealImage && (
+        <ProductImageUpload
+          productId={String(product.id)}
+          productName={product.name}
+          viewMode={viewMode}
+          compact={compact}
+          onUploadSuccess={() => router.refresh()}
+        />
+      )}
     </div>
   );
-
-  return <Link href={detailsHref}>{gridImageContent}</Link>;
 }
