@@ -15,7 +15,7 @@ import { updateProductPrice } from "@/app/actions/action-product-updates";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { formatCurrency } from "@/utils/common-utils";
+import { formatCurrency, formatPriceValue } from "@/utils/common-utils";
 
 interface InlinePriceEditorProps {
   productId: number;
@@ -25,6 +25,9 @@ interface InlinePriceEditorProps {
   corporatePrice: number;
   visiblePrice?: "all" | "wholesale" | "retail";
   className?: string;
+  showCurrencySymbol?: boolean;
+  showPriceIcons?: boolean;
+  valueClassName?: string;
 }
 
 export function InlinePriceEditor({
@@ -35,6 +38,9 @@ export function InlinePriceEditor({
   corporatePrice,
   visiblePrice = "all",
   className = "",
+  showCurrencySymbol = true,
+  showPriceIcons = true,
+  valueClassName = "",
 }: InlinePriceEditorProps) {
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
@@ -53,6 +59,9 @@ export function InlinePriceEditor({
   const [tempCorporatePrice, setTempCorporatePrice] = useState(
     corporatePrice.toString().replace(".", ","),
   );
+  const formatDisplayPrice = showCurrencySymbol
+    ? formatCurrency
+    : formatPriceValue;
 
   const MIN_PRICE = 0.01;
   const MAX_PRICE = 2000000;
@@ -308,34 +317,40 @@ export function InlinePriceEditor({
           <div
             className={`${visiblePrice === "retail" ? "hidden" : "flex"} items-center gap-1`}
           >
-            <PackageCheck className="h-3.5 w-3.5 shrink-0 text-green-600 dark:text-green-400" />
+            {showPriceIcons && (
+              <PackageCheck className="h-3.5 w-3.5 shrink-0 text-green-600 dark:text-green-400" />
+            )}
             <div
-              className="font-semibold text-green-600 dark:text-green-400"
+              className={`font-semibold text-green-600 dark:text-green-400 ${valueClassName}`}
               title="Preço de atacado"
             >
-              {formatCurrency(displayWholesale)}
+              {formatDisplayPrice(displayWholesale)}
             </div>
           </div>
 
           <div className="hidden items-center gap-1">
-            <Building2 className="h-3.5 w-3.5 shrink-0 text-purple-600 dark:text-purple-400" />
+            {showPriceIcons && (
+              <Building2 className="h-3.5 w-3.5 shrink-0 text-purple-600 dark:text-purple-400" />
+            )}
             <div
-              className="font-semibold text-purple-600 dark:text-purple-400"
+              className={`font-semibold text-purple-600 dark:text-purple-400 ${valueClassName}`}
               title="Preço corporativo"
             >
-              {formatCurrency(displayCorporate)}
+              {formatDisplayPrice(displayCorporate)}
             </div>
           </div>
 
           <div
             className={`${visiblePrice === "wholesale" ? "hidden" : "flex"} items-center gap-1`}
           >
-            <ShoppingBag className="h-3.5 w-3.5 shrink-0 text-blue-600 dark:text-blue-400" />
+            {showPriceIcons && (
+              <ShoppingBag className="h-3.5 w-3.5 shrink-0 text-blue-600 dark:text-blue-400" />
+            )}
             <div
-              className="font-semibold text-blue-600 dark:text-blue-400"
+              className={`font-semibold text-blue-600 dark:text-blue-400 ${valueClassName}`}
               title="Preço de varejo"
             >
-              {formatCurrency(displayRetail)}
+              {formatDisplayPrice(displayRetail)}
             </div>
           </div>
         </div>

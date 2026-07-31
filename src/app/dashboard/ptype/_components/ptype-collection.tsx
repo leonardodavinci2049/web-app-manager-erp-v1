@@ -150,24 +150,26 @@ export function PtypeCollection({
             ))}
           </div>
 
-          <div className="hidden overflow-x-auto rounded-xl border lg:block">
+          <div className="hidden min-w-0 max-w-full rounded-xl border lg:block">
             <Table aria-label="Lista de tipos de produtos">
               <TableHeader className="bg-muted/50">
                 <TableRow>
                   <TableHead className="w-28">ID</TableHead>
-                  <TableHead>Tipo de produto</TableHead>
+                  <TableHead className="w-56 max-w-[300px] whitespace-normal">
+                    Tipo de produto
+                  </TableHead>
                   <TableHead className="w-20 text-right">
                     <span className="sr-only">Ações</span>
                   </TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody>
+              <TableBody className="[&_tr:nth-child(even)]:bg-muted/30">
                 {items.map((item) => (
                   <TableRow key={item.id}>
                     <TableCell className="text-muted-foreground tabular-nums">
                       {item.id}
                     </TableCell>
-                    <TableCell className="font-medium">
+                    <TableCell className="max-w-[300px] whitespace-normal break-words font-medium">
                       <Link
                         href={detailHref(item.id)}
                         className="hover:text-primary focus-visible:underline focus-visible:outline-none"

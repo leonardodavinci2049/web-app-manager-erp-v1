@@ -23,19 +23,21 @@ interface BrandTableProps {
  */
 export function BrandTable({ brands, buildDetailHref }: BrandTableProps) {
   return (
-    <div className="overflow-x-auto rounded-lg border">
+    <div className="min-w-0 max-w-full rounded-lg border">
       <Table aria-label="Lista de marcas">
         <TableHeader className="bg-muted/50">
           <TableRow>
             <TableHead className="w-16">Imagem</TableHead>
             <TableHead className="w-24">ID</TableHead>
-            <TableHead className="min-w-48">Marca</TableHead>
+            <TableHead className="w-56 max-w-[300px] whitespace-normal">
+              Marca
+            </TableHead>
             <TableHead className="w-16 text-right">
               <span className="sr-only">Ações</span>
             </TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody>
+        <TableBody className="[&_tr:nth-child(even)]:bg-muted/30">
           {brands.map((brand, index) => (
             <TableRow key={brand.id}>
               <TableCell>
@@ -50,7 +52,7 @@ export function BrandTable({ brands, buildDetailHref }: BrandTableProps) {
               <TableCell className="tabular-nums text-muted-foreground">
                 {brand.id}
               </TableCell>
-              <TableCell className="font-medium">
+              <TableCell className="max-w-[300px] whitespace-normal break-words font-medium">
                 <Link
                   href={buildDetailHref(brand.id)}
                   className="hover:text-primary focus-visible:outline-none focus-visible:underline"

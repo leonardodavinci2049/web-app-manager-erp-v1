@@ -224,24 +224,26 @@ export function SellerCollection({
               />
             ))}
           </div>
-          <div className="hidden overflow-x-auto rounded-xl border lg:block">
+          <div className="hidden min-w-0 max-w-full rounded-xl border lg:block">
             <Table aria-label="Lista de vendedores">
               <TableHeader className="bg-muted/50">
                 <TableRow>
-                  <TableHead className="w-16">Imagem</TableHead>
-                  <TableHead className="w-24">ID</TableHead>
-                  <TableHead className="min-w-52">Vendedor</TableHead>
-                  <TableHead className="min-w-36">Categoria</TableHead>
-                  <TableHead className="min-w-40">Documento</TableHead>
-                  <TableHead className="min-w-40">Telefone/WhatsApp</TableHead>
-                  <TableHead className="min-w-40">Cidade</TableHead>
-                  <TableHead className="min-w-36">Última compra</TableHead>
+                  <TableHead className="w-14">Imagem</TableHead>
+                  <TableHead className="w-20">ID</TableHead>
+                  <TableHead className="w-56 max-w-[300px] whitespace-normal">
+                    Vendedor
+                  </TableHead>
+                  <TableHead className="w-28">Categoria</TableHead>
+                  <TableHead className="w-32">Documento</TableHead>
+                  <TableHead className="w-36">Telefone/WhatsApp</TableHead>
+                  <TableHead className="w-28">Cidade</TableHead>
+                  <TableHead className="w-28">Última compra</TableHead>
                   <TableHead className="w-16">
                     <span className="sr-only">Ações</span>
                   </TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody>
+              <TableBody className="[&_tr:nth-child(even)]:bg-muted/30">
                 {items.map((seller) => (
                   <TableRow key={seller.id}>
                     <TableCell>
@@ -255,14 +257,14 @@ export function SellerCollection({
                     <TableCell className="text-muted-foreground tabular-nums">
                       {seller.id}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="max-w-[300px] whitespace-normal break-words">
                       <Link
                         href={detailHref(seller.id)}
                         className="font-medium hover:text-primary focus-visible:underline focus-visible:outline-none"
                       >
                         {seller.name}
                       </Link>
-                      <p className="text-muted-foreground max-w-64 truncate text-xs">
+                      <p className="text-muted-foreground max-w-[300px] truncate text-xs">
                         {seller.email || seller.legalName || "Sem complemento"}
                       </p>
                     </TableCell>
