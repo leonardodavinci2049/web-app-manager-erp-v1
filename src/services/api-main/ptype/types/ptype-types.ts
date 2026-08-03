@@ -49,11 +49,11 @@ export interface PtypeFindByIdRequest extends PtypeBaseRequest {
 
 export interface PtypeDetail {
   ID_TIPO: number;
-  TIPO: string;
+  TIPO: string | null;
   PATH_IMAGEM: string | null;
-  INATIVO: number;
+  INATIVO: number | null;
   ANOTACOES: string | null;
-  FLAG_CADASTRO_PRODUTO: number;
+  FLAG_CADASTRO_PRODUTO: number | null;
   TX_COMISSAO_VARE: string | null;
   TX_COMISSAO_ATAC: string | null;
   DT_CADASTRO: string | null;

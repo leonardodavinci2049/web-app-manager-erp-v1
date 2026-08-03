@@ -110,7 +110,7 @@ export function transformSupplierDetail(entity: SupplierDetail): UISupplier {
     sector: entity.SETOR1 || undefined,
     email: entity.EMAIL1 || undefined,
     imagePath: entity.PATH_IMAGEM ?? undefined,
-    typePersonId: entity.ID_PESSOA_TIPO,
+    typePersonId: entity.ID_PESSOA_TIPO ?? undefined,
     typePerson: entity.TIPO_PESSOA,
     legalName: entity.RAZAO_SOCIAL || undefined,
     cnpj: entity.CNPJ || undefined,

@@ -16,8 +16,8 @@ interface SupplierImageProps {
 
 /**
  * Imagem do fornecedor (Client). Delega a exibicao padronizada ao componente
- * compartilhado, preservando a imagem padrao do fornecedor. Ainda nao ha
- * `imagePath` neste cadastro, portanto exibe o fallback ate a integracao.
+ * compartilhado, preservando a imagem padrao do fornecedor quando `imagePath`
+ * nao estiver disponivel.
  */
 export function SupplierImage({
   name,
