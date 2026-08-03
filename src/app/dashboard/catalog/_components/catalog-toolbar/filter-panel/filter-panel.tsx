@@ -1,11 +1,11 @@
 "use client";
 
-import { Filter, Search, X } from "lucide-react";
+import { Filter, X } from "lucide-react";
 import {
   type FormEvent,
   type ReactNode,
   useEffect,
-  useMemo,
+  useRef,
   useState,
 } from "react";
 import { Badge } from "@/components/ui/badge";
@@ -61,7 +61,7 @@ interface FilterPanelProps {
   panelActiveFilters: PanelActiveFilter[];
   panelFilterCount: number;
   onOpenChange: (open: boolean) => void;
-  onApplyFilters: (filters: CatalogFilters) => void;
+  onFiltersChange: (filters: CatalogFilters) => void;
   onClearPanelFilters: () => void;
   onRemovePanelFilter: (filterType: PanelFilterType) => void;
 }
@@ -89,6 +89,12 @@ function TextFilterInput({
 
   const normalizedValue = inputValue.trim().slice(0, 200);
 
+  useEffect(() => {
+    if (normalizedValue === value) return;
+    const timer = window.setTimeout(() => onChange(normalizedValue), 500);
+    return () => window.clearTimeout(timer);
+  }, [normalizedValue, onChange, value]);
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (normalizedValue !== value) onChange(normalizedValue);
@@ -99,28 +105,15 @@ function TextFilterInput({
       <Label htmlFor={id} className="text-muted-foreground">
         {label}
       </Label>
-      <div className="relative min-w-0">
-        <Input
-          id={id}
-          value={inputValue}
-          placeholder={placeholder}
-          maxLength={200}
-          disabled={disabled}
-          className="min-w-0 pr-10"
-          onChange={(event) => setInputValue(event.target.value)}
-        />
-        <Button
-          type="submit"
-          variant="ghost"
-          size="icon-sm"
-          className="absolute top-0.5 right-0.5"
-          disabled={disabled || normalizedValue === value}
-          aria-label={`Filtrar por ${label}`}
-          title={`Filtrar por ${label}`}
-        >
-          <Search className="size-4" aria-hidden="true" />
-        </Button>
-      </div>
+      <Input
+        id={id}
+        value={inputValue}
+        placeholder={placeholder}
+        maxLength={200}
+        disabled={disabled}
+        className="min-w-0"
+        onChange={(event) => setInputValue(event.target.value)}
+      />
     </form>
   );
 }
@@ -225,7 +218,6 @@ interface NumericFilterInputProps {
   id: string;
   label: string;
   placeholder?: string;
-  submitManually?: boolean;
   value?: number;
   disabled: boolean;
   onChange: (value: number | undefined) => void;
@@ -235,7 +227,6 @@ function NumericFilterInput({
   id,
   label,
   placeholder,
-  submitManually = false,
   value,
   disabled,
   onChange,
@@ -251,10 +242,10 @@ function NumericFilterInput({
       : undefined;
 
   useEffect(() => {
-    if (submitManually || normalizedValue === value) return;
+    if (normalizedValue === value) return;
     const timer = window.setTimeout(() => onChange(normalizedValue), 500);
     return () => window.clearTimeout(timer);
-  }, [normalizedValue, onChange, submitManually, value]);
+  }, [normalizedValue, onChange, value]);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -266,37 +257,22 @@ function NumericFilterInput({
       <Label htmlFor={id} className="text-muted-foreground">
         {label}
       </Label>
-      <div className="relative min-w-0">
-        <Input
-          id={id}
-          type="text"
-          inputMode="numeric"
-          pattern="[0-9]*"
-          placeholder={placeholder}
-          value={inputValue}
-          disabled={disabled}
-          className={submitManually ? "min-w-0 pr-10" : "min-w-0"}
-          onChange={(event) => {
-            const nextValue = event.target.value;
-            if (nextValue === "" || /^\d+$/.test(nextValue)) {
-              setInputValue(nextValue);
-            }
-          }}
-        />
-        {submitManually && (
-          <Button
-            type="submit"
-            variant="ghost"
-            size="icon-sm"
-            className="absolute top-0.5 right-0.5"
-            disabled={disabled || normalizedValue === value}
-            aria-label={`Filtrar por ${label}`}
-            title={`Filtrar por ${label}`}
-          >
-            <Search className="size-4" aria-hidden="true" />
-          </Button>
-        )}
-      </div>
+      <Input
+        id={id}
+        type="text"
+        inputMode="numeric"
+        pattern="[0-9]*"
+        placeholder={placeholder}
+        value={inputValue}
+        disabled={disabled}
+        className="min-w-0"
+        onChange={(event) => {
+          const nextValue = event.target.value;
+          if (nextValue === "" || /^\d+$/.test(nextValue)) {
+            setInputValue(nextValue);
+          }
+        }}
+      />
     </form>
   );
 }
@@ -414,25 +390,39 @@ export function FilterPanel({
   panelActiveFilters,
   panelFilterCount,
   onOpenChange,
-  onApplyFilters,
+  onFiltersChange,
   onClearPanelFilters,
   onRemovePanelFilter,
 }: FilterPanelProps) {
   const [filters, setFilters] = useState(appliedFilters);
+  const filtersRef = useRef(appliedFilters);
 
   useEffect(() => {
+    filtersRef.current = appliedFilters;
     setFilters(appliedFilters);
   }, [appliedFilters]);
 
   const onFilterChange = <Key extends PanelFilterType>(
     key: Key,
     value: CatalogFilters[Key],
-  ) => setFilters((current) => ({ ...current, [key]: value }));
+  ) => {
+    if (Object.is(filtersRef.current[key], value)) return;
 
-  const hasDraftChanges = useMemo(
-    () => JSON.stringify(filters) !== JSON.stringify(appliedFilters),
-    [appliedFilters, filters],
-  );
+    const nextFilters = { ...filtersRef.current, [key]: value };
+
+    if (
+      (key === "startDate" || key === "endDate") &&
+      nextFilters.startDate !== "" &&
+      nextFilters.endDate !== "" &&
+      nextFilters.startDate <= nextFilters.endDate
+    ) {
+      nextFilters.operationList = 1;
+    }
+
+    filtersRef.current = nextFilters;
+    setFilters(nextFilters);
+    onFiltersChange(nextFilters);
+  };
 
   const hasValidRegistrationPeriod =
     filters.startDate !== "" &&
@@ -443,7 +433,10 @@ export function FilterPanel({
     <Sheet
       open={isOpen}
       onOpenChange={(open) => {
-        if (open) setFilters(appliedFilters);
+        if (open) {
+          filtersRef.current = appliedFilters;
+          setFilters(appliedFilters);
+        }
         onOpenChange(open);
       }}
     >
@@ -560,7 +553,6 @@ export function FilterPanel({
                   id="filter-supplier"
                   label="Fornecedor"
                   placeholder="Digite o ID"
-                  submitManually
                   value={filters.supplierId}
                   disabled={isLoading}
                   onChange={(value) => onFilterChange("supplierId", value)}
@@ -569,7 +561,6 @@ export function FilterPanel({
                   id="filter-physical"
                   label="Produto físico"
                   placeholder="Digite o ID"
-                  submitManually
                   value={filters.physicalId}
                   disabled={isLoading}
                   onChange={(value) => onFilterChange("physicalId", value)}
@@ -803,32 +794,16 @@ export function FilterPanel({
         </Tabs>
 
         <SheetFooter className="supports-[backdrop-filter]:bg-background/80 shrink-0 border-t bg-background/95 p-3 backdrop-blur">
-          <div className="flex w-full gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                onClearPanelFilters();
-                onOpenChange(false);
-              }}
-              className="flex-1"
-              disabled={isLoading || panelFilterCount === 0}
-            >
-              <X className="h-4 w-4" />
-              Limpar
-            </Button>
-            <Button
-              type="button"
-              className="flex-1"
-              disabled={isLoading || !hasDraftChanges}
-              onClick={() => {
-                onApplyFilters(filters);
-                onOpenChange(false);
-              }}
-            >
-              Aplicar filtros
-            </Button>
-          </div>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onClearPanelFilters}
+            className="w-full"
+            disabled={isLoading || panelFilterCount === 0}
+          >
+            <X className="h-4 w-4" />
+            Limpar filtros
+          </Button>
         </SheetFooter>
       </SheetContent>
     </Sheet>

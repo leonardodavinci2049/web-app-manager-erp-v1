@@ -363,7 +363,7 @@ export function CatalogToolbar({
             panelActiveFilters={panelActiveFilters}
             panelFilterCount={panelFilterCount}
             onOpenChange={setIsFilterOpen}
-            onApplyFilters={updateFilters}
+            onFiltersChange={updateFilters}
             onClearPanelFilters={handleClearPanelFilters}
             onRemovePanelFilter={removeActiveFilter}
           />
