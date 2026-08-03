@@ -64,7 +64,7 @@ export function ProductDetailsTabs({
       </TabsContent>
 
       <TabsContent value="images" className="space-y-4">
-        <ProductImagesList product={product} productId={productId} />
+        <ProductImagesList productId={productId} />
       </TabsContent>
 
       <TabsContent value="specifications" className="space-y-4">

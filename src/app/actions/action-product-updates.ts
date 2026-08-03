@@ -181,63 +181,6 @@ export async function updateProductDescription(
 }
 
 /**
- * Server Action: Update product image path
- * @param productId - Product ID to update
- * @param imagePath - New image path
- * @returns Success status and error message if any
- */
-export async function updateProductImagePath(
-  productId: number,
-  imagePath: string,
-): Promise<{
-  success: boolean;
-  error?: string;
-}> {
-  try {
-    // Validate inputs
-    if (!productId || productId <= 0) {
-      return {
-        success: false,
-        error: "ID do produto inválido",
-      };
-    }
-
-    if (!imagePath?.trim()) {
-      return {
-        success: false,
-        error: "Caminho da imagem não pode ser vazio",
-      };
-    }
-
-    const { apiContext } = await getAuthContext();
-
-    await productInlineServiceApi.updateProductImagePathInline({
-      pe_product_id: productId,
-      pe_path_imagem: imagePath.trim(),
-      ...apiContext,
-    });
-
-    logger.info("Product image path updated successfully:", { productId });
-
-    return {
-      success: true,
-    };
-  } catch (error) {
-    logger.error("Error updating product image path:", error);
-
-    const errorMessage =
-      error instanceof Error
-        ? error.message
-        : "Erro desconhecido ao atualizar caminho da imagem";
-
-    return {
-      success: false,
-      error: errorMessage,
-    };
-  }
-}
-
-/**
  * Server Action: Update product stock
  * @param productId - Product ID to update
  * @param stock - New stock quantity
