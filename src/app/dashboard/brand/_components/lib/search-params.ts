@@ -119,13 +119,12 @@ export function getSafeBrandReturnTo(value?: string): string {
 }
 
 /**
- * Monta o href de detalhes do produto incluindo o returnTo quando houver query.
+ * Monta o href de detalhes do produto sempre com `returnTo`, espelhando o padrao
+ * das demais centrais de cadastro (customer, brand, suppliers, etc.).
  */
 export function buildProductDetailsHref(
   productId: number,
   returnTo: string,
 ): string {
-  const base = `/dashboard/product/${productId}`;
-  if (!returnTo.includes("?")) return base;
-  return `${base}?returnTo=${encodeURIComponent(returnTo)}`;
+  return `/dashboard/product/${productId}?returnTo=${encodeURIComponent(returnTo)}`;
 }

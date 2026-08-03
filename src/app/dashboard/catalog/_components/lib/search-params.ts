@@ -20,6 +20,10 @@ const VALID_SORT_OPTIONS = new Set<SortOption>([
   "price-desc",
 ]);
 
+const CATALOG_PATH = "/dashboard/catalog";
+const PRODUCT_PATH = "/dashboard/product";
+const BRAND_DETAIL_PATH_PATTERN = /^\/dashboard\/brand\/\d+$/;
+
 type SearchParamValue = string | string[] | undefined;
 
 /**
@@ -277,13 +281,34 @@ export function buildCatalogReturnTo(
 }
 
 /**
- * Monta o href de detalhes do produto incluindo o returnTo quando houver query.
+ * Monta o href de detalhes do produto sempre com `returnTo`, espelhando o padrao
+ * das demais centrais de cadastro (customer, brand, suppliers, etc.).
  */
 export function buildProductDetailsHref(
   productId: number,
   returnTo: string,
 ): string {
-  const base = `/dashboard/product/${productId}`;
-  if (!returnTo.includes("?")) return base;
-  return `${base}?returnTo=${encodeURIComponent(returnTo)}`;
+  return `${PRODUCT_PATH}/${productId}?returnTo=${encodeURIComponent(returnTo)}`;
+}
+
+/**
+ * Normaliza e valida a URL de retorno do detalhe de produto. O produto pode ser
+ * alcancado a partir do catalogo ou do detalhe de uma marca, por isso aceita
+ * apenas origens same-origin compativeis (catalogo, detalhe de marca ou o
+ * proprio dashboard), preservando query/hash. Retorna o catalogo como fallback.
+ */
+export function getSafeProductReturnTo(value?: string): string {
+  if (!value) return CATALOG_PATH;
+  try {
+    const url = new URL(value, "http://manager.local");
+    if (url.origin !== "http://manager.local") return CATALOG_PATH;
+    const isValidOrigin =
+      url.pathname === CATALOG_PATH ||
+      BRAND_DETAIL_PATH_PATTERN.test(url.pathname) ||
+      url.pathname === "/dashboard";
+    if (isValidOrigin) return `${url.pathname}${url.search}${url.hash}`;
+  } catch {
+    return CATALOG_PATH;
+  }
+  return CATALOG_PATH;
 }
