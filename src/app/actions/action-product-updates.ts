@@ -1,9 +1,13 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
+import { assetsApiService } from "@/services/api-assets/assets-api-service";
 import { productInlineServiceApi } from "@/services/api-main/product-inline";
+import { getProductManagerById } from "@/services/api-main/product-manager/product-manager-service-api";
 import { productUpdateServiceApi } from "@/services/api-main/product-update";
+import { isApiError } from "@/types/api-assets";
 
 const logger = createLogger("ProductUpdateActions");
 
@@ -176,6 +180,110 @@ export async function updateProductDescription(
     return {
       success: false,
       error: errorMessage,
+    };
+  }
+}
+
+/**
+ * Updates PATH_IMAGEM with an original image URL from the product gallery.
+ */
+export async function updateProductImagePath(
+  productId: number,
+  imageId: string,
+): Promise<{
+  success: boolean;
+  alreadyExists?: boolean;
+  imagePath?: string;
+  error?: string;
+}> {
+  if (!Number.isInteger(productId) || productId <= 0) {
+    return {
+      success: false,
+      error: "ID do produto inválido",
+    };
+  }
+
+  if (typeof imageId !== "string" || !imageId.trim()) {
+    return {
+      success: false,
+      error: "ID da imagem inválido",
+    };
+  }
+
+  const { apiContext } = await getAuthContext();
+
+  try {
+    const currentProduct = await getProductManagerById(productId, {
+      ...apiContext,
+      pe_type_business: 1,
+    });
+
+    if (!currentProduct) {
+      return {
+        success: false,
+        error: "Produto não encontrado",
+      };
+    }
+
+    const galleryResponse = await assetsApiService.getEntityGallery({
+      entityType: "PRODUCT",
+      entityId: productId.toString(),
+    });
+
+    if (isApiError(galleryResponse)) {
+      return {
+        success: false,
+        error: "Não foi possível validar a galeria do produto",
+      };
+    }
+
+    const selectedImage = galleryResponse.images.find(
+      (image) => image.id === imageId,
+    );
+    const normalizedImagePath = selectedImage?.urls.original?.trim();
+
+    if (!normalizedImagePath) {
+      return {
+        success: false,
+        error: "Imagem não encontrada na galeria do produto",
+      };
+    }
+
+    if (normalizedImagePath.length > 300) {
+      return {
+        success: false,
+        error: "URL da imagem excede o limite de 300 caracteres",
+      };
+    }
+
+    if (currentProduct.product.imagePath?.trim() === normalizedImagePath) {
+      return {
+        success: true,
+        alreadyExists: true,
+        imagePath: normalizedImagePath,
+      };
+    }
+
+    await productInlineServiceApi.updateProductImagePathInline({
+      pe_product_id: productId,
+      pe_path_imagem: normalizedImagePath,
+      ...apiContext,
+    });
+
+    revalidatePath(`/dashboard/product/${productId}`);
+
+    logger.info("Product image path updated successfully", { productId });
+
+    return {
+      success: true,
+      imagePath: normalizedImagePath,
+    };
+  } catch (error) {
+    logger.error("Error updating product image path", error);
+
+    return {
+      success: false,
+      error: "Erro ao atualizar o campo PATH_IMAGEM",
     };
   }
 }

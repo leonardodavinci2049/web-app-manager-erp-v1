@@ -357,7 +357,7 @@ export function ProductImageGallery({
   }, []);
 
   return (
-    <div className="space-y-4">
+    <div className="w-full max-w-[500px] space-y-4">
       {/* Main Image Display */}
       <Card className="overflow-hidden">
         <CardContent className="p-0">
@@ -456,7 +456,7 @@ export function ProductImageGallery({
                     {image.isPrimary && (
                       <div className="absolute left-0 top-0 bg-amber-500 text-white px-1.5 py-0.5 rounded-br-md text-xs font-semibold flex items-center gap-1 z-20 shadow-lg">
                         <Crown className="h-3 w-3" />
-                        Principalxxx
+                        Principal
                       </div>
                     )}
 
@@ -547,19 +547,12 @@ export function ProductImageGallery({
 
       {/* Zoom Modal */}
       <Dialog open={isZoomModalOpen} onOpenChange={setIsZoomModalOpen}>
-        <DialogContent className="max-w-5xl h-[80vh] p-0">
-          <DialogHeader className="px-6 py-4 border-b">
-            <DialogTitle className="flex items-center justify-between">
-              <span>
-                {productName} - Imagem {zoomedImageIndex + 1} de {images.length}
-              </span>
-              <Badge variant="secondary">
-                Use ← → para navegar | ESC para fechar
-              </Badge>
-            </DialogTitle>
+        <DialogContent className="flex h-[80vh] w-[calc(100%-2rem)] max-w-[800px] flex-col gap-0 overflow-hidden p-0 sm:max-w-[800px]">
+          <DialogHeader className="shrink-0 border-b px-6 py-4 pr-12">
+            <DialogTitle>{productName}</DialogTitle>
           </DialogHeader>
 
-          <div className="relative flex-1 bg-black">
+          <div className="relative min-h-0 flex-1 bg-black">
             {!hasImageError(zoomedImageIndex, "original") ? (
               <Image
                 src={getImageUrl(zoomedImageIndex, "original")}
