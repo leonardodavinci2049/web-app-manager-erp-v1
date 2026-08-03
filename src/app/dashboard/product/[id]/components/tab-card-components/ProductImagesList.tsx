@@ -1,38 +1,22 @@
 "use client";
 
-import {
-  ExternalLink,
-  Image as ImageIcon,
-  RefreshCw,
-  Upload,
-} from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
-import { updateProductImagePath } from "@/app/actions/action-product-updates";
+import { ExternalLink, Image as ImageIcon, RefreshCw } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { getEntityGalleryAction } from "@/app/actions/action-test-assets";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import type { UIProductManager } from "@/services/api-main/product-manager/transformers/transformers";
 import type { GalleryImage } from "@/types/api-assets";
 
 interface ProductImagesListProps {
-  product: UIProductManager;
   productId: number;
-  initialDescription?: string;
 }
 
-// Normaliza URL removendo sufixos de tamanho (-original, -preview, -medium, -thumbnail)
-const normalizeImageUrl = (url: string): string => {
-  return url.replace(/-(original|preview|medium|thumbnail)\./gi, ".");
-};
-
-const ProductImagesList = ({ product, productId }: ProductImagesListProps) => {
+const ProductImagesList = ({ productId }: ProductImagesListProps) => {
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isUpdatingPath, setIsUpdatingPath] = useState(false);
 
   // Fetch gallery images
   const fetchGallery = useCallback(async () => {
@@ -63,107 +47,8 @@ const ProductImagesList = ({ product, productId }: ProductImagesListProps) => {
     fetchGallery();
   }, [fetchGallery]);
 
-  const pathImagem = product.imagePath;
-
-  // Verifica se há divergência entre PATH_IMAGEM e a imagem principal da galeria
-  const syncInfo = useMemo(() => {
-    const primaryImage = galleryImages.find((img) => img.isPrimary);
-    const primaryUrl = primaryImage?.urls.preview;
-
-    if (!primaryUrl) {
-      return { hasDivergence: false, primaryUrl: null, primaryImageId: null };
-    }
-
-    const normalizedPathImagem = pathImagem
-      ? normalizeImageUrl(pathImagem)
-      : null;
-    const normalizedPrimaryUrl = normalizeImageUrl(primaryUrl);
-    const hasDivergence = normalizedPrimaryUrl !== normalizedPathImagem;
-
-    return {
-      hasDivergence,
-      primaryUrl,
-      primaryImageId: primaryImage?.id || null,
-    };
-  }, [galleryImages, pathImagem]);
-
-  // Handler para atualizar o PATH_IMAGEM com a URL da imagem principal
-  const handleSyncPathImagem = useCallback(
-    async (newImageUrl: string) => {
-      setIsUpdatingPath(true);
-      try {
-        const result = await updateProductImagePath(productId, newImageUrl);
-
-        if (result.success) {
-          toast.success("Campo PATH_IMAGEM atualizado com sucesso!");
-          // Força refresh da página para atualizar os dados do produto
-          window.location.reload();
-        } else {
-          toast.error(result.error || "Erro ao atualizar PATH_IMAGEM");
-        }
-      } catch (_err) {
-        toast.error("Erro ao conectar com o servidor");
-      } finally {
-        setIsUpdatingPath(false);
-      }
-    },
-    [productId],
-  );
-
   return (
     <div className="space-y-4">
-      {/* Section 1: PATH_IMAGEM do Produto */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <ImageIcon className="h-5 w-5" />
-            Campo PATH_IMAGEM do Produto
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-muted-foreground">
-                Valor atual:
-              </span>
-              {pathImagem ? (
-                <Badge variant="secondary" className="font-mono text-xs">
-                  Preenchido
-                </Badge>
-              ) : (
-                <Badge variant="outline" className="text-xs">
-                  Vazio
-                </Badge>
-              )}
-            </div>
-
-            {pathImagem ? (
-              <div className="rounded-md bg-muted p-3">
-                <code className="text-xs break-all text-foreground">
-                  {pathImagem}
-                </code>
-                <div className="mt-2">
-                  <a
-                    href={pathImagem}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-                  >
-                    <ExternalLink className="h-3 w-3" />
-                    Abrir imagem em nova aba
-                  </a>
-                </div>
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground italic">
-                Nenhuma URL de imagem definida no campo PATH_IMAGEM
-              </p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Section 2: URLs da Galeria de Imagens */}
       <Card>
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
@@ -246,7 +131,7 @@ const ProductImagesList = ({ product, productId }: ProductImagesListProps) => {
                       )}
                     </div>
 
-                    <div className="flex items-center justify-between">
+                    <div>
                       {image.urls.preview && (
                         <a
                           href={image.urls.preview}
@@ -258,28 +143,6 @@ const ProductImagesList = ({ product, productId }: ProductImagesListProps) => {
                           Abrir preview em nova aba
                         </a>
                       )}
-
-                      {/* Botão para sincronizar PATH_IMAGEM - sempre visível para imagem principal */}
-                      {image.isPrimary && image.urls.preview && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            if (image.urls.preview) {
-                              handleSyncPathImagem(image.urls.preview);
-                            }
-                          }}
-                          disabled={isUpdatingPath}
-                          className="text-xs"
-                        >
-                          {isUpdatingPath ? (
-                            <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
-                          ) : (
-                            <Upload className="h-3 w-3 mr-1" />
-                          )}
-                          Atualizar PATH_IMAGEM
-                        </Button>
-                      )}
                     </div>
                   </div>
                 ))}
@@ -288,58 +151,6 @@ const ProductImagesList = ({ product, productId }: ProductImagesListProps) => {
           )}
         </CardContent>
       </Card>
-
-      {/* Section 3: Comparação */}
-      {pathImagem && galleryImages.length > 0 && (
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg">
-              Verificação de Sincronização
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {(() => {
-              const isInSync = !syncInfo.hasDivergence;
-
-              return (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">Status:</span>
-                    {isInSync ? (
-                      <Badge className="bg-green-500 text-white">
-                        ✓ Sincronizado
-                      </Badge>
-                    ) : (
-                      <Badge variant="destructive">✗ Dessincronizado</Badge>
-                    )}
-                  </div>
-
-                  {!isInSync && (
-                    <div className="rounded-md bg-amber-50 dark:bg-amber-950/20 p-3 mt-2 space-y-2">
-                      <p className="text-sm text-amber-800 dark:text-amber-200">
-                        O campo PATH_IMAGEM não corresponde à URL da imagem
-                        principal na galeria.
-                      </p>
-                      <div className="text-xs space-y-1">
-                        <div>
-                          <strong>PATH_IMAGEM:</strong>{" "}
-                          <code className="break-all">{pathImagem}</code>
-                        </div>
-                        <div>
-                          <strong>Imagem Principal (preview):</strong>{" "}
-                          <code className="break-all">
-                            {syncInfo.primaryUrl || "N/A"}
-                          </code>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })()}
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 };

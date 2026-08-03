@@ -56,9 +56,9 @@ export function ProductTable({ products, catalogReturnTo }: ProductTableProps) {
             <TableHead className="w-[100px] max-w-[100px] whitespace-normal">
               Marca e tipo
             </TableHead>
-            <TableHead className="w-20 text-right">V. Ano</TableHead>
-            <TableHead className="w-24 text-right">V. 3 meses</TableHead>
-            <TableHead className="w-20 text-right">V. Mês</TableHead>
+            <TableHead className="w-28 whitespace-normal">
+              Quant. vendas
+            </TableHead>
             <TableHead className="w-28">Últ. venda</TableHead>
             <TableHead className="w-28">Estoque</TableHead>
             <TableHead className="w-24">Atacado (R$)</TableHead>
@@ -124,14 +124,14 @@ export function ProductTable({ products, catalogReturnTo }: ProductTableProps) {
                     )}
                   </div>
                 </TableCell>
-                <TableCell className="text-right font-medium tabular-nums">
-                  {formatSalesQuantity(product.salesYear)}
-                </TableCell>
-                <TableCell className="text-right font-medium tabular-nums">
-                  {formatSalesQuantity(product.salesLastThreeMonths)}
-                </TableCell>
-                <TableCell className="text-right font-medium tabular-nums">
-                  {formatSalesQuantity(product.salesMonth)}
+                <TableCell className="whitespace-normal tabular-nums">
+                  <div className="space-y-1 text-xs">
+                    <p>Ano: {formatSalesQuantity(product.salesYear)}</p>
+                    <p>
+                      Trim.: {formatSalesQuantity(product.salesLastThreeMonths)}
+                    </p>
+                    <p>Mês: {formatSalesQuantity(product.salesMonth)}</p>
+                  </div>
                 </TableCell>
                 <TableCell className="tabular-nums">
                   {formatLastSaleDate(product.lastSaleAt)}
