@@ -8,16 +8,43 @@ import type {
 export interface UISupplier {
   id: number;
   name: string;
+  legalPhysicalType?: string;
   phone?: string;
   whatsapp?: string;
+  contact?: string;
+  sector?: string;
   legalName?: string;
   cpf?: string;
   cnpj?: string;
   email?: string;
+  imagePath?: string;
   imageId?: number;
-  lastPurchaseAt?: string;
+  typePersonId?: number;
+  typePerson?: string;
+  stateRegistration?: string;
+  municipalRegistration?: string;
+  tradeName?: string;
+  cnpjDate?: string;
+  responsibleName?: string;
+  responsibleRole?: string;
+  rg?: string;
+  zipCode?: string;
+  address?: string;
+  addressNumber?: string;
+  complement?: string;
+  neighborhood?: string;
   state?: string;
   city?: string;
+  countryRegion?: string;
+  country?: string;
+  cityCode?: number;
+  stateCode?: number;
+  website?: string;
+  facebook?: string;
+  twitter?: string;
+  freightForwarder?: boolean;
+  inactive?: boolean;
+  lastPurchaseAt?: string;
   createdAt?: string;
   notes?: string;
   updatedAt?: string;
@@ -39,8 +66,6 @@ export function transformSupplierListItem(
   return {
     id: entity.ID_FORNECEDOR,
     name: entity.FORNECEDOR,
-    notes: undefined,
-    updatedAt: undefined,
   };
 }
 
@@ -77,9 +102,45 @@ export function transformSupplierSearchList(
 export function transformSupplierDetail(entity: SupplierDetail): UISupplier {
   return {
     id: entity.ID_FORNECEDOR,
-    name: entity.FORNECEDOR ?? "",
-    notes: entity.ANOTACOES ?? undefined,
-    updatedAt: entity.DT_UPDATE ?? undefined,
+    name: entity.NOME ?? "",
+    legalPhysicalType: entity.FISIJURI || undefined,
+    phone: entity.FONE1 || undefined,
+    whatsapp: entity.WHATAPP1 || undefined,
+    contact: entity.CONTATO1 || undefined,
+    sector: entity.SETOR1 || undefined,
+    email: entity.EMAIL1 || undefined,
+    imagePath: entity.PATH_IMAGEM ?? undefined,
+    typePersonId: entity.ID_PESSOA_TIPO,
+    typePerson: entity.TIPO_PESSOA,
+    legalName: entity.RAZAO_SOCIAL || undefined,
+    cnpj: entity.CNPJ || undefined,
+    stateRegistration: entity.INSC_ESTADUAL || undefined,
+    municipalRegistration: entity.INSC_MUNICIPAL || undefined,
+    tradeName: entity.NOME_FANTASIA || undefined,
+    cnpjDate: entity.DATA_CNPJ || undefined,
+    responsibleName: entity.NOME_RESPONSAVEL || undefined,
+    responsibleRole: entity.CARGO || undefined,
+    cpf: entity.CPF || undefined,
+    rg: entity.RG || undefined,
+    zipCode: entity.CEP || undefined,
+    address: entity.ENDERECO || undefined,
+    addressNumber: entity.ENDERECO_NUMERO || undefined,
+    complement: entity.COMPLEMENTO || undefined,
+    neighborhood: entity.BAIRRO || undefined,
+    city: entity.CIDADE || undefined,
+    state: entity.UF || undefined,
+    countryRegion: entity.REGIAO_PAIS || undefined,
+    country: entity.PAIS || undefined,
+    cityCode: entity.COD_MUNICIPIO || undefined,
+    stateCode: entity.COD_UF || undefined,
+    website: entity.WEBSITE || undefined,
+    facebook: entity.FACEBOOK || undefined,
+    twitter: entity.TWITTER || undefined,
+    freightForwarder: entity.FRETADOR === 1,
+    inactive: entity.INATIVO === 1,
+    lastPurchaseAt: entity.DT_ULTIMA_COMPRA || undefined,
+    createdAt: entity.DATADOCADASTRO || undefined,
+    notes: entity.ANOTACOES || undefined,
   };
 }
 
@@ -93,7 +154,7 @@ export function transformSupplier(
 ): UISupplier | null {
   if (!entity) return null;
 
-  if ("ANOTACOES" in entity) {
+  if ("ANOTACOES" in entity && "NOME" in entity) {
     return transformSupplierDetail(entity as SupplierDetail);
   }
 

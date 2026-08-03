@@ -154,7 +154,7 @@ export class CarrierServiceApi extends BaseApiService {
       const requestBody = this.buildBasePayload(validatedParams);
 
       const response = await this.post<CarrierFindByIdResponse>(
-        CARRIER_ENDPOINTS.FIND_BY_ID,
+        CARRIER_ENDPOINTS.FIND_MANAGER_ID,
         requestBody,
       );
 
@@ -325,7 +325,7 @@ export class CarrierServiceApi extends BaseApiService {
   }
 
   extractCarrierById(response: CarrierFindByIdResponse): CarrierDetail | null {
-    return response.data?.["Carrier find Id"]?.[0] ?? null;
+    return response.data?.["Carrier find manager Id"]?.[0] ?? null;
   }
 
   extractStoredProcedureResult(
@@ -365,8 +365,8 @@ export class CarrierServiceApi extends BaseApiService {
     return (
       isApiSuccess(response.statusCode) &&
       response.data &&
-      Array.isArray(response.data["Carrier find Id"]) &&
-      response.data["Carrier find Id"].length > 0
+      Array.isArray(response.data["Carrier find manager Id"]) &&
+      response.data["Carrier find manager Id"].length > 0
     );
   }
 }

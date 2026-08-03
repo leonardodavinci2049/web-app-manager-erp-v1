@@ -2,13 +2,17 @@
 
 import {
   ArrowLeft,
+  Building2,
   CheckCircle2,
   CircleOff,
-  Clock3,
+  Globe,
   Loader2,
+  MapPin,
+  Phone,
   Save,
   Trash2,
   TriangleAlert,
+  UserRound,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -29,6 +33,7 @@ import {
   AlertDialogMedia,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -52,8 +57,31 @@ function formatDate(value?: string): string {
   if (Number.isNaN(timestamp)) return value;
   return new Intl.DateTimeFormat("pt-BR", {
     dateStyle: "long",
-    timeStyle: "short",
   }).format(timestamp);
+}
+
+function DetailField({
+  label,
+  value,
+}: {
+  label: string;
+  value?: string | number;
+}) {
+  return (
+    <div className="min-w-0">
+      <dt className="text-muted-foreground text-xs">{label}</dt>
+      <dd className="mt-1 break-words text-sm font-medium">
+        {value === undefined || value === "" ? "Não informado" : value}
+      </dd>
+    </div>
+  );
+}
+
+function resolvePersonTypeLabel(supplier: UISupplier): string {
+  if (supplier.typePerson) return supplier.typePerson;
+  if (supplier.legalPhysicalType === "J") return "Pessoa jurídica";
+  if (supplier.legalPhysicalType === "F") return "Pessoa física";
+  return "Tipo de pessoa não informado";
 }
 
 export function SupplierDetails({ supplier, returnTo }: SupplierDetailsProps) {
@@ -162,126 +190,310 @@ export function SupplierDetails({ supplier, returnTo }: SupplierDetailsProps) {
         </Button>
 
         <div className="flex min-w-0 items-start gap-3">
-          <SupplierImage name={supplier.name} viewMode="list" />
+          <SupplierImage
+            name={supplier.name}
+            imagePath={supplier.imagePath}
+            viewMode="list"
+          />
           <div className="min-w-0">
-            <h1 className="break-words text-2xl font-bold">{supplier.name}</h1>
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="break-words text-2xl font-bold">
+                {supplier.name}
+              </h1>
+              <Badge variant={supplier.inactive ? "destructive" : "secondary"}>
+                {supplier.inactive ? "Inativo" : "Ativo"}
+              </Badge>
+            </div>
             <p className="text-muted-foreground text-sm tabular-nums">
               Fornecedor ID {supplier.id}
+            </p>
+            <p className="text-muted-foreground text-sm">
+              {resolvePersonTypeLabel(supplier)}
             </p>
           </div>
         </div>
 
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Building2 className="size-5" />
+              Conta e identificação
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              <DetailField label="ID do fornecedor" value={supplier.id} />
+              <DetailField
+                label="Tipo de pessoa"
+                value={resolvePersonTypeLabel(supplier)}
+              />
+              <DetailField
+                label="Fretador"
+                value={
+                  supplier.freightForwarder === undefined
+                    ? undefined
+                    : supplier.freightForwarder
+                      ? "Sim"
+                      : "Não"
+                }
+              />
+              <DetailField
+                label="Data de cadastro"
+                value={formatDate(supplier.createdAt)}
+              />
+              <DetailField
+                label="Última compra"
+                value={formatDate(supplier.lastPurchaseAt)}
+              />
+              <DetailField
+                label="Status"
+                value={supplier.inactive ? "Inativo" : "Ativo"}
+              />
+            </dl>
+          </CardContent>
+        </Card>
+
         <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)]">
-          <Card>
-            <CardHeader>
-              <CardTitle>Dados do cadastro</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-5">
-                <div className="space-y-2">
-                  <Label htmlFor="supplier-detail-name">
-                    Nome
-                    <span className="text-destructive" aria-hidden="true">
-                      *
-                    </span>
-                  </Label>
-                  <Input
-                    id="supplier-detail-name"
-                    value={name}
-                    onChange={(event) => {
-                      setName(event.target.value);
-                      setFieldErrors((current) => ({
-                        ...current,
-                        name: undefined,
-                      }));
-                    }}
-                    maxLength={100}
-                    disabled={isSaving || isMutating}
-                    aria-invalid={Boolean(fieldErrors.name?.length)}
-                  />
-                  {fieldErrors.name?.[0] && (
-                    <p className="text-destructive text-sm">
-                      {fieldErrors.name[0]}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between gap-2">
-                    <Label htmlFor="supplier-detail-notes">Observações</Label>
-                    <span className="text-muted-foreground text-xs tabular-nums">
-                      {notes.length}/2.000
-                    </span>
-                  </div>
-                  <Textarea
-                    id="supplier-detail-notes"
-                    value={notes}
-                    onChange={(event) => {
-                      setNotes(event.target.value);
-                      setFieldErrors((current) => ({
-                        ...current,
-                        notes: undefined,
-                      }));
-                    }}
-                    rows={9}
-                    maxLength={2000}
-                    disabled={isSaving || isMutating}
-                    placeholder="Informações administrativas sobre este fornecedor..."
-                    aria-invalid={Boolean(fieldErrors.notes?.length)}
-                  />
-                  {fieldErrors.notes?.[0] && (
-                    <p className="text-destructive text-sm">
-                      {fieldErrors.notes[0]}
-                    </p>
-                  )}
-                </div>
-
-                <Button
-                  type="submit"
-                  disabled={
-                    isSaving ||
-                    isMutating ||
-                    name.trim() === "" ||
-                    notes.length > 2000
-                  }
-                >
-                  {isSaving ? (
-                    <Loader2 className="size-4 animate-spin" />
-                  ) : (
-                    <Save className="size-4" />
-                  )}
-                  {isSaving ? "Salvando..." : "Salvar alterações"}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-
           <div className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Atualização</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Phone className="size-5" />
+                  Contato
+                </CardTitle>
               </CardHeader>
-              <CardContent className="flex items-start gap-2 text-sm">
-                <Clock3 className="text-muted-foreground mt-0.5 size-4 shrink-0" />
-                <div>
-                  <p className="text-muted-foreground text-xs">
-                    Última atualização informada pela API
-                  </p>
-                  <p className="font-medium">
-                    {formatDate(supplier.updatedAt)}
-                  </p>
-                </div>
+              <CardContent>
+                <dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                  <DetailField label="Telefone" value={supplier.phone} />
+                  <DetailField label="WhatsApp" value={supplier.whatsapp} />
+                  <DetailField label="Contato" value={supplier.contact} />
+                  <DetailField label="Setor" value={supplier.sector} />
+                  <DetailField label="E-mail" value={supplier.email} />
+                </dl>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Globe className="size-5" />
+                  Presença digital
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                  <DetailField label="Website" value={supplier.website} />
+                  <DetailField label="Facebook" value={supplier.facebook} />
+                  <DetailField label="Twitter" value={supplier.twitter} />
+                </dl>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MapPin className="size-5" />
+                  Endereço
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                  <DetailField label="CEP" value={supplier.zipCode} />
+                  <DetailField label="Logradouro" value={supplier.address} />
+                  <DetailField label="Número" value={supplier.addressNumber} />
+                  <DetailField
+                    label="Complemento"
+                    value={supplier.complement}
+                  />
+                  <DetailField label="Bairro" value={supplier.neighborhood} />
+                  <DetailField label="Cidade" value={supplier.city} />
+                  <DetailField label="UF" value={supplier.state} />
+                  <DetailField label="Região" value={supplier.countryRegion} />
+                  <DetailField label="País" value={supplier.country} />
+                  <DetailField
+                    label="Código do município"
+                    value={supplier.cityCode}
+                  />
+                  <DetailField
+                    label="Código da UF"
+                    value={supplier.stateCode}
+                  />
+                </dl>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Building2 className="size-5" />
+                  Pessoa jurídica
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                  <DetailField
+                    label="Razão social"
+                    value={supplier.legalName}
+                  />
+                  <DetailField label="CNPJ" value={supplier.cnpj} />
+                  <DetailField
+                    label="Data do CNPJ"
+                    value={formatDate(supplier.cnpjDate)}
+                  />
+                  <DetailField
+                    label="Inscrição estadual"
+                    value={supplier.stateRegistration}
+                  />
+                  <DetailField
+                    label="Inscrição municipal"
+                    value={supplier.municipalRegistration}
+                  />
+                  <DetailField
+                    label="Nome fantasia"
+                    value={supplier.tradeName}
+                  />
+                </dl>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <UserRound className="size-5" />
+                  Pessoa física
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                  <DetailField label="CPF" value={supplier.cpf} />
+                  <DetailField label="RG" value={supplier.rg} />
+                  <DetailField
+                    label="Responsável"
+                    value={supplier.responsibleName}
+                  />
+                  <DetailField
+                    label="Cargo do responsável"
+                    value={supplier.responsibleRole}
+                  />
+                </dl>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Editar dados do fornecedor</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  <div className="space-y-2">
+                    <Label htmlFor="supplier-detail-name">
+                      Nome
+                      <span className="text-destructive" aria-hidden="true">
+                        *
+                      </span>
+                    </Label>
+                    <Input
+                      id="supplier-detail-name"
+                      value={name}
+                      onChange={(event) => {
+                        setName(event.target.value);
+                        setFieldErrors((current) => ({
+                          ...current,
+                          name: undefined,
+                        }));
+                      }}
+                      maxLength={100}
+                      disabled={isSaving || isMutating}
+                      aria-invalid={Boolean(fieldErrors.name?.length)}
+                    />
+                    {fieldErrors.name?.[0] && (
+                      <p className="text-destructive text-sm">
+                        {fieldErrors.name[0]}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <Label htmlFor="supplier-detail-notes">Observações</Label>
+                      <span className="text-muted-foreground text-xs tabular-nums">
+                        {notes.length}/2.000
+                      </span>
+                    </div>
+                    <Textarea
+                      id="supplier-detail-notes"
+                      value={notes}
+                      onChange={(event) => {
+                        setNotes(event.target.value);
+                        setFieldErrors((current) => ({
+                          ...current,
+                          notes: undefined,
+                        }));
+                      }}
+                      rows={9}
+                      maxLength={2000}
+                      disabled={isSaving || isMutating}
+                      placeholder="Informações administrativas sobre este fornecedor..."
+                      aria-invalid={Boolean(fieldErrors.notes?.length)}
+                    />
+                    {fieldErrors.notes?.[0] && (
+                      <p className="text-destructive text-sm">
+                        {fieldErrors.notes[0]}
+                      </p>
+                    )}
+                  </div>
+
+                  <Button
+                    type="submit"
+                    disabled={
+                      isSaving ||
+                      isMutating ||
+                      name.trim() === "" ||
+                      notes.length > 2000
+                    }
+                  >
+                    {isSaving ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      <Save className="size-4" />
+                    )}
+                    {isSaving ? "Salvando..." : "Salvar alterações"}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Cadastro</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <DetailField
+                  label="Data de cadastro"
+                  value={formatDate(supplier.createdAt)}
+                />
+                <DetailField
+                  label="Última compra"
+                  value={formatDate(supplier.lastPurchaseAt)}
+                />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex-row items-center justify-between">
                 <CardTitle className="text-base">Status do cadastro</CardTitle>
+                <Badge
+                  variant={supplier.inactive ? "destructive" : "secondary"}
+                >
+                  {supplier.inactive ? "Inativo" : "Ativo"}
+                </Badge>
               </CardHeader>
               <CardContent className="space-y-3">
                 <p className="text-muted-foreground text-xs">
-                  O detalhe da API não informa o status atual. Escolha o estado
-                  desejado e confirme.
+                  Confirme a operação para definir explicitamente o status deste
+                  fornecedor.
                 </p>
                 <Button
                   type="button"

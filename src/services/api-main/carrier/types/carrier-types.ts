@@ -59,7 +59,46 @@ export interface CarrierFindByIdRequest extends CarrierBaseRequest {
   pe_carrier_id: number;
 }
 
-export type CarrierDetail = CarrierListItem;
+export interface CarrierDetail {
+  ID_TRANSPORTADORA: number;
+  NOME: string;
+  ID_PESSOA_TIPO: number;
+  TIPO_PESSOA: string;
+  FONE1: string | null;
+  WHATAPP1: string | null;
+  CONTATO1: string | null;
+  EMAIL1: string | null;
+  PATH_IMAGEM: string | null;
+  RAZAO_SOCIAL: string | null;
+  CNPJ: string | null;
+  DATA_CNPJ: string | null;
+  INSC_ESTADUAL: string | null;
+  INSC_MUNICIPAL: string | null;
+  NOME_FANTASIA: string | null;
+  NOME_RESPONSAVEL: string | null;
+  CARGO: string | null;
+  CPF: string | null;
+  RG: string | null;
+  CEP: string | null;
+  ENDERECO: string | null;
+  ENDERECO_NUMERO: string | null;
+  COMPLEMENTO: string | null;
+  BAIRRO: string | null;
+  CIDADE: string | null;
+  UF: string | null;
+  REGIAO_PAIS: string | null;
+  PAIS: string | null;
+  COD_MUNICIPIO: number;
+  COD_UF: number;
+  WEBSITE: string | null;
+  FACEBOOK: string | null;
+  TWITTER: string | null;
+  FRETADOR: number;
+  DT_ULTIMA_COMPRA: string | null;
+  ANOTACOES: string | null;
+  INATIVO: number;
+  DATADOCADASTRO: string | null;
+}
 
 export interface CarrierCreateRequest extends CarrierBaseRequest {
   pe_type_person_id?: number;
