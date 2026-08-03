@@ -14,12 +14,14 @@ interface ProductDetailsLayoutProps {
   product: UIProductManager;
   productId: number;
   relatedCategories: UIProductManagerRelatedCategory[];
+  returnTo: string;
 }
 
 export function ProductDetailsLayout({
   product,
   productId,
   relatedCategories,
+  returnTo,
 }: ProductDetailsLayoutProps) {
   // Format prices - API returns strings like "320.000000"
   const retailPriceRaw = product.retailPrice
@@ -69,7 +71,7 @@ export function ProductDetailsLayout({
     <div className="space-y-6">
       {/* Action Buttons */}
       <div className="flex items-center justify-between">
-        <BackToCatalogButton />
+        <BackToCatalogButton returnTo={returnTo} />
       </div>
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,500px)_minmax(0,1fr)]">

@@ -4,6 +4,7 @@ export {
   buildCatalogReturnTo,
   buildCatalogUrl,
   buildProductDetailsHref,
+  getSafeProductReturnTo,
   mapSortToApiParams,
   parseCatalogSearchParams,
   SORT_OPTIONS,

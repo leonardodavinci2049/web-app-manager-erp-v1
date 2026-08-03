@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { z } from "zod";
+import { getSafeProductReturnTo } from "@/app/dashboard/catalog/_components";
 import {
   ProductDetailsLayout,
   ProductDetailsLayoutSkeleton,
@@ -23,10 +24,17 @@ const ProductPageParamsSchema = z.object({
 
 interface ProductDetailsPageProps {
   params: Promise<{ id: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
 // Server Component - Fetch data directly
-async function ProductDetailsPageContent({ productId }: { productId: number }) {
+async function ProductDetailsPageContent({
+  productId,
+  returnTo,
+}: {
+  productId: number;
+  returnTo: string;
+}) {
   await connection();
   const { apiContext } = await getAuthContext();
 
@@ -58,6 +66,7 @@ async function ProductDetailsPageContent({ productId }: { productId: number }) {
               product={product}
               productId={productId}
               relatedCategories={relatedCategories}
+              returnTo={returnTo}
             />
           </div>
         </div>
@@ -68,9 +77,13 @@ async function ProductDetailsPageContent({ productId }: { productId: number }) {
 
 export default async function ProductDetailsPage({
   params,
+  searchParams,
 }: ProductDetailsPageProps) {
-  // Await params as it's a Promise in Next.js 15
-  const routeParams = await params;
+  await connection();
+  const [routeParams, rawSearchParams] = await Promise.all([
+    params,
+    searchParams,
+  ]);
 
   // Validate and extract product ID from route params
   let productId: number;
@@ -85,11 +98,21 @@ export default async function ProductDetailsPage({
     notFound();
   }
 
+  const rawReturnTo = rawSearchParams.returnTo;
+  const returnTo = getSafeProductReturnTo(
+    typeof rawReturnTo === "string" ? rawReturnTo : rawReturnTo?.[0],
+  );
+  // O breadcrumb reflete a hierarquia canonica do produto; preserva filtros
+  // quando a origem e o catalogo e mantem o path canonico nos demais casos.
+  const catalogHref = returnTo.startsWith("/dashboard/catalog")
+    ? returnTo
+    : "/dashboard/catalog";
+
   // Build breadcrumb items
   const breadcrumbItems = [
     { label: "Dashboard", href: "/dashboard" },
     { label: "Produtos", href: "#" },
-    { label: "Catálogo", href: "/dashboard/catalog" },
+    { label: "Catálogo", href: catalogHref },
     { label: "Detalhes", isActive: true },
   ];
 
@@ -113,7 +136,7 @@ export default async function ProductDetailsPage({
           </div>
         }
       >
-        <ProductDetailsPageContent productId={productId} />
+        <ProductDetailsPageContent productId={productId} returnTo={returnTo} />
       </Suspense>
     </>
   );
