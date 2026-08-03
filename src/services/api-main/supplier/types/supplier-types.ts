@@ -85,7 +85,7 @@ export interface SupplierFindByIdRequest extends SupplierBaseRequest {
 
 export interface SupplierDetail {
   ID_FORNECEDOR: number;
-  NOME: string;
+  NOME: string | null;
   FISIJURI: string | null;
   FONE1: string | null;
   WHATAPP1: string | null;
@@ -93,7 +93,7 @@ export interface SupplierDetail {
   SETOR1: string | null;
   EMAIL1: string | null;
   PATH_IMAGEM: string | null;
-  ID_PESSOA_TIPO: number;
+  ID_PESSOA_TIPO: number | null;
   TIPO_PESSOA: string;
   RAZAO_SOCIAL: string | null;
   CNPJ: string | null;
@@ -114,13 +114,13 @@ export interface SupplierDetail {
   UF: string | null;
   REGIAO_PAIS: string | null;
   PAIS: string | null;
-  COD_MUNICIPIO: number;
-  COD_UF: number;
+  COD_MUNICIPIO: number | null;
+  COD_UF: number | null;
   WEBSITE: string | null;
   FACEBOOK: string | null;
   TWITTER: string | null;
   FRETADOR: number | null;
-  INATIVO: number;
+  INATIVO: number | null;
   DT_ULTIMA_COMPRA: string | null;
   DATADOCADASTRO: string | null;
   ANOTACOES: string | null;

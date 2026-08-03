@@ -47,7 +47,7 @@ ptype/
 | Método | Endpoint | Tipo |
 |--------|----------|------|
 | `findAllPtypes` | `/ptype/v2/ptype-find-all` | Leitura |
-| `findPtypeById` | `/ptype/v2/ptype-find-id` | Leitura |
+| `findPtypeById` | `/ptype/v2/ptype-find-manager-id` | Leitura |
 | `createPtype` | `/ptype/v2/ptype-create` | Mutação |
 | `updatePtype` | `/ptype/v2/ptype-update` | Mutação |
 | `deletePtype` | `/ptype/v2/ptype-delete` | Mutação |

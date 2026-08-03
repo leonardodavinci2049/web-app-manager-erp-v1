@@ -16,9 +16,8 @@ interface PtypeImageProps {
 
 /**
  * Imagem do tipo de produto (Client). Delega a exibicao padronizada ao
- * componente compartilhado, preservando a imagem padrao do tipo de produto.
- * Ainda nao ha `imagePath` neste cadastro, portanto exibe o fallback ate a
- * integracao do campo.
+ * componente compartilhado, preservando a imagem padrao do tipo de produto
+ * quando `imagePath` nao estiver disponivel.
  */
 export function PtypeImage({
   name,

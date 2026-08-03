@@ -34,6 +34,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import type { UIPtype } from "@/services/api-main/ptype";
+import { PtypeImage } from "../../_components/ptype-image";
 import {
   deletePtypeAction,
   setPtypeStatusAction,
@@ -179,16 +180,23 @@ export function PtypeDetails({ item, returnTo }: PtypeDetailsProps) {
           </Link>
         </Button>
 
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <h1 className="break-words text-2xl font-bold">{item.name}</h1>
-            <Badge variant={item.inactive ? "destructive" : "secondary"}>
-              {item.inactive ? "Inativo" : "Ativo"}
-            </Badge>
+        <div className="flex min-w-0 items-start gap-3">
+          <PtypeImage
+            name={item.name}
+            imagePath={item.imagePath}
+            viewMode="list"
+          />
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="break-words text-2xl font-bold">{item.name}</h1>
+              <Badge variant={item.inactive ? "destructive" : "secondary"}>
+                {item.inactive ? "Inativo" : "Ativo"}
+              </Badge>
+            </div>
+            <p className="text-muted-foreground mt-1 text-sm tabular-nums">
+              Tipo de produto ID {item.id}
+            </p>
           </div>
-          <p className="text-muted-foreground mt-1 text-sm tabular-nums">
-            Tipo de produto ID {item.id}
-          </p>
         </div>
 
         <Card>
