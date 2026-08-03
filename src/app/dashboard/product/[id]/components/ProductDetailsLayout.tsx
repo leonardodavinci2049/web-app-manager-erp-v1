@@ -72,7 +72,7 @@ export function ProductDetailsLayout({
         <BackToCatalogButton />
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-2">
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,500px)_minmax(0,1fr)]">
         <ProductImageGalleryServer
           productId={productId}
           productName={product.name}
@@ -106,7 +106,7 @@ export function ProductDetailsLayoutSkeleton() {
       <Skeleton className="h-9 w-40" />
 
       {/* Main Layout Skeleton */}
-      <div className="grid gap-8 lg:grid-cols-2">
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,500px)_minmax(0,1fr)]">
         {/* Left Column - Images */}
         <div className="space-y-4">
           <Skeleton className="aspect-square w-full" />
