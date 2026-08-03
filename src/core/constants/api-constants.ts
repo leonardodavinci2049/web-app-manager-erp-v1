@@ -200,6 +200,7 @@ export const TAXONOMY_ENDPOINTS = {
 export const PTYPE_ENDPOINTS = {
   FIND_ALL: "/ptype/v2/ptype-find-all",
   FIND_BY_ID: "/ptype/v2/ptype-find-id",
+  FIND_MANAGER_ID: "/ptype/v2/ptype-find-manager-id",
   SEARCH_ALL: "/ptype/v2/ptype-search-all",
   FIND_MANAGER_ALL: "/ptype/v2/ptype-find-manager-all",
   CREATE: "/ptype/v2/ptype-create",
@@ -234,6 +235,7 @@ export const PRODUCT_MANAGER_ENDPOINTS = {
 export const CARRIER_ENDPOINTS = {
   FIND_ALL: "/carrier/v2/carrier-find-all",
   FIND_BY_ID: "/carrier/v2/carrier-find-id",
+  FIND_MANAGER_ID: "/carrier/v2/carrier-find-manager-id",
   SEARCH_ALL: "/carrier/v2/carrier-search-all",
   FIND_MANAGER_ALL: "/carrier/v2/carrier-find-manager-all",
   CREATE: "/carrier/v2/carrier-create",
@@ -245,6 +247,7 @@ export const CARRIER_ENDPOINTS = {
 export const SUPPLIER_ENDPOINTS = {
   FIND_ALL: "/supplier/v2/supplier-find-all",
   FIND_BY_ID: "/supplier/v2/supplier-find-id",
+  FIND_MANAGER_ID: "/supplier/v2/supplier-find-manager-id",
   SEARCH_ALL: "/supplier/v2/supplier-search-all",
   FIND_MANAGER_ALL: "/supplier/v2/supplier-find-manager-all",
   CREATE: "/supplier/v2/supplier-create",

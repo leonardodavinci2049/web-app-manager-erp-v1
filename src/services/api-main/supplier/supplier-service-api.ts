@@ -173,7 +173,7 @@ export class SupplierServiceApi extends BaseApiService {
       const requestBody = this.buildBasePayload(validatedParams);
 
       const response = await this.post<SupplierFindByIdResponse>(
-        SUPPLIER_ENDPOINTS.FIND_BY_ID,
+        SUPPLIER_ENDPOINTS.FIND_MANAGER_ID,
         requestBody,
       );
 
@@ -450,7 +450,7 @@ export class SupplierServiceApi extends BaseApiService {
   extractSupplierById(
     response: SupplierFindByIdResponse,
   ): SupplierDetail | null {
-    return response.data?.["Supplier find Id"]?.[0] ?? null;
+    return response.data?.["Supplier find manager Id"]?.[0] ?? null;
   }
 
   extractSupplierRelProds(
@@ -502,8 +502,8 @@ export class SupplierServiceApi extends BaseApiService {
     return (
       isApiSuccess(response.statusCode) &&
       response.data &&
-      Array.isArray(response.data["Supplier find Id"]) &&
-      response.data["Supplier find Id"].length > 0
+      Array.isArray(response.data["Supplier find manager Id"]) &&
+      response.data["Supplier find manager Id"].length > 0
     );
   }
 

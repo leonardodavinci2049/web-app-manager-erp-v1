@@ -152,7 +152,7 @@ export class PtypeServiceApi extends BaseApiService {
       const requestBody = this.buildBasePayload(validatedParams);
 
       const response = await this.post<PtypeFindByIdResponse>(
-        PTYPE_ENDPOINTS.FIND_BY_ID,
+        PTYPE_ENDPOINTS.FIND_MANAGER_ID,
         requestBody,
       );
 
@@ -314,7 +314,7 @@ export class PtypeServiceApi extends BaseApiService {
   }
 
   extractPtypeById(response: PtypeFindByIdResponse): PtypeDetail | null {
-    return response.data?.["Type find Id"]?.[0] ?? null;
+    return response.data?.["Type find manager Id"]?.[0] ?? null;
   }
 
   extractStoredProcedureResult(
@@ -351,8 +351,8 @@ export class PtypeServiceApi extends BaseApiService {
     return (
       isApiSuccess(response.statusCode) &&
       response.data &&
-      Array.isArray(response.data["Type find Id"]) &&
-      response.data["Type find Id"].length > 0
+      Array.isArray(response.data["Type find manager Id"]) &&
+      response.data["Type find manager Id"].length > 0
     );
   }
 }

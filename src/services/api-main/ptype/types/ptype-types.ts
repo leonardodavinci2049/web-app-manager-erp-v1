@@ -50,7 +50,12 @@ export interface PtypeFindByIdRequest extends PtypeBaseRequest {
 export interface PtypeDetail {
   ID_TIPO: number;
   TIPO: string;
+  PATH_IMAGEM: string | null;
+  INATIVO: number;
   ANOTACOES: string | null;
+  FLAG_CADASTRO_PRODUTO: number;
+  TX_COMISSAO_VARE: string | null;
+  TX_COMISSAO_ATAC: string | null;
   DT_CADASTRO: string | null;
 }
 

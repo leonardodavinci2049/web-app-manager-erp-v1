@@ -6,7 +6,9 @@ import {
   CheckCircle2,
   CircleOff,
   Loader2,
+  Percent,
   Save,
+  Tag,
   Trash2,
   TriangleAlert,
 } from "lucide-react";
@@ -24,6 +26,7 @@ import {
   AlertDialogMedia,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -49,6 +52,31 @@ function formatDate(value?: string): string {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
   return new Intl.DateTimeFormat("pt-BR", { dateStyle: "long" }).format(date);
+}
+
+function formatPercent(value?: number): string {
+  if (value === undefined) return "Não informada";
+  return new Intl.NumberFormat("pt-BR", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 4,
+  }).format(value);
+}
+
+function DetailField({
+  label,
+  value,
+}: {
+  label: string;
+  value?: string | number;
+}) {
+  return (
+    <div className="min-w-0">
+      <dt className="text-muted-foreground text-xs">{label}</dt>
+      <dd className="mt-1 break-words text-sm font-medium">
+        {value === undefined || value === "" ? "Não informado" : value}
+      </dd>
+    </div>
+  );
 }
 
 export function PtypeDetails({ item, returnTo }: PtypeDetailsProps) {
@@ -152,11 +180,69 @@ export function PtypeDetails({ item, returnTo }: PtypeDetailsProps) {
         </Button>
 
         <div className="min-w-0">
-          <h1 className="break-words text-2xl font-bold">{item.name}</h1>
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="break-words text-2xl font-bold">{item.name}</h1>
+            <Badge variant={item.inactive ? "destructive" : "secondary"}>
+              {item.inactive ? "Inativo" : "Ativo"}
+            </Badge>
+          </div>
           <p className="text-muted-foreground mt-1 text-sm tabular-nums">
             Tipo de produto ID {item.id}
           </p>
         </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Tag className="size-5" />
+              Detalhes do tipo
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              <DetailField
+                label="Status"
+                value={item.inactive ? "Inativo" : "Ativo"}
+              />
+              <DetailField
+                label="Cadastro de produto"
+                value={
+                  item.productRegistrationFlag === undefined
+                    ? undefined
+                    : item.productRegistrationFlag
+                      ? "Habilitado"
+                      : "Não habilitado"
+                }
+              />
+              <DetailField
+                label="Data de cadastro"
+                value={formatDate(item.createdAt)}
+              />
+              <div className="min-w-0">
+                <dt className="text-muted-foreground flex items-center gap-1 text-xs">
+                  <Percent className="size-3" />
+                  Comissão varejo
+                </dt>
+                <dd className="mt-1 text-sm font-medium tabular-nums">
+                  {item.retailCommissionRate === undefined
+                    ? "Não informada"
+                    : `${formatPercent(item.retailCommissionRate)}%`}
+                </dd>
+              </div>
+              <div className="min-w-0">
+                <dt className="text-muted-foreground flex items-center gap-1 text-xs">
+                  <Percent className="size-3" />
+                  Comissão atacado
+                </dt>
+                <dd className="mt-1 text-sm font-medium tabular-nums">
+                  {item.wholesaleCommissionRate === undefined
+                    ? "Não informada"
+                    : `${formatPercent(item.wholesaleCommissionRate)}%`}
+                </dd>
+              </div>
+            </dl>
+          </CardContent>
+        </Card>
 
         <form
           onSubmit={handleSubmit}
@@ -246,13 +332,16 @@ export function PtypeDetails({ item, returnTo }: PtypeDetailsProps) {
             </Card>
 
             <Card>
-              <CardHeader>
+              <CardHeader className="flex-row items-center justify-between">
                 <CardTitle className="text-base">Status do cadastro</CardTitle>
+                <Badge variant={item.inactive ? "destructive" : "secondary"}>
+                  {item.inactive ? "Inativo" : "Ativo"}
+                </Badge>
               </CardHeader>
               <CardContent className="space-y-3">
                 <p className="text-muted-foreground text-xs">
-                  A API não informa o status atual neste detalhe. Escolha o
-                  estado desejado e confirme a operação.
+                  Confirme a operação para definir explicitamente o status deste
+                  tipo de produto.
                 </p>
                 <Button
                   type="button"
