@@ -120,7 +120,7 @@ export function CategoryMenu({
             path.length === 0 && "font-medium text-foreground",
           )}
         >
-          Todas as categorias
+          Todas as categoriass
         </button>
         {path.map((node, index) => (
           <span key={node.id} className="flex items-center gap-1">
