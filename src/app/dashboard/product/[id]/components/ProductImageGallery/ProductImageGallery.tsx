@@ -36,6 +36,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { DEFAULT_PRODUCT_IMAGE_URL } from "./product-image-gallery-constants";
 
 export interface GalleryImageWithId {
   id: string;
@@ -50,7 +51,6 @@ interface ProductImageGalleryProps {
   images: GalleryImageWithId[];
   productName: string;
   productId: number;
-  fallbackImage?: string; // Fallback image URL (from PATH_IMAGEM)
   onImageUploadSuccess?: () => void | Promise<void>;
 }
 
@@ -58,16 +58,12 @@ export function ProductImageGallery({
   images,
   productName,
   productId,
-  fallbackImage,
   onImageUploadSuccess,
 }: ProductImageGalleryProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isZoomModalOpen, setIsZoomModalOpen] = useState(false);
   const [zoomedImageIndex, setZoomedImageIndex] = useState(0);
-  const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
-  const [fallbackAttempted, setFallbackAttempted] = useState<Set<number>>(
-    new Set(),
-  );
+  const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
   const [isUploading, setIsUploading] = useState(false);
   const [deleteImageIndex, setDeleteImageIndex] = useState<number | null>(null);
   const [setPrimaryImageIndex, setSetPrimaryImageIndex] = useState<
@@ -75,7 +71,13 @@ export function ProductImageGallery({
   >(null);
   const [isDragOver, setIsDragOver] = useState(false);
 
-  // Get the image URL with fallback logic
+  const getImageErrorKey = useCallback(
+    (index: number, size: "original" | "medium" | "preview") =>
+      `${images[index]?.id ?? "missing"}:${size}`,
+    [images],
+  );
+
+  // Get the requested gallery URL or the default image after a loading error
   const getImageUrl = useCallback(
     (
       index: number,
@@ -83,28 +85,14 @@ export function ProductImageGallery({
     ): string => {
       const currentImage = images[index];
 
-      // If no image at this index, use fallback or default
+      const errorKey = getImageErrorKey(index, size);
+
       if (!currentImage) {
-        return fallbackImage || "/images/product/no-image.jpeg";
+        return DEFAULT_PRODUCT_IMAGE_URL;
       }
 
-      // If this is already a fallback image (id = "fallback"), return as-is
-      if (currentImage.id === "fallback") {
-        return currentImage.url;
-      }
-
-      // If gallery image has error and we have PATH_IMAGEM fallback and haven't tried it yet
-      if (
-        imageErrors.has(index) &&
-        fallbackImage &&
-        !fallbackAttempted.has(index)
-      ) {
-        return fallbackImage;
-      }
-
-      // If both gallery and fallback failed, use default image
-      if (imageErrors.has(index) && fallbackAttempted.has(index)) {
-        return "/images/product/no-image.jpeg";
+      if (currentImage.id === "fallback" || imageErrors.has(errorKey)) {
+        return DEFAULT_PRODUCT_IMAGE_URL;
       }
 
       // Return requested size or fallback to default url
@@ -120,20 +108,21 @@ export function ProductImageGallery({
       // Default to preview
       return currentImage.previewUrl || currentImage.url;
     },
-    [images, imageErrors, fallbackImage, fallbackAttempted],
+    [getImageErrorKey, images, imageErrors],
   );
 
-  // Handle image loading errors with fallback logic
-  const handleImageError = useCallback(
-    (index: number) => {
-      setImageErrors((prev) => new Set(prev).add(index));
+  const hasImageError = useCallback(
+    (index: number, size: "original" | "medium" | "preview") =>
+      imageErrors.has(getImageErrorKey(index, size)),
+    [getImageErrorKey, imageErrors],
+  );
 
-      // If we have a PATH_IMAGEM fallback and haven't tried it yet, mark as attempted
-      if (fallbackImage && !fallbackAttempted.has(index)) {
-        setFallbackAttempted((prev) => new Set(prev).add(index));
-      }
+  const handleImageError = useCallback(
+    (index: number, size: "original" | "medium" | "preview") => {
+      const errorKey = getImageErrorKey(index, size);
+      setImageErrors((previousErrors) => new Set(previousErrors).add(errorKey));
     },
-    [fallbackImage, fallbackAttempted],
+    [getImageErrorKey],
   );
 
   // Handle image upload via drag & drop or file input
@@ -245,13 +234,7 @@ export function ProductImageGallery({
           );
         }
 
-        // Call server action to delete the image
-        // Pass productId and wasPrimary flag to update PATH_IMAGEM if needed
-        const result = await deleteProductImageAction(
-          imageToDelete.id,
-          productId.toString(),
-          imageToDelete.isPrimary,
-        );
+        const result = await deleteProductImageAction(imageToDelete.id);
 
         if (result.success) {
           if (!imageToDelete.isPrimary) {
@@ -277,7 +260,7 @@ export function ProductImageGallery({
         setDeleteImageIndex(null);
       }
     },
-    [selectedImageIndex, images, onImageUploadSuccess, productId],
+    [selectedImageIndex, images, onImageUploadSuccess],
   );
 
   // Handle setting image as primary
@@ -383,8 +366,7 @@ export function ProductImageGallery({
             className="relative aspect-square bg-muted group cursor-zoom-in w-full"
             onClick={() => openZoomModal(selectedImageIndex)}
           >
-            {!imageErrors.has(selectedImageIndex) ||
-            (fallbackImage && !fallbackAttempted.has(selectedImageIndex)) ? (
+            {!hasImageError(selectedImageIndex, "preview") ? (
               <>
                 <Image
                   src={getImageUrl(selectedImageIndex, "preview")}
@@ -393,7 +375,9 @@ export function ProductImageGallery({
                   className="object-cover transition-transform duration-300"
                   priority
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 50vw"
-                  onError={() => handleImageError(selectedImageIndex)}
+                  onError={() =>
+                    handleImageError(selectedImageIndex, "preview")
+                  }
                   unoptimized={
                     getImageUrl(selectedImageIndex, "preview").startsWith(
                       "http://",
@@ -419,7 +403,7 @@ export function ProductImageGallery({
             ) : (
               <div className="relative flex h-full items-center justify-center">
                 <Image
-                  src="/images/product/no-image.jpeg"
+                  src={DEFAULT_PRODUCT_IMAGE_URL}
                   alt="Imagem não disponível"
                   fill
                   priority
@@ -439,45 +423,49 @@ export function ProductImageGallery({
             key={`product-gallery-${image.id}`}
             className={`cursor-pointer overflow-hidden transition-all hover:ring-2 hover:ring-primary ${
               selectedImageIndex === index ? "ring-2 ring-primary" : ""
-            } ${imageErrors.has(index) ? "opacity-50" : ""}`}
-            onClick={() =>
-              !imageErrors.has(index) && setSelectedImageIndex(index)
-            }
+            } ${hasImageError(index, "medium") ? "opacity-50" : ""}`}
+            onClick={() => setSelectedImageIndex(index)}
           >
             <CardContent className="p-0 relative">
               <div className="relative aspect-square bg-muted">
-                {!imageErrors.has(index) ||
-                (fallbackImage && !fallbackAttempted.has(index)) ? (
-                  <>
-                    <Image
-                      src={getImageUrl(index, "medium")}
-                      alt={`${productName} - ${index + 1}`}
-                      fill
-                      className="object-cover"
-                      sizes="100px"
-                      onError={() => handleImageError(index)}
-                      unoptimized={
-                        getImageUrl(index, "medium").startsWith("http://") ||
-                        getImageUrl(index, "medium").startsWith("https://")
-                      }
-                    />
+                {!hasImageError(index, "medium") ? (
+                  <Image
+                    src={getImageUrl(index, "medium")}
+                    alt={`${productName} - ${index + 1}`}
+                    fill
+                    className="object-cover"
+                    sizes="100px"
+                    onError={() => handleImageError(index, "medium")}
+                    unoptimized={
+                      getImageUrl(index, "medium").startsWith("http://") ||
+                      getImageUrl(index, "medium").startsWith("https://")
+                    }
+                  />
+                ) : (
+                  <Image
+                    src={DEFAULT_PRODUCT_IMAGE_URL}
+                    alt="Imagem não disponível"
+                    fill
+                    className="object-cover opacity-50"
+                    sizes="100px"
+                  />
+                )}
 
-                    {/* Primary indicator badge - positioned at top left with higher z-index */}
+                {image.id !== "fallback" && (
+                  <>
                     {image.isPrimary && (
                       <div className="absolute left-0 top-0 bg-amber-500 text-white px-1.5 py-0.5 rounded-br-md text-xs font-semibold flex items-center gap-1 z-20 shadow-lg">
                         <Crown className="h-3 w-3" />
-                        Principal
+                        Principalxxx
                       </div>
                     )}
 
-                    {/* Delete button - positioned to not overlap with primary badge */}
                     <Button
                       variant={image.isPrimary ? "outline" : "destructive"}
                       size="icon"
                       className="absolute right-1 top-1 h-7 w-7 opacity-80 hover:opacity-100 transition-opacity z-10"
                       onClick={(e) => {
                         e.stopPropagation();
-                        // Check if it's the only image
                         if (images.length === 1) {
                           toast.error(
                             "Não é possível excluir a única imagem do produto",
@@ -496,7 +484,6 @@ export function ProductImageGallery({
                       <X className="h-4 w-4" />
                     </Button>
 
-                    {/* Set as Primary button - only for non-primary images, positioned at top left with same size as delete button */}
                     {!image.isPrimary && (
                       <Button
                         variant="secondary"
@@ -512,14 +499,6 @@ export function ProductImageGallery({
                       </Button>
                     )}
                   </>
-                ) : (
-                  <Image
-                    src="/images/product/no-image.jpeg"
-                    alt="Imagem não disponível"
-                    fill
-                    className="object-cover opacity-50"
-                    sizes="100px"
-                  />
                 )}
               </div>
             </CardContent>
@@ -581,8 +560,7 @@ export function ProductImageGallery({
           </DialogHeader>
 
           <div className="relative flex-1 bg-black">
-            {!imageErrors.has(zoomedImageIndex) ||
-            (fallbackImage && !fallbackAttempted.has(zoomedImageIndex)) ? (
+            {!hasImageError(zoomedImageIndex, "original") ? (
               <Image
                 src={getImageUrl(zoomedImageIndex, "original")}
                 alt={`${productName} - Ampliada`}
@@ -590,7 +568,7 @@ export function ProductImageGallery({
                 className="object-contain"
                 priority
                 sizes="(max-width: 1200px) 100vw, 80vw"
-                onError={() => handleImageError(zoomedImageIndex)}
+                onError={() => handleImageError(zoomedImageIndex, "original")}
                 unoptimized={
                   getImageUrl(zoomedImageIndex, "original").startsWith(
                     "http://",
@@ -603,7 +581,7 @@ export function ProductImageGallery({
             ) : (
               <div className="relative flex h-full items-center justify-center">
                 <Image
-                  src="/images/product/no-image.jpeg"
+                  src={DEFAULT_PRODUCT_IMAGE_URL}
                   alt="Imagem não disponível"
                   fill
                   className="object-contain opacity-50"

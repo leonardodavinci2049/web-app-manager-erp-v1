@@ -21,62 +21,6 @@ export function ProductDetailsLayout({
   productId,
   relatedCategories,
 }: ProductDetailsLayoutProps) {
-  // Helper function to validate and get product image URL
-  const getProductImageUrl = (): string => {
-    const defaultImage = "/images/product/no-image.jpeg";
-
-    // Check if product has imagePath field
-    if (product.imagePath && typeof product.imagePath === "string") {
-      const pathImagem = product.imagePath;
-      // If imagePath looks like a URL (starts with http/https or /)
-      if (pathImagem.startsWith("http") || pathImagem.startsWith("/")) {
-        try {
-          // Validate URL format for external URLs
-          if (pathImagem.startsWith("http")) {
-            new URL(pathImagem);
-          }
-          return pathImagem;
-        } catch {
-          // Invalid URL format, continue to next check
-        }
-      } else if (pathImagem.length > 0) {
-        // If it's a relative path, make it absolute
-        return pathImagem.startsWith("/")
-          ? pathImagem
-          : `/images/product/${pathImagem}`;
-      }
-    }
-
-    // Check if slug could be an image path
-    if (product.slug && typeof product.slug === "string") {
-      // If slug looks like a URL (starts with http/https or /)
-      if (product.slug.startsWith("http") || product.slug.startsWith("/")) {
-        try {
-          // Validate URL format for external URLs
-          if (product.slug.startsWith("http")) {
-            new URL(product.slug);
-          }
-          // Only use slug if it looks like an image file
-          if (product.slug.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i)) {
-            return product.slug;
-          }
-        } catch {
-          // Invalid URL format, continue to next check
-        }
-      }
-
-      // If slug looks like an image filename, construct path
-      if (product.slug.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i)) {
-        return `/images/product/${product.slug}`;
-      }
-    }
-
-    // Default fallback
-    return defaultImage;
-  };
-
-  const productImage = getProductImageUrl();
-
   // Format prices - API returns strings like "320.000000"
   const retailPriceRaw = product.retailPrice
     ? Number.parseFloat(product.retailPrice)
@@ -132,7 +76,6 @@ export function ProductDetailsLayout({
         <ProductImageGalleryServer
           productId={productId}
           productName={product.name}
-          fallbackImage={productImage}
         />
 
         <ProductInfoDisplay

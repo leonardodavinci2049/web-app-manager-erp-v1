@@ -212,7 +212,15 @@ export class AssetsApiService {
         body: JSON.stringify(request),
       });
 
-      return this.handleResponse<EntityGalleryResponse>(response);
+      const galleryResponse =
+        await this.handleResponse<EntityGalleryResponse>(response);
+
+      console.log(
+        "[AssetsApiService.getEntityGallery] Gallery response:",
+        JSON.stringify(galleryResponse, null, 2),
+      );
+
+      return galleryResponse;
     } catch (error) {
       return {
         statusCode: 500,

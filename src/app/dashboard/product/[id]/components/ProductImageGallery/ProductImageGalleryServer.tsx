@@ -3,13 +3,13 @@ import { assetsApiService } from "@/services/api-assets/assets-api-service";
 import { isApiError } from "@/types/api-assets";
 
 import { ProductImageGalleryRefresh } from "./ProductImageGalleryRefresh";
+import { DEFAULT_PRODUCT_IMAGE_URL } from "./product-image-gallery-constants";
 
 const logger = createLogger("ProductImageGalleryServer");
 
 interface ProductImageGalleryServerProps {
   productId: number;
   productName: string;
-  fallbackImage: string;
 }
 
 /**
@@ -19,13 +19,12 @@ interface ProductImageGalleryServerProps {
  * 1. Fetches images from the external assets API using the entity-gallery endpoint
  * 2. Sorts images by isPrimary (primary first), then displayOrder, then upload date
  * 3. Transforms the response to extract image URLs in correct order
- * 4. Applies fallback image if gallery is empty or error occurs
+ * 4. Applies the default image if gallery is empty or an error occurs
  * 5. Wraps the client-side ProductImageGallery with refresh functionality
  */
 export async function ProductImageGalleryServer({
   productId,
   productName,
-  fallbackImage,
 }: ProductImageGalleryServerProps) {
   try {
     // Fetch gallery from API
@@ -40,20 +39,19 @@ export async function ProductImageGalleryServer({
         `Failed to fetch gallery for product ${productId}: ${galleryResponse.message}`,
       );
 
-      // Use fallback image (from PATH_IMAGEM) on error with refresh wrapper
+      // Use the default image on error
       return (
         <ProductImageGalleryRefresh
           productId={productId}
           productName={productName}
-          fallbackImage={fallbackImage}
           initialImages={[
             {
               id: "fallback",
-              url: fallbackImage,
-              originalUrl: fallbackImage,
-              mediumUrl: fallbackImage,
-              previewUrl: fallbackImage,
-              isPrimary: true,
+              url: DEFAULT_PRODUCT_IMAGE_URL,
+              originalUrl: DEFAULT_PRODUCT_IMAGE_URL,
+              mediumUrl: DEFAULT_PRODUCT_IMAGE_URL,
+              previewUrl: DEFAULT_PRODUCT_IMAGE_URL,
+              isPrimary: false,
             },
           ]}
         />
@@ -104,20 +102,19 @@ export async function ProductImageGalleryServer({
 
     // Apply fallback if gallery is empty
     if (galleryImages.length === 0) {
-      // Use fallback image from PATH_IMAGEM when gallery is empty
+      // Use the default image when gallery is empty
       return (
         <ProductImageGalleryRefresh
           productId={productId}
           productName={productName}
-          fallbackImage={fallbackImage}
           initialImages={[
             {
               id: "fallback",
-              url: fallbackImage,
-              originalUrl: fallbackImage,
-              mediumUrl: fallbackImage,
-              previewUrl: fallbackImage,
-              isPrimary: true,
+              url: DEFAULT_PRODUCT_IMAGE_URL,
+              originalUrl: DEFAULT_PRODUCT_IMAGE_URL,
+              mediumUrl: DEFAULT_PRODUCT_IMAGE_URL,
+              previewUrl: DEFAULT_PRODUCT_IMAGE_URL,
+              isPrimary: false,
             },
           ]}
         />
@@ -128,7 +125,6 @@ export async function ProductImageGalleryServer({
       <ProductImageGalleryRefresh
         productId={productId}
         productName={productName}
-        fallbackImage={fallbackImage}
         initialImages={galleryImages}
       />
     );
@@ -138,20 +134,19 @@ export async function ProductImageGalleryServer({
       error,
     );
 
-    // Use fallback image on unexpected error with refresh wrapper
+    // Use the default image on unexpected error
     return (
       <ProductImageGalleryRefresh
         productId={productId}
         productName={productName}
-        fallbackImage={fallbackImage}
         initialImages={[
           {
             id: "fallback",
-            url: fallbackImage,
-            originalUrl: fallbackImage,
-            mediumUrl: fallbackImage,
-            previewUrl: fallbackImage,
-            isPrimary: true,
+            url: DEFAULT_PRODUCT_IMAGE_URL,
+            originalUrl: DEFAULT_PRODUCT_IMAGE_URL,
+            mediumUrl: DEFAULT_PRODUCT_IMAGE_URL,
+            previewUrl: DEFAULT_PRODUCT_IMAGE_URL,
+            isPrimary: false,
           },
         ]}
       />

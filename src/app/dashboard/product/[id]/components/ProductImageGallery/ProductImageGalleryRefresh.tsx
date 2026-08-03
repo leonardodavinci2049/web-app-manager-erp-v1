@@ -6,11 +6,11 @@ import {
   type GalleryImageWithId,
   ProductImageGallery,
 } from "./ProductImageGallery";
+import { DEFAULT_PRODUCT_IMAGE_URL } from "./product-image-gallery-constants";
 
 interface ProductImageGalleryRefreshProps {
   productId: number;
   productName: string;
-  fallbackImage: string;
   initialImages: GalleryImageWithId[];
 }
 
@@ -28,11 +28,11 @@ interface ProductImageGalleryRefreshProps {
 export function ProductImageGalleryRefresh({
   productId,
   productName,
-  fallbackImage,
   initialImages,
 }: ProductImageGalleryRefreshProps) {
   const [images, setImages] = useState<GalleryImageWithId[]>(initialImages);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [galleryVersion, setGalleryVersion] = useState(0);
 
   const handleImageUploadSuccess = async () => {
     setIsRefreshing(true);
@@ -49,14 +49,15 @@ export function ProductImageGalleryRefresh({
             : [
                 {
                   id: "fallback",
-                  url: fallbackImage,
-                  originalUrl: fallbackImage,
-                  mediumUrl: fallbackImage,
-                  previewUrl: fallbackImage,
-                  isPrimary: true,
+                  url: DEFAULT_PRODUCT_IMAGE_URL,
+                  originalUrl: DEFAULT_PRODUCT_IMAGE_URL,
+                  mediumUrl: DEFAULT_PRODUCT_IMAGE_URL,
+                  previewUrl: DEFAULT_PRODUCT_IMAGE_URL,
+                  isPrimary: false,
                 },
               ],
         );
+        setGalleryVersion((currentVersion) => currentVersion + 1);
       } else {
         // Keep existing images if refresh fails
         console.error("Gallery refresh failed:", data.error);
@@ -71,10 +72,10 @@ export function ProductImageGalleryRefresh({
 
   return (
     <ProductImageGallery
+      key={galleryVersion}
       images={images}
       productName={productName}
       productId={productId}
-      fallbackImage={fallbackImage}
       onImageUploadSuccess={isRefreshing ? undefined : handleImageUploadSuccess}
     />
   );
