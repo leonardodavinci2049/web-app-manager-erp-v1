@@ -1,3 +1,4 @@
+import { addDays, format, subMonths } from "date-fns";
 import type {
   AdvancedFilterFlag,
   CatalogFilters,
@@ -120,32 +121,15 @@ function parseDate(params: URLSearchParams, key: string): string {
   return /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : "";
 }
 
-function formatDateInputValue(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
 function getDefaultRegistrationPeriod(): {
   startDate: string;
   endDate: string;
 } {
   const today = new Date();
-  const startDate = new Date(
-    today.getFullYear(),
-    today.getMonth(),
-    today.getDate() - 7,
-  );
-  const endDate = new Date(
-    today.getFullYear(),
-    today.getMonth(),
-    today.getDate() + 1,
-  );
 
   return {
-    startDate: formatDateInputValue(startDate),
-    endDate: formatDateInputValue(endDate),
+    startDate: format(subMonths(today, 1), "yyyy-MM-dd"),
+    endDate: format(addDays(today, 1), "yyyy-MM-dd"),
   };
 }
 
