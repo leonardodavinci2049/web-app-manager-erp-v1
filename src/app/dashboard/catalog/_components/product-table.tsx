@@ -126,11 +126,11 @@ export function ProductTable({ products, catalogReturnTo }: ProductTableProps) {
                 </TableCell>
                 <TableCell className="whitespace-normal tabular-nums">
                   <div className="space-y-1 text-xs">
-                    <p>Anual: {formatSalesQuantity(product.salesYear)}</p>
+                    <p>Ano: {formatSalesQuantity(product.salesYear)}</p>
                     <p>
                       Trim.: {formatSalesQuantity(product.salesLastThreeMonths)}
                     </p>
-                    <p>Mensal: {formatSalesQuantity(product.salesMonth)}</p>
+                    <p>Mês: {formatSalesQuantity(product.salesMonth)}</p>
                   </div>
                 </TableCell>
                 <TableCell className="tabular-nums">
