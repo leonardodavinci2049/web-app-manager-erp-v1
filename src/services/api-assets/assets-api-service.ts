@@ -215,7 +215,7 @@ export class AssetsApiService {
       const galleryResponse =
         await this.handleResponse<EntityGalleryResponse>(response);
 
- /*      console.log(
+      /*      console.log(
         "[AssetsApiService.getEntityGallery] Gallery response:",
         JSON.stringify(galleryResponse, null, 2),
       ); */
