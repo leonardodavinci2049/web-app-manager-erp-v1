@@ -1,6 +1,7 @@
 "use client";
 
-import { Filter, X } from "lucide-react";
+import { ptBR } from "date-fns/locale";
+import { CalendarIcon, Filter, X } from "lucide-react";
 import {
   type FormEvent,
   type ReactNode,
@@ -10,8 +11,14 @@ import {
 } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -118,36 +125,31 @@ function TextFilterInput({
   );
 }
 
-function formatIsoDateToBrazilian(value: string): string {
+function parseIsoDate(value: string): Date | undefined {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
-  return match ? `${match[3]}/${match[2]}/${match[1]}` : "";
-}
-
-function parseBrazilianDate(value: string): string | undefined {
-  const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value);
   if (!match) return undefined;
 
-  const day = Number(match[1]);
+  const year = Number(match[1]);
   const month = Number(match[2]);
-  const year = Number(match[3]);
-  const date = new Date(Date.UTC(year, month - 1, day));
+  const day = Number(match[3]);
+  const date = new Date(year, month - 1, day);
 
   if (
-    date.getUTCFullYear() !== year ||
-    date.getUTCMonth() !== month - 1 ||
-    date.getUTCDate() !== day
+    date.getFullYear() !== year ||
+    date.getMonth() !== month - 1 ||
+    date.getDate() !== day
   ) {
     return undefined;
   }
 
-  return `${match[3]}-${match[2]}-${match[1]}`;
+  return date;
 }
 
-function maskBrazilianDate(value: string): string {
-  const digits = value.replace(/\D/g, "").slice(0, 8);
-  if (digits.length <= 2) return digits;
-  if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
-  return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+function formatDateToIso(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 interface DateFilterInputProps {
@@ -169,48 +171,50 @@ function DateFilterInput({
   disabled,
   onChange,
 }: DateFilterInputProps) {
-  const formattedValue = formatIsoDateToBrazilian(value);
-  const [inputValue, setInputValue] = useState(formattedValue);
-
-  useEffect(() => setInputValue(formattedValue), [formattedValue]);
-
-  const commitValue = () => {
-    const isoDate = parseBrazilianDate(inputValue);
-    const isWithinRange =
-      isoDate && (!min || isoDate >= min) && (!max || isoDate <= max);
-
-    if (isoDate && isWithinRange) {
-      if (isoDate !== value) onChange(isoDate);
-      return;
-    }
-
-    setInputValue(formattedValue);
-  };
-
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    commitValue();
-  };
+  const [open, setOpen] = useState(false);
+  const selectedDate = parseIsoDate(value);
+  const minDate = min ? parseIsoDate(min) : undefined;
+  const maxDate = max ? parseIsoDate(max) : undefined;
 
   return (
-    <form className="space-y-1" onSubmit={handleSubmit}>
+    <div className="min-w-0 space-y-1">
       <Label htmlFor={id}>{label}</Label>
-      <Input
-        id={id}
-        type="text"
-        inputMode="numeric"
-        autoComplete="off"
-        lang="pt-BR"
-        placeholder="DD/MM/AAAA"
-        maxLength={10}
-        value={inputValue}
-        disabled={disabled}
-        onBlur={commitValue}
-        onChange={(event) =>
-          setInputValue(maskBrazilianDate(event.target.value))
-        }
-      />
-    </form>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            id={id}
+            type="button"
+            variant="outline"
+            disabled={disabled}
+            className="w-full justify-start px-3 font-normal"
+          >
+            <CalendarIcon className="size-4 text-muted-foreground" />
+            <span className="truncate">
+              {selectedDate
+                ? new Intl.DateTimeFormat("pt-BR").format(selectedDate)
+                : "Selecione"}
+            </span>
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0" align="start">
+          <Calendar
+            mode="single"
+            selected={selectedDate}
+            defaultMonth={selectedDate}
+            locale={ptBR}
+            disabled={(date) =>
+              (minDate !== undefined && date < minDate) ||
+              (maxDate !== undefined && date > maxDate)
+            }
+            onSelect={(date) => {
+              if (!date) return;
+              onChange(formatDateToIso(date));
+              setOpen(false);
+            }}
+          />
+        </PopoverContent>
+      </Popover>
+    </div>
   );
 }
 
@@ -396,10 +400,19 @@ export function FilterPanel({
 }: FilterPanelProps) {
   const [filters, setFilters] = useState(appliedFilters);
   const filtersRef = useRef(appliedFilters);
+  const [draftStartDate, setDraftStartDate] = useState(
+    appliedFilters.startDate,
+  );
+  const [draftEndDate, setDraftEndDate] = useState(appliedFilters.endDate);
+  const isRegistrationPeriodDirtyRef = useRef(false);
 
   useEffect(() => {
     filtersRef.current = appliedFilters;
     setFilters(appliedFilters);
+    if (!isRegistrationPeriodDirtyRef.current) {
+      setDraftStartDate(appliedFilters.startDate);
+      setDraftEndDate(appliedFilters.endDate);
+    }
   }, [appliedFilters]);
 
   const onFilterChange = <Key extends PanelFilterType>(
@@ -410,24 +423,31 @@ export function FilterPanel({
 
     const nextFilters = { ...filtersRef.current, [key]: value };
 
-    if (
-      (key === "startDate" || key === "endDate") &&
-      nextFilters.startDate !== "" &&
-      nextFilters.endDate !== "" &&
-      nextFilters.startDate <= nextFilters.endDate
-    ) {
-      nextFilters.operationList = 1;
-    }
-
     filtersRef.current = nextFilters;
     setFilters(nextFilters);
     onFiltersChange(nextFilters);
   };
 
   const hasValidRegistrationPeriod =
-    filters.startDate !== "" &&
-    filters.endDate !== "" &&
-    filters.startDate <= filters.endDate;
+    draftStartDate !== "" &&
+    draftEndDate !== "" &&
+    draftStartDate <= draftEndDate;
+
+  const applyRegistrationPeriod = () => {
+    if (!hasValidRegistrationPeriod) return;
+
+    const nextFilters: CatalogFilters = {
+      ...filtersRef.current,
+      operationList: 1,
+      startDate: draftStartDate,
+      endDate: draftEndDate,
+    };
+
+    isRegistrationPeriodDirtyRef.current = false;
+    filtersRef.current = nextFilters;
+    setFilters(nextFilters);
+    onFiltersChange(nextFilters);
+  };
 
   return (
     <Sheet
@@ -436,6 +456,9 @@ export function FilterPanel({
         if (open) {
           filtersRef.current = appliedFilters;
           setFilters(appliedFilters);
+          setDraftStartDate(appliedFilters.startDate);
+          setDraftEndDate(appliedFilters.endDate);
+          isRegistrationPeriodDirtyRef.current = false;
         }
         onOpenChange(open);
       }}
@@ -476,7 +499,10 @@ export function FilterPanel({
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto p-3">
-            <TabsContent value="general" className="space-y-3">
+            <TabsContent
+              value="general"
+              className="flex min-h-full flex-col gap-3"
+            >
               <div className="space-y-1">
                 <Label className="text-muted-foreground">Categoria</Label>
                 <CategoryMenu
@@ -489,113 +515,121 @@ export function FilterPanel({
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
-                <div className="min-w-0 space-y-1">
-                  <Label className="text-muted-foreground">Marca</Label>
-                  <Select
-                    value={filters.selectedBrand || "all"}
-                    onValueChange={(value) =>
-                      onFilterChange(
-                        "selectedBrand",
-                        value === "all" ? undefined : value,
-                      )
-                    }
-                    disabled={isLoading}
-                  >
-                    <SelectTrigger className="w-full" aria-label="Marca">
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todas as marcas</SelectItem>
-                      {brands.map((brand) => (
-                        <SelectItem key={brand.id} value={brand.id.toString()}>
-                          {brand.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="min-w-0 space-y-1">
-                  <Label className="text-muted-foreground">
-                    Tipo de produto
-                  </Label>
-                  <Select
-                    value={filters.selectedPtype || "all"}
-                    onValueChange={(value) =>
-                      onFilterChange(
-                        "selectedPtype",
-                        value === "all" ? undefined : value,
-                      )
-                    }
-                    disabled={isLoading}
-                  >
-                    <SelectTrigger
-                      className="w-full"
-                      aria-label="Tipo de produto"
+              <div className="mt-auto space-y-3">
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="min-w-0 space-y-1">
+                    <Label className="text-muted-foreground">Marca</Label>
+                    <Select
+                      value={filters.selectedBrand || "all"}
+                      onValueChange={(value) =>
+                        onFilterChange(
+                          "selectedBrand",
+                          value === "all" ? undefined : value,
+                        )
+                      }
+                      disabled={isLoading}
                     >
-                      <SelectValue placeholder="Selecione" />
+                      <SelectTrigger className="w-full" aria-label="Marca">
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todas as marcas</SelectItem>
+                        {brands.map((brand) => (
+                          <SelectItem
+                            key={brand.id}
+                            value={brand.id.toString()}
+                          >
+                            {brand.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="min-w-0 space-y-1">
+                    <Label className="text-muted-foreground">
+                      Tipo de produto
+                    </Label>
+                    <Select
+                      value={filters.selectedPtype || "all"}
+                      onValueChange={(value) =>
+                        onFilterChange(
+                          "selectedPtype",
+                          value === "all" ? undefined : value,
+                        )
+                      }
+                      disabled={isLoading}
+                    >
+                      <SelectTrigger
+                        className="w-full"
+                        aria-label="Tipo de produto"
+                      >
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todos os tipos</SelectItem>
+                        {ptypes.map((ptype) => (
+                          <SelectItem
+                            key={ptype.id}
+                            value={ptype.id.toString()}
+                          >
+                            {ptype.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <NumericFilterInput
+                    id="filter-supplier"
+                    label="Fornecedor"
+                    placeholder="Digite o ID"
+                    value={filters.supplierId}
+                    disabled={isLoading}
+                    onChange={(value) => onFilterChange("supplierId", value)}
+                  />
+                  <NumericFilterInput
+                    id="filter-physical"
+                    label="Produto físico"
+                    placeholder="Digite o ID"
+                    value={filters.physicalId}
+                    disabled={isLoading}
+                    onChange={(value) => onFilterChange("physicalId", value)}
+                  />
+                </div>
+
+                <TextFilterInput
+                  id="filter-ean"
+                  label="EAN"
+                  placeholder="Digite o EAN"
+                  value={filters.ean}
+                  disabled={isLoading}
+                  onChange={(value) => onFilterChange("ean", value)}
+                />
+
+                <div className="space-y-1 pt-1">
+                  <Label className="text-muted-foreground">Ordenação</Label>
+                  <Select
+                    value={filters.sortBy}
+                    onValueChange={(value) =>
+                      onFilterChange("sortBy", value as SortOption)
+                    }
+                    disabled={isLoading}
+                  >
+                    <SelectTrigger className="w-full" aria-label="Ordenação">
+                      <SelectValue placeholder="Ordenar" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">Todos os tipos</SelectItem>
-                      {ptypes.map((ptype) => (
-                        <SelectItem key={ptype.id} value={ptype.id.toString()}>
-                          {ptype.name}
+                      {SORT_OPTIONS.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                <NumericFilterInput
-                  id="filter-supplier"
-                  label="Fornecedor"
-                  placeholder="Digite o ID"
-                  value={filters.supplierId}
-                  disabled={isLoading}
-                  onChange={(value) => onFilterChange("supplierId", value)}
-                />
-                <NumericFilterInput
-                  id="filter-physical"
-                  label="Produto físico"
-                  placeholder="Digite o ID"
-                  value={filters.physicalId}
-                  disabled={isLoading}
-                  onChange={(value) => onFilterChange("physicalId", value)}
-                />
-              </div>
-
-              <TextFilterInput
-                id="filter-ean"
-                label="EAN"
-                placeholder="Digite o EAN"
-                value={filters.ean}
-                disabled={isLoading}
-                onChange={(value) => onFilterChange("ean", value)}
-              />
-
-              <div className="space-y-1 pt-1">
-                <Label className="text-muted-foreground">Ordenação</Label>
-                <Select
-                  value={filters.sortBy}
-                  onValueChange={(value) =>
-                    onFilterChange("sortBy", value as SortOption)
-                  }
-                  disabled={isLoading}
-                >
-                  <SelectTrigger className="w-full" aria-label="Ordenação">
-                    <SelectValue placeholder="Ordenar" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {SORT_OPTIONS.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </div>
             </TabsContent>
 
@@ -679,28 +713,49 @@ export function FilterPanel({
                   label="Filtrar pelo período informado"
                   checked={filters.operationList === 1}
                   disabled={isLoading || !hasValidRegistrationPeriod}
-                  onCheckedChange={(value) =>
-                    onFilterChange("operationList", value ? 1 : 0)
-                  }
+                  onCheckedChange={(value) => {
+                    if (value) {
+                      applyRegistrationPeriod();
+                      return;
+                    }
+                    onFilterChange("operationList", 0);
+                  }}
                 />
                 <div className="grid grid-cols-2 gap-2">
                   <DateFilterInput
                     id="filter-start-date"
                     label="Data inicial"
-                    value={filters.startDate}
-                    max={filters.endDate || undefined}
+                    value={draftStartDate}
+                    max={draftEndDate || undefined}
                     disabled={isLoading}
-                    onChange={(value) => onFilterChange("startDate", value)}
+                    onChange={(value) => {
+                      isRegistrationPeriodDirtyRef.current = true;
+                      setDraftStartDate(value);
+                    }}
                   />
                   <DateFilterInput
                     id="filter-end-date"
                     label="Data final"
-                    value={filters.endDate}
-                    min={filters.startDate || undefined}
+                    value={draftEndDate}
+                    min={draftStartDate || undefined}
                     disabled={isLoading}
-                    onChange={(value) => onFilterChange("endDate", value)}
+                    onChange={(value) => {
+                      isRegistrationPeriodDirtyRef.current = true;
+                      setDraftEndDate(value);
+                    }}
                   />
                 </div>
+                {filters.operationList === 1 && (
+                  <Button
+                    type="button"
+                    size="sm"
+                    className="w-full"
+                    disabled={isLoading || !hasValidRegistrationPeriod}
+                    onClick={applyRegistrationPeriod}
+                  >
+                    Filtrar Data
+                  </Button>
+                )}
               </FilterGroup>
             </TabsContent>
 
