@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useCategoryQueryNavigation } from "../../_hooks/use-category-query-navigation";
 import { LevelBadge } from "../category-level-badge";
-import type { CategoryDetailDto } from "../category-types";
+import type { CategoryDetailDto, CategoryDetailTab } from "../category-types";
 import { CategoryCreateTrigger } from "../dialogs/category-create-dialog";
 
 export function CategoryDetailHeader({
@@ -14,7 +14,7 @@ export function CategoryDetailHeader({
   tab,
 }: {
   detail: CategoryDetailDto;
-  tab: "details" | "products";
+  tab: CategoryDetailTab;
 }) {
   const navigate = useCategoryQueryNavigation();
 

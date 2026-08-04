@@ -1,10 +1,16 @@
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
+import { Suspense } from "react";
 import { SiteHeaderWithBreadcrumb } from "@/components/dashboard/header/site-header-with-breadcrumb";
 import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
 import { getPtypeById, PtypeNotFoundError } from "@/services/api-main/ptype";
 import { getSafePtypeReturnTo } from "../_components";
+import {
+  PtypeImageGalleryServer,
+  PtypeImageGallerySkeleton,
+  PtypeImagesListServer,
+} from "./_components/image-gallery";
 import { PtypeDetails } from "./_components/ptype-details";
 
 const logger = createLogger("PtypeDetailsPage");
@@ -50,7 +56,26 @@ export default async function PtypeDetailPage({
         <div className="@container/main flex flex-1 flex-col gap-6">
           <div className="flex flex-col gap-6 py-6">
             <div className="px-3 lg:px-6">
-              <PtypeDetails item={item} returnTo={returnTo} />
+              <PtypeDetails
+                item={item}
+                returnTo={returnTo}
+                imageGallery={
+                  <Suspense fallback={<PtypeImageGallerySkeleton />}>
+                    <PtypeImageGalleryServer
+                      ptypeId={item.id}
+                      ptypeName={item.name}
+                    />
+                  </Suspense>
+                }
+                imageContent={
+                  <Suspense fallback={<PtypeImageGallerySkeleton />}>
+                    <PtypeImagesListServer
+                      ptypeId={item.id}
+                      initialPtypeImagePath={item.imagePath ?? ""}
+                    />
+                  </Suspense>
+                }
+              />
             </div>
           </div>
         </div>

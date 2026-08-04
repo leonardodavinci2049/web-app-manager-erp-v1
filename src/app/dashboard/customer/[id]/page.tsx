@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
+import { Suspense } from "react";
 import { SiteHeaderWithBreadcrumb } from "@/components/dashboard/header/site-header-with-breadcrumb";
 import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
@@ -9,6 +10,11 @@ import {
   getCustomerLatestProducts,
 } from "@/services/api-main/customer-general";
 import { CustomerDetails, getSafeCustomerReturnTo } from "../_components";
+import {
+  CustomerImageGalleryServer,
+  CustomerImageGallerySkeleton,
+  CustomerImagesListServer,
+} from "./_components/image-gallery";
 
 const logger = createLogger("CustomerDetailsPage");
 
@@ -75,6 +81,22 @@ export default async function CustomerDetailsPage({
                 products={products}
                 hasProductsError={hasProductsError}
                 returnTo={returnTo}
+                imageGallery={
+                  <Suspense fallback={<CustomerImageGallerySkeleton />}>
+                    <CustomerImageGalleryServer
+                      customerId={bundle.customer.id}
+                      customerName={bundle.customer.name}
+                    />
+                  </Suspense>
+                }
+                imageContent={
+                  <Suspense fallback={<CustomerImageGallerySkeleton />}>
+                    <CustomerImagesListServer
+                      customerId={bundle.customer.id}
+                      initialCustomerImagePath={bundle.customer.imagePath ?? ""}
+                    />
+                  </Suspense>
+                }
               />
             </div>
           </div>

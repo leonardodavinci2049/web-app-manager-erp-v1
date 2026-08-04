@@ -85,7 +85,7 @@ parâmetros não alterados. Não monte URLs manualmente nos Client Components.
 | `status` | `active`, `inactive` | Filtro por status |
 | `withoutProducts` | `1` | Somente categorias sem produtos diretos |
 | `issue` | `family-empty`, `group-empty`, `inconsistent` | Filtro de diagnóstico |
-| `tab` | `products`; ausência significa detalhes | Aba do painel |
+| `tab` | `image`, `products`; ausência significa detalhes | Aba do painel |
 | `productSearch` | texto, até 100 caracteres | Busca entre produtos vinculados |
 | `productPage` | inteiro positivo; ausência representa `0` | Página de produtos |
 
@@ -120,15 +120,19 @@ Ao mudar de categoria, busca ou contexto da aba de produtos, limpe
 - Ativação e inativação ficam na zona de perigo do formulário.
 - Exclusão fica bloqueada quando há categorias filhas ou produtos diretamente
   vinculados.
+- A aba **Imagem** contém a galeria de assets em proporção 3:1 e a visualização
+  do `PATH_IMAGEM`. O primeiro upload, a troca da principal e a promoção após
+  exclusão sincronizam o caminho pela operação inline dedicada.
 - A aba **Produtos** lista, busca e pagina os vínculos diretos. Ela permite
   vincular um produto pelo ID e remover um vínculo existente.
 
 ## Server Actions e invariantes
 
-Todas as mutações ficam em `_actions/category-actions.ts`. Elas validam a
+As mutações cadastrais ficam em `_actions/category-actions.ts`; as mutações da
+galeria ficam em `_actions/category-image-gallery-actions.ts`. Elas validam a
 entrada com Zod, recuperam novamente o contexto autenticado, verificam o estado
 atual no servidor, chamam os serviços de API e executam
-`revalidatePath("/dashboard/category")`.
+`revalidatePath("/dashboard/category")` quando necessário.
 
 - `createCategoryAction()`: deriva o nível a partir do pai, gera o slug e impede
   a criação abaixo do nível 3.
@@ -149,7 +153,7 @@ cliente.
 ## Serviços relacionados
 
 - `taxonomy-base`: leituras e CRUD completo da taxonomia.
-- `taxonomy-inline`: alteração pontual de pai e status.
+- `taxonomy-inline`: alteração pontual de imagem, pai e status.
 - `taxonomy-rel`: criação e remoção da relação taxonomia–produto.
 - `product-manager`: validação do produto e de suas categorias relacionadas.
 
@@ -158,8 +162,6 @@ respectivo módulo em `src/services/api-main`.
 
 ## Recursos ainda não implementados
 
-- O seletor de imagem está desabilitado até a integração com o serviço de
-  arquivos. O formulário apenas preserva o `imagePath` existente.
 - A aba **Histórico** está visível, mas desabilitada.
 - O diálogo de vínculo em massa é somente uma prévia navegável. Ele não busca
   produtos nem executa mutações até existir um endpoint em lote com limite,

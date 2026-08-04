@@ -13,6 +13,7 @@ import {
   Trash2,
 } from "lucide-react";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,6 +24,8 @@ import { SellerImage } from "./seller-image";
 interface SellerDetailsProps {
   seller: UISellerDetail;
   returnTo: string;
+  imageGallery: ReactNode;
+  imageContent: ReactNode;
 }
 
 function formatDate(value?: string): string {
@@ -51,7 +54,12 @@ function DetailField({
   );
 }
 
-export function SellerDetails({ seller, returnTo }: SellerDetailsProps) {
+export function SellerDetails({
+  seller,
+  returnTo,
+  imageGallery,
+  imageContent,
+}: SellerDetailsProps) {
   const fullPersonalName = [seller.firstName, seller.lastName]
     .filter(Boolean)
     .join(" ");
@@ -60,18 +68,22 @@ export function SellerDetails({ seller, returnTo }: SellerDetailsProps) {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="grid gap-6 lg:grid-cols-[minmax(280px,500px)_minmax(0,1fr)]">
       <Button
         asChild
         variant="outline"
         size="sm"
-        className="h-8 px-2 text-xs sm:h-9 sm:px-3 sm:text-sm"
+        className="h-8 px-2 text-xs sm:h-9 sm:px-3 sm:text-sm lg:col-span-2 lg:justify-self-start"
       >
         <Link href={returnTo}>
           <ArrowLeft className="size-4" />
           Voltar aos vendedores
         </Link>
       </Button>
+
+      <aside className="lg:row-span-3 lg:row-start-2 lg:self-start lg:sticky lg:top-6">
+        {imageGallery}
+      </aside>
 
       <div className="flex min-w-0 items-start gap-3">
         <SellerImage
@@ -259,9 +271,12 @@ export function SellerDetails({ seller, returnTo }: SellerDetailsProps) {
       </div>
 
       <Tabs defaultValue="deletion" className="w-full">
-        <TabsList className="grid h-auto w-full grid-cols-1">
+        <TabsList className="grid h-auto w-full grid-cols-2">
+          <TabsTrigger value="image">Imagem</TabsTrigger>
           <TabsTrigger value="deletion">Exclusão</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="image">{imageContent}</TabsContent>
 
         <TabsContent value="deletion">
           <Card className="border-destructive/40 bg-destructive/5">

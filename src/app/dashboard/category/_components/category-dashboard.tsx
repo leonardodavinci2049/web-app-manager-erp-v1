@@ -1,10 +1,12 @@
 import { FolderTree } from "lucide-react";
+import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { CategoryDashboardHeader } from "./category-dashboard-header";
 import { CategoryEmptyState } from "./category-empty-state";
 import { CategoryMobileBottomBar } from "./category-mobile-bottom-bar";
 import type {
   CategoryDetailDto,
+  CategoryDetailTab,
   CategoryFiltersState,
   CategoryNodeDto,
   CategoryProductDto,
@@ -22,7 +24,8 @@ export interface CategoryDashboardProps {
   products: CategoryProductDto[];
   productTotal: number;
   filters: CategoryFiltersState;
-  tab: "details" | "products";
+  tab: CategoryDetailTab;
+  imageContent?: ReactNode;
   productSearch: string;
   productPage: number;
   productsPerPage: number;
@@ -63,6 +66,7 @@ export function CategoryDashboard(props: CategoryDashboardProps) {
                 detail={props.detail}
                 flatCategories={props.flatCategories}
                 tab={props.tab}
+                imageContent={props.imageContent}
                 productSearch={props.productSearch}
                 productPage={props.productPage}
                 productsPerPage={props.productsPerPage}

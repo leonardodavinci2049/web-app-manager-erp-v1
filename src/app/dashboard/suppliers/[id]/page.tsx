@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
+import { Suspense } from "react";
 import { SiteHeaderWithBreadcrumb } from "@/components/dashboard/header/site-header-with-breadcrumb";
 import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
@@ -8,6 +9,11 @@ import {
   SupplierNotFoundError,
 } from "@/services/api-main/supplier";
 import { getSafeSupplierReturnTo, SupplierDetails } from "../_components";
+import {
+  SupplierImageGalleryServer,
+  SupplierImageGallerySkeleton,
+  SupplierImagesListServer,
+} from "./_components/image-gallery";
 
 const logger = createLogger("SupplierDetailsPage");
 
@@ -55,7 +61,26 @@ export default async function SupplierDetailsPage({
         <div className="@container/main flex flex-1 flex-col gap-6">
           <div className="flex flex-col gap-6 py-6">
             <div className="px-3 lg:px-6">
-              <SupplierDetails supplier={supplier} returnTo={returnTo} />
+              <SupplierDetails
+                supplier={supplier}
+                returnTo={returnTo}
+                imageGallery={
+                  <Suspense fallback={<SupplierImageGallerySkeleton />}>
+                    <SupplierImageGalleryServer
+                      supplierId={supplier.id}
+                      supplierName={supplier.name}
+                    />
+                  </Suspense>
+                }
+                imageContent={
+                  <Suspense fallback={<SupplierImageGallerySkeleton />}>
+                    <SupplierImagesListServer
+                      supplierId={supplier.id}
+                      initialSupplierImagePath={supplier.imagePath ?? ""}
+                    />
+                  </Suspense>
+                }
+              />
             </div>
           </div>
         </div>

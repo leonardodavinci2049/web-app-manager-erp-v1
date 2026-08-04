@@ -2,8 +2,9 @@
 
 import { cn } from "@/lib/utils";
 import { useCategoryQueryNavigation } from "../../_hooks/use-category-query-navigation";
+import type { CategoryDetailTab } from "../category-types";
 
-export function CategoryDetailTabs({ tab }: { tab: "details" | "products" }) {
+export function CategoryDetailTabs({ tab }: { tab: CategoryDetailTab }) {
   const navigate = useCategoryQueryNavigation();
 
   return (
@@ -19,6 +20,18 @@ export function CategoryDetailTabs({ tab }: { tab: "details" | "products" }) {
         )}
       >
         Detalhes
+      </button>
+      <button
+        type="button"
+        onClick={() => navigate({ tab: "image", productPage: undefined })}
+        className={cn(
+          "border-b-2 px-4 py-3 text-sm",
+          tab === "image"
+            ? "border-foreground font-medium"
+            : "border-transparent text-muted-foreground",
+        )}
+      >
+        Imagem
       </button>
       <button
         type="button"
