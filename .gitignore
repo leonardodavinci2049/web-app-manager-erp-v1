@@ -61,5 +61,6 @@ src/core/config-tenant
 !/scripts/create-initial-prompt.sh
 /docs
 /API-documentation
+/API-assets-documentation
 /schemas
 .agents
