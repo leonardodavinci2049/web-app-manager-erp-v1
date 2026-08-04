@@ -8,29 +8,35 @@ import {
   Save,
 } from "lucide-react";
 import Image from "next/image";
-import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { updateProductImagePath } from "@/app/actions/action-product-updates";
-import { getEntityGalleryAction } from "@/app/actions/action-test-assets";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import type { GalleryImage } from "@/types/api-assets";
-import { DEFAULT_PRODUCT_IMAGE_URL } from "../ProductImageGallery/product-image-gallery-constants";
+import { DEFAULT_PRODUCT_IMAGE_URL } from "../../_components/image-gallery/image-gallery-constants";
+import type { ProductGalleryImage } from "../../_components/image-gallery/image-gallery-types";
 
 interface ProductImagesListProps {
   productId: number;
   initialProductImagePath: string;
+  initialGalleryImages: ProductGalleryImage[];
+  initialGalleryError: string | null;
 }
 
 const ProductImagesList = ({
   productId,
   initialProductImagePath,
+  initialGalleryImages,
+  initialGalleryError,
 }: ProductImagesListProps) => {
-  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+  const [isRefreshing, startRefreshTransition] = useTransition();
+  const [galleryImages, setGalleryImages] =
+    useState<ProductGalleryImage[]>(initialGalleryImages);
+  const [error, setError] = useState<string | null>(initialGalleryError);
   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
   const [productImagePath, setProductImagePath] = useState(
     initialProductImagePath,
@@ -38,35 +44,15 @@ const ProductImagesList = ({
   const [hasProductImageError, setHasProductImageError] = useState(false);
   const [updatingImageId, setUpdatingImageId] = useState<string | null>(null);
 
-  // Fetch gallery images
-  const fetchGallery = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
+  const refreshGallery = useCallback(() => {
     setImageErrors(new Set());
-
-    try {
-      const response = await getEntityGalleryAction({
-        entityType: "PRODUCT",
-        entityId: productId.toString(),
-      });
-
-      if (!response.success) {
-        setError(response.error || "Erro ao carregar galeria");
-        setGalleryImages([]);
-      } else {
-        setGalleryImages(response.data?.images || []);
-      }
-    } catch (_err) {
-      setError("Erro ao conectar com a API de assets");
-      setGalleryImages([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [productId]);
+    startRefreshTransition(() => router.refresh());
+  }, [router]);
 
   useEffect(() => {
-    fetchGallery();
-  }, [fetchGallery]);
+    setGalleryImages(initialGalleryImages);
+    setError(initialGalleryError);
+  }, [initialGalleryError, initialGalleryImages]);
 
   useEffect(() => {
     setProductImagePath(initialProductImagePath);
@@ -74,7 +60,7 @@ const ProductImagesList = ({
   }, [initialProductImagePath]);
 
   const handleUpdateProductImagePath = useCallback(
-    async (image: GalleryImage) => {
+    async (image: ProductGalleryImage) => {
       const originalUrl = image.urls.original.trim();
 
       if (productImagePath.trim() === originalUrl) {
@@ -174,25 +160,18 @@ const ProductImagesList = ({
             <Button
               variant="outline"
               size="sm"
-              onClick={fetchGallery}
-              disabled={isLoading}
+              onClick={refreshGallery}
+              disabled={isRefreshing}
             >
               <RefreshCw
-                className={`h-4 w-4 mr-1 ${isLoading ? "animate-spin" : ""}`}
+                className={`h-4 w-4 mr-1 ${isRefreshing ? "animate-spin" : ""}`}
               />
               Atualizar
             </Button>
           </div>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <RefreshCw className="h-6 w-6 animate-spin text-muted-foreground" />
-              <span className="ml-2 text-sm text-muted-foreground">
-                Carregando galeria...
-              </span>
-            </div>
-          ) : error ? (
+          {error ? (
             <div className="rounded-md bg-destructive/10 p-4">
               <p className="text-sm text-destructive">{error}</p>
             </div>

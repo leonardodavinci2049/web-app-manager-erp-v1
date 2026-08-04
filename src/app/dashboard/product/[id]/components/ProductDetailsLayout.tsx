@@ -5,10 +5,14 @@ import type {
   UIProductManagerRelatedCategory,
 } from "@/services/api-main/product-manager/transformers/transformers";
 import { formatCurrency } from "@/utils/common-utils";
+import {
+  ProductImageGalleryServer,
+  ProductImageGallerySkeleton,
+} from "../_components/image-gallery";
 import { BackToCatalogButton } from "./BackToCatalogButton";
 import { ProductDetailsTabs } from "./ProductDetailsTabs";
-import { ProductImageGalleryServer } from "./ProductImageGallery/ProductImageGalleryServer";
 import { ProductInfoDisplay } from "./ProductInfoDisplay";
+import { ProductImagesListServer } from "./tab-card-components/product-images-list-server";
 
 interface ProductDetailsLayoutProps {
   product: UIProductManager;
@@ -96,7 +100,16 @@ export function ProductDetailsLayout({
         />
       </div>
 
-      <ProductDetailsTabs product={product} productId={productId} />
+      <ProductDetailsTabs
+        product={product}
+        productId={productId}
+        imagesContent={
+          <ProductImagesListServer
+            productId={productId}
+            initialProductImagePath={product.imagePath ?? ""}
+          />
+        }
+      />
     </div>
   );
 }
@@ -112,20 +125,7 @@ export function ProductDetailsLayoutSkeleton() {
       {/* Main Layout Skeleton */}
       <div className="grid gap-8 lg:grid-cols-[minmax(0,500px)_minmax(0,1fr)]">
         {/* Left Column - Image Gallery */}
-        <div className="w-full max-w-[500px] space-y-4">
-          {/* Main image */}
-          <Skeleton className="aspect-square w-full" />
-          {/* Thumbnails grid (grid-cols-4) */}
-          <div className="grid grid-cols-4 gap-2">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton
-                // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton list
-                key={`gallery-skeleton-${i}`}
-                className="aspect-square w-full"
-              />
-            ))}
-          </div>
-        </div>
+        <ProductImageGallerySkeleton />
 
         {/* Right Column - Product Info */}
         <div className="space-y-6">

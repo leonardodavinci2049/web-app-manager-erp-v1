@@ -14,6 +14,11 @@ export type EntityType =
   | "GALLERY"
   | "CATEGORY"
   | "BRAND"
+  | "CUSTOMER"
+  | "SELLER"
+  | "PTYPE"
+  | "SUPPLIERS"
+  | "CARRIER"
   | "ARTICLE"
   | "EVENT"
   | "DOCUMENT"
@@ -90,6 +95,8 @@ export interface UploadFileRequest {
   tags?: string[];
   description?: string;
   altText?: string;
+  isPrimary?: boolean;
+  displayOrder?: number;
 }
 
 // List Files Request
@@ -219,6 +226,11 @@ export const ENTITY_TYPE_LABELS: Record<EntityType, string> = {
   GALLERY: "assets.entityType.gallery",
   CATEGORY: "assets.entityType.category",
   BRAND: "assets.entityType.brand",
+  CUSTOMER: "assets.entityType.customer",
+  SELLER: "assets.entityType.seller",
+  PTYPE: "assets.entityType.ptype",
+  SUPPLIERS: "assets.entityType.suppliers",
+  CARRIER: "assets.entityType.carrier",
   ARTICLE: "assets.entityType.article",
   EVENT: "assets.entityType.event",
   DOCUMENT: "assets.entityType.document",
