@@ -1,3 +1,5 @@
+import "server-only";
+
 import { serverEnvs } from "@/core/config/envs.server";
 import { createLogger } from "@/core/logger";
 
@@ -8,6 +10,7 @@ import type {
   DeleteFileResponse,
   EntityGalleryRequest,
   EntityGalleryResponse,
+  EntityType,
   FileAsset,
   FindFileRequest,
   ListFilesRequest,
@@ -125,6 +128,12 @@ export class AssetsApiService {
       }
       if (request.altText) {
         formData.append("altText", request.altText);
+      }
+      if (request.isPrimary !== undefined) {
+        formData.append("isPrimary", String(request.isPrimary));
+      }
+      if (request.displayOrder !== undefined) {
+        formData.append("displayOrder", String(request.displayOrder));
       }
 
       // Debug info about file upload removed for cleaner console output
@@ -261,7 +270,7 @@ export class AssetsApiService {
    * Requires authentication
    */
   async setPrimaryImage(request: {
-    entityType: string;
+    entityType: EntityType;
     entityId: string;
     assetId: string;
     displayOrder?: number;

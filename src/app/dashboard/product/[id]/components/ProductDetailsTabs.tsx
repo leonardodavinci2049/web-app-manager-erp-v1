@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,7 +9,6 @@ import type { UIProductManager } from "@/services/api-main/product-manager/trans
 import { ProductCharacteristicsCard } from "./ProductCharacteristicsCard";
 import { ProductGeneralDataCard } from "./ProductGeneralDataCard";
 import { ProductDescriptionEditor } from "./tab-card-components/ProductDescriptionEditor";
-import ProductImagesList from "./tab-card-components/ProductImagesList";
 import { ProductMetadataCard } from "./tab-card-components/ProductMetadataCard";
 import { ProductTaxValuesCard } from "./tab-card-components/ProductTaxValuesCard";
 import { ProductTechnicalDataCard } from "./tab-card-components/ProductTechnicalDataCard";
@@ -16,11 +16,13 @@ import { ProductTechnicalDataCard } from "./tab-card-components/ProductTechnical
 interface ProductDetailsTabsProps {
   product: UIProductManager;
   productId: number;
+  imagesContent: ReactNode;
 }
 
 export function ProductDetailsTabs({
   product,
   productId,
+  imagesContent,
 }: ProductDetailsTabsProps) {
   const router = useRouter();
 
@@ -64,10 +66,7 @@ export function ProductDetailsTabs({
       </TabsContent>
 
       <TabsContent value="images" className="space-y-4">
-        <ProductImagesList
-          productId={productId}
-          initialProductImagePath={product.imagePath ?? ""}
-        />
+        {imagesContent}
       </TabsContent>
 
       <TabsContent value="specifications" className="space-y-4">
