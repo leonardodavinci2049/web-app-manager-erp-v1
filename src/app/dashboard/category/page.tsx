@@ -1,4 +1,5 @@
 import { connection } from "next/server";
+import { Suspense } from "react";
 import { SiteHeaderWithBreadcrumb } from "@/components/dashboard/header/site-header-with-breadcrumb";
 import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
@@ -14,11 +15,17 @@ import {
   buildCategoryTree,
 } from "./_components/category-hierarchy";
 import type {
+  CategoryDetailTab,
   CategoryFilterLevel,
   CategoryFilterStatus,
   CategoryFiltersState,
   CategoryProductDto,
 } from "./_components/category-types";
+import {
+  CategoryImageGalleryServer,
+  CategoryImageGallerySkeleton,
+  CategoryImagesListServer,
+} from "./_components/image-gallery";
 
 const logger = createLogger("CategoryDashboardPage");
 const CATEGORY_MENU_LIMIT = 10_000;
@@ -63,7 +70,10 @@ export default async function CategoryDashboardPage({
   )
     ? rawIssue
     : "";
-  const tab = firstParam(rawParams.tab) === "products" ? "products" : "details";
+  const rawTab = firstParam(rawParams.tab);
+  const tab: CategoryDetailTab = ["image", "products"].includes(rawTab)
+    ? (rawTab as CategoryDetailTab)
+    : "details";
   const productPage = Math.max(
     0,
     positiveInteger(firstParam(rawParams.productPage)) ?? 0,
@@ -111,6 +121,7 @@ export default async function CategoryDashboardPage({
     if (menuCategory) {
       baseById.set(selectedCategoryDetail.id, {
         ...menuCategory,
+        imagePath: selectedCategoryDetail.imagePath ?? menuCategory.imagePath,
         imageId: selectedCategoryDetail.imageId,
         metaTitle: selectedCategoryDetail.metaTitle,
         metaDescription: selectedCategoryDetail.metaDescription,
@@ -160,6 +171,22 @@ export default async function CategoryDashboardPage({
     }
   }
 
+  const imageContent =
+    detail && tab === "image" ? (
+      <Suspense fallback={<CategoryImageGallerySkeleton />}>
+        <div className="space-y-6">
+          <CategoryImageGalleryServer
+            categoryId={detail.id}
+            categoryName={detail.name}
+          />
+          <CategoryImagesListServer
+            categoryId={detail.id}
+            initialCategoryImagePath={detail.imagePath ?? ""}
+          />
+        </div>
+      </Suspense>
+    ) : undefined;
+
   return (
     <>
       <SiteHeaderWithBreadcrumb
@@ -186,6 +213,7 @@ export default async function CategoryDashboardPage({
           } satisfies CategoryFiltersState
         }
         tab={tab}
+        imageContent={imageContent}
         productSearch={productSearch}
         productPage={productPage}
         productsPerPage={PRODUCTS_PER_PAGE}

@@ -1,0 +1,318 @@
+"use server";
+
+import { z } from "zod";
+import { createLogger } from "@/core/logger";
+import { getAuthContext } from "@/server/auth-context";
+import { assetsApiService } from "@/services/api-assets/assets-api-service";
+import type { GalleryImage } from "@/services/api-assets/types/api-assets";
+import { isApiError } from "@/services/api-assets/types/api-assets";
+import { getSupplierById } from "@/services/api-main/supplier";
+import {
+  SUPPLIERS_GALLERY_ACCEPTED_MIME_TYPES,
+  SUPPLIERS_GALLERY_ENTITY_TYPE,
+  SUPPLIERS_GALLERY_LIMIT,
+  SUPPLIERS_GALLERY_MAX_FILE_SIZE,
+} from "../_components/image-gallery/image-gallery-constants";
+import type { SupplierGalleryMutationResult } from "../_components/image-gallery/image-gallery-types";
+
+const logger = createLogger("SupplierImageGalleryActions");
+
+const SupplierIdSchema = z.coerce.number().int().positive();
+const AssetIdSchema = z.string().uuid();
+const UploadSchema = z.object({
+  supplierId: SupplierIdSchema,
+  file: z.custom<File>((value) => value instanceof File, "Arquivo inválido"),
+});
+
+function sortGalleryImages(images: GalleryImage[]): GalleryImage[] {
+  return [...images].sort((left, right) => {
+    if (left.isPrimary !== right.isPrimary) {
+      return left.isPrimary ? -1 : 1;
+    }
+    if (left.displayOrder !== right.displayOrder) {
+      return left.displayOrder - right.displayOrder;
+    }
+    return (
+      new Date(right.uploadedAt).getTime() - new Date(left.uploadedAt).getTime()
+    );
+  });
+}
+
+function getSafeApiLogMessage(message: string | string[]): string {
+  return Array.isArray(message) ? message.join(", ") : message;
+}
+
+async function getAuthorizedSupplierContext(supplierId: number) {
+  const { apiContext } = await getAuthContext();
+  const result = await getSupplierById(supplierId, apiContext);
+
+  return result ? apiContext : null;
+}
+
+async function authorizeSupplier(supplierId: number): Promise<boolean> {
+  return Boolean(await getAuthorizedSupplierContext(supplierId));
+}
+
+async function readSupplierGallery(supplierId: number) {
+  const gallery = await assetsApiService.getEntityGallery({
+    entityType: SUPPLIERS_GALLERY_ENTITY_TYPE,
+    entityId: supplierId.toString(),
+  });
+
+  if (isApiError(gallery)) {
+    logger.warn("Assets API rejected supplier gallery read", {
+      supplierId,
+      statusCode: gallery.statusCode,
+      apiMessage: getSafeApiLogMessage(gallery.message),
+    });
+    return null;
+  }
+
+  return gallery;
+}
+
+export async function uploadSupplierImageAction(
+  formData: FormData,
+): Promise<SupplierGalleryMutationResult> {
+  const parsedInput = UploadSchema.safeParse({
+    supplierId: formData.get("supplierId"),
+    file: formData.get("file"),
+  });
+
+  if (!parsedInput.success) {
+    return {
+      success: false,
+      error: "Arquivo ou ID do fornecedor inválido.",
+    };
+  }
+
+  const { file, supplierId } = parsedInput.data;
+  if (
+    !SUPPLIERS_GALLERY_ACCEPTED_MIME_TYPES.includes(
+      file.type as (typeof SUPPLIERS_GALLERY_ACCEPTED_MIME_TYPES)[number],
+    )
+  ) {
+    return {
+      success: false,
+      error: "Formato não aceito. Use JPEG, PNG, GIF ou WebP.",
+    };
+  }
+  if (file.size <= 0 || file.size > SUPPLIERS_GALLERY_MAX_FILE_SIZE) {
+    return {
+      success: false,
+      error: "A imagem deve ter até 10 MB e não pode estar vazia.",
+    };
+  }
+
+  try {
+    if (!(await authorizeSupplier(supplierId))) {
+      return {
+        success: false,
+        error: "Fornecedor não encontrada ou inacessível.",
+      };
+    }
+
+    const gallery = await readSupplierGallery(supplierId);
+    if (!gallery) {
+      return {
+        success: false,
+        error: "Não foi possível validar o limite da galeria.",
+      };
+    }
+    if (gallery.totalImages >= SUPPLIERS_GALLERY_LIMIT) {
+      return {
+        success: false,
+        error: `A galeria já atingiu o limite de ${SUPPLIERS_GALLERY_LIMIT} imagens.`,
+      };
+    }
+
+    const isFirstImage = gallery.totalImages === 0;
+    const result = await assetsApiService.uploadFile({
+      file,
+      entityType: SUPPLIERS_GALLERY_ENTITY_TYPE,
+      entityId: supplierId.toString(),
+      altText: `Imagem de ${file.name}`,
+      isPrimary: isFirstImage ? true : undefined,
+      displayOrder: isFirstImage ? 1 : undefined,
+    });
+
+    if (isApiError(result)) {
+      logger.warn("Assets API rejected supplier image upload", {
+        supplierId,
+        statusCode: result.statusCode,
+        apiMessage: getSafeApiLogMessage(result.message),
+      });
+      return { success: false, error: "Não foi possível enviar esta imagem." };
+    }
+
+    return {
+      success: true,
+      message: `${file.name} foi enviada com sucesso.`,
+      preferredImageId: result.id,
+    };
+  } catch (error) {
+    logger.error("Unexpected supplier image upload failure", error);
+    return { success: false, error: "Não foi possível enviar esta imagem." };
+  }
+}
+
+export async function setPrimarySupplierImageAction(
+  rawSupplierId: number | string,
+  rawAssetId: string,
+): Promise<SupplierGalleryMutationResult> {
+  const parsedInput = z
+    .object({ supplierId: SupplierIdSchema, assetId: AssetIdSchema })
+    .safeParse({ supplierId: rawSupplierId, assetId: rawAssetId });
+  if (!parsedInput.success) {
+    return { success: false, error: "Fornecedor ou imagem inválida." };
+  }
+
+  const { assetId, supplierId } = parsedInput.data;
+  try {
+    if (!(await authorizeSupplier(supplierId))) {
+      return {
+        success: false,
+        error: "Fornecedor não encontrada ou inacessível.",
+      };
+    }
+
+    const gallery = await readSupplierGallery(supplierId);
+    if (!gallery) {
+      return { success: false, error: "Não foi possível validar a imagem." };
+    }
+    const image = gallery.images.find((item) => item.id === assetId);
+    if (!image) {
+      return {
+        success: false,
+        error: "Imagem não pertence a este fornecedor.",
+      };
+    }
+    if (image.isPrimary) {
+      return {
+        success: true,
+        message: "Esta imagem já é a principal.",
+        preferredImageId: assetId,
+      };
+    }
+
+    const result = await assetsApiService.setPrimaryImage({
+      entityType: SUPPLIERS_GALLERY_ENTITY_TYPE,
+      entityId: supplierId.toString(),
+      assetId,
+      displayOrder: 1,
+    });
+    if (isApiError(result)) {
+      logger.warn("Assets API rejected primary supplier image update", {
+        supplierId,
+        assetId,
+        statusCode: result.statusCode,
+        apiMessage: getSafeApiLogMessage(result.message),
+      });
+      return {
+        success: false,
+        error: "Não foi possível definir a imagem principal.",
+      };
+    }
+
+    return {
+      success: true,
+      message: "Nova imagem principal definida.",
+      preferredImageId: assetId,
+    };
+  } catch (error) {
+    logger.error("Unexpected primary supplier image update failure", error);
+    return {
+      success: false,
+      error: "Não foi possível definir a imagem principal.",
+    };
+  }
+}
+
+export async function deleteSupplierImageAction(
+  rawSupplierId: number | string,
+  rawAssetId: string,
+): Promise<SupplierGalleryMutationResult> {
+  const parsedInput = z
+    .object({ supplierId: SupplierIdSchema, assetId: AssetIdSchema })
+    .safeParse({ supplierId: rawSupplierId, assetId: rawAssetId });
+  if (!parsedInput.success) {
+    return { success: false, error: "Fornecedor ou imagem inválida." };
+  }
+
+  const { assetId, supplierId } = parsedInput.data;
+  try {
+    if (!(await authorizeSupplier(supplierId))) {
+      return {
+        success: false,
+        error: "Fornecedor não encontrada ou inacessível.",
+      };
+    }
+
+    const gallery = await readSupplierGallery(supplierId);
+    if (!gallery) {
+      return { success: false, error: "Não foi possível validar a imagem." };
+    }
+    const orderedImages = sortGalleryImages(gallery.images);
+    const image = orderedImages.find((item) => item.id === assetId);
+    if (!image) {
+      return {
+        success: false,
+        error: "Imagem não pertence a este fornecedor.",
+      };
+    }
+    if (gallery.totalImages <= 1 || orderedImages.length <= 1) {
+      return {
+        success: false,
+        error: "A única imagem da galeria não pode ser excluída.",
+      };
+    }
+
+    const promotionCandidate = orderedImages.find(
+      (item) => item.id !== assetId,
+    );
+    const deleteResult = await assetsApiService.deleteFile({ id: assetId });
+    if (isApiError(deleteResult)) {
+      logger.warn("Assets API rejected supplier image deletion", {
+        supplierId,
+        assetId,
+        statusCode: deleteResult.statusCode,
+        apiMessage: getSafeApiLogMessage(deleteResult.message),
+      });
+      return { success: false, error: "Não foi possível excluir esta imagem." };
+    }
+
+    if (image.isPrimary && promotionCandidate) {
+      const primaryResult = await assetsApiService.setPrimaryImage({
+        entityType: SUPPLIERS_GALLERY_ENTITY_TYPE,
+        entityId: supplierId.toString(),
+        assetId: promotionCandidate.id,
+        displayOrder: 1,
+      });
+      if (isApiError(primaryResult)) {
+        logger.error("Supplier image deleted but primary promotion failed", {
+          supplierId,
+          deletedAssetId: assetId,
+          candidateAssetId: promotionCandidate.id,
+          statusCode: primaryResult.statusCode,
+          apiMessage: getSafeApiLogMessage(primaryResult.message),
+        });
+        return {
+          success: true,
+          message: "Imagem excluída.",
+          preferredImageId: promotionCandidate.id,
+          warning:
+            "A imagem foi excluída, mas não foi possível confirmar a nova principal.",
+        };
+      }
+    }
+
+    return {
+      success: true,
+      message: "Imagem excluída com sucesso.",
+      preferredImageId: image.isPrimary ? promotionCandidate?.id : undefined,
+    };
+  } catch (error) {
+    logger.error("Unexpected supplier image deletion failure", error);
+    return { success: false, error: "Não foi possível excluir esta imagem." };
+  }
+}

@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
+import { Suspense } from "react";
 import { SiteHeaderWithBreadcrumb } from "@/components/dashboard/header/site-header-with-breadcrumb";
 import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
@@ -8,6 +9,11 @@ import {
   getCarrierById,
 } from "@/services/api-main/carrier";
 import { CarrierDetails, getSafeCarrierReturnTo } from "../_components";
+import {
+  CarrierImageGalleryServer,
+  CarrierImageGallerySkeleton,
+  CarrierImagesListServer,
+} from "./_components/image-gallery";
 
 const logger = createLogger("CarrierDetailsPage");
 
@@ -52,7 +58,26 @@ export default async function CarrierDetailsPage({
         <div className="@container/main flex flex-1 flex-col gap-6">
           <div className="flex flex-col gap-6 py-6">
             <div className="px-3 lg:px-6">
-              <CarrierDetails carrier={carrier} returnTo={returnTo} />
+              <CarrierDetails
+                carrier={carrier}
+                returnTo={returnTo}
+                imageGallery={
+                  <Suspense fallback={<CarrierImageGallerySkeleton />}>
+                    <CarrierImageGalleryServer
+                      carrierId={carrier.id}
+                      carrierName={carrier.name}
+                    />
+                  </Suspense>
+                }
+                imageContent={
+                  <Suspense fallback={<CarrierImageGallerySkeleton />}>
+                    <CarrierImagesListServer
+                      carrierId={carrier.id}
+                      initialCarrierImagePath={carrier.imagePath ?? ""}
+                    />
+                  </Suspense>
+                }
+              />
             </div>
           </div>
         </div>

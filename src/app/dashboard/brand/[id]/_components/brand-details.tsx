@@ -3,6 +3,7 @@
 import { ArrowLeft, CalendarDays, Info, Tag } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import type { ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,6 +23,8 @@ interface BrandDetailsProps {
   returnTo: string;
   productReturnTo: string;
   hasProductsError: boolean;
+  imageGallery: ReactNode;
+  imageTabContent: ReactNode;
 }
 
 function formatDate(value?: string): string {
@@ -42,6 +45,8 @@ export function BrandDetails({
   returnTo,
   productReturnTo,
   hasProductsError,
+  imageGallery,
+  imageTabContent,
 }: BrandDetailsProps) {
   const router = useRouter();
   const isDeleteBlocked = productTotal > 0 || hasProductsError;
@@ -73,21 +78,22 @@ export function BrandDetails({
         </p>
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)]">
-        <Card>
-          <CardHeader>
-            <CardTitle>Dados do cadastro</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <BrandDetailForm
-              key={brand.id}
-              brand={brand}
-              onSaved={() => router.refresh()}
-            />
-          </CardContent>
-        </Card>
-
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,500px)_minmax(0,1fr)]">
+        {imageGallery}
         <div className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Dados do cadastro</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <BrandDetailForm
+                key={brand.id}
+                brand={brand}
+                onSaved={() => router.refresh()}
+              />
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
@@ -120,8 +126,9 @@ export function BrandDetails({
       </div>
 
       <Tabs defaultValue="products" className="w-full">
-        <TabsList className="grid h-auto w-full grid-cols-2">
+        <TabsList className="grid h-auto w-full grid-cols-3">
           <TabsTrigger value="products">Produtos</TabsTrigger>
+          <TabsTrigger value="image">Imagem</TabsTrigger>
           <TabsTrigger value="deletion">Exclusão</TabsTrigger>
         </TabsList>
 
@@ -152,6 +159,10 @@ export function BrandDetails({
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="image" className="space-y-4">
+          {imageTabContent}
         </TabsContent>
 
         <TabsContent value="deletion">

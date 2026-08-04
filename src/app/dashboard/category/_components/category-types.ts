@@ -6,6 +6,8 @@ export type CategoryFilterLevel = "all" | "1" | "2" | "3";
 
 export type CategoryFilterStatus = "all" | "active" | "inactive";
 
+export type CategoryDetailTab = "details" | "image" | "products";
+
 export interface CategoryFiltersState {
   search: string;
   level: CategoryFilterLevel;

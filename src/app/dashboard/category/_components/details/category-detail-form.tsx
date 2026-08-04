@@ -1,7 +1,6 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useTransition } from "react";
 import { useForm } from "react-hook-form";
@@ -11,7 +10,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
-import { getValidImageUrl } from "@/utils/image-utils";
 import {
   toggleCategoryStatusAction,
   updateCategoryAction,
@@ -124,37 +122,6 @@ export function CategoryDetailForm({
             readOnly
             className="bg-muted"
           />
-        </div>
-      </section>
-      <Separator />
-      <section className="space-y-3">
-        <div>
-          <h3 className="text-sm font-semibold">Imagem de capa</h3>
-          <p className="text-xs text-muted-foreground">
-            O upload será disponibilizado após a integração com o serviço de
-            arquivos.
-          </p>
-        </div>
-        <div className="space-y-3">
-          <div className="relative aspect-[3/1] w-full overflow-hidden rounded-md border bg-muted/30">
-            <Image
-              src={
-                detail.imagePath && detail.imagePath.trim() !== ""
-                  ? getValidImageUrl(detail.imagePath)
-                  : "/default-images/category-banner.webp"
-              }
-              alt={`Imagem da categoria ${detail.name}`}
-              fill
-              sizes="(max-width: 768px) 100vw, 480px"
-              className="object-cover"
-            />
-          </div>
-          <p className="text-xs text-muted-foreground">
-            {detail.imagePath || "Nenhuma imagem cadastrada"}
-          </p>
-          <Button type="button" variant="outline" size="sm" disabled>
-            Selecionar imagem
-          </Button>
         </div>
       </section>
       <Separator />

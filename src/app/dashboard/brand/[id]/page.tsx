@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
+import { Suspense } from "react";
 import { SiteHeaderWithBreadcrumb } from "@/components/dashboard/header/site-header-with-breadcrumb";
 import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
@@ -8,6 +9,11 @@ import { getBrandById } from "@/services/api-main/brand/brand-service-api";
 import { getProductsManager } from "@/services/api-main/product-manager/product-manager-service-api";
 import { BRAND_PRODUCT_PAGE_SIZE, getSafeBrandReturnTo } from "../_components";
 import { BrandDetails } from "./_components/brand-details";
+import {
+  BrandImageGalleryServer,
+  BrandImageGallerySkeleton,
+} from "./_components/image-gallery";
+import { BrandImagesListServer } from "./_components/image-gallery/brand-images-list-server";
 
 const logger = createLogger("BrandDetailsPage");
 
@@ -97,6 +103,22 @@ export default async function BrandDetailPage({
                 returnTo={returnTo}
                 productReturnTo={productReturnTo}
                 hasProductsError={hasProductsError}
+                imageGallery={
+                  <Suspense fallback={<BrandImageGallerySkeleton />}>
+                    <BrandImageGalleryServer
+                      brandId={brand.id}
+                      brandName={brand.name}
+                    />
+                  </Suspense>
+                }
+                imageTabContent={
+                  <Suspense fallback={<BrandImageGallerySkeleton />}>
+                    <BrandImagesListServer
+                      brandId={brand.id}
+                      initialBrandImagePath={brand.imagePath ?? ""}
+                    />
+                  </Suspense>
+                }
               />
             </div>
           </div>

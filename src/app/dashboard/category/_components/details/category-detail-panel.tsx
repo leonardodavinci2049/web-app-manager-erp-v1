@@ -1,5 +1,7 @@
+import type { ReactNode } from "react";
 import type {
   CategoryDetailDto,
+  CategoryDetailTab,
   CategoryNodeDto,
   CategoryProductDto,
 } from "../category-types";
@@ -11,7 +13,8 @@ import { CategoryDetailTabs } from "./category-detail-tabs";
 export interface CategoryDetailPanelProps {
   detail: CategoryDetailDto;
   flatCategories: CategoryNodeDto[];
-  tab: "details" | "products";
+  tab: CategoryDetailTab;
+  imageContent?: ReactNode;
   productSearch: string;
   productPage: number;
   productsPerPage: number;
@@ -23,6 +26,7 @@ export function CategoryDetailPanel({
   detail,
   flatCategories,
   tab,
+  imageContent,
   productSearch,
   productPage,
   productsPerPage,
@@ -36,6 +40,8 @@ export function CategoryDetailPanel({
       <div className="flex-1 overflow-y-auto p-4 pb-24 lg:p-6">
         {tab === "details" ? (
           <CategoryDetailForm detail={detail} flatCategories={flatCategories} />
+        ) : tab === "image" ? (
+          imageContent
         ) : (
           <CategoryProductsTab
             detail={detail}

@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { type FormEvent, useState } from "react";
+import { type FormEvent, type ReactNode, useState } from "react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -46,6 +46,8 @@ type Confirmation = "activate" | "deactivate" | "delete";
 interface PtypeDetailsProps {
   item: UIPtype;
   returnTo: string;
+  imageGallery: ReactNode;
+  imageContent: ReactNode;
 }
 
 function formatDate(value?: string): string {
@@ -80,7 +82,12 @@ function DetailField({
   );
 }
 
-export function PtypeDetails({ item, returnTo }: PtypeDetailsProps) {
+export function PtypeDetails({
+  item,
+  returnTo,
+  imageGallery,
+  imageContent,
+}: PtypeDetailsProps) {
   const router = useRouter();
   const [name, setName] = useState(item.name);
   const [notes, setNotes] = useState(item.notes ?? "");
@@ -167,18 +174,22 @@ export function PtypeDetails({ item, returnTo }: PtypeDetailsProps) {
 
   return (
     <>
-      <div className="space-y-6">
+      <div className="grid gap-6 lg:grid-cols-[minmax(280px,500px)_minmax(0,1fr)]">
         <Button
           asChild
           variant="outline"
           size="sm"
-          className="h-8 px-2 text-xs sm:h-9 sm:px-3 sm:text-sm"
+          className="h-8 px-2 text-xs sm:h-9 sm:px-3 sm:text-sm lg:col-span-2 lg:justify-self-start"
         >
           <Link href={returnTo}>
             <ArrowLeft className="size-4" />
             Voltar aos tipos
           </Link>
         </Button>
+
+        <aside className="lg:row-span-4 lg:row-start-2 lg:self-start lg:sticky lg:top-6">
+          {imageGallery}
+        </aside>
 
         <div className="flex min-w-0 items-start gap-3">
           <PtypeImage
@@ -377,9 +388,12 @@ export function PtypeDetails({ item, returnTo }: PtypeDetailsProps) {
         </form>
 
         <Tabs defaultValue="deletion" className="w-full">
-          <TabsList className="grid h-auto w-full grid-cols-1">
+          <TabsList className="grid h-auto w-full grid-cols-2">
+            <TabsTrigger value="image">Imagem</TabsTrigger>
             <TabsTrigger value="deletion">Exclusão</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="image">{imageContent}</TabsContent>
 
           <TabsContent value="deletion">
             <Card className="border-destructive/40 bg-destructive/5">
