@@ -59,6 +59,7 @@ src/core/config-tenant
 # project generated files
 /scripts/*
 !/scripts/create-initial-prompt.sh
+!/scripts/create-feature-worktree.sh
 /docs
 /API-documentation
 /API-assets-documentation
