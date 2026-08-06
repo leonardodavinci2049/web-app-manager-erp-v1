@@ -1,14 +1,14 @@
 import { RegistryDetailLoading } from "@/components/registry";
 
-export default function CarrierDetailsLoading() {
+export default function BrandDetailsLoading() {
   return (
     <RegistryDetailLoading
-      title="Detalhes da transportadora"
+      title="Detalhes da marca"
       breadcrumbItems={[
         { label: "Dashboard", href: "/dashboard" },
-        { label: "Transportadoras", isActive: true },
+        { label: "Marcas", isActive: true },
       ]}
-      variant="extended"
+      variant="brand"
     />
   );
 }
