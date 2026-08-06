@@ -67,6 +67,13 @@ for env_file in .env .env.local; do
   fi
 done
 
+images_source_path="${project_root}/public/images"
+
+if [[ -d "${images_source_path}" ]]; then
+  mkdir -p -- "${worktree_path}/public"
+  cp -a -- "${images_source_path}" "${worktree_path}/public/"
+fi
+
 for documentation_link in API-documentation API-assets-documentation; do
   source_path="${project_root}/${documentation_link}"
 

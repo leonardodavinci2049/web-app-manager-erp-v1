@@ -18,7 +18,10 @@ interface ProductGridProps {
 const GRID_CLASS =
   "grid grid-cols-2 gap-2 sm:grid-cols-[repeat(auto-fill,minmax(190px,1fr))] sm:gap-3 lg:gap-4";
 const LIST_CLASS = "space-y-2 sm:space-y-3";
-const EAGER_GRID_IMAGE_COUNT = 6;
+// Cobre a primeira linha visivel em monitores largos (ate ~10 colunas em
+// 1920px) para que imagens acima da dobra carreguem com `loading="eager"` e
+// nao sejam sinalizadas como LCP preguicoso pelo next/image.
+const EAGER_GRID_IMAGE_COUNT = 12;
 
 /**
  * Grid de produtos (Server Component). Apenas layout + .map() + empty state.

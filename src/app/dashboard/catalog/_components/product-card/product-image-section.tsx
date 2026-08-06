@@ -79,7 +79,7 @@ export function ProductImageSection({
           compact ? "h-14 w-14 sm:h-16 sm:w-16" : "h-16 w-16 sm:h-20 sm:w-20"
         }`}
       >
-        <Link href={detailsHref}>
+        <Link className="relative block size-full" href={detailsHref}>
           <Image
             src={imageSrc}
             alt={`Imagem do produto ${product.name}`}
@@ -122,7 +122,7 @@ export function ProductImageSection({
 
   return (
     <div className="relative aspect-[3/2] overflow-hidden rounded-md">
-      <Link href={detailsHref}>
+      <Link className="relative block size-full" href={detailsHref}>
         <Image
           src={imageSrc}
           alt={`Imagem do produto ${product.name}`}
