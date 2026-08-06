@@ -196,29 +196,31 @@ export default async function CategoryDashboardPage({
           { label: "Categorias", isActive: true },
         ]}
       />
-      <CategoryDashboard
-        tree={tree}
-        flatCategories={flat}
-        stats={stats}
-        detail={detail}
-        products={products}
-        productTotal={productTotal}
-        filters={
-          {
-            search,
-            level,
-            status,
-            withoutProducts,
-            issue,
-          } satisfies CategoryFiltersState
-        }
-        tab={tab}
-        imageContent={imageContent}
-        productSearch={productSearch}
-        productPage={productPage}
-        productsPerPage={PRODUCTS_PER_PAGE}
-        dataError={dataError}
-      />
+      <div className="mx-auto flex w-full max-w-[1400px] min-w-0 flex-1 flex-col">
+        <CategoryDashboard
+          tree={tree}
+          flatCategories={flat}
+          stats={stats}
+          detail={detail}
+          products={products}
+          productTotal={productTotal}
+          filters={
+            {
+              search,
+              level,
+              status,
+              withoutProducts,
+              issue,
+            } satisfies CategoryFiltersState
+          }
+          tab={tab}
+          imageContent={imageContent}
+          productSearch={productSearch}
+          productPage={productPage}
+          productsPerPage={PRODUCTS_PER_PAGE}
+          dataError={dataError}
+        />
+      </div>
     </>
   );
 }

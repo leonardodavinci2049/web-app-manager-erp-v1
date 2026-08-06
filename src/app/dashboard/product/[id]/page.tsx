@@ -123,21 +123,26 @@ export default async function ProductDetailsPage({
         breadcrumbItems={breadcrumbItems}
       />
 
-      <Suspense
-        fallback={
-          <div className="flex flex-1 flex-col">
-            <div className="@container/main flex flex-1 flex-col gap-6">
-              <div className="flex flex-col gap-6 py-6">
-                <div className="px-4 lg:px-6">
-                  <ProductDetailsLayoutSkeleton />
+      <div className="mx-auto flex w-full max-w-[1400px] min-w-0 flex-1 flex-col">
+        <Suspense
+          fallback={
+            <div className="flex flex-1 flex-col">
+              <div className="@container/main flex flex-1 flex-col gap-6">
+                <div className="flex flex-col gap-6 py-6">
+                  <div className="px-4 lg:px-6">
+                    <ProductDetailsLayoutSkeleton />
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        }
-      >
-        <ProductDetailsPageContent productId={productId} returnTo={returnTo} />
-      </Suspense>
+          }
+        >
+          <ProductDetailsPageContent
+            productId={productId}
+            returnTo={returnTo}
+          />
+        </Suspense>
+      </div>
     </>
   );
 }
