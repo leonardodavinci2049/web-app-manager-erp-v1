@@ -79,10 +79,12 @@ export function ProductDetailsLayout({
       </div>
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,500px)_minmax(0,1fr)]">
-        <ProductImageGalleryServer
-          productId={productId}
-          productName={product.name}
-        />
+        <aside className="lg:self-start lg:sticky lg:top-6">
+          <ProductImageGalleryServer
+            productId={productId}
+            productName={product.name}
+          />
+        </aside>
 
         <ProductInfoDisplay
           product={product}
@@ -125,7 +127,9 @@ export function ProductDetailsLayoutSkeleton() {
       {/* Main Layout Skeleton */}
       <div className="grid gap-8 lg:grid-cols-[minmax(0,500px)_minmax(0,1fr)]">
         {/* Left Column - Image Gallery */}
-        <ProductImageGallerySkeleton />
+        <aside className="lg:self-start lg:sticky lg:top-6">
+          <ProductImageGallerySkeleton />
+        </aside>
 
         {/* Right Column - Product Info */}
         <div className="space-y-6">

@@ -78,7 +78,7 @@ export function BrandDetails({
         </p>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,500px)_minmax(0,1fr)]">
+      <div className="grid gap-8 lg:grid-cols-[minmax(280px,500px)_minmax(0,1fr)]">
         {imageGallery}
         <div className="space-y-4">
           <Card>
