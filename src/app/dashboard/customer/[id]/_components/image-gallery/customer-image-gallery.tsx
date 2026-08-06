@@ -219,7 +219,8 @@ export function CustomerImageGallery({
         return;
       }
       toast.success(result.message);
-      setLiveMessage(result.message);
+      if (result.warning) toast.warning(result.warning);
+      setLiveMessage(result.warning ?? result.message);
       refresh(result.preferredImageId);
     } finally {
       setPrimaryImageId(null);
