@@ -1,7 +1,10 @@
 import { cache } from "react";
 import { createLogger } from "@/core/logger";
 import { assetsApiService } from "@/services/api-assets/assets-api-service";
-import { isApiError } from "@/services/api-assets/types/api-assets";
+import {
+  isApiError,
+  isNotFoundApiError,
+} from "@/services/api-assets/types/api-assets";
 import { CarrierImageGalleryRefresh } from "./carrier-image-gallery-refresh";
 import { CARRIER_GALLERY_ENTITY_TYPE } from "./image-gallery-constants";
 import type {
@@ -34,12 +37,14 @@ export const getCarrierGalleryInitialState = cache(
             ? gallery.message.join(", ")
             : gallery.message,
         });
-        initialState = {
-          status: "error",
-          images: [],
-          totalImages: 0,
-          error: "Não foi possível carregar a galeria de imagens.",
-        };
+        initialState = isNotFoundApiError(gallery)
+          ? { status: "empty", images: [], totalImages: 0 }
+          : {
+              status: "error",
+              images: [],
+              totalImages: 0,
+              error: "Não foi possível carregar a galeria de imagens.",
+            };
       } else {
         const images = [...gallery.images]
           .sort((left, right) => {
