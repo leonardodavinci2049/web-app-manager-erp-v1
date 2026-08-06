@@ -174,218 +174,222 @@ export function PtypeDetails({
 
   return (
     <>
-      <div className="grid gap-6 lg:grid-cols-[minmax(280px,500px)_minmax(0,1fr)]">
-        <Button
-          asChild
-          variant="outline"
-          size="sm"
-          className="h-8 px-2 text-xs sm:h-9 sm:px-3 sm:text-sm lg:col-span-2 lg:justify-self-start"
-        >
-          <Link href={returnTo}>
-            <ArrowLeft className="size-4" />
-            Voltar aos tipos
-          </Link>
-        </Button>
+      <div className="space-y-6">
+        <div className="grid gap-6 lg:grid-cols-[minmax(280px,500px)_minmax(0,1fr)]">
+          <Button
+            asChild
+            variant="outline"
+            size="sm"
+            className="h-8 px-2 text-xs sm:h-9 sm:px-3 sm:text-sm lg:col-span-2 lg:justify-self-start"
+          >
+            <Link href={returnTo}>
+              <ArrowLeft className="size-4" />
+              Voltar aos tipos
+            </Link>
+          </Button>
 
-        <aside className="lg:row-span-4 lg:row-start-2 lg:self-start lg:sticky lg:top-6">
-          {imageGallery}
-        </aside>
+          <aside className="lg:row-span-3 lg:row-start-2 lg:self-start lg:sticky lg:top-6">
+            {imageGallery}
+          </aside>
 
-        <div className="flex min-w-0 items-start gap-3">
-          <PtypeImage
-            name={item.name}
-            imagePath={item.imagePath}
-            viewMode="list"
-          />
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <h1 className="break-words text-2xl font-bold">{item.name}</h1>
-              <Badge variant={item.inactive ? "destructive" : "secondary"}>
-                {item.inactive ? "Inativo" : "Ativo"}
-              </Badge>
-            </div>
-            <p className="text-muted-foreground mt-1 text-sm tabular-nums">
-              Tipo de produto ID {item.id}
-            </p>
-          </div>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Tag className="size-5" />
-              Detalhes do tipo
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              <DetailField
-                label="Status"
-                value={item.inactive ? "Inativo" : "Ativo"}
-              />
-              <DetailField
-                label="Cadastro de produto"
-                value={
-                  item.productRegistrationFlag === undefined
-                    ? undefined
-                    : item.productRegistrationFlag
-                      ? "Habilitado"
-                      : "Não habilitado"
-                }
-              />
-              <DetailField
-                label="Data de cadastro"
-                value={formatDate(item.createdAt)}
-              />
-              <div className="min-w-0">
-                <dt className="text-muted-foreground flex items-center gap-1 text-xs">
-                  <Percent className="size-3" />
-                  Comissão varejo
-                </dt>
-                <dd className="mt-1 text-sm font-medium tabular-nums">
-                  {item.retailCommissionRate === undefined
-                    ? "Não informada"
-                    : `${formatPercent(item.retailCommissionRate)}%`}
-                </dd>
-              </div>
-              <div className="min-w-0">
-                <dt className="text-muted-foreground flex items-center gap-1 text-xs">
-                  <Percent className="size-3" />
-                  Comissão atacado
-                </dt>
-                <dd className="mt-1 text-sm font-medium tabular-nums">
-                  {item.wholesaleCommissionRate === undefined
-                    ? "Não informada"
-                    : `${formatPercent(item.wholesaleCommissionRate)}%`}
-                </dd>
-              </div>
-            </dl>
-          </CardContent>
-        </Card>
-
-        <form
-          onSubmit={handleSubmit}
-          className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)]"
-        >
-          <Card>
-            <CardHeader>
-              <CardTitle>Dados do cadastro</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="ptype-detail-name">Nome</Label>
-                <Input
-                  id="ptype-detail-name"
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                  maxLength={100}
-                  disabled={isSaving || isMutating}
-                  aria-invalid={Boolean(fieldErrors.name?.length)}
-                />
-                {fieldErrors.name?.[0] && (
-                  <p className="text-destructive text-sm">
-                    {fieldErrors.name[0]}
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between gap-2">
-                  <Label htmlFor="ptype-detail-notes">Observações</Label>
-                  <span className="text-muted-foreground text-xs tabular-nums">
-                    {notes.length}/2.000
-                  </span>
-                </div>
-                <Textarea
-                  id="ptype-detail-notes"
-                  value={notes}
-                  onChange={(event) => setNotes(event.target.value)}
-                  maxLength={2000}
-                  rows={8}
-                  disabled={isSaving || isMutating}
-                  aria-invalid={Boolean(fieldErrors.notes?.length)}
-                  placeholder="Informações administrativas sobre este tipo..."
-                />
-                {fieldErrors.notes?.[0] && (
-                  <p className="text-destructive text-sm">
-                    {fieldErrors.notes[0]}
-                  </p>
-                )}
-              </div>
-
-              <Button
-                type="submit"
-                disabled={
-                  isSaving ||
-                  isMutating ||
-                  name.trim() === "" ||
-                  notes.length > 2000
-                }
-              >
-                {isSaving ? (
-                  <Loader2 className="size-4 animate-spin" />
-                ) : (
-                  <Save className="size-4" />
-                )}
-                {isSaving ? "Salvando..." : "Salvar alterações"}
-              </Button>
-            </CardContent>
-          </Card>
-
-          <div className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <CalendarDays className="size-4" />
-                  Cadastro
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground text-xs">
-                  Data de cadastro
-                </p>
-                <p className="mt-1 text-sm font-medium">
-                  {formatDate(item.createdAt)}
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex-row items-center justify-between">
-                <CardTitle className="text-base">Status do cadastro</CardTitle>
+          <div className="flex min-w-0 items-start gap-3">
+            <PtypeImage
+              name={item.name}
+              imagePath={item.imagePath}
+              viewMode="list"
+            />
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="break-words text-2xl font-bold">{item.name}</h1>
                 <Badge variant={item.inactive ? "destructive" : "secondary"}>
                   {item.inactive ? "Inativo" : "Ativo"}
                 </Badge>
+              </div>
+              <p className="text-muted-foreground mt-1 text-sm tabular-nums">
+                Tipo de produto ID {item.id}
+              </p>
+            </div>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Tag className="size-5" />
+                Detalhes do tipo
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                <DetailField
+                  label="Status"
+                  value={item.inactive ? "Inativo" : "Ativo"}
+                />
+                <DetailField
+                  label="Cadastro de produto"
+                  value={
+                    item.productRegistrationFlag === undefined
+                      ? undefined
+                      : item.productRegistrationFlag
+                        ? "Habilitado"
+                        : "Não habilitado"
+                  }
+                />
+                <DetailField
+                  label="Data de cadastro"
+                  value={formatDate(item.createdAt)}
+                />
+                <div className="min-w-0">
+                  <dt className="text-muted-foreground flex items-center gap-1 text-xs">
+                    <Percent className="size-3" />
+                    Comissão varejo
+                  </dt>
+                  <dd className="mt-1 text-sm font-medium tabular-nums">
+                    {item.retailCommissionRate === undefined
+                      ? "Não informada"
+                      : `${formatPercent(item.retailCommissionRate)}%`}
+                  </dd>
+                </div>
+                <div className="min-w-0">
+                  <dt className="text-muted-foreground flex items-center gap-1 text-xs">
+                    <Percent className="size-3" />
+                    Comissão atacado
+                  </dt>
+                  <dd className="mt-1 text-sm font-medium tabular-nums">
+                    {item.wholesaleCommissionRate === undefined
+                      ? "Não informada"
+                      : `${formatPercent(item.wholesaleCommissionRate)}%`}
+                  </dd>
+                </div>
+              </dl>
+            </CardContent>
+          </Card>
+
+          <form
+            onSubmit={handleSubmit}
+            className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)]"
+          >
+            <Card>
+              <CardHeader>
+                <CardTitle>Dados do cadastro</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <p className="text-muted-foreground text-xs">
-                  Confirme a operação para definir explicitamente o status deste
-                  tipo de produto.
-                </p>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="ptype-detail-name">Nome</Label>
+                  <Input
+                    id="ptype-detail-name"
+                    value={name}
+                    onChange={(event) => setName(event.target.value)}
+                    maxLength={100}
+                    disabled={isSaving || isMutating}
+                    aria-invalid={Boolean(fieldErrors.name?.length)}
+                  />
+                  {fieldErrors.name?.[0] && (
+                    <p className="text-destructive text-sm">
+                      {fieldErrors.name[0]}
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <Label htmlFor="ptype-detail-notes">Observações</Label>
+                    <span className="text-muted-foreground text-xs tabular-nums">
+                      {notes.length}/2.000
+                    </span>
+                  </div>
+                  <Textarea
+                    id="ptype-detail-notes"
+                    value={notes}
+                    onChange={(event) => setNotes(event.target.value)}
+                    maxLength={2000}
+                    rows={8}
+                    disabled={isSaving || isMutating}
+                    aria-invalid={Boolean(fieldErrors.notes?.length)}
+                    placeholder="Informações administrativas sobre este tipo..."
+                  />
+                  {fieldErrors.notes?.[0] && (
+                    <p className="text-destructive text-sm">
+                      {fieldErrors.notes[0]}
+                    </p>
+                  )}
+                </div>
+
                 <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => setConfirmation("activate")}
-                  disabled={isSaving || isMutating}
+                  type="submit"
+                  disabled={
+                    isSaving ||
+                    isMutating ||
+                    name.trim() === "" ||
+                    notes.length > 2000
+                  }
                 >
-                  <CheckCircle2 className="size-4" />
-                  Marcar como ativo
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => setConfirmation("deactivate")}
-                  disabled={isSaving || isMutating}
-                >
-                  <CircleOff className="size-4" />
-                  Marcar como inativo
+                  {isSaving ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <Save className="size-4" />
+                  )}
+                  {isSaving ? "Salvando..." : "Salvar alterações"}
                 </Button>
               </CardContent>
             </Card>
-          </div>
-        </form>
+
+            <div className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <CalendarDays className="size-4" />
+                    Cadastro
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground text-xs">
+                    Data de cadastro
+                  </p>
+                  <p className="mt-1 text-sm font-medium">
+                    {formatDate(item.createdAt)}
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex-row items-center justify-between">
+                  <CardTitle className="text-base">
+                    Status do cadastro
+                  </CardTitle>
+                  <Badge variant={item.inactive ? "destructive" : "secondary"}>
+                    {item.inactive ? "Inativo" : "Ativo"}
+                  </Badge>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <p className="text-muted-foreground text-xs">
+                    Confirme a operação para definir explicitamente o status
+                    deste tipo de produto.
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => setConfirmation("activate")}
+                    disabled={isSaving || isMutating}
+                  >
+                    <CheckCircle2 className="size-4" />
+                    Marcar como ativo
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => setConfirmation("deactivate")}
+                    disabled={isSaving || isMutating}
+                  >
+                    <CircleOff className="size-4" />
+                    Marcar como inativo
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </form>
+        </div>
 
         <Tabs defaultValue="deletion" className="w-full">
           <TabsList className="grid h-auto w-full grid-cols-2">

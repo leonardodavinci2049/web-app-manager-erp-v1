@@ -183,304 +183,74 @@ export function SupplierDetails({
 
   return (
     <>
-      <div className="grid gap-6 lg:grid-cols-[minmax(280px,500px)_minmax(0,1fr)]">
-        <Button
-          asChild
-          variant="outline"
-          size="sm"
-          className="h-8 px-2 text-xs sm:h-9 sm:px-3 sm:text-sm lg:col-span-2 lg:justify-self-start"
-        >
-          <Link href={returnTo}>
-            <ArrowLeft className="size-4" />
-            Voltar aos fornecedores
-          </Link>
-        </Button>
+      <div className="space-y-6">
+        <div className="grid gap-6 lg:grid-cols-[minmax(280px,500px)_minmax(0,1fr)]">
+          <Button
+            asChild
+            variant="outline"
+            size="sm"
+            className="h-8 px-2 text-xs sm:h-9 sm:px-3 sm:text-sm lg:col-span-2 lg:justify-self-start"
+          >
+            <Link href={returnTo}>
+              <ArrowLeft className="size-4" />
+              Voltar aos fornecedores
+            </Link>
+          </Button>
 
-        <aside className="lg:row-span-4 lg:row-start-2 lg:self-start lg:sticky lg:top-6">
-          {imageGallery}
-        </aside>
+          <aside className="lg:row-span-3 lg:row-start-2 lg:self-start lg:sticky lg:top-6">
+            {imageGallery}
+          </aside>
 
-        <div className="flex min-w-0 items-start gap-3">
-          <SupplierImage
-            name={supplier.name}
-            imagePath={supplier.imagePath}
-            viewMode="list"
-          />
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <h1 className="break-words text-2xl font-bold">
-                {supplier.name}
-              </h1>
-              <Badge variant={supplier.inactive ? "destructive" : "secondary"}>
-                {supplier.inactive ? "Inativo" : "Ativo"}
-              </Badge>
+          <div className="flex min-w-0 items-start gap-3">
+            <SupplierImage
+              name={supplier.name}
+              imagePath={supplier.imagePath}
+              viewMode="list"
+            />
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="break-words text-2xl font-bold">
+                  {supplier.name}
+                </h1>
+                <Badge
+                  variant={supplier.inactive ? "destructive" : "secondary"}
+                >
+                  {supplier.inactive ? "Inativo" : "Ativo"}
+                </Badge>
+              </div>
+              <p className="text-muted-foreground text-sm tabular-nums">
+                Fornecedor ID {supplier.id}
+              </p>
+              <p className="text-muted-foreground text-sm">
+                {resolvePersonTypeLabel(supplier)}
+              </p>
             </div>
-            <p className="text-muted-foreground text-sm tabular-nums">
-              Fornecedor ID {supplier.id}
-            </p>
-            <p className="text-muted-foreground text-sm">
-              {resolvePersonTypeLabel(supplier)}
-            </p>
-          </div>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Building2 className="size-5" />
-              Conta e identificação
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              <DetailField label="ID do fornecedor" value={supplier.id} />
-              <DetailField
-                label="Tipo de pessoa"
-                value={resolvePersonTypeLabel(supplier)}
-              />
-              <DetailField
-                label="Fretador"
-                value={
-                  supplier.freightForwarder === undefined
-                    ? undefined
-                    : supplier.freightForwarder
-                      ? "Sim"
-                      : "Não"
-                }
-              />
-              <DetailField
-                label="Data de cadastro"
-                value={formatDate(supplier.createdAt)}
-              />
-              <DetailField
-                label="Última compra"
-                value={formatDate(supplier.lastPurchaseAt)}
-              />
-              <DetailField
-                label="Status"
-                value={supplier.inactive ? "Inativo" : "Ativo"}
-              />
-            </dl>
-          </CardContent>
-        </Card>
-
-        <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)]">
-          <div className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Phone className="size-5" />
-                  Contato
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                  <DetailField label="Telefone" value={supplier.phone} />
-                  <DetailField label="WhatsApp" value={supplier.whatsapp} />
-                  <DetailField label="Contato" value={supplier.contact} />
-                  <DetailField label="Setor" value={supplier.sector} />
-                  <DetailField label="E-mail" value={supplier.email} />
-                </dl>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Globe className="size-5" />
-                  Presença digital
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                  <DetailField label="Website" value={supplier.website} />
-                  <DetailField label="Facebook" value={supplier.facebook} />
-                  <DetailField label="Twitter" value={supplier.twitter} />
-                </dl>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MapPin className="size-5" />
-                  Endereço
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                  <DetailField label="CEP" value={supplier.zipCode} />
-                  <DetailField label="Logradouro" value={supplier.address} />
-                  <DetailField label="Número" value={supplier.addressNumber} />
-                  <DetailField
-                    label="Complemento"
-                    value={supplier.complement}
-                  />
-                  <DetailField label="Bairro" value={supplier.neighborhood} />
-                  <DetailField label="Cidade" value={supplier.city} />
-                  <DetailField label="UF" value={supplier.state} />
-                  <DetailField label="Região" value={supplier.countryRegion} />
-                  <DetailField label="País" value={supplier.country} />
-                  <DetailField
-                    label="Código do município"
-                    value={supplier.cityCode}
-                  />
-                  <DetailField
-                    label="Código da UF"
-                    value={supplier.stateCode}
-                  />
-                </dl>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Building2 className="size-5" />
-                  Pessoa jurídica
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                  <DetailField
-                    label="Razão social"
-                    value={supplier.legalName}
-                  />
-                  <DetailField label="CNPJ" value={supplier.cnpj} />
-                  <DetailField
-                    label="Data do CNPJ"
-                    value={formatDate(supplier.cnpjDate)}
-                  />
-                  <DetailField
-                    label="Inscrição estadual"
-                    value={supplier.stateRegistration}
-                  />
-                  <DetailField
-                    label="Inscrição municipal"
-                    value={supplier.municipalRegistration}
-                  />
-                  <DetailField
-                    label="Nome fantasia"
-                    value={supplier.tradeName}
-                  />
-                </dl>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <UserRound className="size-5" />
-                  Pessoa física
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                  <DetailField label="CPF" value={supplier.cpf} />
-                  <DetailField label="RG" value={supplier.rg} />
-                  <DetailField
-                    label="Responsável"
-                    value={supplier.responsibleName}
-                  />
-                  <DetailField
-                    label="Cargo do responsável"
-                    value={supplier.responsibleRole}
-                  />
-                </dl>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Editar dados do fornecedor</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-5">
-                  <div className="space-y-2">
-                    <Label htmlFor="supplier-detail-name">
-                      Nome
-                      <span className="text-destructive" aria-hidden="true">
-                        *
-                      </span>
-                    </Label>
-                    <Input
-                      id="supplier-detail-name"
-                      value={name}
-                      onChange={(event) => {
-                        setName(event.target.value);
-                        setFieldErrors((current) => ({
-                          ...current,
-                          name: undefined,
-                        }));
-                      }}
-                      maxLength={100}
-                      disabled={isSaving || isMutating}
-                      aria-invalid={Boolean(fieldErrors.name?.length)}
-                    />
-                    {fieldErrors.name?.[0] && (
-                      <p className="text-destructive text-sm">
-                        {fieldErrors.name[0]}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between gap-2">
-                      <Label htmlFor="supplier-detail-notes">Observações</Label>
-                      <span className="text-muted-foreground text-xs tabular-nums">
-                        {notes.length}/2.000
-                      </span>
-                    </div>
-                    <Textarea
-                      id="supplier-detail-notes"
-                      value={notes}
-                      onChange={(event) => {
-                        setNotes(event.target.value);
-                        setFieldErrors((current) => ({
-                          ...current,
-                          notes: undefined,
-                        }));
-                      }}
-                      rows={9}
-                      maxLength={2000}
-                      disabled={isSaving || isMutating}
-                      placeholder="Informações administrativas sobre este fornecedor..."
-                      aria-invalid={Boolean(fieldErrors.notes?.length)}
-                    />
-                    {fieldErrors.notes?.[0] && (
-                      <p className="text-destructive text-sm">
-                        {fieldErrors.notes[0]}
-                      </p>
-                    )}
-                  </div>
-
-                  <Button
-                    type="submit"
-                    disabled={
-                      isSaving ||
-                      isMutating ||
-                      name.trim() === "" ||
-                      notes.length > 2000
-                    }
-                  >
-                    {isSaving ? (
-                      <Loader2 className="size-4 animate-spin" />
-                    ) : (
-                      <Save className="size-4" />
-                    )}
-                    {isSaving ? "Salvando..." : "Salvar alterações"}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
           </div>
 
-          <div className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Cadastro</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Building2 className="size-5" />
+                Conta e identificação
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                <DetailField label="ID do fornecedor" value={supplier.id} />
+                <DetailField
+                  label="Tipo de pessoa"
+                  value={resolvePersonTypeLabel(supplier)}
+                />
+                <DetailField
+                  label="Fretador"
+                  value={
+                    supplier.freightForwarder === undefined
+                      ? undefined
+                      : supplier.freightForwarder
+                        ? "Sim"
+                        : "Não"
+                  }
+                />
                 <DetailField
                   label="Data de cadastro"
                   value={formatDate(supplier.createdAt)}
@@ -489,45 +259,289 @@ export function SupplierDetails({
                   label="Última compra"
                   value={formatDate(supplier.lastPurchaseAt)}
                 />
-              </CardContent>
-            </Card>
+                <DetailField
+                  label="Status"
+                  value={supplier.inactive ? "Inativo" : "Ativo"}
+                />
+              </dl>
+            </CardContent>
+          </Card>
 
-            <Card>
-              <CardHeader className="flex-row items-center justify-between">
-                <CardTitle className="text-base">Status do cadastro</CardTitle>
-                <Badge
-                  variant={supplier.inactive ? "destructive" : "secondary"}
-                >
-                  {supplier.inactive ? "Inativo" : "Ativo"}
-                </Badge>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p className="text-muted-foreground text-xs">
-                  Confirme a operação para definir explicitamente o status deste
-                  fornecedor.
-                </p>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full"
-                  disabled={isSaving || isMutating}
-                  onClick={() => setConfirmation("activate")}
-                >
-                  <CheckCircle2 className="size-4" />
-                  Marcar como ativo
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full"
-                  disabled={isSaving || isMutating}
-                  onClick={() => setConfirmation("deactivate")}
-                >
-                  <CircleOff className="size-4" />
-                  Marcar como inativo
-                </Button>
-              </CardContent>
-            </Card>
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)]">
+            <div className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Phone className="size-5" />
+                    Contato
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                    <DetailField label="Telefone" value={supplier.phone} />
+                    <DetailField label="WhatsApp" value={supplier.whatsapp} />
+                    <DetailField label="Contato" value={supplier.contact} />
+                    <DetailField label="Setor" value={supplier.sector} />
+                    <DetailField label="E-mail" value={supplier.email} />
+                  </dl>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Globe className="size-5" />
+                    Presença digital
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                    <DetailField label="Website" value={supplier.website} />
+                    <DetailField label="Facebook" value={supplier.facebook} />
+                    <DetailField label="Twitter" value={supplier.twitter} />
+                  </dl>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MapPin className="size-5" />
+                    Endereço
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                    <DetailField label="CEP" value={supplier.zipCode} />
+                    <DetailField label="Logradouro" value={supplier.address} />
+                    <DetailField
+                      label="Número"
+                      value={supplier.addressNumber}
+                    />
+                    <DetailField
+                      label="Complemento"
+                      value={supplier.complement}
+                    />
+                    <DetailField label="Bairro" value={supplier.neighborhood} />
+                    <DetailField label="Cidade" value={supplier.city} />
+                    <DetailField label="UF" value={supplier.state} />
+                    <DetailField
+                      label="Região"
+                      value={supplier.countryRegion}
+                    />
+                    <DetailField label="País" value={supplier.country} />
+                    <DetailField
+                      label="Código do município"
+                      value={supplier.cityCode}
+                    />
+                    <DetailField
+                      label="Código da UF"
+                      value={supplier.stateCode}
+                    />
+                  </dl>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Building2 className="size-5" />
+                    Pessoa jurídica
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                    <DetailField
+                      label="Razão social"
+                      value={supplier.legalName}
+                    />
+                    <DetailField label="CNPJ" value={supplier.cnpj} />
+                    <DetailField
+                      label="Data do CNPJ"
+                      value={formatDate(supplier.cnpjDate)}
+                    />
+                    <DetailField
+                      label="Inscrição estadual"
+                      value={supplier.stateRegistration}
+                    />
+                    <DetailField
+                      label="Inscrição municipal"
+                      value={supplier.municipalRegistration}
+                    />
+                    <DetailField
+                      label="Nome fantasia"
+                      value={supplier.tradeName}
+                    />
+                  </dl>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <UserRound className="size-5" />
+                    Pessoa física
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                    <DetailField label="CPF" value={supplier.cpf} />
+                    <DetailField label="RG" value={supplier.rg} />
+                    <DetailField
+                      label="Responsável"
+                      value={supplier.responsibleName}
+                    />
+                    <DetailField
+                      label="Cargo do responsável"
+                      value={supplier.responsibleRole}
+                    />
+                  </dl>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Editar dados do fornecedor</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleSubmit} className="space-y-5">
+                    <div className="space-y-2">
+                      <Label htmlFor="supplier-detail-name">
+                        Nome
+                        <span className="text-destructive" aria-hidden="true">
+                          *
+                        </span>
+                      </Label>
+                      <Input
+                        id="supplier-detail-name"
+                        value={name}
+                        onChange={(event) => {
+                          setName(event.target.value);
+                          setFieldErrors((current) => ({
+                            ...current,
+                            name: undefined,
+                          }));
+                        }}
+                        maxLength={100}
+                        disabled={isSaving || isMutating}
+                        aria-invalid={Boolean(fieldErrors.name?.length)}
+                      />
+                      {fieldErrors.name?.[0] && (
+                        <p className="text-destructive text-sm">
+                          {fieldErrors.name[0]}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <Label htmlFor="supplier-detail-notes">
+                          Observações
+                        </Label>
+                        <span className="text-muted-foreground text-xs tabular-nums">
+                          {notes.length}/2.000
+                        </span>
+                      </div>
+                      <Textarea
+                        id="supplier-detail-notes"
+                        value={notes}
+                        onChange={(event) => {
+                          setNotes(event.target.value);
+                          setFieldErrors((current) => ({
+                            ...current,
+                            notes: undefined,
+                          }));
+                        }}
+                        rows={9}
+                        maxLength={2000}
+                        disabled={isSaving || isMutating}
+                        placeholder="Informações administrativas sobre este fornecedor..."
+                        aria-invalid={Boolean(fieldErrors.notes?.length)}
+                      />
+                      {fieldErrors.notes?.[0] && (
+                        <p className="text-destructive text-sm">
+                          {fieldErrors.notes[0]}
+                        </p>
+                      )}
+                    </div>
+
+                    <Button
+                      type="submit"
+                      disabled={
+                        isSaving ||
+                        isMutating ||
+                        name.trim() === "" ||
+                        notes.length > 2000
+                      }
+                    >
+                      {isSaving ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        <Save className="size-4" />
+                      )}
+                      {isSaving ? "Salvando..." : "Salvar alterações"}
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Cadastro</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <DetailField
+                    label="Data de cadastro"
+                    value={formatDate(supplier.createdAt)}
+                  />
+                  <DetailField
+                    label="Última compra"
+                    value={formatDate(supplier.lastPurchaseAt)}
+                  />
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex-row items-center justify-between">
+                  <CardTitle className="text-base">
+                    Status do cadastro
+                  </CardTitle>
+                  <Badge
+                    variant={supplier.inactive ? "destructive" : "secondary"}
+                  >
+                    {supplier.inactive ? "Inativo" : "Ativo"}
+                  </Badge>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <p className="text-muted-foreground text-xs">
+                    Confirme a operação para definir explicitamente o status
+                    deste fornecedor.
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    disabled={isSaving || isMutating}
+                    onClick={() => setConfirmation("activate")}
+                  >
+                    <CheckCircle2 className="size-4" />
+                    Marcar como ativo
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    disabled={isSaving || isMutating}
+                    onClick={() => setConfirmation("deactivate")}
+                  >
+                    <CircleOff className="size-4" />
+                    Marcar como inativo
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
 
