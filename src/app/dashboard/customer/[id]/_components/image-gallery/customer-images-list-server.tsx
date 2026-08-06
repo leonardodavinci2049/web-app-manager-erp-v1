@@ -16,9 +16,6 @@ export async function CustomerImagesListServer({
     <CustomerImagesList
       initialCustomerImagePath={initialCustomerImagePath}
       initialGalleryImages={galleryState.images}
-      initialGalleryError={
-        galleryState.status === "error" ? galleryState.error : null
-      }
     />
   );
 }

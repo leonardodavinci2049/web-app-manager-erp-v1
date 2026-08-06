@@ -59,7 +59,6 @@ interface PtypeImageGalleryProps {
   totalImages: number;
   ptypeName: string;
   ptypeId: number;
-  loadError: string | null;
   selectionRequest: { imageId?: string; version: number };
   onRefresh: (preferredImageId?: string) => void;
 }
@@ -75,7 +74,6 @@ export function PtypeImageGallery({
   totalImages,
   ptypeName,
   ptypeId,
-  loadError,
   selectionRequest,
   onRefresh,
 }: PtypeImageGalleryProps) {
@@ -270,28 +268,6 @@ export function PtypeImageGallery({
       className="w-full max-w-[500px] space-y-4"
       aria-label={`Galeria de imagens de ${ptypeName}`}
     >
-      {loadError && (
-        <div
-          role="alert"
-          className="flex items-center justify-between gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive"
-        >
-          <span>{loadError}</span>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={isBusy}
-            onClick={async () => {
-              setPendingMutation("refresh");
-              refresh(selectedImageId);
-              setPendingMutation(null);
-            }}
-          >
-            Tentar novamente
-          </Button>
-        </div>
-      )}
-
       <Card className="overflow-hidden py-0">
         <CardContent className="p-0">
           {selectedImage ? (

@@ -16,9 +16,6 @@ export async function SupplierImagesListServer({
     <SupplierImagesList
       initialSupplierImagePath={initialSupplierImagePath}
       initialGalleryImages={galleryState.images}
-      initialGalleryError={
-        galleryState.status === "error" ? galleryState.error : null
-      }
     />
   );
 }

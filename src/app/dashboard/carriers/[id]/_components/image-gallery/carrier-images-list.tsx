@@ -19,19 +19,16 @@ import type { CarrierGalleryImage } from "./image-gallery-types";
 interface CarrierImagesListProps {
   initialCarrierImagePath: string;
   initialGalleryImages: CarrierGalleryImage[];
-  initialGalleryError: string | null;
 }
 
 export function CarrierImagesList({
   initialCarrierImagePath,
   initialGalleryImages,
-  initialGalleryError,
 }: CarrierImagesListProps) {
   const router = useRouter();
   const [isRefreshing, startRefreshTransition] = useTransition();
   const [galleryImages, setGalleryImages] =
     useState<CarrierGalleryImage[]>(initialGalleryImages);
-  const [error, setError] = useState<string | null>(initialGalleryError);
   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
   const [hasCarrierImageError, setHasCarrierImageError] = useState(false);
   const carrierImagePath = initialCarrierImagePath;
@@ -43,8 +40,7 @@ export function CarrierImagesList({
 
   useEffect(() => {
     setGalleryImages(initialGalleryImages);
-    setError(initialGalleryError);
-  }, [initialGalleryError, initialGalleryImages]);
+  }, [initialGalleryImages]);
 
   return (
     <div className="space-y-4">
@@ -121,11 +117,7 @@ export function CarrierImagesList({
           </div>
         </CardHeader>
         <CardContent>
-          {error ? (
-            <div className="rounded-md bg-destructive/10 p-4">
-              <p className="text-sm text-destructive">{error}</p>
-            </div>
-          ) : galleryImages.length === 0 ? (
+          {galleryImages.length === 0 ? (
             <p className="text-sm text-muted-foreground italic py-4">
               Nenhuma imagem na galeria do Assets API para esta transportadora
             </p>

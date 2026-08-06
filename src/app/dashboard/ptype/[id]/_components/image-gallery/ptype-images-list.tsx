@@ -19,19 +19,16 @@ import type { PtypeGalleryImage } from "./image-gallery-types";
 interface PtypeImagesListProps {
   initialPtypeImagePath: string;
   initialGalleryImages: PtypeGalleryImage[];
-  initialGalleryError: string | null;
 }
 
 export function PtypeImagesList({
   initialPtypeImagePath,
   initialGalleryImages,
-  initialGalleryError,
 }: PtypeImagesListProps) {
   const router = useRouter();
   const [isRefreshing, startRefreshTransition] = useTransition();
   const [galleryImages, setGalleryImages] =
     useState<PtypeGalleryImage[]>(initialGalleryImages);
-  const [error, setError] = useState<string | null>(initialGalleryError);
   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
   const [hasPtypeImageError, setHasPtypeImageError] = useState(false);
   const ptypeImagePath = initialPtypeImagePath;
@@ -43,8 +40,7 @@ export function PtypeImagesList({
 
   useEffect(() => {
     setGalleryImages(initialGalleryImages);
-    setError(initialGalleryError);
-  }, [initialGalleryError, initialGalleryImages]);
+  }, [initialGalleryImages]);
 
   return (
     <div className="space-y-4">
@@ -121,11 +117,7 @@ export function PtypeImagesList({
           </div>
         </CardHeader>
         <CardContent>
-          {error ? (
-            <div className="rounded-md bg-destructive/10 p-4">
-              <p className="text-sm text-destructive">{error}</p>
-            </div>
-          ) : galleryImages.length === 0 ? (
+          {galleryImages.length === 0 ? (
             <p className="text-sm text-muted-foreground italic py-4">
               Nenhuma imagem na galeria do Assets API para este tipo de produto
             </p>

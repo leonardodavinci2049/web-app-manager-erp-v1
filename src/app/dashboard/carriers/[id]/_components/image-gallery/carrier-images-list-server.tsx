@@ -16,9 +16,6 @@ export async function CarrierImagesListServer({
     <CarrierImagesList
       initialCarrierImagePath={initialCarrierImagePath}
       initialGalleryImages={galleryState.images}
-      initialGalleryError={
-        galleryState.status === "error" ? galleryState.error : null
-      }
     />
   );
 }

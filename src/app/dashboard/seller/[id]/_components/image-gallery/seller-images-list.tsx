@@ -19,19 +19,16 @@ import type { SellerGalleryImage } from "./image-gallery-types";
 interface SellerImagesListProps {
   initialSellerImagePath: string;
   initialGalleryImages: SellerGalleryImage[];
-  initialGalleryError: string | null;
 }
 
 export function SellerImagesList({
   initialSellerImagePath,
   initialGalleryImages,
-  initialGalleryError,
 }: SellerImagesListProps) {
   const router = useRouter();
   const [isRefreshing, startRefreshTransition] = useTransition();
   const [galleryImages, setGalleryImages] =
     useState<SellerGalleryImage[]>(initialGalleryImages);
-  const [error, setError] = useState<string | null>(initialGalleryError);
   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
   const [hasSellerImageError, setHasSellerImageError] = useState(false);
   const sellerImagePath = initialSellerImagePath;
@@ -43,8 +40,7 @@ export function SellerImagesList({
 
   useEffect(() => {
     setGalleryImages(initialGalleryImages);
-    setError(initialGalleryError);
-  }, [initialGalleryError, initialGalleryImages]);
+  }, [initialGalleryImages]);
 
   return (
     <div className="space-y-4">
@@ -121,11 +117,7 @@ export function SellerImagesList({
           </div>
         </CardHeader>
         <CardContent>
-          {error ? (
-            <div className="rounded-md bg-destructive/10 p-4">
-              <p className="text-sm text-destructive">{error}</p>
-            </div>
-          ) : galleryImages.length === 0 ? (
+          {galleryImages.length === 0 ? (
             <p className="text-sm text-muted-foreground italic py-4">
               Nenhuma imagem na galeria do Assets API para este vendedor
             </p>
