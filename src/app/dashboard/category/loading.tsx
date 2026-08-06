@@ -28,7 +28,7 @@ export default function CategoryDashboardLoading() {
           { label: "Categorias", isActive: true },
         ]}
       />
-      <div className="flex min-h-0 flex-1 flex-col bg-background pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0">
+      <div className="mx-auto flex min-h-0 w-full max-w-[1400px] flex-1 flex-col bg-background pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0">
         <div className="flex flex-col justify-between gap-3 px-3 py-3 sm:flex-row sm:items-center lg:px-6">
           <div className="space-y-1.5">
             <Skeleton className="h-6 w-56 sm:w-72" />

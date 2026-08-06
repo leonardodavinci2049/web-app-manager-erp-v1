@@ -1,14 +1,14 @@
 import { RegistryDetailLoading } from "@/components/registry";
 
-export default function CarrierDetailsLoading() {
+export default function PtypeDetailsLoading() {
   return (
     <RegistryDetailLoading
-      title="Detalhes da transportadora"
+      title="Detalhes do tipo de produto"
       breadcrumbItems={[
         { label: "Dashboard", href: "/dashboard" },
-        { label: "Transportadoras", isActive: true },
+        { label: "Tipos de produtos", isActive: true },
       ]}
-      variant="extended"
+      variant="ptype"
     />
   );
 }
