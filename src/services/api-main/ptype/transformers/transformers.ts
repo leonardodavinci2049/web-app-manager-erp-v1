@@ -16,6 +16,7 @@ export function transformPtypeListItem(entity: PtypeListItem): UIPtype {
   return {
     id: entity.ID_TIPO,
     name: entity.TIPO,
+    imagePath: entity.PATH_IMAGEM ?? undefined,
   };
 }
 

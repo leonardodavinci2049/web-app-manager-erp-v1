@@ -1,11 +1,16 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
 import { assetsApiService } from "@/services/api-assets/assets-api-service";
 import type { GalleryImage } from "@/services/api-assets/types/api-assets";
 import { isApiError } from "@/services/api-assets/types/api-assets";
+import {
+  FIELD_TYPE,
+  generalCallServiceApi,
+} from "@/services/api-main/general-call";
 import { getPtypeById } from "@/services/api-main/ptype";
 import {
   PTYPE_GALLERY_ACCEPTED_MIME_TYPES,
@@ -16,6 +21,10 @@ import {
 import type { PtypeGalleryMutationResult } from "../_components/image-gallery/image-gallery-types";
 
 const logger = createLogger("PtypeImageGalleryActions");
+const PTYPE_TABLE_NAME = "tbl_produto_tipo";
+const PTYPE_PRIMARY_KEY_FIELD = "ID_TIPO";
+const PTYPE_IMAGE_PATH_FIELD = "PATH_IMAGEM";
+const PTYPE_IMAGE_PATH_MAX_LENGTH = 300;
 
 const PtypeIdSchema = z.coerce.number().int().positive();
 const AssetIdSchema = z.string().uuid();
@@ -49,8 +58,23 @@ async function getAuthorizedPtypeContext(ptypeId: number) {
   return result ? apiContext : null;
 }
 
-async function authorizePtype(ptypeId: number): Promise<boolean> {
-  return Boolean(await getAuthorizedPtypeContext(ptypeId));
+async function updatePtypeImagePath(
+  ptypeId: number,
+  imagePath: string,
+  apiContext: Awaited<ReturnType<typeof getAuthContext>>["apiContext"],
+): Promise<void> {
+  await generalCallServiceApi.updateTableInlineField({
+    ...apiContext,
+    pe_table_name: PTYPE_TABLE_NAME,
+    pe_primary_key_field: PTYPE_PRIMARY_KEY_FIELD,
+    pe_register_id: ptypeId,
+    pe_field_type: FIELD_TYPE.STRING,
+    pe_field: PTYPE_IMAGE_PATH_FIELD,
+    pe_value_str: imagePath,
+  });
+
+  revalidatePath("/dashboard/ptype");
+  revalidatePath(`/dashboard/ptype/${ptypeId}`);
 }
 
 async function readPtypeGallery(ptypeId: number) {
@@ -105,7 +129,8 @@ export async function uploadPtypeImageAction(
   }
 
   try {
-    if (!(await authorizePtype(ptypeId))) {
+    const apiContext = await getAuthorizedPtypeContext(ptypeId);
+    if (!apiContext) {
       return {
         success: false,
         error: "Tipo de produto não encontrada ou inacessível.",
@@ -145,9 +170,45 @@ export async function uploadPtypeImageAction(
       return { success: false, error: "Não foi possível enviar esta imagem." };
     }
 
+    if (isFirstImage) {
+      const imagePath = result.urls.original.trim();
+      if (!imagePath || imagePath.length > PTYPE_IMAGE_PATH_MAX_LENGTH) {
+        logger.error("First ptype image has an invalid original URL", {
+          ptypeId,
+          assetId: result.id,
+          imagePathLength: imagePath.length,
+        });
+        return {
+          success: true,
+          message: `${file.name} foi enviada com sucesso.`,
+          preferredImageId: result.id,
+          warning:
+            "A imagem foi enviada, mas não foi possível atualizar PATH_IMAGEM.",
+        };
+      }
+
+      try {
+        await updatePtypeImagePath(ptypeId, imagePath, apiContext);
+      } catch (error) {
+        logger.error(
+          "First ptype image uploaded but PATH_IMAGEM update failed",
+          { ptypeId, assetId: result.id, error },
+        );
+        return {
+          success: true,
+          message: `${file.name} foi enviada com sucesso.`,
+          preferredImageId: result.id,
+          warning:
+            "A imagem foi enviada, mas não foi possível atualizar PATH_IMAGEM.",
+        };
+      }
+    }
+
     return {
       success: true,
-      message: `${file.name} foi enviada com sucesso.`,
+      message: isFirstImage
+        ? `${file.name} foi enviada e definida como imagem do tipo de produto.`
+        : `${file.name} foi enviada com sucesso.`,
       preferredImageId: result.id,
     };
   } catch (error) {
@@ -169,7 +230,8 @@ export async function setPrimaryPtypeImageAction(
 
   const { assetId, ptypeId } = parsedInput.data;
   try {
-    if (!(await authorizePtype(ptypeId))) {
+    const apiContext = await getAuthorizedPtypeContext(ptypeId);
+    if (!apiContext) {
       return {
         success: false,
         error: "Tipo de produto não encontrada ou inacessível.",
@@ -188,6 +250,35 @@ export async function setPrimaryPtypeImageAction(
       };
     }
     if (image.isPrimary) {
+      const imagePath = image.urls.original.trim();
+      if (!imagePath || imagePath.length > PTYPE_IMAGE_PATH_MAX_LENGTH) {
+        logger.error("Primary ptype image has an invalid original URL", {
+          ptypeId,
+          assetId,
+          imagePathLength: imagePath.length,
+        });
+        return {
+          success: true,
+          message: "Esta imagem já é a principal.",
+          preferredImageId: assetId,
+          warning: "Não foi possível atualizar PATH_IMAGEM.",
+        };
+      }
+      try {
+        await updatePtypeImagePath(ptypeId, imagePath, apiContext);
+      } catch (error) {
+        logger.error("Primary ptype image PATH_IMAGEM repair failed", {
+          ptypeId,
+          assetId,
+          error,
+        });
+        return {
+          success: true,
+          message: "Esta imagem já é a principal.",
+          preferredImageId: assetId,
+          warning: "Não foi possível atualizar PATH_IMAGEM.",
+        };
+      }
       return {
         success: true,
         message: "Esta imagem já é a principal.",
@@ -211,6 +302,38 @@ export async function setPrimaryPtypeImageAction(
       return {
         success: false,
         error: "Não foi possível definir a imagem principal.",
+      };
+    }
+
+    const imagePath = image.urls.original.trim();
+    if (!imagePath || imagePath.length > PTYPE_IMAGE_PATH_MAX_LENGTH) {
+      logger.error("Primary ptype image has an invalid original URL", {
+        ptypeId,
+        assetId,
+        imagePathLength: imagePath.length,
+      });
+      return {
+        success: true,
+        message: "Nova imagem principal definida.",
+        preferredImageId: assetId,
+        warning:
+          "A imagem principal foi alterada, mas não foi possível atualizar PATH_IMAGEM.",
+      };
+    }
+
+    try {
+      await updatePtypeImagePath(ptypeId, imagePath, apiContext);
+    } catch (error) {
+      logger.error(
+        "Primary ptype image changed but PATH_IMAGEM update failed",
+        { ptypeId, assetId, error },
+      );
+      return {
+        success: true,
+        message: "Nova imagem principal definida.",
+        preferredImageId: assetId,
+        warning:
+          "A imagem principal foi alterada, mas não foi possível atualizar PATH_IMAGEM.",
       };
     }
 
@@ -241,7 +364,8 @@ export async function deletePtypeImageAction(
 
   const { assetId, ptypeId } = parsedInput.data;
   try {
-    if (!(await authorizePtype(ptypeId))) {
+    const apiContext = await getAuthorizedPtypeContext(ptypeId);
+    if (!apiContext) {
       return {
         success: false,
         error: "Tipo de produto não encontrada ou inacessível.",
@@ -302,6 +426,38 @@ export async function deletePtypeImageAction(
           preferredImageId: promotionCandidate.id,
           warning:
             "A imagem foi excluída, mas não foi possível confirmar a nova principal.",
+        };
+      }
+
+      const imagePath = promotionCandidate.urls.original.trim();
+      if (!imagePath || imagePath.length > PTYPE_IMAGE_PATH_MAX_LENGTH) {
+        logger.error("Promoted ptype image has an invalid original URL", {
+          ptypeId,
+          assetId: promotionCandidate.id,
+          imagePathLength: imagePath.length,
+        });
+        return {
+          success: true,
+          message: "Imagem excluída.",
+          preferredImageId: promotionCandidate.id,
+          warning:
+            "A nova principal foi definida, mas não foi possível atualizar PATH_IMAGEM.",
+        };
+      }
+
+      try {
+        await updatePtypeImagePath(ptypeId, imagePath, apiContext);
+      } catch (error) {
+        logger.error(
+          "Primary ptype image promoted but PATH_IMAGEM update failed",
+          { ptypeId, assetId: promotionCandidate.id, error },
+        );
+        return {
+          success: true,
+          message: "Imagem excluída.",
+          preferredImageId: promotionCandidate.id,
+          warning:
+            "A nova principal foi definida, mas não foi possível atualizar PATH_IMAGEM.",
         };
       }
     }

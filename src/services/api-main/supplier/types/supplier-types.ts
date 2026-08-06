@@ -52,6 +52,7 @@ export interface SupplierSearchListItem {
   CNPJ: string | null;
   EMAIL: string | null;
   ID_IMAGEM: number;
+  PATH_IMAGEM?: string | null;
   ULTIMA_COMPRA: string | null;
   UF: string | null;
   CIDADE: string | null;

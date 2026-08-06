@@ -79,7 +79,11 @@ function SupplierCard({
             : "flex h-full flex-col gap-3 p-3 sm:p-4"
         }
       >
-        <SupplierImage name={supplier.name} viewMode={viewMode} />
+        <SupplierImage
+          name={supplier.name}
+          imagePath={supplier.imagePath}
+          viewMode={viewMode}
+        />
         <div className="min-w-0 flex-1 space-y-3">
           <div>
             <p className="line-clamp-2 font-semibold">{supplier.name}</p>
@@ -229,6 +233,7 @@ export function SupplierCollection({
             <Table aria-label="Lista de fornecedores">
               <TableHeader className="bg-muted/50">
                 <TableRow>
+                  <TableHead className="w-14">Imagem</TableHead>
                   <TableHead className="w-20">ID</TableHead>
                   <TableHead className="w-56 max-w-[300px] whitespace-normal">
                     Fornecedor
@@ -245,6 +250,14 @@ export function SupplierCollection({
               <TableBody className="[&_tr:nth-child(even)]:bg-muted/30">
                 {items.map((supplier) => (
                   <TableRow key={supplier.id}>
+                    <TableCell>
+                      <SupplierImage
+                        name={supplier.name}
+                        imagePath={supplier.imagePath}
+                        viewMode="list"
+                        size="sm"
+                      />
+                    </TableCell>
                     <TableCell className="text-muted-foreground tabular-nums">
                       {supplier.id}
                     </TableCell>
