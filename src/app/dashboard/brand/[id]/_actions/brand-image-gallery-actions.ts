@@ -1,12 +1,17 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
 import { assetsApiService } from "@/services/api-assets/assets-api-service";
 import type { GalleryImage } from "@/services/api-assets/types/api-assets";
 import { isApiError } from "@/services/api-assets/types/api-assets";
-import { getBrandById } from "@/services/api-main/brand/brand-service-api";
+import {
+  brandServiceApi,
+  getBrandById,
+} from "@/services/api-main/brand/brand-service-api";
+import { FIELD_TYPE } from "@/services/api-main/general-call";
 import {
   BRAND_GALLERY_ACCEPTED_MIME_TYPES,
   BRAND_GALLERY_ENTITY_TYPE,
@@ -16,6 +21,8 @@ import {
 import type { BrandGalleryMutationResult } from "../_components/image-gallery/image-gallery-types";
 
 const logger = createLogger("BrandImageGalleryActions");
+const BRAND_IMAGE_PATH_FIELD = "PATH_IMAGEM";
+const BRAND_IMAGE_PATH_MAX_LENGTH = 300;
 
 const BrandIdSchema = z.coerce.number().int().positive();
 const AssetIdSchema = z.string().uuid();
@@ -49,8 +56,21 @@ async function getAuthorizedBrandContext(brandId: number) {
   return result ? apiContext : null;
 }
 
-async function authorizeBrand(brandId: number): Promise<boolean> {
-  return Boolean(await getAuthorizedBrandContext(brandId));
+async function updateBrandImagePath(
+  brandId: number,
+  imagePath: string,
+  apiContext: Awaited<ReturnType<typeof getAuthContext>>["apiContext"],
+): Promise<void> {
+  await brandServiceApi.updateBrandInlineField({
+    ...apiContext,
+    pe_register_id: brandId,
+    pe_field_type: FIELD_TYPE.STRING,
+    pe_field: BRAND_IMAGE_PATH_FIELD,
+    pe_value_str: imagePath,
+  });
+
+  revalidatePath("/dashboard/brand");
+  revalidatePath(`/dashboard/brand/${brandId}`);
 }
 
 async function readBrandGallery(brandId: number) {
@@ -102,7 +122,8 @@ export async function uploadBrandImageAction(
   }
 
   try {
-    if (!(await authorizeBrand(brandId))) {
+    const apiContext = await getAuthorizedBrandContext(brandId);
+    if (!apiContext) {
       return {
         success: false,
         error: "Marca não encontrada ou inacessível.",
@@ -142,9 +163,45 @@ export async function uploadBrandImageAction(
       return { success: false, error: "Não foi possível enviar esta imagem." };
     }
 
+    if (isFirstImage) {
+      const imagePath = result.urls.original.trim();
+      if (!imagePath || imagePath.length > BRAND_IMAGE_PATH_MAX_LENGTH) {
+        logger.error("First brand image has an invalid original URL", {
+          brandId,
+          assetId: result.id,
+          imagePathLength: imagePath.length,
+        });
+        return {
+          success: true,
+          message: `${file.name} foi enviada com sucesso.`,
+          preferredImageId: result.id,
+          warning:
+            "A imagem foi enviada, mas não foi possível atualizar PATH_IMAGEM.",
+        };
+      }
+
+      try {
+        await updateBrandImagePath(brandId, imagePath, apiContext);
+      } catch (error) {
+        logger.error(
+          "First brand image uploaded but PATH_IMAGEM update failed",
+          { brandId, assetId: result.id, error },
+        );
+        return {
+          success: true,
+          message: `${file.name} foi enviada com sucesso.`,
+          preferredImageId: result.id,
+          warning:
+            "A imagem foi enviada, mas não foi possível atualizar PATH_IMAGEM.",
+        };
+      }
+    }
+
     return {
       success: true,
-      message: `${file.name} foi enviada com sucesso.`,
+      message: isFirstImage
+        ? `${file.name} foi enviada e definida como imagem da marca.`
+        : `${file.name} foi enviada com sucesso.`,
       preferredImageId: result.id,
     };
   } catch (error) {
@@ -166,7 +223,8 @@ export async function setPrimaryBrandImageAction(
 
   const { assetId, brandId } = parsedInput.data;
   try {
-    if (!(await authorizeBrand(brandId))) {
+    const apiContext = await getAuthorizedBrandContext(brandId);
+    if (!apiContext) {
       return {
         success: false,
         error: "Marca não encontrada ou inacessível.",
@@ -182,6 +240,35 @@ export async function setPrimaryBrandImageAction(
       return { success: false, error: "Imagem não pertence a esta marca." };
     }
     if (image.isPrimary) {
+      const imagePath = image.urls.original.trim();
+      if (!imagePath || imagePath.length > BRAND_IMAGE_PATH_MAX_LENGTH) {
+        logger.error("Primary brand image has an invalid original URL", {
+          brandId,
+          assetId,
+          imagePathLength: imagePath.length,
+        });
+        return {
+          success: true,
+          message: "Esta imagem já é a principal.",
+          preferredImageId: assetId,
+          warning: "Não foi possível atualizar PATH_IMAGEM.",
+        };
+      }
+      try {
+        await updateBrandImagePath(brandId, imagePath, apiContext);
+      } catch (error) {
+        logger.error("Primary brand image PATH_IMAGEM repair failed", {
+          brandId,
+          assetId,
+          error,
+        });
+        return {
+          success: true,
+          message: "Esta imagem já é a principal.",
+          preferredImageId: assetId,
+          warning: "Não foi possível atualizar PATH_IMAGEM.",
+        };
+      }
       return {
         success: true,
         message: "Esta imagem já é a principal.",
@@ -205,6 +292,38 @@ export async function setPrimaryBrandImageAction(
       return {
         success: false,
         error: "Não foi possível definir a imagem principal.",
+      };
+    }
+
+    const imagePath = image.urls.original.trim();
+    if (!imagePath || imagePath.length > BRAND_IMAGE_PATH_MAX_LENGTH) {
+      logger.error("Primary brand image has an invalid original URL", {
+        brandId,
+        assetId,
+        imagePathLength: imagePath.length,
+      });
+      return {
+        success: true,
+        message: "Nova imagem principal definida.",
+        preferredImageId: assetId,
+        warning:
+          "A imagem principal foi alterada, mas não foi possível atualizar PATH_IMAGEM.",
+      };
+    }
+
+    try {
+      await updateBrandImagePath(brandId, imagePath, apiContext);
+    } catch (error) {
+      logger.error(
+        "Primary brand image changed but PATH_IMAGEM update failed",
+        { brandId, assetId, error },
+      );
+      return {
+        success: true,
+        message: "Nova imagem principal definida.",
+        preferredImageId: assetId,
+        warning:
+          "A imagem principal foi alterada, mas não foi possível atualizar PATH_IMAGEM.",
       };
     }
 
@@ -235,7 +354,8 @@ export async function deleteBrandImageAction(
 
   const { assetId, brandId } = parsedInput.data;
   try {
-    if (!(await authorizeBrand(brandId))) {
+    const apiContext = await getAuthorizedBrandContext(brandId);
+    if (!apiContext) {
       return {
         success: false,
         error: "Marca não encontrada ou inacessível.",
@@ -293,6 +413,38 @@ export async function deleteBrandImageAction(
           preferredImageId: promotionCandidate.id,
           warning:
             "A imagem foi excluída, mas não foi possível confirmar a nova principal.",
+        };
+      }
+
+      const imagePath = promotionCandidate.urls.original.trim();
+      if (!imagePath || imagePath.length > BRAND_IMAGE_PATH_MAX_LENGTH) {
+        logger.error("Promoted brand image has an invalid original URL", {
+          brandId,
+          assetId: promotionCandidate.id,
+          imagePathLength: imagePath.length,
+        });
+        return {
+          success: true,
+          message: "Imagem excluída.",
+          preferredImageId: promotionCandidate.id,
+          warning:
+            "A nova principal foi definida, mas não foi possível atualizar PATH_IMAGEM.",
+        };
+      }
+
+      try {
+        await updateBrandImagePath(brandId, imagePath, apiContext);
+      } catch (error) {
+        logger.error(
+          "Primary brand image promoted but PATH_IMAGEM update failed",
+          { brandId, assetId: promotionCandidate.id, error },
+        );
+        return {
+          success: true,
+          message: "Imagem excluída.",
+          preferredImageId: promotionCandidate.id,
+          warning:
+            "A nova principal foi definida, mas não foi possível atualizar PATH_IMAGEM.",
         };
       }
     }

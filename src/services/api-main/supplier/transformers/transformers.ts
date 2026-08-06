@@ -86,6 +86,7 @@ export function transformSupplierSearchListItem(
     cnpj: entity.CNPJ ?? undefined,
     email: entity.EMAIL ?? undefined,
     imageId: entity.ID_IMAGEM || undefined,
+    imagePath: entity.PATH_IMAGEM ?? undefined,
     lastPurchaseAt: entity.ULTIMA_COMPRA ?? undefined,
     state: entity.UF ?? undefined,
     city: entity.CIDADE ?? undefined,

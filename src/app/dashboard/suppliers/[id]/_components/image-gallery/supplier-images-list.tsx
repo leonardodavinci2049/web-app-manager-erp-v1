@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  CircleAlert,
-  ExternalLink,
-  Image as ImageIcon,
-  RefreshCw,
-} from "lucide-react";
+import { ExternalLink, Image as ImageIcon, RefreshCw } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, useTransition } from "react";
@@ -19,19 +14,16 @@ import type { SupplierGalleryImage } from "./image-gallery-types";
 interface SupplierImagesListProps {
   initialSupplierImagePath: string;
   initialGalleryImages: SupplierGalleryImage[];
-  initialGalleryError: string | null;
 }
 
 export function SupplierImagesList({
   initialSupplierImagePath,
   initialGalleryImages,
-  initialGalleryError,
 }: SupplierImagesListProps) {
   const router = useRouter();
   const [isRefreshing, startRefreshTransition] = useTransition();
   const [galleryImages, setGalleryImages] =
     useState<SupplierGalleryImage[]>(initialGalleryImages);
-  const [error, setError] = useState<string | null>(initialGalleryError);
   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
   const [hasSupplierImageError, setHasSupplierImageError] = useState(false);
   const supplierImagePath = initialSupplierImagePath;
@@ -43,8 +35,7 @@ export function SupplierImagesList({
 
   useEffect(() => {
     setGalleryImages(initialGalleryImages);
-    setError(initialGalleryError);
-  }, [initialGalleryError, initialGalleryImages]);
+  }, [initialGalleryImages]);
 
   return (
     <div className="space-y-4">
@@ -121,11 +112,7 @@ export function SupplierImagesList({
           </div>
         </CardHeader>
         <CardContent>
-          {error ? (
-            <div className="rounded-md bg-destructive/10 p-4">
-              <p className="text-sm text-destructive">{error}</p>
-            </div>
-          ) : galleryImages.length === 0 ? (
+          {galleryImages.length === 0 ? (
             <p className="text-sm text-muted-foreground italic py-4">
               Nenhuma imagem na galeria do Assets API para este fornecedor
             </p>
@@ -139,15 +126,6 @@ export function SupplierImagesList({
               </div>
 
               <Separator />
-
-              <p className="flex items-start gap-2 rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-amber-700 dark:text-amber-400">
-                <CircleAlert
-                  className="mt-0.5 size-4 shrink-0"
-                  aria-hidden="true"
-                />
-                A atualização de PATH_IMAGEM está pendente de um método
-                específico na API de fornecedores.
-              </p>
 
               <div className="space-y-4 mt-3">
                 {galleryImages.map((image, index) => (
@@ -211,20 +189,10 @@ export function SupplierImagesList({
                         Abrir preview em nova aba
                       </a>
 
-                      <div>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          disabled
-                        >
-                          <CircleAlert className="mr-1 h-3 w-3" />
-                          {supplierImagePath.trim() ===
-                          image.urls.original.trim()
-                            ? "Já cadastrada"
-                            : "Usar no PATH_IMAGEM — API pendente"}
-                        </Button>
-                      </div>
+                      {supplierImagePath.trim() ===
+                        image.urls.original.trim() && (
+                        <Badge variant="secondary">Em PATH_IMAGEM</Badge>
+                      )}
                     </div>
                   </div>
                 ))}

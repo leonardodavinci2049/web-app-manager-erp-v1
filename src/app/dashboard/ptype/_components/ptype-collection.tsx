@@ -97,7 +97,11 @@ export function PtypeCollection({
               className="group h-full gap-3 py-4 transition-all hover:-translate-y-0.5 hover:shadow-md"
             >
               <CardContent className="flex h-full flex-col gap-3 px-3 text-center">
-                <PtypeImage name={item.name} viewMode="grid" />
+                <PtypeImage
+                  name={item.name}
+                  imagePath={item.imagePath}
+                  viewMode="grid"
+                />
                 <div className="min-w-0">
                   <p className="line-clamp-2 text-sm font-medium">
                     {item.name}
@@ -126,7 +130,11 @@ export function PtypeCollection({
                 className="gap-0 py-0 transition-shadow hover:shadow-md"
               >
                 <CardContent className="flex items-center gap-3 p-3">
-                  <PtypeImage name={item.name} viewMode="list" />
+                  <PtypeImage
+                    name={item.name}
+                    imagePath={item.imagePath}
+                    viewMode="list"
+                  />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium">{item.name}</p>
                     <p className="text-muted-foreground text-xs tabular-nums">
@@ -154,6 +162,7 @@ export function PtypeCollection({
             <Table aria-label="Lista de tipos de produtos">
               <TableHeader className="bg-muted/50">
                 <TableRow>
+                  <TableHead className="w-14">Imagem</TableHead>
                   <TableHead className="w-28">ID</TableHead>
                   <TableHead className="w-56 max-w-[300px] whitespace-normal">
                     Tipo de produto
@@ -166,6 +175,14 @@ export function PtypeCollection({
               <TableBody className="[&_tr:nth-child(even)]:bg-muted/30">
                 {items.map((item) => (
                   <TableRow key={item.id}>
+                    <TableCell>
+                      <PtypeImage
+                        name={item.name}
+                        imagePath={item.imagePath}
+                        viewMode="list"
+                        size="sm"
+                      />
+                    </TableCell>
                     <TableCell className="text-muted-foreground tabular-nums">
                       {item.id}
                     </TableCell>

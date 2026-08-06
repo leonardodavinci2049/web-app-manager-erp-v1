@@ -1,11 +1,16 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
 import { assetsApiService } from "@/services/api-assets/assets-api-service";
 import type { GalleryImage } from "@/services/api-assets/types/api-assets";
 import { isApiError } from "@/services/api-assets/types/api-assets";
+import {
+  FIELD_TYPE,
+  generalCallServiceApi,
+} from "@/services/api-main/general-call";
 import { getSupplierById } from "@/services/api-main/supplier";
 import {
   SUPPLIERS_GALLERY_ACCEPTED_MIME_TYPES,
@@ -16,6 +21,10 @@ import {
 import type { SupplierGalleryMutationResult } from "../_components/image-gallery/image-gallery-types";
 
 const logger = createLogger("SupplierImageGalleryActions");
+const SUPPLIER_TABLE_NAME = "tbl_fornecedor";
+const SUPPLIER_PRIMARY_KEY_FIELD = "ID_FORNECEDOR";
+const SUPPLIER_IMAGE_PATH_FIELD = "PATH_IMAGEM";
+const SUPPLIER_IMAGE_PATH_MAX_LENGTH = 300;
 
 const SupplierIdSchema = z.coerce.number().int().positive();
 const AssetIdSchema = z.string().uuid();
@@ -49,8 +58,23 @@ async function getAuthorizedSupplierContext(supplierId: number) {
   return result ? apiContext : null;
 }
 
-async function authorizeSupplier(supplierId: number): Promise<boolean> {
-  return Boolean(await getAuthorizedSupplierContext(supplierId));
+async function updateSupplierImagePath(
+  supplierId: number,
+  imagePath: string,
+  apiContext: Awaited<ReturnType<typeof getAuthContext>>["apiContext"],
+): Promise<void> {
+  await generalCallServiceApi.updateTableInlineField({
+    ...apiContext,
+    pe_table_name: SUPPLIER_TABLE_NAME,
+    pe_primary_key_field: SUPPLIER_PRIMARY_KEY_FIELD,
+    pe_register_id: supplierId,
+    pe_field_type: FIELD_TYPE.STRING,
+    pe_field: SUPPLIER_IMAGE_PATH_FIELD,
+    pe_value_str: imagePath,
+  });
+
+  revalidatePath("/dashboard/suppliers");
+  revalidatePath(`/dashboard/suppliers/${supplierId}`);
 }
 
 async function readSupplierGallery(supplierId: number) {
@@ -105,7 +129,8 @@ export async function uploadSupplierImageAction(
   }
 
   try {
-    if (!(await authorizeSupplier(supplierId))) {
+    const apiContext = await getAuthorizedSupplierContext(supplierId);
+    if (!apiContext) {
       return {
         success: false,
         error: "Fornecedor não encontrada ou inacessível.",
@@ -145,9 +170,45 @@ export async function uploadSupplierImageAction(
       return { success: false, error: "Não foi possível enviar esta imagem." };
     }
 
+    if (isFirstImage) {
+      const imagePath = result.urls.original.trim();
+      if (!imagePath || imagePath.length > SUPPLIER_IMAGE_PATH_MAX_LENGTH) {
+        logger.error("First supplier image has an invalid original URL", {
+          supplierId,
+          assetId: result.id,
+          imagePathLength: imagePath.length,
+        });
+        return {
+          success: true,
+          message: `${file.name} foi enviada com sucesso.`,
+          preferredImageId: result.id,
+          warning:
+            "A imagem foi enviada, mas não foi possível atualizar PATH_IMAGEM.",
+        };
+      }
+
+      try {
+        await updateSupplierImagePath(supplierId, imagePath, apiContext);
+      } catch (error) {
+        logger.error(
+          "First supplier image uploaded but PATH_IMAGEM update failed",
+          { supplierId, assetId: result.id, error },
+        );
+        return {
+          success: true,
+          message: `${file.name} foi enviada com sucesso.`,
+          preferredImageId: result.id,
+          warning:
+            "A imagem foi enviada, mas não foi possível atualizar PATH_IMAGEM.",
+        };
+      }
+    }
+
     return {
       success: true,
-      message: `${file.name} foi enviada com sucesso.`,
+      message: isFirstImage
+        ? `${file.name} foi enviada e definida como imagem do fornecedor.`
+        : `${file.name} foi enviada com sucesso.`,
       preferredImageId: result.id,
     };
   } catch (error) {
@@ -169,7 +230,8 @@ export async function setPrimarySupplierImageAction(
 
   const { assetId, supplierId } = parsedInput.data;
   try {
-    if (!(await authorizeSupplier(supplierId))) {
+    const apiContext = await getAuthorizedSupplierContext(supplierId);
+    if (!apiContext) {
       return {
         success: false,
         error: "Fornecedor não encontrada ou inacessível.",
@@ -188,6 +250,35 @@ export async function setPrimarySupplierImageAction(
       };
     }
     if (image.isPrimary) {
+      const imagePath = image.urls.original.trim();
+      if (!imagePath || imagePath.length > SUPPLIER_IMAGE_PATH_MAX_LENGTH) {
+        logger.error("Primary supplier image has an invalid original URL", {
+          supplierId,
+          assetId,
+          imagePathLength: imagePath.length,
+        });
+        return {
+          success: true,
+          message: "Esta imagem já é a principal.",
+          preferredImageId: assetId,
+          warning: "Não foi possível atualizar PATH_IMAGEM.",
+        };
+      }
+      try {
+        await updateSupplierImagePath(supplierId, imagePath, apiContext);
+      } catch (error) {
+        logger.error("Primary supplier image PATH_IMAGEM repair failed", {
+          supplierId,
+          assetId,
+          error,
+        });
+        return {
+          success: true,
+          message: "Esta imagem já é a principal.",
+          preferredImageId: assetId,
+          warning: "Não foi possível atualizar PATH_IMAGEM.",
+        };
+      }
       return {
         success: true,
         message: "Esta imagem já é a principal.",
@@ -211,6 +302,38 @@ export async function setPrimarySupplierImageAction(
       return {
         success: false,
         error: "Não foi possível definir a imagem principal.",
+      };
+    }
+
+    const imagePath = image.urls.original.trim();
+    if (!imagePath || imagePath.length > SUPPLIER_IMAGE_PATH_MAX_LENGTH) {
+      logger.error("Primary supplier image has an invalid original URL", {
+        supplierId,
+        assetId,
+        imagePathLength: imagePath.length,
+      });
+      return {
+        success: true,
+        message: "Nova imagem principal definida.",
+        preferredImageId: assetId,
+        warning:
+          "A imagem principal foi alterada, mas não foi possível atualizar PATH_IMAGEM.",
+      };
+    }
+
+    try {
+      await updateSupplierImagePath(supplierId, imagePath, apiContext);
+    } catch (error) {
+      logger.error(
+        "Primary supplier image changed but PATH_IMAGEM update failed",
+        { supplierId, assetId, error },
+      );
+      return {
+        success: true,
+        message: "Nova imagem principal definida.",
+        preferredImageId: assetId,
+        warning:
+          "A imagem principal foi alterada, mas não foi possível atualizar PATH_IMAGEM.",
       };
     }
 
@@ -241,7 +364,8 @@ export async function deleteSupplierImageAction(
 
   const { assetId, supplierId } = parsedInput.data;
   try {
-    if (!(await authorizeSupplier(supplierId))) {
+    const apiContext = await getAuthorizedSupplierContext(supplierId);
+    if (!apiContext) {
       return {
         success: false,
         error: "Fornecedor não encontrada ou inacessível.",
@@ -302,6 +426,38 @@ export async function deleteSupplierImageAction(
           preferredImageId: promotionCandidate.id,
           warning:
             "A imagem foi excluída, mas não foi possível confirmar a nova principal.",
+        };
+      }
+
+      const imagePath = promotionCandidate.urls.original.trim();
+      if (!imagePath || imagePath.length > SUPPLIER_IMAGE_PATH_MAX_LENGTH) {
+        logger.error("Promoted supplier image has an invalid original URL", {
+          supplierId,
+          assetId: promotionCandidate.id,
+          imagePathLength: imagePath.length,
+        });
+        return {
+          success: true,
+          message: "Imagem excluída.",
+          preferredImageId: promotionCandidate.id,
+          warning:
+            "A nova principal foi definida, mas não foi possível atualizar PATH_IMAGEM.",
+        };
+      }
+
+      try {
+        await updateSupplierImagePath(supplierId, imagePath, apiContext);
+      } catch (error) {
+        logger.error(
+          "Primary supplier image promoted but PATH_IMAGEM update failed",
+          { supplierId, assetId: promotionCandidate.id, error },
+        );
+        return {
+          success: true,
+          message: "Imagem excluída.",
+          preferredImageId: promotionCandidate.id,
+          warning:
+            "A nova principal foi definida, mas não foi possível atualizar PATH_IMAGEM.",
         };
       }
     }

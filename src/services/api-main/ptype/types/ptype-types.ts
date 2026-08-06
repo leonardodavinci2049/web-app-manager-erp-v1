@@ -41,6 +41,7 @@ export interface PtypeFindManagerAllRequest extends PtypeBaseRequest {
 export interface PtypeListItem {
   ID_TIPO: number;
   TIPO: string;
+  PATH_IMAGEM?: string | null;
 }
 
 export interface PtypeFindByIdRequest extends PtypeBaseRequest {

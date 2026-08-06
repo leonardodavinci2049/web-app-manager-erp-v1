@@ -264,10 +264,7 @@ export function PtypeDetails({
             </CardContent>
           </Card>
 
-          <form
-            onSubmit={handleSubmit}
-            className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)]"
-          >
+          <form onSubmit={handleSubmit} className="space-y-4">
             <Card>
               <CardHeader>
                 <CardTitle>Dados do cadastro</CardTitle>

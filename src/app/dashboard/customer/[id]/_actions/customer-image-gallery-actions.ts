@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
@@ -7,6 +8,10 @@ import { assetsApiService } from "@/services/api-assets/assets-api-service";
 import type { GalleryImage } from "@/services/api-assets/types/api-assets";
 import { isApiError } from "@/services/api-assets/types/api-assets";
 import { getCustomerById } from "@/services/api-main/customer-general";
+import {
+  FIELD_TYPE,
+  generalCallServiceApi,
+} from "@/services/api-main/general-call";
 import {
   CUSTOMER_GALLERY_ACCEPTED_MIME_TYPES,
   CUSTOMER_GALLERY_ENTITY_TYPE,
@@ -16,6 +21,10 @@ import {
 import type { CustomerGalleryMutationResult } from "../_components/image-gallery/image-gallery-types";
 
 const logger = createLogger("CustomerImageGalleryActions");
+const CUSTOMER_TABLE_NAME = "tbl_pessoa";
+const CUSTOMER_PRIMARY_KEY_FIELD = "ID_TBL_PESSOA";
+const CUSTOMER_IMAGE_PATH_FIELD = "PATH_IMAGEM";
+const CUSTOMER_IMAGE_PATH_MAX_LENGTH = 300;
 
 const CustomerIdSchema = z.coerce.number().int().positive();
 const AssetIdSchema = z.string().uuid();
@@ -49,8 +58,23 @@ async function getAuthorizedCustomerContext(customerId: number) {
   return result ? apiContext : null;
 }
 
-async function authorizeCustomer(customerId: number): Promise<boolean> {
-  return Boolean(await getAuthorizedCustomerContext(customerId));
+async function updateCustomerImagePath(
+  customerId: number,
+  imagePath: string,
+  apiContext: Awaited<ReturnType<typeof getAuthContext>>["apiContext"],
+): Promise<void> {
+  await generalCallServiceApi.updateTableInlineField({
+    pe_table_name: CUSTOMER_TABLE_NAME,
+    pe_primary_key_field: CUSTOMER_PRIMARY_KEY_FIELD,
+    pe_register_id: customerId,
+    pe_field_type: FIELD_TYPE.STRING,
+    pe_field: CUSTOMER_IMAGE_PATH_FIELD,
+    pe_value_str: imagePath,
+    ...apiContext,
+  });
+
+  revalidatePath("/dashboard/customer");
+  revalidatePath(`/dashboard/customer/${customerId}`);
 }
 
 async function readCustomerGallery(customerId: number) {
@@ -102,7 +126,8 @@ export async function uploadCustomerImageAction(
   }
 
   try {
-    if (!(await authorizeCustomer(customerId))) {
+    const apiContext = await getAuthorizedCustomerContext(customerId);
+    if (!apiContext) {
       return {
         success: false,
         error: "Cliente não encontrada ou inacessível.",
@@ -142,9 +167,45 @@ export async function uploadCustomerImageAction(
       return { success: false, error: "Não foi possível enviar esta imagem." };
     }
 
+    if (isFirstImage) {
+      const imagePath = result.urls.original.trim();
+      if (!imagePath || imagePath.length > CUSTOMER_IMAGE_PATH_MAX_LENGTH) {
+        logger.error("First customer image has an invalid original URL", {
+          customerId,
+          assetId: result.id,
+          imagePathLength: imagePath.length,
+        });
+        return {
+          success: true,
+          message: `${file.name} foi enviada com sucesso.`,
+          preferredImageId: result.id,
+          warning:
+            "A imagem foi enviada, mas não foi possível atualizar PATH_IMAGEM.",
+        };
+      }
+
+      try {
+        await updateCustomerImagePath(customerId, imagePath, apiContext);
+      } catch (error) {
+        logger.error(
+          "First customer image uploaded but PATH_IMAGEM update failed",
+          { customerId, assetId: result.id, error },
+        );
+        return {
+          success: true,
+          message: `${file.name} foi enviada com sucesso.`,
+          preferredImageId: result.id,
+          warning:
+            "A imagem foi enviada, mas não foi possível atualizar PATH_IMAGEM.",
+        };
+      }
+    }
+
     return {
       success: true,
-      message: `${file.name} foi enviada com sucesso.`,
+      message: isFirstImage
+        ? `${file.name} foi enviada e definida como imagem do cliente.`
+        : `${file.name} foi enviada com sucesso.`,
       preferredImageId: result.id,
     };
   } catch (error) {
@@ -166,7 +227,8 @@ export async function setPrimaryCustomerImageAction(
 
   const { assetId, customerId } = parsedInput.data;
   try {
-    if (!(await authorizeCustomer(customerId))) {
+    const apiContext = await getAuthorizedCustomerContext(customerId);
+    if (!apiContext) {
       return {
         success: false,
         error: "Cliente não encontrada ou inacessível.",
@@ -182,6 +244,35 @@ export async function setPrimaryCustomerImageAction(
       return { success: false, error: "Imagem não pertence a este cliente." };
     }
     if (image.isPrimary) {
+      const imagePath = image.urls.original.trim();
+      if (!imagePath || imagePath.length > CUSTOMER_IMAGE_PATH_MAX_LENGTH) {
+        logger.error("Primary customer image has an invalid original URL", {
+          customerId,
+          assetId,
+          imagePathLength: imagePath.length,
+        });
+        return {
+          success: true,
+          message: "Esta imagem já é a principal.",
+          preferredImageId: assetId,
+          warning: "Não foi possível atualizar PATH_IMAGEM.",
+        };
+      }
+      try {
+        await updateCustomerImagePath(customerId, imagePath, apiContext);
+      } catch (error) {
+        logger.error("Primary customer image PATH_IMAGEM repair failed", {
+          customerId,
+          assetId,
+          error,
+        });
+        return {
+          success: true,
+          message: "Esta imagem já é a principal.",
+          preferredImageId: assetId,
+          warning: "Não foi possível atualizar PATH_IMAGEM.",
+        };
+      }
       return {
         success: true,
         message: "Esta imagem já é a principal.",
@@ -205,6 +296,38 @@ export async function setPrimaryCustomerImageAction(
       return {
         success: false,
         error: "Não foi possível definir a imagem principal.",
+      };
+    }
+
+    const imagePath = image.urls.original.trim();
+    if (!imagePath || imagePath.length > CUSTOMER_IMAGE_PATH_MAX_LENGTH) {
+      logger.error("Primary customer image has an invalid original URL", {
+        customerId,
+        assetId,
+        imagePathLength: imagePath.length,
+      });
+      return {
+        success: true,
+        message: "Nova imagem principal definida.",
+        preferredImageId: assetId,
+        warning:
+          "A imagem principal foi alterada, mas não foi possível atualizar PATH_IMAGEM.",
+      };
+    }
+
+    try {
+      await updateCustomerImagePath(customerId, imagePath, apiContext);
+    } catch (error) {
+      logger.error(
+        "Primary customer image changed but PATH_IMAGEM update failed",
+        { customerId, assetId, error },
+      );
+      return {
+        success: true,
+        message: "Nova imagem principal definida.",
+        preferredImageId: assetId,
+        warning:
+          "A imagem principal foi alterada, mas não foi possível atualizar PATH_IMAGEM.",
       };
     }
 
@@ -235,7 +358,8 @@ export async function deleteCustomerImageAction(
 
   const { assetId, customerId } = parsedInput.data;
   try {
-    if (!(await authorizeCustomer(customerId))) {
+    const apiContext = await getAuthorizedCustomerContext(customerId);
+    if (!apiContext) {
       return {
         success: false,
         error: "Cliente não encontrada ou inacessível.",
@@ -293,6 +417,38 @@ export async function deleteCustomerImageAction(
           preferredImageId: promotionCandidate.id,
           warning:
             "A imagem foi excluída, mas não foi possível confirmar a nova principal.",
+        };
+      }
+
+      const imagePath = promotionCandidate.urls.original.trim();
+      if (!imagePath || imagePath.length > CUSTOMER_IMAGE_PATH_MAX_LENGTH) {
+        logger.error("Promoted customer image has an invalid original URL", {
+          customerId,
+          assetId: promotionCandidate.id,
+          imagePathLength: imagePath.length,
+        });
+        return {
+          success: true,
+          message: "Imagem excluída.",
+          preferredImageId: promotionCandidate.id,
+          warning:
+            "A nova principal foi definida, mas não foi possível atualizar PATH_IMAGEM.",
+        };
+      }
+
+      try {
+        await updateCustomerImagePath(customerId, imagePath, apiContext);
+      } catch (error) {
+        logger.error(
+          "Primary customer image promoted but PATH_IMAGEM update failed",
+          { customerId, assetId: promotionCandidate.id, error },
+        );
+        return {
+          success: true,
+          message: "Imagem excluída.",
+          preferredImageId: promotionCandidate.id,
+          warning:
+            "A nova principal foi definida, mas não foi possível atualizar PATH_IMAGEM.",
         };
       }
     }

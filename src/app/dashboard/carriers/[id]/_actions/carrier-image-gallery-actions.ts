@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
@@ -7,6 +8,10 @@ import { assetsApiService } from "@/services/api-assets/assets-api-service";
 import type { GalleryImage } from "@/services/api-assets/types/api-assets";
 import { isApiError } from "@/services/api-assets/types/api-assets";
 import { getCarrierById } from "@/services/api-main/carrier";
+import {
+  FIELD_TYPE,
+  generalCallServiceApi,
+} from "@/services/api-main/general-call";
 import {
   CARRIER_GALLERY_ACCEPTED_MIME_TYPES,
   CARRIER_GALLERY_ENTITY_TYPE,
@@ -16,6 +21,10 @@ import {
 import type { CarrierGalleryMutationResult } from "../_components/image-gallery/image-gallery-types";
 
 const logger = createLogger("CarrierImageGalleryActions");
+const CARRIER_TABLE_NAME = "tbl_transportadora";
+const CARRIER_PRIMARY_KEY_FIELD = "ID_TRANSPORTADORA";
+const CARRIER_IMAGE_PATH_FIELD = "PATH_IMAGEM";
+const CARRIER_IMAGE_PATH_MAX_LENGTH = 300;
 
 const CarrierIdSchema = z.coerce.number().int().positive();
 const AssetIdSchema = z.string().uuid();
@@ -49,8 +58,23 @@ async function getAuthorizedCarrierContext(carrierId: number) {
   return result ? apiContext : null;
 }
 
-async function authorizeCarrier(carrierId: number): Promise<boolean> {
-  return Boolean(await getAuthorizedCarrierContext(carrierId));
+async function updateCarrierImagePath(
+  carrierId: number,
+  imagePath: string,
+  apiContext: Awaited<ReturnType<typeof getAuthContext>>["apiContext"],
+): Promise<void> {
+  await generalCallServiceApi.updateTableInlineField({
+    ...apiContext,
+    pe_table_name: CARRIER_TABLE_NAME,
+    pe_primary_key_field: CARRIER_PRIMARY_KEY_FIELD,
+    pe_register_id: carrierId,
+    pe_field_type: FIELD_TYPE.STRING,
+    pe_field: CARRIER_IMAGE_PATH_FIELD,
+    pe_value_str: imagePath,
+  });
+
+  revalidatePath("/dashboard/carriers");
+  revalidatePath(`/dashboard/carriers/${carrierId}`);
 }
 
 async function readCarrierGallery(carrierId: number) {
@@ -105,7 +129,8 @@ export async function uploadCarrierImageAction(
   }
 
   try {
-    if (!(await authorizeCarrier(carrierId))) {
+    const apiContext = await getAuthorizedCarrierContext(carrierId);
+    if (!apiContext) {
       return {
         success: false,
         error: "Transportadora não encontrada ou inacessível.",
@@ -145,9 +170,45 @@ export async function uploadCarrierImageAction(
       return { success: false, error: "Não foi possível enviar esta imagem." };
     }
 
+    if (isFirstImage) {
+      const imagePath = result.urls.original.trim();
+      if (!imagePath || imagePath.length > CARRIER_IMAGE_PATH_MAX_LENGTH) {
+        logger.error("First carrier image has an invalid original URL", {
+          carrierId,
+          assetId: result.id,
+          imagePathLength: imagePath.length,
+        });
+        return {
+          success: true,
+          message: `${file.name} foi enviada com sucesso.`,
+          preferredImageId: result.id,
+          warning:
+            "A imagem foi enviada, mas não foi possível atualizar PATH_IMAGEM.",
+        };
+      }
+
+      try {
+        await updateCarrierImagePath(carrierId, imagePath, apiContext);
+      } catch (error) {
+        logger.error(
+          "First carrier image uploaded but PATH_IMAGEM update failed",
+          { carrierId, assetId: result.id, error },
+        );
+        return {
+          success: true,
+          message: `${file.name} foi enviada com sucesso.`,
+          preferredImageId: result.id,
+          warning:
+            "A imagem foi enviada, mas não foi possível atualizar PATH_IMAGEM.",
+        };
+      }
+    }
+
     return {
       success: true,
-      message: `${file.name} foi enviada com sucesso.`,
+      message: isFirstImage
+        ? `${file.name} foi enviada e definida como imagem da transportadora.`
+        : `${file.name} foi enviada com sucesso.`,
       preferredImageId: result.id,
     };
   } catch (error) {
@@ -169,7 +230,8 @@ export async function setPrimaryCarrierImageAction(
 
   const { assetId, carrierId } = parsedInput.data;
   try {
-    if (!(await authorizeCarrier(carrierId))) {
+    const apiContext = await getAuthorizedCarrierContext(carrierId);
+    if (!apiContext) {
       return {
         success: false,
         error: "Transportadora não encontrada ou inacessível.",
@@ -188,6 +250,35 @@ export async function setPrimaryCarrierImageAction(
       };
     }
     if (image.isPrimary) {
+      const imagePath = image.urls.original.trim();
+      if (!imagePath || imagePath.length > CARRIER_IMAGE_PATH_MAX_LENGTH) {
+        logger.error("Primary carrier image has an invalid original URL", {
+          carrierId,
+          assetId,
+          imagePathLength: imagePath.length,
+        });
+        return {
+          success: true,
+          message: "Esta imagem já é a principal.",
+          preferredImageId: assetId,
+          warning: "Não foi possível atualizar PATH_IMAGEM.",
+        };
+      }
+      try {
+        await updateCarrierImagePath(carrierId, imagePath, apiContext);
+      } catch (error) {
+        logger.error("Primary carrier image PATH_IMAGEM repair failed", {
+          carrierId,
+          assetId,
+          error,
+        });
+        return {
+          success: true,
+          message: "Esta imagem já é a principal.",
+          preferredImageId: assetId,
+          warning: "Não foi possível atualizar PATH_IMAGEM.",
+        };
+      }
       return {
         success: true,
         message: "Esta imagem já é a principal.",
@@ -211,6 +302,38 @@ export async function setPrimaryCarrierImageAction(
       return {
         success: false,
         error: "Não foi possível definir a imagem principal.",
+      };
+    }
+
+    const imagePath = image.urls.original.trim();
+    if (!imagePath || imagePath.length > CARRIER_IMAGE_PATH_MAX_LENGTH) {
+      logger.error("Primary carrier image has an invalid original URL", {
+        carrierId,
+        assetId,
+        imagePathLength: imagePath.length,
+      });
+      return {
+        success: true,
+        message: "Nova imagem principal definida.",
+        preferredImageId: assetId,
+        warning:
+          "A imagem principal foi alterada, mas não foi possível atualizar PATH_IMAGEM.",
+      };
+    }
+
+    try {
+      await updateCarrierImagePath(carrierId, imagePath, apiContext);
+    } catch (error) {
+      logger.error(
+        "Primary carrier image changed but PATH_IMAGEM update failed",
+        { carrierId, assetId, error },
+      );
+      return {
+        success: true,
+        message: "Nova imagem principal definida.",
+        preferredImageId: assetId,
+        warning:
+          "A imagem principal foi alterada, mas não foi possível atualizar PATH_IMAGEM.",
       };
     }
 
@@ -241,7 +364,8 @@ export async function deleteCarrierImageAction(
 
   const { assetId, carrierId } = parsedInput.data;
   try {
-    if (!(await authorizeCarrier(carrierId))) {
+    const apiContext = await getAuthorizedCarrierContext(carrierId);
+    if (!apiContext) {
       return {
         success: false,
         error: "Transportadora não encontrada ou inacessível.",
@@ -302,6 +426,38 @@ export async function deleteCarrierImageAction(
           preferredImageId: promotionCandidate.id,
           warning:
             "A imagem foi excluída, mas não foi possível confirmar a nova principal.",
+        };
+      }
+
+      const imagePath = promotionCandidate.urls.original.trim();
+      if (!imagePath || imagePath.length > CARRIER_IMAGE_PATH_MAX_LENGTH) {
+        logger.error("Promoted carrier image has an invalid original URL", {
+          carrierId,
+          assetId: promotionCandidate.id,
+          imagePathLength: imagePath.length,
+        });
+        return {
+          success: true,
+          message: "Imagem excluída.",
+          preferredImageId: promotionCandidate.id,
+          warning:
+            "A nova principal foi definida, mas não foi possível atualizar PATH_IMAGEM.",
+        };
+      }
+
+      try {
+        await updateCarrierImagePath(carrierId, imagePath, apiContext);
+      } catch (error) {
+        logger.error(
+          "Primary carrier image promoted but PATH_IMAGEM update failed",
+          { carrierId, assetId: promotionCandidate.id, error },
+        );
+        return {
+          success: true,
+          message: "Imagem excluída.",
+          preferredImageId: promotionCandidate.id,
+          warning:
+            "A nova principal foi definida, mas não foi possível atualizar PATH_IMAGEM.",
         };
       }
     }

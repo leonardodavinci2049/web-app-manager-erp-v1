@@ -83,7 +83,7 @@ export default async function BrandDetailPage({
           { label: brand.name, isActive: true },
         ]}
       />
-      <div className="flex flex-1 flex-col">
+      <div className="mx-auto flex w-full max-w-[1400px] min-w-0 flex-1 flex-col">
         <div className="@container/main flex flex-1 flex-col gap-6">
           <div className="flex flex-col gap-6 py-6">
             <div className="px-3 lg:px-6">

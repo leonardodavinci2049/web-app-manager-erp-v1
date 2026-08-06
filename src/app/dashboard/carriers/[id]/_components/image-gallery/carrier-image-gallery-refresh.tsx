@@ -24,23 +24,14 @@ export function CarrierImageGalleryRefresh({
     initialState.images,
   );
   const [totalImages, setTotalImages] = useState(initialState.totalImages);
-  const [loadError, setLoadError] = useState(
-    initialState.status === "error" ? initialState.error : null,
-  );
   const [selectionRequest, setSelectionRequest] = useState({
     imageId: initialState.images.find((image) => image.isPrimary)?.id,
     version: 0,
   });
 
   useEffect(() => {
-    if (initialState.status === "error") {
-      setLoadError(initialState.error);
-      return;
-    }
-
     setImages(initialState.images);
     setTotalImages(initialState.totalImages);
-    setLoadError(null);
     setSelectionRequest((current) => ({
       ...current,
       version: current.version + 1,
@@ -64,7 +55,6 @@ export function CarrierImageGalleryRefresh({
       totalImages={totalImages}
       carrierName={carrierName}
       carrierId={carrierId}
-      loadError={loadError}
       selectionRequest={selectionRequest}
       onRefresh={refreshGallery}
     />

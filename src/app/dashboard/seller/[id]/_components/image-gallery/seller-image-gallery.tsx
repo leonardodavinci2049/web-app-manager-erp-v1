@@ -59,7 +59,6 @@ interface SellerImageGalleryProps {
   totalImages: number;
   sellerName: string;
   sellerId: number;
-  loadError: string | null;
   selectionRequest: { imageId?: string; version: number };
   onRefresh: (preferredImageId?: string) => void;
 }
@@ -75,7 +74,6 @@ export function SellerImageGallery({
   totalImages,
   sellerName,
   sellerId,
-  loadError,
   selectionRequest,
   onRefresh,
 }: SellerImageGalleryProps) {
@@ -273,28 +271,6 @@ export function SellerImageGallery({
       className="w-full max-w-[500px] space-y-4"
       aria-label={`Galeria de imagens de ${sellerName}`}
     >
-      {loadError && (
-        <div
-          role="alert"
-          className="flex items-center justify-between gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive"
-        >
-          <span>{loadError}</span>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={isBusy}
-            onClick={async () => {
-              setPendingMutation("refresh");
-              refresh(selectedImageId);
-              setPendingMutation(null);
-            }}
-          >
-            Tentar novamente
-          </Button>
-        </div>
-      )}
-
       <Card className="overflow-hidden py-0">
         <CardContent className="p-0">
           {selectedImage ? (

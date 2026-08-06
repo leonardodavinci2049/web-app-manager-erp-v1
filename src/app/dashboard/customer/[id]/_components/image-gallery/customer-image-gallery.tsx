@@ -59,7 +59,6 @@ interface CustomerImageGalleryProps {
   totalImages: number;
   customerName: string;
   customerId: number;
-  loadError: string | null;
   selectionRequest: { imageId?: string; version: number };
   onRefresh: (preferredImageId?: string) => void;
 }
@@ -75,7 +74,6 @@ export function CustomerImageGallery({
   totalImages,
   customerName,
   customerId,
-  loadError,
   selectionRequest,
   onRefresh,
 }: CustomerImageGalleryProps) {
@@ -221,7 +219,8 @@ export function CustomerImageGallery({
         return;
       }
       toast.success(result.message);
-      setLiveMessage(result.message);
+      if (result.warning) toast.warning(result.warning);
+      setLiveMessage(result.warning ?? result.message);
       refresh(result.preferredImageId);
     } finally {
       setPrimaryImageId(null);
@@ -273,28 +272,6 @@ export function CustomerImageGallery({
       className="w-full max-w-[500px] space-y-4"
       aria-label={`Galeria de imagens de ${customerName}`}
     >
-      {loadError && (
-        <div
-          role="alert"
-          className="flex items-center justify-between gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive"
-        >
-          <span>{loadError}</span>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={isBusy}
-            onClick={async () => {
-              setPendingMutation("refresh");
-              refresh(selectedImageId);
-              setPendingMutation(null);
-            }}
-          >
-            Tentar novamente
-          </Button>
-        </div>
-      )}
-
       <Card className="overflow-hidden py-0">
         <CardContent className="p-0">
           {selectedImage ? (

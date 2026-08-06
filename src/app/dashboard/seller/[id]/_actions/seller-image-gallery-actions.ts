@@ -1,11 +1,16 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
 import { assetsApiService } from "@/services/api-assets/assets-api-service";
 import type { GalleryImage } from "@/services/api-assets/types/api-assets";
 import { isApiError } from "@/services/api-assets/types/api-assets";
+import {
+  FIELD_TYPE,
+  generalCallServiceApi,
+} from "@/services/api-main/general-call";
 import { getSellerById } from "@/services/api-main/seller";
 import {
   SELLER_GALLERY_ACCEPTED_MIME_TYPES,
@@ -16,6 +21,10 @@ import {
 import type { SellerGalleryMutationResult } from "../_components/image-gallery/image-gallery-types";
 
 const logger = createLogger("SellerImageGalleryActions");
+const SELLER_TABLE_NAME = "tbl_pessoa";
+const SELLER_PRIMARY_KEY_FIELD = "ID_TBL_PESSOA";
+const SELLER_IMAGE_PATH_FIELD = "PATH_IMAGEM";
+const SELLER_IMAGE_PATH_MAX_LENGTH = 300;
 
 const SellerIdSchema = z.coerce.number().int().positive();
 const AssetIdSchema = z.string().uuid();
@@ -49,8 +58,23 @@ async function getAuthorizedSellerContext(sellerId: number) {
   return result ? apiContext : null;
 }
 
-async function authorizeSeller(sellerId: number): Promise<boolean> {
-  return Boolean(await getAuthorizedSellerContext(sellerId));
+async function updateSellerImagePath(
+  sellerId: number,
+  imagePath: string,
+  apiContext: Awaited<ReturnType<typeof getAuthContext>>["apiContext"],
+): Promise<void> {
+  await generalCallServiceApi.updateTableInlineField({
+    ...apiContext,
+    pe_table_name: SELLER_TABLE_NAME,
+    pe_primary_key_field: SELLER_PRIMARY_KEY_FIELD,
+    pe_register_id: sellerId,
+    pe_field_type: FIELD_TYPE.STRING,
+    pe_field: SELLER_IMAGE_PATH_FIELD,
+    pe_value_str: imagePath,
+  });
+
+  revalidatePath("/dashboard/seller");
+  revalidatePath(`/dashboard/seller/${sellerId}`);
 }
 
 async function readSellerGallery(sellerId: number) {
@@ -102,7 +126,8 @@ export async function uploadSellerImageAction(
   }
 
   try {
-    if (!(await authorizeSeller(sellerId))) {
+    const apiContext = await getAuthorizedSellerContext(sellerId);
+    if (!apiContext) {
       return {
         success: false,
         error: "Vendedor não encontrada ou inacessível.",
@@ -142,9 +167,45 @@ export async function uploadSellerImageAction(
       return { success: false, error: "Não foi possível enviar esta imagem." };
     }
 
+    if (isFirstImage) {
+      const imagePath = result.urls.original.trim();
+      if (!imagePath || imagePath.length > SELLER_IMAGE_PATH_MAX_LENGTH) {
+        logger.error("First seller image has an invalid original URL", {
+          sellerId,
+          assetId: result.id,
+          imagePathLength: imagePath.length,
+        });
+        return {
+          success: true,
+          message: `${file.name} foi enviada com sucesso.`,
+          preferredImageId: result.id,
+          warning:
+            "A imagem foi enviada, mas não foi possível atualizar PATH_IMAGEM.",
+        };
+      }
+
+      try {
+        await updateSellerImagePath(sellerId, imagePath, apiContext);
+      } catch (error) {
+        logger.error(
+          "First seller image uploaded but PATH_IMAGEM update failed",
+          { sellerId, assetId: result.id, error },
+        );
+        return {
+          success: true,
+          message: `${file.name} foi enviada com sucesso.`,
+          preferredImageId: result.id,
+          warning:
+            "A imagem foi enviada, mas não foi possível atualizar PATH_IMAGEM.",
+        };
+      }
+    }
+
     return {
       success: true,
-      message: `${file.name} foi enviada com sucesso.`,
+      message: isFirstImage
+        ? `${file.name} foi enviada e definida como imagem do vendedor.`
+        : `${file.name} foi enviada com sucesso.`,
       preferredImageId: result.id,
     };
   } catch (error) {
@@ -166,7 +227,8 @@ export async function setPrimarySellerImageAction(
 
   const { assetId, sellerId } = parsedInput.data;
   try {
-    if (!(await authorizeSeller(sellerId))) {
+    const apiContext = await getAuthorizedSellerContext(sellerId);
+    if (!apiContext) {
       return {
         success: false,
         error: "Vendedor não encontrada ou inacessível.",
@@ -182,6 +244,35 @@ export async function setPrimarySellerImageAction(
       return { success: false, error: "Imagem não pertence a este vendedor." };
     }
     if (image.isPrimary) {
+      const imagePath = image.urls.original.trim();
+      if (!imagePath || imagePath.length > SELLER_IMAGE_PATH_MAX_LENGTH) {
+        logger.error("Primary seller image has an invalid original URL", {
+          sellerId,
+          assetId,
+          imagePathLength: imagePath.length,
+        });
+        return {
+          success: true,
+          message: "Esta imagem já é a principal.",
+          preferredImageId: assetId,
+          warning: "Não foi possível atualizar PATH_IMAGEM.",
+        };
+      }
+      try {
+        await updateSellerImagePath(sellerId, imagePath, apiContext);
+      } catch (error) {
+        logger.error("Primary seller image PATH_IMAGEM repair failed", {
+          sellerId,
+          assetId,
+          error,
+        });
+        return {
+          success: true,
+          message: "Esta imagem já é a principal.",
+          preferredImageId: assetId,
+          warning: "Não foi possível atualizar PATH_IMAGEM.",
+        };
+      }
       return {
         success: true,
         message: "Esta imagem já é a principal.",
@@ -205,6 +296,38 @@ export async function setPrimarySellerImageAction(
       return {
         success: false,
         error: "Não foi possível definir a imagem principal.",
+      };
+    }
+
+    const imagePath = image.urls.original.trim();
+    if (!imagePath || imagePath.length > SELLER_IMAGE_PATH_MAX_LENGTH) {
+      logger.error("Primary seller image has an invalid original URL", {
+        sellerId,
+        assetId,
+        imagePathLength: imagePath.length,
+      });
+      return {
+        success: true,
+        message: "Nova imagem principal definida.",
+        preferredImageId: assetId,
+        warning:
+          "A imagem principal foi alterada, mas não foi possível atualizar PATH_IMAGEM.",
+      };
+    }
+
+    try {
+      await updateSellerImagePath(sellerId, imagePath, apiContext);
+    } catch (error) {
+      logger.error(
+        "Primary seller image changed but PATH_IMAGEM update failed",
+        { sellerId, assetId, error },
+      );
+      return {
+        success: true,
+        message: "Nova imagem principal definida.",
+        preferredImageId: assetId,
+        warning:
+          "A imagem principal foi alterada, mas não foi possível atualizar PATH_IMAGEM.",
       };
     }
 
@@ -235,7 +358,8 @@ export async function deleteSellerImageAction(
 
   const { assetId, sellerId } = parsedInput.data;
   try {
-    if (!(await authorizeSeller(sellerId))) {
+    const apiContext = await getAuthorizedSellerContext(sellerId);
+    if (!apiContext) {
       return {
         success: false,
         error: "Vendedor não encontrada ou inacessível.",
@@ -293,6 +417,38 @@ export async function deleteSellerImageAction(
           preferredImageId: promotionCandidate.id,
           warning:
             "A imagem foi excluída, mas não foi possível confirmar a nova principal.",
+        };
+      }
+
+      const imagePath = promotionCandidate.urls.original.trim();
+      if (!imagePath || imagePath.length > SELLER_IMAGE_PATH_MAX_LENGTH) {
+        logger.error("Promoted seller image has an invalid original URL", {
+          sellerId,
+          assetId: promotionCandidate.id,
+          imagePathLength: imagePath.length,
+        });
+        return {
+          success: true,
+          message: "Imagem excluída.",
+          preferredImageId: promotionCandidate.id,
+          warning:
+            "A nova principal foi definida, mas não foi possível atualizar PATH_IMAGEM.",
+        };
+      }
+
+      try {
+        await updateSellerImagePath(sellerId, imagePath, apiContext);
+      } catch (error) {
+        logger.error(
+          "Primary seller image promoted but PATH_IMAGEM update failed",
+          { sellerId, assetId: promotionCandidate.id, error },
+        );
+        return {
+          success: true,
+          message: "Imagem excluída.",
+          preferredImageId: promotionCandidate.id,
+          warning:
+            "A nova principal foi definida, mas não foi possível atualizar PATH_IMAGEM.",
         };
       }
     }

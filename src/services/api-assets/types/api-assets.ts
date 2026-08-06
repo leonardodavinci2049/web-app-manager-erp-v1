@@ -179,6 +179,12 @@ export function isApiError(response: unknown): response is ApiErrorResponse {
   );
 }
 
+export function isNotFoundApiError(
+  response: unknown,
+): response is ApiErrorResponse {
+  return isApiError(response) && response.statusCode === 404;
+}
+
 // Form data for upload (for use with FormData)
 export interface UploadFormData {
   file: File;

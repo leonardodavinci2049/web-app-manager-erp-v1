@@ -16,9 +16,6 @@ export async function PtypeImagesListServer({
     <PtypeImagesList
       initialPtypeImagePath={initialPtypeImagePath}
       initialGalleryImages={galleryState.images}
-      initialGalleryError={
-        galleryState.status === "error" ? galleryState.error : null
-      }
     />
   );
 }
