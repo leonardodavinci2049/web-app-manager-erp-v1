@@ -11,6 +11,10 @@ import {
   getCustomerById,
 } from "@/services/api-main/customer-general";
 import {
+  CustomerInlineError,
+  customerInlineServiceApi,
+} from "@/services/api-main/customer-inline";
+import {
   CustomerUpdError,
   customerUpdServiceApi,
 } from "@/services/api-main/customer-upd";
@@ -104,6 +108,14 @@ const restrictionSchema = z.object({
   customerId: customerIdSchema,
   restricted: z.boolean(),
 });
+const personTypeSchema = z.object({
+  customerId: customerIdSchema,
+  personTypeId: z.number().int().min(1).max(2),
+});
+const customerTypeSchema = z.object({
+  customerId: customerIdSchema,
+  customerTypeId: z.number().int().min(1).max(3),
+});
 
 function safeFailure(
   message: string,
@@ -119,7 +131,9 @@ function safeOperationMessage(error: unknown, fallback: string): string {
     (error instanceof CustomerError &&
       error.code === "CUSTOMER_OPERATION_ERROR") ||
     (error instanceof CustomerUpdError &&
-      error.code === "CUSTOMER_UPD_OPERATION_ERROR")
+      error.code === "CUSTOMER_UPD_OPERATION_ERROR") ||
+    (error instanceof CustomerInlineError &&
+      error.code === "CUSTOMER_INLINE_OPERATION_ERROR")
   ) {
     const message = error.message.trim().slice(0, 300);
     if (message) return message;
@@ -415,6 +429,60 @@ export async function updateCustomerRestrictionAction(
       safeOperationMessage(
         error,
         "Não foi possível alterar a restrição do cliente.",
+      ),
+      error,
+    );
+  }
+}
+
+export async function updateCustomerTypePersonAction(
+  input: z.input<typeof personTypeSchema>,
+): Promise<CustomerActionResult> {
+  const parsed = personTypeSchema.safeParse(input);
+  if (!parsed.success) return safeFailure("Tipo de pessoa inválido.");
+
+  try {
+    const context = await getExistingCustomer(parsed.data.customerId);
+    if ("success" in context) return context;
+    await customerInlineServiceApi.updateTypePerson({
+      pe_customer_id: parsed.data.customerId,
+      pe_person_type_id: parsed.data.personTypeId,
+      ...context.apiContext,
+    });
+    revalidateCustomer(parsed.data.customerId);
+    return { success: true, message: "Tipo de pessoa atualizado." };
+  } catch (error) {
+    return safeFailure(
+      safeOperationMessage(
+        error,
+        "Não foi possível atualizar o tipo de pessoa.",
+      ),
+      error,
+    );
+  }
+}
+
+export async function updateCustomerTypeCustomerAction(
+  input: z.input<typeof customerTypeSchema>,
+): Promise<CustomerActionResult> {
+  const parsed = customerTypeSchema.safeParse(input);
+  if (!parsed.success) return safeFailure("Tipo de cliente inválido.");
+
+  try {
+    const context = await getExistingCustomer(parsed.data.customerId);
+    if ("success" in context) return context;
+    await customerInlineServiceApi.updateTypeCustomer({
+      pe_customer_id: parsed.data.customerId,
+      pe_customer_type_id: parsed.data.customerTypeId,
+      ...context.apiContext,
+    });
+    revalidateCustomer(parsed.data.customerId);
+    return { success: true, message: "Tipo de cliente atualizado." };
+  } catch (error) {
+    return safeFailure(
+      safeOperationMessage(
+        error,
+        "Não foi possível atualizar o tipo de cliente.",
       ),
       error,
     );
