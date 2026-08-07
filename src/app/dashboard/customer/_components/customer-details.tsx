@@ -20,6 +20,7 @@ import type {
 } from "@/services/api-main/customer-general";
 import { CustomerDetailForms } from "./customer-detail-forms";
 import { CustomerImage } from "./customer-image";
+import { CustomerTypeSections } from "./customer-type-sections";
 
 interface CustomerDetailsProps {
   customer: UICustomerDetail;
@@ -163,6 +164,12 @@ export function CustomerDetails({
                 </dl>
               </CardContent>
             </Card>
+
+            <CustomerTypeSections
+              customerId={customer.id}
+              personTypeId={customer.personTypeId}
+              customerTypeId={customer.customerTypeId}
+            />
 
             <Card>
               <CardHeader>
