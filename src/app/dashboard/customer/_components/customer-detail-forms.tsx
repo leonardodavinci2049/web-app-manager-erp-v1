@@ -185,7 +185,7 @@ export function CustomerDetailForms({
   );
 
   return (
-    <Tabs defaultValue="general" className="w-full">
+    <Tabs defaultValue="notes" className="w-full">
       <TabsList className="grid h-auto w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-7">
         <TabsTrigger value="notes">Anotações</TabsTrigger>
         <TabsTrigger value="person">

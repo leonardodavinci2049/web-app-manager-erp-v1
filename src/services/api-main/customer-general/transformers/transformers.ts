@@ -2,6 +2,7 @@ import type {
   CustomerDetail,
   CustomerLatestProduct,
   CustomerListItem,
+  CustomerManagerDetail,
   CustomerPersonListItem,
   SellerInfo,
 } from "../types/customer-general-types";
@@ -184,18 +185,24 @@ export function transformCustomerPersonList(
 }
 
 export function transformCustomerDetail(
-  entity: CustomerDetail,
+  entity: CustomerDetail | CustomerManagerDetail,
 ): UICustomerDetail {
+  const isManagerDetail = "ID_CLIENTE" in entity;
+
   return {
-    id: entity.ID_USUARIO,
-    storeId: entity.ID_LOJA,
-    customerTypeId: entity.ID_TIPO_CLIENTE,
-    accountStatus: entity.ACCOUNT_STATUS,
+    id: isManagerDetail ? entity.ID_CLIENTE : entity.ID_USUARIO,
+    storeId: entity.ID_LOJA ?? 0,
+    customerTypeId: entity.ID_TIPO_CLIENTE ?? 0,
+    accountStatus: isManagerDetail
+      ? entity.INATIVO === 1
+        ? "Inativo"
+        : "Ativo"
+      : entity.ACCOUNT_STATUS,
     name: entity.NOME ?? "",
     email: entity.EMAIL ?? "",
     phone: entity.FONE1 ?? "",
     whatsapp: entity.WHATAPP1 ?? "",
-    personTypeId: entity.ID_PESSOA_TIPO,
+    personTypeId: entity.ID_PESSOA_TIPO ?? 0,
     accountType: entity.ACCOUNT_TIPO,
     cpf: entity.CPF ?? "",
     firstName: entity.PRIMEIRO_NOME ?? undefined,
@@ -210,7 +217,7 @@ export function transformCustomerDetail(
     responsibleName: entity.NOME_RESPONSAVEL ?? undefined,
     responsibleRole: entity.CARGO_RESPONSAVEL ?? undefined,
     mainActivity: entity.ATIVIDADE_PRINCIPAL ?? undefined,
-    sellerId: entity.ID_VENDEDOR,
+    sellerId: entity.ID_VENDEDOR ?? 0,
     zipCode: entity.CEP ?? "",
     address: entity.ENDERECO ?? "",
     addressNumber: entity.ENDERECO_NUMERO ?? "",
@@ -220,8 +227,8 @@ export function transformCustomerDetail(
     state: entity.UF ?? "",
     countryRegion: entity.REGIAO_PAIS ?? undefined,
     country: entity.PAIS ?? undefined,
-    cityCode: entity.COD_MUNICIPIO,
-    stateCode: entity.COD_UF,
+    cityCode: entity.COD_MUNICIPIO ?? 0,
+    stateCode: entity.COD_UF ?? 0,
     website: entity.WEBSITE ?? undefined,
     facebook: entity.FACEBOOK ?? undefined,
     twitter: entity.TWITTER ?? undefined,
@@ -230,8 +237,8 @@ export function transformCustomerDetail(
     tiktok: entity.TIKTOK ?? undefined,
     telegram: entity.TELEGRAM ?? undefined,
     notes: entity.ANOTACOES ?? "",
-    sellerFlag: entity.VENDEDOR,
-    createdAt: entity.DATADOCADASTRO,
+    sellerFlag: entity.VENDEDOR ?? 0,
+    createdAt: entity.DATADOCADASTRO ?? "",
   };
 }
 
