@@ -60,6 +60,10 @@ const generalSchema = z.object({
   whatsapp: optionalText(100),
   imagePath: optionalText(500),
 });
+const notesSchema = z.object({
+  customerId: customerIdSchema,
+  notes: optionalText(2000),
+});
 const personalSchema = z.object({
   customerId: customerIdSchema,
   cpf: optionalText(100),
@@ -250,6 +254,35 @@ export async function updateCustomerGeneralAction(
         error,
         "Não foi possível atualizar os dados gerais.",
       ),
+      error,
+    );
+  }
+}
+
+export async function updateCustomerNotesAction(
+  input: z.input<typeof notesSchema>,
+): Promise<CustomerActionResult> {
+  const parsed = notesSchema.safeParse(input);
+  if (!parsed.success)
+    return safeFailure(
+      "Revise as anotações.",
+      undefined,
+      z.flattenError(parsed.error).fieldErrors,
+    );
+
+  try {
+    const context = await getExistingCustomer(parsed.data.customerId);
+    if ("success" in context) return context;
+    await customerInlineServiceApi.updateNotes({
+      pe_customer_id: parsed.data.customerId,
+      pe_notes: parsed.data.notes,
+      ...context.apiContext,
+    });
+    revalidateCustomer(parsed.data.customerId);
+    return { success: true, message: "Anotações atualizadas." };
+  } catch (error) {
+    return safeFailure(
+      safeOperationMessage(error, "Não foi possível atualizar as anotações."),
       error,
     );
   }
