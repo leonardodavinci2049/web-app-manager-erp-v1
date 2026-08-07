@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import type { UIBrand } from "@/services/api-main/brand/transformers/transformers";
 import type { UIProductManager } from "@/services/api-main/product-manager/transformers/transformers";
 import type { UIPtype } from "@/services/api-main/ptype/transformers/transformers";
+import { transcribeCatalogVoiceAction } from "../../_actions/catalog-voice-actions";
 import {
   buildCatalogUrl,
   parseCatalogSearchParams,
@@ -352,6 +353,7 @@ export function CatalogToolbar({
             accessibleLabel="Pesquisar produtos"
             pending={isPending}
             onSearch={handleSearch}
+            onTranscribeAudio={transcribeCatalogVoiceAction}
           />
           <FilterPanel
             filters={filters}
