@@ -39,6 +39,7 @@ export interface UICustomerDetail {
   email: string;
   phone: string;
   whatsapp: string;
+  notes: string;
   personTypeId: number;
   accountType: string;
   cpf: string;
@@ -228,6 +229,7 @@ export function transformCustomerDetail(
     instagram: entity.INSTAGRAM ?? undefined,
     tiktok: entity.TIKTOK ?? undefined,
     telegram: entity.TELEGRAM ?? undefined,
+    notes: entity.ANOTACOES ?? "",
     sellerFlag: entity.VENDEDOR,
     createdAt: entity.DATADOCADASTRO,
   };

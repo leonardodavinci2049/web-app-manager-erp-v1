@@ -7,8 +7,8 @@ import { toast } from "sonner";
 import {
   updateCustomerAddressAction,
   updateCustomerBusinessAction,
-  updateCustomerGeneralAction,
   updateCustomerInternetAction,
+  updateCustomerNotesAction,
   updateCustomerPersonalAction,
   updateCustomerRestrictionAction,
 } from "@/app/dashboard/customer/_actions/customer-actions";
@@ -16,17 +16,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 import type { UICustomerDetail } from "@/services/api-main/customer-general";
 import type { CustomerActionResult } from "./types/customer-dashboard-types";
 
-type Section = "general" | "person" | "address" | "internet" | "restriction";
+type Section = "notes" | "person" | "address" | "internet" | "restriction";
 
 interface DetailValues {
-  name: string;
-  email: string;
-  phone: string;
-  whatsapp: string;
   imagePath: string;
+  notes: string;
   cpf: string;
   firstName: string;
   lastName: string;
@@ -64,11 +62,8 @@ interface CustomerDetailFormsProps {
 
 function toValues(customer: UICustomerDetail): DetailValues {
   return {
-    name: customer.name,
-    email: customer.email,
-    phone: customer.phone,
-    whatsapp: customer.whatsapp,
     imagePath: customer.imagePath ?? "",
+    notes: customer.notes,
     cpf: customer.cpf,
     firstName: customer.firstName ?? "",
     lastName: customer.lastName ?? "",
@@ -192,7 +187,7 @@ export function CustomerDetailForms({
   return (
     <Tabs defaultValue="general" className="w-full">
       <TabsList className="grid h-auto w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-7">
-        <TabsTrigger value="general">Contato</TabsTrigger>
+        <TabsTrigger value="notes">Anotações</TabsTrigger>
         <TabsTrigger value="person">
           {isBusiness ? "Empresa" : "Pessoa"}
         </TabsTrigger>
@@ -203,40 +198,41 @@ export function CustomerDetailForms({
         <TabsTrigger value="deletion">Exclusão</TabsTrigger>
       </TabsList>
 
-      <TabsContent value="general">
+      <TabsContent value="notes">
         <form
           className="space-y-4 rounded-lg border p-4"
           onSubmit={(event: FormEvent<HTMLFormElement>) => {
             event.preventDefault();
             runAction(
-              "general",
-              updateCustomerGeneralAction({
+              "notes",
+              updateCustomerNotesAction({
                 customerId: customer.id,
-                name: values.name,
-                email: values.email,
-                phone: values.phone,
-                whatsapp: values.whatsapp,
-                imagePath: values.imagePath,
+                notes: values.notes,
               }),
             );
           }}
         >
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="sm:col-span-2">
-              {field("name", "Nome", { maxLength: 300, required: true })}
-            </div>
-            {field("email", "E-mail", { type: "email", maxLength: 255 })}
-            {field("phone", "Telefone", { maxLength: 100 })}
-            {field("whatsapp", "WhatsApp", { maxLength: 100 })}
-            <div className="sm:col-span-2">
-              {field("imagePath", "Caminho da imagem", {
-                maxLength: 500,
-              })}
-            </div>
+          <div className="space-y-1">
+            <Label htmlFor="customer-detail-notes">Anotações</Label>
+            <Textarea
+              id="customer-detail-notes"
+              value={values.notes}
+              maxLength={2000}
+              rows={7}
+              disabled={savingSection !== null}
+              aria-invalid={Boolean(errors.notes?.[0])}
+              onChange={(event) => setField("notes", event.target.value)}
+            />
+            {errors.notes?.[0] && (
+              <p className="text-destructive text-xs">{errors.notes[0]}</p>
+            )}
+            <p className="text-muted-foreground text-right text-xs">
+              {values.notes.length}/2000
+            </p>
           </div>
           <SectionButton
-            saving={savingSection === "general"}
-            label="Salvar dados gerais"
+            saving={savingSection === "notes"}
+            label="Salvar anotações"
           />
         </form>
       </TabsContent>

@@ -1,7 +1,6 @@
 import {
   ArrowLeft,
   CalendarDays,
-  Contact,
   History,
   LockKeyhole,
   Store,
@@ -19,6 +18,7 @@ import type {
   UISellerInfo,
 } from "@/services/api-main/customer-general";
 import { CustomerDetailForms } from "./customer-detail-forms";
+import { CustomerIdentitySection } from "./customer-identity-section";
 import { CustomerImage } from "./customer-image";
 import { CustomerPersonBusinessSections } from "./customer-person-business-sections";
 import { CustomerTypeSections } from "./customer-type-sections";
@@ -121,50 +121,7 @@ export function CustomerDetails({
 
         <div className="space-y-4">
           <div className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Contact className="size-5" />
-                  Conta e identificação
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                  <DetailField label="ID do cliente" value={customer.id} />
-                  <DetailField label="ID da loja" value={customer.storeId} />
-                  <DetailField
-                    label="ID do tipo de cliente"
-                    value={customer.customerTypeId}
-                  />
-                  <DetailField
-                    label="ID do tipo de pessoa"
-                    value={customer.personTypeId}
-                  />
-                  <DetailField
-                    label="Tipo de conta"
-                    value={customer.accountType}
-                  />
-                  <DetailField
-                    label="Também é vendedor"
-                    value={customer.sellerFlag === 1 ? "Sim" : "Não"}
-                  />
-                  <DetailField label="CPF" value={customer.cpf} />
-                  <DetailField label="CNPJ" value={customer.cnpj} />
-                  <DetailField
-                    label="Nome fantasia"
-                    value={customer.tradeName}
-                  />
-                  <DetailField
-                    label="Cargo do responsável"
-                    value={customer.responsibleRole}
-                  />
-                  <DetailField
-                    label="Data de cadastro"
-                    value={formatDate(customer.createdAt)}
-                  />
-                </dl>
-              </CardContent>
-            </Card>
+            <CustomerIdentitySection customer={customer} />
 
             <CustomerPersonBusinessSections customer={customer} />
 

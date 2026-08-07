@@ -158,6 +158,7 @@ export interface CustomerDetail {
   INSTAGRAM: string | null;
   TIKTOK: string | null;
   TELEGRAM: string | null;
+  ANOTACOES: string;
   VENDEDOR: number;
   DATADOCADASTRO: string;
 }
