@@ -32,8 +32,13 @@ import type {
   CustomerFindLatestProductsResponse,
   CustomerFindManagerAllRequest,
   CustomerFindManagerAllResponse,
+  CustomerFindManagerIdRequest,
+  CustomerFindManagerIdResponse,
+  CustomerFindPdvIdRequest,
+  CustomerFindPdvIdResponse,
   CustomerLatestProduct,
   CustomerListItem,
+  CustomerManagerDetail,
   CustomerPersonListItem,
   CustomerSearchAllRequest,
   CustomerSearchAllResponse,
@@ -49,6 +54,8 @@ import {
   CustomerFindByIdSchema,
   CustomerFindLatestProductsSchema,
   CustomerFindManagerAllSchema,
+  CustomerFindManagerIdSchema,
+  CustomerFindPdvIdSchema,
   CustomerSearchAllSchema,
 } from "./validation/customer-general-schemas";
 
@@ -201,6 +208,68 @@ export class CustomerGeneralServiceApi extends BaseApiService {
       return response;
     } catch (error) {
       logger.error("Erro ao buscar cliente por ID", error);
+      throw error;
+    }
+  }
+
+  async findCustomerByManagerId(
+    params: CustomerFindManagerIdRequest,
+  ): Promise<CustomerFindManagerIdResponse> {
+    try {
+      const validatedParams = CustomerFindManagerIdSchema.parse(params);
+      const requestBody = this.buildBasePayload(validatedParams);
+
+      const response = await this.post<CustomerFindManagerIdResponse>(
+        CUSTOMER_GENERAL_ENDPOINTS.FIND_MANAGER_ID,
+        requestBody,
+      );
+
+      if (response.statusCode === API_STATUS_CODES.NOT_FOUND) {
+        throw new CustomerNotFoundError(validatedParams);
+      }
+
+      if (isApiError(response.statusCode)) {
+        throw new CustomerError(
+          response.message || "Erro ao buscar cliente por ID no manager",
+          "CUSTOMER_FIND_MANAGER_ID_ERROR",
+          response.statusCode,
+        );
+      }
+
+      return response;
+    } catch (error) {
+      logger.error("Erro ao buscar cliente por ID no manager", error);
+      throw error;
+    }
+  }
+
+  async findCustomerByPdvId(
+    params: CustomerFindPdvIdRequest,
+  ): Promise<CustomerFindPdvIdResponse> {
+    try {
+      const validatedParams = CustomerFindPdvIdSchema.parse(params);
+      const requestBody = this.buildBasePayload(validatedParams);
+
+      const response = await this.post<CustomerFindPdvIdResponse>(
+        CUSTOMER_GENERAL_ENDPOINTS.FIND_PDV_ID,
+        requestBody,
+      );
+
+      if (response.statusCode === API_STATUS_CODES.NOT_FOUND) {
+        throw new CustomerNotFoundError(validatedParams);
+      }
+
+      if (isApiError(response.statusCode)) {
+        throw new CustomerError(
+          response.message || "Erro ao buscar cliente por ID no PDV",
+          "CUSTOMER_FIND_PDV_ID_ERROR",
+          response.statusCode,
+        );
+      }
+
+      return response;
+    } catch (error) {
+      logger.error("Erro ao buscar cliente por ID no PDV", error);
       throw error;
     }
   }
@@ -365,8 +434,14 @@ export class CustomerGeneralServiceApi extends BaseApiService {
     return response.data?.["Customer Information"]?.[0] ?? null;
   }
 
+  extractCustomerByManagerId(
+    response: CustomerFindManagerIdResponse,
+  ): CustomerManagerDetail | null {
+    return response.data?.["Customer Information"]?.[0] ?? null;
+  }
+
   extractSellerInfo(
-    response: CustomerFindByIdResponse,
+    response: CustomerFindByIdResponse | CustomerFindManagerIdResponse,
   ): import("./types/customer-general-types").SellerInfo | null {
     return response.data?.["Seller Information"]?.[0] ?? null;
   }
@@ -504,11 +579,12 @@ export async function getCustomerById(
 ): Promise<UICustomerDetailsBundle | undefined> {
   if (!params.pe_system_client_id) return undefined;
 
-  const response = await customerGeneralServiceApi.findCustomerById({
+  const response = await customerGeneralServiceApi.findCustomerByManagerId({
     pe_customer_id: id,
     ...params,
   });
-  const customer = customerGeneralServiceApi.extractCustomerById(response);
+  const customer =
+    customerGeneralServiceApi.extractCustomerByManagerId(response);
   if (!customer) return undefined;
   const seller = customerGeneralServiceApi.extractSellerInfo(response);
 

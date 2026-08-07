@@ -136,6 +136,8 @@ export const CUSTOMER_ENDPOINTS = {
 export const CUSTOMER_GENERAL_ENDPOINTS = {
   FIND_ALL: "/customer/v2/customer-find-all",
   FIND_BY_ID: "/customer/v2/customer-find-by-id",
+  FIND_MANAGER_ID: "/customer/v2/customer-find-manager-id",
+  FIND_PDV_ID: "/customer/v2/customer-find-pdv-id",
   SEARCH_ALL: "/customer/v2/customer-search-all",
   FIND_MANAGER_ALL: "/customer/v2/customer-find-manager-all",
   CREATE: "/customer/v2/customer-create",

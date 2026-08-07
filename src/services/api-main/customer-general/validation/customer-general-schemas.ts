@@ -49,6 +49,17 @@ export const CustomerFindByIdSchema = z.object({
   pe_customer_id: z.number().int().positive(),
 });
 
+export const CustomerFindManagerIdSchema = z.object({
+  ...baseContextSchema,
+  pe_customer_id: z.number().int().positive(),
+});
+
+export const CustomerFindPdvIdSchema = z.object({
+  ...baseContextSchema,
+  pe_seller_id: z.number().int().positive(),
+  pe_customer_id: z.number().int().positive(),
+});
+
 export const CustomerCreateSchema = z.object({
   ...baseContextSchema,
   pe_name: z.string().max(255).min(1),
@@ -82,6 +93,10 @@ export type CustomerFindManagerAllInput = z.infer<
   typeof CustomerFindManagerAllSchema
 >;
 export type CustomerFindByIdInput = z.infer<typeof CustomerFindByIdSchema>;
+export type CustomerFindManagerIdInput = z.infer<
+  typeof CustomerFindManagerIdSchema
+>;
+export type CustomerFindPdvIdInput = z.infer<typeof CustomerFindPdvIdSchema>;
 export type CustomerCreateInput = z.infer<typeof CustomerCreateSchema>;
 export type CustomerFindLatestProductsInput = z.infer<
   typeof CustomerFindLatestProductsSchema
