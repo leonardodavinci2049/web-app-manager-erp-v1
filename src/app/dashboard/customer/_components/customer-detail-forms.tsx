@@ -6,10 +6,8 @@ import { type FormEvent, type ReactNode, useState } from "react";
 import { toast } from "sonner";
 import {
   updateCustomerAddressAction,
-  updateCustomerBusinessAction,
   updateCustomerInternetAction,
   updateCustomerNotesAction,
-  updateCustomerPersonalAction,
   updateCustomerRestrictionAction,
 } from "@/app/dashboard/customer/_actions/customer-actions";
 import { Button } from "@/components/ui/button";
@@ -20,21 +18,10 @@ import { Textarea } from "@/components/ui/textarea";
 import type { UICustomerDetail } from "@/services/api-main/customer-general";
 import type { CustomerActionResult } from "./types/customer-dashboard-types";
 
-type Section = "notes" | "person" | "address" | "internet" | "restriction";
+type Section = "notes" | "address" | "internet" | "restriction";
 
 interface DetailValues {
-  imagePath: string;
   notes: string;
-  cpf: string;
-  firstName: string;
-  lastName: string;
-  birthDate: string;
-  cnpj: string;
-  companyName: string;
-  stateRegistration: string;
-  municipalRegistration: string;
-  responsibleName: string;
-  mainActivity: string;
   zipCode: string;
   address: string;
   addressNumber: string;
@@ -62,18 +49,7 @@ interface CustomerDetailFormsProps {
 
 function toValues(customer: UICustomerDetail): DetailValues {
   return {
-    imagePath: customer.imagePath ?? "",
     notes: customer.notes,
-    cpf: customer.cpf,
-    firstName: customer.firstName ?? "",
-    lastName: customer.lastName ?? "",
-    birthDate: customer.birthDate?.slice(0, 10) ?? "",
-    cnpj: customer.cnpj,
-    companyName: customer.companyName,
-    stateRegistration: customer.stateRegistration ?? "",
-    municipalRegistration: customer.municipalRegistration ?? "",
-    responsibleName: customer.responsibleName ?? "",
-    mainActivity: customer.mainActivity ?? "",
     zipCode: customer.zipCode,
     address: customer.address,
     addressNumber: customer.addressNumber,
@@ -118,11 +94,6 @@ export function CustomerDetailForms({
     {},
   );
   const [savingSection, setSavingSection] = useState<Section | null>(null);
-  const isBusiness = Boolean(
-    customer.cnpj ||
-      customer.companyName ||
-      customer.accountType.toLocaleUpperCase("pt-BR").includes("JUR"),
-  );
 
   const setField = <Key extends keyof DetailValues>(
     field: Key,
@@ -186,15 +157,12 @@ export function CustomerDetailForms({
 
   return (
     <Tabs defaultValue="notes" className="w-full">
-      <TabsList className="grid h-auto w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-7">
+      <TabsList className="grid h-auto w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-6">
         <TabsTrigger value="notes">Anotações</TabsTrigger>
-        <TabsTrigger value="person">
-          {isBusiness ? "Empresa" : "Pessoa"}
-        </TabsTrigger>
+        <TabsTrigger value="image">Imagem</TabsTrigger>
         <TabsTrigger value="internet">Internet</TabsTrigger>
         <TabsTrigger value="address">Endereço</TabsTrigger>
         <TabsTrigger value="restriction">Restrição</TabsTrigger>
-        <TabsTrigger value="image">Imagem</TabsTrigger>
         <TabsTrigger value="deletion">Exclusão</TabsTrigger>
       </TabsList>
 
@@ -235,82 +203,6 @@ export function CustomerDetailForms({
             label="Salvar anotações"
           />
         </form>
-      </TabsContent>
-
-      <TabsContent value="person">
-        {isBusiness ? (
-          <form
-            className="space-y-4 rounded-lg border p-4"
-            onSubmit={(event: FormEvent<HTMLFormElement>) => {
-              event.preventDefault();
-              runAction(
-                "person",
-                updateCustomerBusinessAction({
-                  customerId: customer.id,
-                  cnpj: values.cnpj,
-                  companyName: values.companyName,
-                  stateRegistration: values.stateRegistration,
-                  municipalRegistration: values.municipalRegistration,
-                  responsibleName: values.responsibleName,
-                  mainActivity: values.mainActivity,
-                }),
-              );
-            }}
-          >
-            <div className="grid gap-4 sm:grid-cols-2">
-              {field("cnpj", "CNPJ", { maxLength: 100, required: true })}
-              {field("companyName", "Razão social", {
-                maxLength: 300,
-                required: true,
-              })}
-              {field("stateRegistration", "Inscrição estadual", {
-                maxLength: 100,
-              })}
-              {field("municipalRegistration", "Inscrição municipal", {
-                maxLength: 100,
-              })}
-              {field("responsibleName", "Responsável", {
-                maxLength: 300,
-              })}
-              {field("mainActivity", "Atividade principal", {
-                maxLength: 300,
-              })}
-            </div>
-            <SectionButton
-              saving={savingSection === "person"}
-              label="Salvar dados empresariais"
-            />
-          </form>
-        ) : (
-          <form
-            className="space-y-4 rounded-lg border p-4"
-            onSubmit={(event: FormEvent<HTMLFormElement>) => {
-              event.preventDefault();
-              runAction(
-                "person",
-                updateCustomerPersonalAction({
-                  customerId: customer.id,
-                  cpf: values.cpf,
-                  firstName: values.firstName,
-                  lastName: values.lastName,
-                  imagePath: values.imagePath,
-                  birthDate: values.birthDate,
-                }),
-              );
-            }}
-          >
-            <div className="grid gap-4 sm:grid-cols-2">
-              {field("cpf", "CPF", { maxLength: 100 })}
-              {field("birthDate", "Data de nascimento", { type: "date" })}
-              {field("firstName", "Primeiro nome", { maxLength: 300 })}
-              {field("lastName", "Sobrenome", { maxLength: 100 })}
-            </div>
-            <SectionButton
-              saving={savingSection === "person"}
-              label="Salvar dados pessoais"
-            />
-          </form>
-        )}
       </TabsContent>
 
       <TabsContent value="internet">
