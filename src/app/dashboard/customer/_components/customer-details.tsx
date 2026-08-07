@@ -20,6 +20,7 @@ import type {
 } from "@/services/api-main/customer-general";
 import { CustomerDetailForms } from "./customer-detail-forms";
 import { CustomerImage } from "./customer-image";
+import { CustomerPersonBusinessSections } from "./customer-person-business-sections";
 import { CustomerTypeSections } from "./customer-type-sections";
 
 interface CustomerDetailsProps {
@@ -164,6 +165,8 @@ export function CustomerDetails({
                 </dl>
               </CardContent>
             </Card>
+
+            <CustomerPersonBusinessSections customer={customer} />
 
             <CustomerTypeSections
               customerId={customer.id}
