@@ -28,12 +28,16 @@ interface CustomerTypeSectionsProps {
   customerId: number;
   personTypeId: number;
   customerTypeId: number;
+  showPersonType?: boolean;
+  showCustomerType?: boolean;
 }
 
 export function CustomerTypeSections({
   customerId,
   personTypeId,
   customerTypeId,
+  showPersonType = true,
+  showCustomerType = true,
 }: CustomerTypeSectionsProps) {
   const router = useRouter();
   const [savingPerson, setSavingPerson] = useState<number | null>(null);
@@ -65,99 +69,103 @@ export function CustomerTypeSections({
 
   return (
     <>
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Users className="size-4" />
-            Tipo de pessoa
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 gap-2">
-            {PERSON_TYPES.map((option) => {
-              const selected = option.id === personTypeId;
-              const saving = savingPerson === option.id;
-              return (
-                <Button
-                  key={option.id}
-                  type="button"
-                  variant={selected ? "default" : "outline"}
-                  aria-pressed={selected}
-                  disabled={isBusy || selected}
-                  onClick={() =>
-                    runInline(
-                      "person",
-                      option.id,
-                      updateCustomerTypePersonAction({
-                        customerId,
-                        personTypeId: option.id,
-                      }),
-                    )
-                  }
-                  className="justify-between"
-                >
-                  <span className="flex items-center gap-2">
-                    {saving ? (
-                      <Loader2 className="size-4 animate-spin" />
-                    ) : (
-                      <Check className="size-4" />
-                    )}
-                    {option.label}
-                  </span>
-                  {selected && <Badge variant="secondary">Atual</Badge>}
-                </Button>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
+      {showPersonType && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Users className="size-4" />
+              Tipo de pessoa
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-2">
+              {PERSON_TYPES.map((option) => {
+                const selected = option.id === personTypeId;
+                const saving = savingPerson === option.id;
+                return (
+                  <Button
+                    key={option.id}
+                    type="button"
+                    variant={selected ? "default" : "outline"}
+                    aria-pressed={selected}
+                    disabled={isBusy || selected}
+                    onClick={() =>
+                      runInline(
+                        "person",
+                        option.id,
+                        updateCustomerTypePersonAction({
+                          customerId,
+                          personTypeId: option.id,
+                        }),
+                      )
+                    }
+                    className="justify-between"
+                  >
+                    <span className="flex items-center gap-2">
+                      {saving ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        <Check className="size-4" />
+                      )}
+                      {option.label}
+                    </span>
+                    {selected && <Badge variant="secondary">Atual</Badge>}
+                  </Button>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Tags className="size-4" />
-            Tipo de cliente
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-            {CUSTOMER_TYPES.map((option) => {
-              const selected = option.id === customerTypeId;
-              const saving = savingCustomer === option.id;
-              return (
-                <Button
-                  key={option.id}
-                  type="button"
-                  variant={selected ? "default" : "outline"}
-                  aria-pressed={selected}
-                  disabled={isBusy || selected}
-                  onClick={() =>
-                    runInline(
-                      "customer",
-                      option.id,
-                      updateCustomerTypeCustomerAction({
-                        customerId,
-                        customerTypeId: option.id,
-                      }),
-                    )
-                  }
-                  className="justify-between"
-                >
-                  <span className="flex items-center gap-2">
-                    {saving ? (
-                      <Loader2 className="size-4 animate-spin" />
-                    ) : (
-                      <Check className="size-4" />
-                    )}
-                    {option.label}
-                  </span>
-                  {selected && <Badge variant="secondary">Atual</Badge>}
-                </Button>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
+      {showCustomerType && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Tags className="size-4" />
+              Tipo de cliente
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+              {CUSTOMER_TYPES.map((option) => {
+                const selected = option.id === customerTypeId;
+                const saving = savingCustomer === option.id;
+                return (
+                  <Button
+                    key={option.id}
+                    type="button"
+                    variant={selected ? "default" : "outline"}
+                    aria-pressed={selected}
+                    disabled={isBusy || selected}
+                    onClick={() =>
+                      runInline(
+                        "customer",
+                        option.id,
+                        updateCustomerTypeCustomerAction({
+                          customerId,
+                          customerTypeId: option.id,
+                        }),
+                      )
+                    }
+                    className="justify-between"
+                  >
+                    <span className="flex items-center gap-2">
+                      {saving ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        <Check className="size-4" />
+                      )}
+                      {option.label}
+                    </span>
+                    {selected && <Badge variant="secondary">Atual</Badge>}
+                  </Button>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </>
   );
 }
