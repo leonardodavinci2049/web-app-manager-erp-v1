@@ -109,18 +109,17 @@ export function CustomerIdentitySection({
     </div>
   );
 
-  
   return (
-    <Card>
-      <CardHeader>
+    <Card className="gap-4 py-4 sm:gap-6 sm:py-6">
+      <CardHeader className="px-4 sm:px-6">
         <CardTitle className="flex items-center gap-2">
           <Contact className="size-5" />
           Conta e identificação
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <form className="space-y-4" onSubmit={handleSubmit}>
-          <div className="grid gap-4 sm:grid-cols-2">
+      <CardContent className="px-4 sm:px-6">
+        <form className="space-y-3 sm:space-y-4" onSubmit={handleSubmit}>
+          <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
             <div className="sm:col-span-2">
               {field("name", "Nome", { maxLength: 300, required: true })}
             </div>
