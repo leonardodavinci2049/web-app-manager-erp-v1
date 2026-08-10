@@ -132,60 +132,6 @@ export function CustomerDetails({
             />
 
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <History className="size-5" />
-                  Produtos recentes
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {hasProductsError ? (
-                  <div className="rounded-lg border border-dashed p-6 text-center">
-                    <p className="font-medium">
-                      Não foi possível carregar os produtos recentes.
-                    </p>
-                    <p className="text-muted-foreground mt-1 text-xs">
-                      Os demais dados do cliente permanecem disponíveis.
-                    </p>
-                  </div>
-                ) : products.length === 0 ? (
-                  <div className="rounded-lg border border-dashed p-6 text-center">
-                    <p className="font-medium">Nenhum produto recente.</p>
-                  </div>
-                ) : (
-                  <div className="divide-y rounded-lg border">
-                    {products.map((product) => (
-                      <div
-                        key={`${product.movementId}-${product.productId}`}
-                        className="flex flex-wrap items-start justify-between gap-3 p-3"
-                      >
-                        <div className="min-w-0 flex-1">
-                          <p className="font-medium">{product.product}</p>
-                          <p className="text-muted-foreground text-xs">
-                            Pedido {product.orderId} · Produto{" "}
-                            {product.productId}
-                            {product.sku ? ` · SKU ${product.sku}` : ""}
-                          </p>
-                          <p className="text-muted-foreground text-xs">
-                            {formatDate(product.createdAt)}
-                          </p>
-                        </div>
-                        <div className="text-right text-sm">
-                          <p className="font-medium">
-                            {formatCurrency(product.total)}
-                          </p>
-                          <p className="text-muted-foreground text-xs">
-                            Quantidade: {product.quantity}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card>
               <CardHeader className="flex-row items-center justify-between">
                 <CardTitle className="flex items-center gap-2 text-base">
                   <LockKeyhole className="size-4" />
@@ -281,6 +227,60 @@ export function CustomerDetails({
       <CustomerDetailForms
         customer={customer}
         imageContent={imageContent}
+        productsContent={
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <History className="size-5" />
+                Produtos recentes
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {hasProductsError ? (
+                <div className="rounded-lg border border-dashed p-6 text-center">
+                  <p className="font-medium">
+                    Não foi possível carregar os produtos recentes.
+                  </p>
+                  <p className="text-muted-foreground mt-1 text-xs">
+                    Os demais dados do cliente permanecem disponíveis.
+                  </p>
+                </div>
+              ) : products.length === 0 ? (
+                <div className="rounded-lg border border-dashed p-6 text-center">
+                  <p className="font-medium">Nenhum produto recente.</p>
+                </div>
+              ) : (
+                <div className="divide-y rounded-lg border">
+                  {products.map((product) => (
+                    <div
+                      key={`${product.movementId}-${product.productId}`}
+                      className="flex flex-wrap items-start justify-between gap-3 p-3"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium">{product.product}</p>
+                        <p className="text-muted-foreground text-xs">
+                          Pedido {product.orderId} · Produto {product.productId}
+                          {product.sku ? ` · SKU ${product.sku}` : ""}
+                        </p>
+                        <p className="text-muted-foreground text-xs">
+                          {formatDate(product.createdAt)}
+                        </p>
+                      </div>
+                      <div className="text-right text-sm">
+                        <p className="font-medium">
+                          {formatCurrency(product.total)}
+                        </p>
+                        <p className="text-muted-foreground text-xs">
+                          Quantidade: {product.quantity}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        }
         addressSummary={
           <Card>
             <CardHeader>

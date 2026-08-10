@@ -45,6 +45,7 @@ interface CustomerDetailFormsProps {
   customer: UICustomerDetail;
   deletionContent: ReactNode;
   imageContent: ReactNode;
+  productsContent: ReactNode;
 }
 
 function toValues(customer: UICustomerDetail): DetailValues {
@@ -87,6 +88,7 @@ export function CustomerDetailForms({
   customer,
   deletionContent,
   imageContent,
+  productsContent,
 }: CustomerDetailFormsProps) {
   const router = useRouter();
   const [values, setValues] = useState<DetailValues>(() => toValues(customer));
@@ -157,15 +159,15 @@ export function CustomerDetailForms({
 
   return (
     <Tabs defaultValue="notes" className="w-full">
-      <TabsList className="grid h-auto w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-6">
+      <TabsList className="grid h-auto w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-7">
         <TabsTrigger value="notes">Anotações</TabsTrigger>
         <TabsTrigger value="image">Imagem</TabsTrigger>
         <TabsTrigger value="internet">Internet</TabsTrigger>
         <TabsTrigger value="address">Endereço</TabsTrigger>
         <TabsTrigger value="restriction">Restrição</TabsTrigger>
+        <TabsTrigger value="products">Produtos</TabsTrigger>
         <TabsTrigger value="deletion">Exclusão</TabsTrigger>
       </TabsList>
-
 
       <TabsContent value="notes">
         <form
@@ -344,6 +346,8 @@ export function CustomerDetailForms({
       </TabsContent>
 
       <TabsContent value="image">{imageContent}</TabsContent>
+
+      <TabsContent value="products">{productsContent}</TabsContent>
 
       <TabsContent value="deletion">{deletionContent}</TabsContent>
     </Tabs>
