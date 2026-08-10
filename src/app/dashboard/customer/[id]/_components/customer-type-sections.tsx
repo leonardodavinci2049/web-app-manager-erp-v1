@@ -70,14 +70,14 @@ export function CustomerTypeSections({
   return (
     <>
       {showPersonType && (
-        <Card>
-          <CardHeader>
+        <Card className="gap-4 py-4 sm:gap-6 sm:py-6">
+          <CardHeader className="px-4 sm:px-6">
             <CardTitle className="flex items-center gap-2 text-base">
               <Users className="size-4" />
               Tipo de pessoa
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4 sm:px-6">
             <div className="grid grid-cols-2 gap-2">
               {PERSON_TYPES.map((option) => {
                 const selected = option.id === personTypeId;
@@ -119,14 +119,14 @@ export function CustomerTypeSections({
       )}
 
       {showCustomerType && (
-        <Card>
-          <CardHeader>
+        <Card className="gap-4 py-4 sm:gap-6 sm:py-6">
+          <CardHeader className="px-4 sm:px-6">
             <CardTitle className="flex items-center gap-2 text-base">
               <Tags className="size-4" />
               Tipo de cliente
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4 sm:px-6">
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
               {CUSTOMER_TYPES.map((option) => {
                 const selected = option.id === customerTypeId;

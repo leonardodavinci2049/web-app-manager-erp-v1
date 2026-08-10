@@ -43,15 +43,15 @@ export function CustomerImagesList({
   }, [initialGalleryImages]);
 
   return (
-    <div className="space-y-4">
-      <Card>
-        <CardHeader className="pb-3">
+    <div className="space-y-3 sm:space-y-4">
+      <Card className="gap-4 py-4 sm:gap-6 sm:py-6">
+        <CardHeader className="px-4 pb-3 sm:px-6">
           <CardTitle className="flex items-center gap-2 text-lg">
             <ImageIcon className="h-5 w-5" />
             Imagem cadastrada no cliente
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-4 sm:px-6">
           {customerImagePath ? (
             <div className="flex items-start gap-3 rounded-md border p-3">
               <div className="relative size-24 shrink-0 overflow-hidden rounded-md bg-muted sm:size-32">
@@ -96,8 +96,8 @@ export function CustomerImagesList({
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader className="pb-3">
+      <Card className="gap-4 py-4 sm:gap-6 sm:py-6">
+        <CardHeader className="px-4 pb-3 sm:px-6">
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2 text-lg">
               <ImageIcon className="h-5 w-5" />
@@ -116,7 +116,7 @@ export function CustomerImagesList({
             </Button>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-4 sm:px-6">
           {galleryImages.length === 0 ? (
             <p className="text-sm text-muted-foreground italic py-4">
               Nenhuma imagem na galeria do Assets API para este cliente

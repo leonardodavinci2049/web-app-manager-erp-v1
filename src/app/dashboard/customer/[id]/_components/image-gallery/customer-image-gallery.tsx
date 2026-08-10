@@ -269,7 +269,7 @@ export function CustomerImageGallery({
 
   return (
     <section
-      className="w-full max-w-[500px] space-y-4"
+      className="w-full max-w-[500px] space-y-3 sm:space-y-4"
       aria-label={`Galeria de imagens de ${customerName}`}
     >
       <Card className="overflow-hidden py-0">
