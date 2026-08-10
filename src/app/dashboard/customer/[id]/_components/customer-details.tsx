@@ -123,12 +123,23 @@ export function CustomerDetails({
           <div className="space-y-4">
             <CustomerIdentitySection customer={customer} />
 
-            <CustomerPersonBusinessSections customer={customer} />
+            <CustomerTypeSections
+              customerId={customer.id}
+              personTypeId={customer.personTypeId}
+              customerTypeId={customer.customerTypeId}
+              showCustomerType={false}
+            />
+
+            <CustomerPersonBusinessSections
+              customer={customer}
+              personTypeId={customer.personTypeId}
+            />
 
             <CustomerTypeSections
               customerId={customer.id}
               personTypeId={customer.personTypeId}
               customerTypeId={customer.customerTypeId}
+              showPersonType={false}
             />
           </div>
 

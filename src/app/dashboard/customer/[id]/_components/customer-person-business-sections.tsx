@@ -19,6 +19,7 @@ type SavingSection = "person" | "business" | null;
 
 interface CustomerPersonBusinessSectionsProps {
   customer: UICustomerDetail;
+  personTypeId: number;
 }
 
 function SectionButton({ saving, label }: { saving: boolean; label: string }) {
@@ -36,6 +37,7 @@ function SectionButton({ saving, label }: { saving: boolean; label: string }) {
 
 export function CustomerPersonBusinessSections({
   customer,
+  personTypeId,
 }: CustomerPersonBusinessSectionsProps) {
   const router = useRouter();
   const [personValues, setPersonValues] = useState({
@@ -149,100 +151,106 @@ export function CustomerPersonBusinessSections({
 
   return (
     <>
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <UserRound className="size-4" />
-            Pessoa Física
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form
-            className="space-y-4"
-            onSubmit={(event: FormEvent<HTMLFormElement>) => {
-              event.preventDefault();
-              runAction(
-                "person",
-                updateCustomerPersonalAction({
-                  customerId: customer.id,
-                  cpf: personValues.cpf,
-                  firstName: personValues.firstName,
-                  lastName: personValues.lastName,
-                  birthDate: personValues.birthDate,
-                  imagePath: customer.imagePath ?? "",
-                }),
-              );
-            }}
-          >
-            <div className="grid gap-4 sm:grid-cols-2">
-              {personField("cpf", "CPF", { maxLength: 100 })}
-              {personField("birthDate", "Data de nascimento", { type: "date" })}
-              {personField("firstName", "Primeiro nome", { maxLength: 300 })}
-              {personField("lastName", "Sobrenome", { maxLength: 100 })}
-            </div>
-            <SectionButton
-              saving={savingSection === "person"}
-              label="Salvar dados pessoais"
-            />
-          </form>
-        </CardContent>
-      </Card>
+      {personTypeId === 1 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <UserRound className="size-4" />
+              Pessoa Física
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form
+              className="space-y-4"
+              onSubmit={(event: FormEvent<HTMLFormElement>) => {
+                event.preventDefault();
+                runAction(
+                  "person",
+                  updateCustomerPersonalAction({
+                    customerId: customer.id,
+                    cpf: personValues.cpf,
+                    firstName: personValues.firstName,
+                    lastName: personValues.lastName,
+                    birthDate: personValues.birthDate,
+                    imagePath: customer.imagePath ?? "",
+                  }),
+                );
+              }}
+            >
+              <div className="grid gap-4 sm:grid-cols-2">
+                {personField("cpf", "CPF", { maxLength: 100 })}
+                {personField("birthDate", "Data de nascimento", {
+                  type: "date",
+                })}
+                {personField("firstName", "Primeiro nome", { maxLength: 300 })}
+                {personField("lastName", "Sobrenome", { maxLength: 100 })}
+              </div>
+              <SectionButton
+                saving={savingSection === "person"}
+                label="Salvar dados pessoais"
+              />
+            </form>
+          </CardContent>
+        </Card>
+      )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Building2 className="size-4" />
-            Pessoa Jurídica
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form
-            className="space-y-4"
-            onSubmit={(event: FormEvent<HTMLFormElement>) => {
-              event.preventDefault();
-              runAction(
-                "business",
-                updateCustomerBusinessAction({
-                  customerId: customer.id,
-                  cnpj: businessValues.cnpj,
-                  companyName: businessValues.companyName,
-                  stateRegistration: businessValues.stateRegistration,
-                  municipalRegistration: businessValues.municipalRegistration,
-                  responsibleName: businessValues.responsibleName,
-                  mainActivity: businessValues.mainActivity,
-                }),
-              );
-            }}
-          >
-            <div className="grid gap-4 sm:grid-cols-2">
-              {businessField("cnpj", "CNPJ", {
-                maxLength: 100,
-                required: true,
-              })}
-              {businessField("companyName", "Razão social", {
-                maxLength: 300,
-                required: true,
-              })}
-              {businessField("stateRegistration", "Inscrição estadual", {
-                maxLength: 100,
-              })}
-              {businessField("municipalRegistration", "Inscrição municipal", {
-                maxLength: 100,
-              })}
-              {businessField("responsibleName", "Nome do responsável", {
-                maxLength: 300,
-              })}
-              {businessField("mainActivity", "Atividade principal", {
-                maxLength: 300,
-              })}
-            </div>
-            <SectionButton
-              saving={savingSection === "business"}
-              label="Salvar dados empresariais"
-            />
-          </form>
-        </CardContent>
-      </Card>
+      {personTypeId === 2 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Building2 className="size-4" />
+              Pessoa Jurídica
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form
+              className="space-y-4"
+              onSubmit={(event: FormEvent<HTMLFormElement>) => {
+                event.preventDefault();
+                runAction(
+                  "business",
+                  updateCustomerBusinessAction({
+                    customerId: customer.id,
+                    cnpj: businessValues.cnpj,
+                    companyName: businessValues.companyName,
+                    stateRegistration: businessValues.stateRegistration,
+                    municipalRegistration: businessValues.municipalRegistration,
+                    responsibleName: businessValues.responsibleName,
+                    mainActivity: businessValues.mainActivity,
+                  }),
+                );
+              }}
+            >
+              <div className="grid gap-4 sm:grid-cols-2">
+                {businessField("cnpj", "CNPJ", {
+                  maxLength: 100,
+                  required: true,
+                })}
+                {businessField("companyName", "Razão social", {
+                  maxLength: 300,
+                  required: true,
+                })}
+                {businessField("stateRegistration", "Inscrição estadual", {
+                  maxLength: 100,
+                })}
+                {businessField("municipalRegistration", "Inscrição municipal", {
+                  maxLength: 100,
+                })}
+                {businessField("responsibleName", "Nome do responsável", {
+                  maxLength: 300,
+                })}
+                {businessField("mainActivity", "Atividade principal", {
+                  maxLength: 300,
+                })}
+              </div>
+              <SectionButton
+                saving={savingSection === "business"}
+                label="Salvar dados empresariais"
+              />
+            </form>
+          </CardContent>
+        </Card>
+      )}
     </>
   );
 }
