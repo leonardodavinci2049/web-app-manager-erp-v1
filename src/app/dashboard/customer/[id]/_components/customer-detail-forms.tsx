@@ -45,7 +45,9 @@ interface CustomerDetailFormsProps {
   customer: UICustomerDetail;
   deletionContent: ReactNode;
   imageContent: ReactNode;
+  miscellaneousContent: ReactNode;
   productsContent: ReactNode;
+  statusContent: ReactNode;
 }
 
 function toValues(customer: UICustomerDetail): DetailValues {
@@ -88,7 +90,9 @@ export function CustomerDetailForms({
   customer,
   deletionContent,
   imageContent,
+  miscellaneousContent,
   productsContent,
+  statusContent,
 }: CustomerDetailFormsProps) {
   const router = useRouter();
   const [values, setValues] = useState<DetailValues>(() => toValues(customer));
@@ -159,13 +163,14 @@ export function CustomerDetailForms({
 
   return (
     <Tabs defaultValue="notes" className="w-full">
-      <TabsList className="grid h-auto w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-7">
+      <TabsList className="grid h-auto w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-8">
         <TabsTrigger value="notes">Anotações</TabsTrigger>
         <TabsTrigger value="image">Imagem</TabsTrigger>
         <TabsTrigger value="internet">Internet</TabsTrigger>
         <TabsTrigger value="address">Endereço</TabsTrigger>
-        <TabsTrigger value="restriction">Restrição</TabsTrigger>
         <TabsTrigger value="products">Produtos</TabsTrigger>
+        <TabsTrigger value="miscellaneous">Diversos</TabsTrigger>
+        <TabsTrigger value="status">Status</TabsTrigger>
         <TabsTrigger value="deletion">Exclusão</TabsTrigger>
       </TabsList>
 
@@ -246,7 +251,56 @@ export function CustomerDetailForms({
         </form>
       </TabsContent>
 
-      <TabsContent value="restriction">
+      <TabsContent value="address" className="space-y-4">
+        <form
+          className="space-y-4 rounded-lg border p-4"
+          onSubmit={(event: FormEvent<HTMLFormElement>) => {
+            event.preventDefault();
+            runAction(
+              "address",
+              updateCustomerAddressAction({
+                customerId: customer.id,
+                zipCode: values.zipCode,
+                address: values.address,
+                addressNumber: values.addressNumber,
+                complement: values.complement,
+                neighborhood: values.neighborhood,
+                city: values.city,
+                state: values.state,
+                cityCode: values.cityCode,
+                stateCode: values.stateCode,
+              }),
+            );
+          }}
+        >
+          <div className="grid gap-4 sm:grid-cols-2">
+            {field("zipCode", "CEP", { maxLength: 100 })}
+            {field("state", "UF", { maxLength: 100 })}
+            <div className="sm:col-span-2">
+              {field("address", "Endereço", { maxLength: 300 })}
+            </div>
+            {field("addressNumber", "Número", { maxLength: 100 })}
+            {field("complement", "Complemento", { maxLength: 100 })}
+            {field("neighborhood", "Bairro", { maxLength: 300 })}
+            {field("city", "Cidade", { maxLength: 300 })}
+            {field("cityCode", "Código do município", { maxLength: 100 })}
+            {field("stateCode", "Código da UF", { maxLength: 100 })}
+          </div>
+          <SectionButton
+            saving={savingSection === "address"}
+            label="Salvar endereço"
+          />
+        </form>
+        {addressSummary}
+      </TabsContent>
+
+      <TabsContent value="image">{imageContent}</TabsContent>
+
+      <TabsContent value="products">{productsContent}</TabsContent>
+
+      <TabsContent value="miscellaneous">{miscellaneousContent}</TabsContent>
+
+      <TabsContent value="status" className="space-y-4">
         <div className="space-y-3 rounded-lg border p-4">
           <div>
             <h3 className="font-semibold">Restrição comercial</h3>
@@ -300,54 +354,8 @@ export function CustomerDetailForms({
             </Button>
           </div>
         </div>
+        {statusContent}
       </TabsContent>
-
-      <TabsContent value="address" className="space-y-4">
-        <form
-          className="space-y-4 rounded-lg border p-4"
-          onSubmit={(event: FormEvent<HTMLFormElement>) => {
-            event.preventDefault();
-            runAction(
-              "address",
-              updateCustomerAddressAction({
-                customerId: customer.id,
-                zipCode: values.zipCode,
-                address: values.address,
-                addressNumber: values.addressNumber,
-                complement: values.complement,
-                neighborhood: values.neighborhood,
-                city: values.city,
-                state: values.state,
-                cityCode: values.cityCode,
-                stateCode: values.stateCode,
-              }),
-            );
-          }}
-        >
-          <div className="grid gap-4 sm:grid-cols-2">
-            {field("zipCode", "CEP", { maxLength: 100 })}
-            {field("state", "UF", { maxLength: 100 })}
-            <div className="sm:col-span-2">
-              {field("address", "Endereço", { maxLength: 300 })}
-            </div>
-            {field("addressNumber", "Número", { maxLength: 100 })}
-            {field("complement", "Complemento", { maxLength: 100 })}
-            {field("neighborhood", "Bairro", { maxLength: 300 })}
-            {field("city", "Cidade", { maxLength: 300 })}
-            {field("cityCode", "Código do município", { maxLength: 100 })}
-            {field("stateCode", "Código da UF", { maxLength: 100 })}
-          </div>
-          <SectionButton
-            saving={savingSection === "address"}
-            label="Salvar endereço"
-          />
-        </form>
-        {addressSummary}
-      </TabsContent>
-
-      <TabsContent value="image">{imageContent}</TabsContent>
-
-      <TabsContent value="products">{productsContent}</TabsContent>
 
       <TabsContent value="deletion">{deletionContent}</TabsContent>
     </Tabs>
