@@ -102,20 +102,18 @@ export function CustomerDetails({
             viewMode="list"
           />
           <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <h1 className="break-words text-xl font-bold sm:text-2xl">
-                {customer.name}
-              </h1>
+            <h1 className="break-words text-xl font-bold sm:text-2xl">
+              {customer.name}
+            </h1>
+            <div className="text-muted-foreground flex min-w-0 items-center gap-2 overflow-x-auto whitespace-nowrap text-sm">
               <Badge variant="secondary">
                 {customer.accountStatus || "Status não informado"}
               </Badge>
+              <span aria-hidden="true">·</span>
+              <span className="tabular-nums">ID: {customer.id}</span>
+              <span aria-hidden="true">·</span>
+              <span>{customer.accountType || "Tipo Não Informado"}</span>
             </div>
-            <p className="text-muted-foreground text-sm tabular-nums">
-              Cliente ID {customer.id}
-            </p>
-            <p className="text-muted-foreground text-sm">
-              {customer.accountType || "Tipo de conta não informado"}
-            </p>
           </div>
         </div>
 
