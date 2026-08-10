@@ -175,24 +175,29 @@ export function CustomerDetailForms({
         <TabsTrigger value="notes" className={TAB_TRIGGER_CLASS_NAME}>
           Anotações
         </TabsTrigger>
-        <TabsTrigger value="image" className={TAB_TRIGGER_CLASS_NAME}>
-          Imagem
-        </TabsTrigger>
-        <TabsTrigger value="internet" className={TAB_TRIGGER_CLASS_NAME}>
-          Internet
-        </TabsTrigger>
         <TabsTrigger value="address" className={TAB_TRIGGER_CLASS_NAME}>
           Endereço
-        </TabsTrigger>
-        <TabsTrigger value="products" className={TAB_TRIGGER_CLASS_NAME}>
-          Produtos
-        </TabsTrigger>
-        <TabsTrigger value="miscellaneous" className={TAB_TRIGGER_CLASS_NAME}>
-          Diversos
         </TabsTrigger>
         <TabsTrigger value="status" className={TAB_TRIGGER_CLASS_NAME}>
           Status
         </TabsTrigger>
+
+        <TabsTrigger value="image" className={TAB_TRIGGER_CLASS_NAME}>
+          Imagem
+        </TabsTrigger>
+
+        <TabsTrigger value="products" className={TAB_TRIGGER_CLASS_NAME}>
+          Compras
+        </TabsTrigger>
+
+        <TabsTrigger value="internet" className={TAB_TRIGGER_CLASS_NAME}>
+          Internet
+        </TabsTrigger>
+
+        <TabsTrigger value="miscellaneous" className={TAB_TRIGGER_CLASS_NAME}>
+          Diversos
+        </TabsTrigger>
+
         <TabsTrigger value="deletion" className={TAB_TRIGGER_CLASS_NAME}>
           Exclusão
         </TabsTrigger>
