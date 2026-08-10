@@ -123,45 +123,24 @@ export function CustomerDetails({
           <div className="space-y-4">
             <CustomerIdentitySection customer={customer} />
 
-            <CustomerPersonBusinessSections customer={customer} />
+            <CustomerTypeSections
+              customerId={customer.id}
+              personTypeId={customer.personTypeId}
+              customerTypeId={customer.customerTypeId}
+              showCustomerType={false}
+            />
+
+            <CustomerPersonBusinessSections
+              customer={customer}
+              personTypeId={customer.personTypeId}
+            />
 
             <CustomerTypeSections
               customerId={customer.id}
               personTypeId={customer.personTypeId}
               customerTypeId={customer.customerTypeId}
+              showPersonType={false}
             />
-
-            <Card>
-              <CardHeader className="flex-row items-center justify-between">
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <LockKeyhole className="size-4" />
-                  Status do cadastro
-                </CardTitle>
-                <Badge variant="secondary">Pendente de API</Badge>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p className="text-muted-foreground text-xs">
-                  A API atual não oferece contratos seguros para ativar ou
-                  inativar clientes.
-                </p>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full"
-                  disabled
-                >
-                  Ativar — Pendente de API
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full"
-                  disabled
-                >
-                  Inativar — Pendente de API
-                </Button>
-              </CardContent>
-            </Card>
           </div>
 
           <div className="space-y-4">
@@ -198,21 +177,6 @@ export function CustomerDetails({
                 )}
               </CardContent>
             </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <CalendarDays className="size-4" />
-                  Cadastro
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <DetailField
-                  label="Data de cadastro"
-                  value={formatDate(customer.createdAt)}
-                />
-              </CardContent>
-            </Card>
           </div>
         </div>
       </div>
@@ -227,6 +191,22 @@ export function CustomerDetails({
       <CustomerDetailForms
         customer={customer}
         imageContent={imageContent}
+        miscellaneousContent={
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <CalendarDays className="size-4" />
+                Cadastro
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <DetailField
+                label="Data de cadastro"
+                value={formatDate(customer.createdAt)}
+              />
+            </CardContent>
+          </Card>
+        }
         productsContent={
           <Card>
             <CardHeader>
@@ -278,6 +258,39 @@ export function CustomerDetails({
                   ))}
                 </div>
               )}
+            </CardContent>
+          </Card>
+        }
+        statusContent={
+          <Card>
+            <CardHeader className="flex-row items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <LockKeyhole className="size-4" />
+                Status do cadastro
+              </CardTitle>
+              <Badge variant="secondary">Pendente de API</Badge>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-muted-foreground text-xs">
+                A API atual não oferece contratos seguros para ativar ou
+                inativar clientes.
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                disabled
+              >
+                Ativar — Pendente de API
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                disabled
+              >
+                Inativar — Pendente de API
+              </Button>
             </CardContent>
           </Card>
         }
