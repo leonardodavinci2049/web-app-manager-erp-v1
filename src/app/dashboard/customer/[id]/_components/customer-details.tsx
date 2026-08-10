@@ -78,8 +78,8 @@ export function CustomerDetails({
   imageContent,
 }: CustomerDetailsProps) {
   return (
-    <div className="space-y-6">
-      <div className="grid gap-6 lg:grid-cols-[minmax(280px,500px)_minmax(0,1fr)]">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-[minmax(280px,500px)_minmax(0,1fr)]">
         <Button
           asChild
           variant="outline"
@@ -92,7 +92,7 @@ export function CustomerDetails({
           </Link>
         </Button>
 
-        <aside className="lg:row-span-2 lg:row-start-2 lg:self-start lg:sticky lg:top-6">
+        <aside className="hidden lg:sticky lg:top-6 lg:row-span-2 lg:row-start-2 lg:block lg:self-start">
           {imageGallery}
         </aside>
         <div className="flex min-w-0 items-start gap-3">
@@ -103,7 +103,7 @@ export function CustomerDetails({
           />
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="break-words text-2xl font-bold">
+              <h1 className="break-words text-xl font-bold sm:text-2xl">
                 {customer.name}
               </h1>
               <Badge variant="secondary">
@@ -119,8 +119,8 @@ export function CustomerDetails({
           </div>
         </div>
 
-        <div className="space-y-4">
-          <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <CustomerIdentitySection customer={customer} />
 
             <CustomerTypeSections
@@ -143,15 +143,15 @@ export function CustomerDetails({
             />
           </div>
 
-          <div className="space-y-4">
-            <Card>
-              <CardHeader>
+          <div className="space-y-3 sm:space-y-4">
+            <Card className="gap-4 py-4 sm:gap-6 sm:py-6">
+              <CardHeader className="px-4 sm:px-6">
                 <CardTitle className="flex items-center gap-2 text-base">
                   <Store className="size-4" />
                   Vendedor relacionado
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="px-4 sm:px-6">
                 {seller ? (
                   <div className="flex items-start gap-3">
                     <CustomerImage
@@ -181,9 +181,11 @@ export function CustomerDetails({
         </div>
       </div>
 
-      <div className="space-y-1">
-        <h2 className="text-lg font-semibold">Editar cadastro por seção</h2>
-        <p className="text-muted-foreground text-sm">
+      <div className="space-y-0.5 sm:space-y-1">
+        <h2 className="text-base font-semibold sm:text-lg">
+          Editar cadastro por seção
+        </h2>
+        <p className="text-muted-foreground hidden text-sm sm:block">
           Selecione uma seção para consultar e atualizar os dados do cliente.
         </p>
       </div>
@@ -191,15 +193,16 @@ export function CustomerDetails({
       <CustomerDetailForms
         customer={customer}
         imageContent={imageContent}
+        mobileImageGallery={imageGallery}
         miscellaneousContent={
-          <Card>
-            <CardHeader>
+          <Card className="gap-4 py-4 sm:gap-6 sm:py-6">
+            <CardHeader className="px-4 sm:px-6">
               <CardTitle className="flex items-center gap-2 text-base">
                 <CalendarDays className="size-4" />
                 Cadastro
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-4 sm:px-6">
               <DetailField
                 label="Data de cadastro"
                 value={formatDate(customer.createdAt)}
@@ -208,14 +211,14 @@ export function CustomerDetails({
           </Card>
         }
         productsContent={
-          <Card>
-            <CardHeader>
+          <Card className="gap-4 py-4 sm:gap-6 sm:py-6">
+            <CardHeader className="px-4 sm:px-6">
               <CardTitle className="flex items-center gap-2">
                 <History className="size-5" />
                 Produtos recentes
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-4 sm:px-6">
               {hasProductsError ? (
                 <div className="rounded-lg border border-dashed p-6 text-center">
                   <p className="font-medium">
@@ -262,15 +265,15 @@ export function CustomerDetails({
           </Card>
         }
         statusContent={
-          <Card>
-            <CardHeader className="flex-row items-center justify-between">
+          <Card className="gap-4 py-4 sm:gap-6 sm:py-6">
+            <CardHeader className="flex-row items-center justify-between px-4 sm:px-6">
               <CardTitle className="flex items-center gap-2 text-base">
                 <LockKeyhole className="size-4" />
                 Status do cadastro
               </CardTitle>
               <Badge variant="secondary">Pendente de API</Badge>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-3 px-4 sm:px-6">
               <p className="text-muted-foreground text-xs">
                 A API atual não oferece contratos seguros para ativar ou
                 inativar clientes.
@@ -295,14 +298,14 @@ export function CustomerDetails({
           </Card>
         }
         addressSummary={
-          <Card>
-            <CardHeader>
+          <Card className="gap-4 py-4 sm:gap-6 sm:py-6">
+            <CardHeader className="px-4 sm:px-6">
               <CardTitle className="flex items-center gap-2 text-base">
                 <UserRound className="size-4" />
                 Localização resumida
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-4 sm:px-6">
               <p className="text-sm">
                 {[customer.address, customer.addressNumber]
                   .filter(Boolean)
@@ -317,15 +320,15 @@ export function CustomerDetails({
           </Card>
         }
         deletionContent={
-          <Card className="border-destructive/40 bg-destructive/5">
-            <CardHeader className="flex-row items-center justify-between">
+          <Card className="gap-4 border-destructive/40 bg-destructive/5 py-4 sm:gap-6 sm:py-6">
+            <CardHeader className="flex-row items-center justify-between px-4 sm:px-6">
               <CardTitle className="text-destructive flex items-center gap-2 text-base">
                 <LockKeyhole className="size-4" />
                 Zona de exclusão
               </CardTitle>
               <Badge variant="secondary">Pendente de API</Badge>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-3 px-4 sm:px-6">
               <p className="text-muted-foreground text-sm">
                 A API atual não oferece um contrato seguro para excluir
                 clientes.

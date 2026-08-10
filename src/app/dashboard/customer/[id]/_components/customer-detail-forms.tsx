@@ -20,6 +20,9 @@ import type { CustomerActionResult } from "../../_components/types/customer-dash
 
 type Section = "notes" | "address" | "internet" | "restriction";
 
+const TAB_TRIGGER_CLASS_NAME =
+  "h-8 min-w-max flex-none snap-start px-3 text-xs sm:h-9 sm:text-sm lg:min-w-0 lg:px-2";
+
 interface DetailValues {
   notes: string;
   zipCode: string;
@@ -45,6 +48,7 @@ interface CustomerDetailFormsProps {
   customer: UICustomerDetail;
   deletionContent: ReactNode;
   imageContent: ReactNode;
+  mobileImageGallery: ReactNode;
   miscellaneousContent: ReactNode;
   productsContent: ReactNode;
   statusContent: ReactNode;
@@ -90,6 +94,7 @@ export function CustomerDetailForms({
   customer,
   deletionContent,
   imageContent,
+  mobileImageGallery,
   miscellaneousContent,
   productsContent,
   statusContent,
@@ -162,21 +167,40 @@ export function CustomerDetailForms({
   );
 
   return (
-    <Tabs defaultValue="notes" className="w-full">
-      <TabsList className="grid h-auto w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-8">
-        <TabsTrigger value="notes">Anotações</TabsTrigger>
-        <TabsTrigger value="image">Imagem</TabsTrigger>
-        <TabsTrigger value="internet">Internet</TabsTrigger>
-        <TabsTrigger value="address">Endereço</TabsTrigger>
-        <TabsTrigger value="products">Produtos</TabsTrigger>
-        <TabsTrigger value="miscellaneous">Diversos</TabsTrigger>
-        <TabsTrigger value="status">Status</TabsTrigger>
-        <TabsTrigger value="deletion">Exclusão</TabsTrigger>
+    <Tabs defaultValue="notes" className="w-full gap-3 sm:gap-4">
+      <TabsList
+        className="h-auto w-full snap-x justify-start gap-1 overflow-x-auto p-1 lg:grid lg:grid-cols-8 lg:overflow-visible"
+        aria-label="Seções do cadastro do cliente"
+      >
+        <TabsTrigger value="notes" className={TAB_TRIGGER_CLASS_NAME}>
+          Anotações
+        </TabsTrigger>
+        <TabsTrigger value="image" className={TAB_TRIGGER_CLASS_NAME}>
+          Imagem
+        </TabsTrigger>
+        <TabsTrigger value="internet" className={TAB_TRIGGER_CLASS_NAME}>
+          Internet
+        </TabsTrigger>
+        <TabsTrigger value="address" className={TAB_TRIGGER_CLASS_NAME}>
+          Endereço
+        </TabsTrigger>
+        <TabsTrigger value="products" className={TAB_TRIGGER_CLASS_NAME}>
+          Produtos
+        </TabsTrigger>
+        <TabsTrigger value="miscellaneous" className={TAB_TRIGGER_CLASS_NAME}>
+          Diversos
+        </TabsTrigger>
+        <TabsTrigger value="status" className={TAB_TRIGGER_CLASS_NAME}>
+          Status
+        </TabsTrigger>
+        <TabsTrigger value="deletion" className={TAB_TRIGGER_CLASS_NAME}>
+          Exclusão
+        </TabsTrigger>
       </TabsList>
 
       <TabsContent value="notes">
         <form
-          className="space-y-4 rounded-lg border p-4"
+          className="space-y-3 rounded-lg border p-3 sm:space-y-4 sm:p-4"
           onSubmit={(event: FormEvent<HTMLFormElement>) => {
             event.preventDefault();
             runAction(
@@ -194,7 +218,7 @@ export function CustomerDetailForms({
               id="customer-detail-notes"
               value={values.notes}
               maxLength={2000}
-              rows={7}
+              rows={5}
               disabled={savingSection !== null}
               aria-invalid={Boolean(errors.notes?.[0])}
               onChange={(event) => setField("notes", event.target.value)}
@@ -215,7 +239,7 @@ export function CustomerDetailForms({
 
       <TabsContent value="internet">
         <form
-          className="space-y-4 rounded-lg border p-4"
+          className="space-y-3 rounded-lg border p-3 sm:space-y-4 sm:p-4"
           onSubmit={(event: FormEvent<HTMLFormElement>) => {
             event.preventDefault();
             runAction(
@@ -233,7 +257,7 @@ export function CustomerDetailForms({
             );
           }}
         >
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
             <div className="sm:col-span-2">
               {field("website", "Website", { maxLength: 500 })}
             </div>
@@ -251,9 +275,9 @@ export function CustomerDetailForms({
         </form>
       </TabsContent>
 
-      <TabsContent value="address" className="space-y-4">
+      <TabsContent value="address" className="space-y-3 sm:space-y-4">
         <form
-          className="space-y-4 rounded-lg border p-4"
+          className="space-y-3 rounded-lg border p-3 sm:space-y-4 sm:p-4"
           onSubmit={(event: FormEvent<HTMLFormElement>) => {
             event.preventDefault();
             runAction(
@@ -273,7 +297,7 @@ export function CustomerDetailForms({
             );
           }}
         >
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
             {field("zipCode", "CEP", { maxLength: 100 })}
             {field("state", "UF", { maxLength: 100 })}
             <div className="sm:col-span-2">
@@ -294,14 +318,19 @@ export function CustomerDetailForms({
         {addressSummary}
       </TabsContent>
 
-      <TabsContent value="image">{imageContent}</TabsContent>
+      <TabsContent value="image" className="space-y-3 sm:space-y-4">
+        <div className="mx-auto w-full max-w-[500px] lg:hidden">
+          {mobileImageGallery}
+        </div>
+        {imageContent}
+      </TabsContent>
 
       <TabsContent value="products">{productsContent}</TabsContent>
 
       <TabsContent value="miscellaneous">{miscellaneousContent}</TabsContent>
 
-      <TabsContent value="status" className="space-y-4">
-        <div className="space-y-3 rounded-lg border p-4">
+      <TabsContent value="status" className="space-y-3 sm:space-y-4">
+        <div className="space-y-3 rounded-lg border p-3 sm:p-4">
           <div>
             <h3 className="font-semibold">Restrição comercial</h3>
             <p className="text-muted-foreground text-xs">

@@ -152,16 +152,16 @@ export function CustomerPersonBusinessSections({
   return (
     <>
       {personTypeId === 1 && (
-        <Card>
-          <CardHeader>
+        <Card className="gap-4 py-4 sm:gap-6 sm:py-6">
+          <CardHeader className="px-4 sm:px-6">
             <CardTitle className="flex items-center gap-2 text-base">
               <UserRound className="size-4" />
               Pessoa Física
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4 sm:px-6">
             <form
-              className="space-y-4"
+              className="space-y-3 sm:space-y-4"
               onSubmit={(event: FormEvent<HTMLFormElement>) => {
                 event.preventDefault();
                 runAction(
@@ -177,7 +177,7 @@ export function CustomerPersonBusinessSections({
                 );
               }}
             >
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
                 {personField("cpf", "CPF", { maxLength: 100 })}
                 {personField("birthDate", "Data de nascimento", {
                   type: "date",
@@ -195,16 +195,16 @@ export function CustomerPersonBusinessSections({
       )}
 
       {personTypeId === 2 && (
-        <Card>
-          <CardHeader>
+        <Card className="gap-4 py-4 sm:gap-6 sm:py-6">
+          <CardHeader className="px-4 sm:px-6">
             <CardTitle className="flex items-center gap-2 text-base">
               <Building2 className="size-4" />
               Pessoa Jurídica
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4 sm:px-6">
             <form
-              className="space-y-4"
+              className="space-y-3 sm:space-y-4"
               onSubmit={(event: FormEvent<HTMLFormElement>) => {
                 event.preventDefault();
                 runAction(
@@ -221,7 +221,7 @@ export function CustomerPersonBusinessSections({
                 );
               }}
             >
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
                 {businessField("cnpj", "CNPJ", {
                   maxLength: 100,
                   required: true,
