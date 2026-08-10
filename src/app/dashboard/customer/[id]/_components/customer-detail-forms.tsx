@@ -16,7 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import type { UICustomerDetail } from "@/services/api-main/customer-general";
-import type { CustomerActionResult } from "./types/customer-dashboard-types";
+import type { CustomerActionResult } from "../../_components/types/customer-dashboard-types";
 
 type Section = "notes" | "address" | "internet" | "restriction";
 
@@ -165,6 +165,7 @@ export function CustomerDetailForms({
         <TabsTrigger value="restriction">Restrição</TabsTrigger>
         <TabsTrigger value="deletion">Exclusão</TabsTrigger>
       </TabsList>
+
 
       <TabsContent value="notes">
         <form
