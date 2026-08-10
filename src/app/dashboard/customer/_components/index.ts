@@ -1,5 +1,4 @@
 export { CustomerDashboard } from "./customer-dashboard";
-export { CustomerDetails } from "./customer-details";
 export {
   buildCustomerDetailHref,
   buildCustomerUrl,

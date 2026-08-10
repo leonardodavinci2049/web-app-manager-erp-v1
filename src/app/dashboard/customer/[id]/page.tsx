@@ -9,7 +9,8 @@ import {
   getCustomerById,
   getCustomerLatestProducts,
 } from "@/services/api-main/customer-general";
-import { CustomerDetails, getSafeCustomerReturnTo } from "../_components";
+import { getSafeCustomerReturnTo } from "../_components";
+import { CustomerDetails } from "./_components/customer-details";
 import {
   CustomerImageGalleryServer,
   CustomerImageGallerySkeleton,

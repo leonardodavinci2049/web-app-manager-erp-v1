@@ -11,7 +11,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { CustomerActionResult } from "./types/customer-dashboard-types";
+import type { CustomerActionResult } from "../../_components/types/customer-dashboard-types";
 
 const PERSON_TYPES = [
   { id: 1, label: "Pessoa Física" },
