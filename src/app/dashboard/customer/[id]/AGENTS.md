@@ -132,6 +132,8 @@ Section-to-action mapping:
 | Address | `customer-detail-forms` | `updateCustomerAddressAction` |
 | Internet | `customer-detail-forms` | `updateCustomerInternetAction` |
 | Status (restriction) | `customer-detail-forms` | `updateCustomerRestrictionAction` |
+| Status (active/inactive) | `customer-detail-forms` | `updateCustomerInactiveAction` |
+| Status (email advertising) | `customer-detail-forms` | `updateCustomerEmailMarketingAction` |
 
 Note: all these actions live in `../_actions/customer-actions.ts` (shared with
 the list's create flow), not in this folder. Reuse them; do not duplicate
@@ -152,11 +154,12 @@ section logic here.
 
 ## Restriction Flow
 
-The restriction tab intentionally does **not** read the current restriction
-state from the detail DTO. The user must choose explicitly ("Marcar com
-restrição" / "Remover restrição"), and only the boolean flag is sent. Each
-action asks for a `window.confirm()` before submitting. Preserve this explicit
-choice behavior; do not infer the state from the UI.
+The restriction tab reads `UICustomerDetail.restricted`, mapped from
+`RESTRICAO === 1`, and presents "Sem restrição" / "Com restrição" as an
+accessible two-option selector. The current option uses `aria-pressed`, is
+visually highlighted and disabled, while selecting the other option asks for a
+`window.confirm()` before sending only the boolean flag. After success,
+`router.refresh()` reloads the persisted state.
 
 ## Image Gallery Subsystem
 
@@ -267,8 +270,6 @@ into this folder.
 
 The detail page deliberately disables flows without a safe API contract:
 
-- **Activate/Inactivate** (`statusContent`): disabled buttons labeled
-  "Pendente de API". Only the restriction flag is mutable today.
 - **Delete** (`deletionContent`): disabled destructive button in a danger zone.
 - **Manual `PATH_IMAGEM` assignment** (`customer-images-list`): the per-image
   "Usar no PATH_IMAGEM" button is disabled. Promotion is automatic via gallery
@@ -284,6 +285,11 @@ contract arrives, wire the action, enable the control, and remove the
   interactive components (forms, toggles, gallery, avatars with error state).
 - Keep section forms independent: each section owns its state and submits to one
   action. Do not introduce a shared editing context or a single save-all action.
+- Status selectors map `RESTRICAO`, `INATIVO`, and `EMAIL_MKT` into boolean UI
+  state. They write one field per Server Action through
+  `generalCallServiceApi.updateTableInlineField`, using `FIELD_TYPE.BIGINT`,
+  while fixing `tbl_pessoa`, `ID_TBL_PESSOA`, and the target field on the
+  server.
 - When adding a detail section, align together: the service payload, the Zod
   schema in `customer-actions.ts`, the `UICustomerDetail` field, the
   `toValues()` mapping, the form UI, and the tab entry (if applicable).

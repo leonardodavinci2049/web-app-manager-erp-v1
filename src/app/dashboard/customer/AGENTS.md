@@ -292,8 +292,8 @@ client; use `safeOperationMessage()` to surface only safe operation messages.
 - `customer-upd` (`src/services/api-main/customer-upd`): stored-procedure
   updates for general, personal, business, address, internet, and flags.
 - `general-call` (`src/services/api-main/general-call`):
-  `updateTableInlineField()` used to write `PATH_IMAGEM` on
-  `tbl_pessoa` keyed by `ID_TBL_PESSOA`.
+  `updateTableInlineField()` used to write `PATH_IMAGEM`, `RESTRICAO`,
+  `INATIVO`, and `EMAIL_MKT` on `tbl_pessoa` keyed by `ID_TBL_PESSOA`.
 - `api-assets` (`src/services/api-assets`): gallery read, upload, primary
   promotion, and deletion via `assetsApiService`.
 
@@ -303,9 +303,6 @@ Read the local `AGENTS.md` inside each service module before changing it.
 
 The detail page intentionally disables flows that lack a safe API contract:
 
-- **Activate/Inactivate**: the status card renders disabled buttons labeled
-  "Pendente de API". Do not wire these to an endpoint until the API exposes a
-  secure activation contract.
 - **Delete**: the deletion zone renders a disabled destructive button. Do not
   implement deletion until the API exposes a secure, idempotent delete contract
   with referential safety.

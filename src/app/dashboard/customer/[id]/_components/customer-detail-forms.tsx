@@ -1,15 +1,27 @@
 "use client";
 
-import { Loader2, Save, ShieldAlert, ShieldCheck } from "lucide-react";
+import {
+  Loader2,
+  MailCheck,
+  MailX,
+  Power,
+  PowerOff,
+  Save,
+  ShieldAlert,
+  ShieldCheck,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { type FormEvent, type ReactNode, useState } from "react";
 import { toast } from "sonner";
 import {
   updateCustomerAddressAction,
+  updateCustomerEmailMarketingAction,
+  updateCustomerInactiveAction,
   updateCustomerInternetAction,
   updateCustomerNotesAction,
   updateCustomerRestrictionAction,
 } from "@/app/dashboard/customer/_actions/customer-actions";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,7 +30,13 @@ import { Textarea } from "@/components/ui/textarea";
 import type { UICustomerDetail } from "@/services/api-main/customer-general";
 import type { CustomerActionResult } from "../../_components/types/customer-dashboard-types";
 
-type Section = "notes" | "address" | "internet" | "restriction";
+type Section =
+  | "notes"
+  | "address"
+  | "internet"
+  | "restriction"
+  | "registrationStatus"
+  | "emailMarketing";
 
 const TAB_TRIGGER_CLASS_NAME =
   "h-8 min-w-max flex-none snap-start px-3 text-xs sm:h-9 sm:text-sm lg:min-w-0 lg:px-2";
@@ -51,7 +69,6 @@ interface CustomerDetailFormsProps {
   mobileImageGallery: ReactNode;
   miscellaneousContent: ReactNode;
   productsContent: ReactNode;
-  statusContent: ReactNode;
 }
 
 function toValues(customer: UICustomerDetail): DetailValues {
@@ -97,7 +114,6 @@ export function CustomerDetailForms({
   mobileImageGallery,
   miscellaneousContent,
   productsContent,
-  statusContent,
 }: CustomerDetailFormsProps) {
   const router = useRouter();
   const [values, setValues] = useState<DetailValues>(() => toValues(customer));
@@ -339,38 +355,20 @@ export function CustomerDetailForms({
           <div>
             <h3 className="font-semibold">Restrição comercial</h3>
             <p className="text-muted-foreground text-xs">
-              O detalhe não informa o estado atual. Escolha explicitamente o
-              estado desejado; somente a flag de restrição será enviada.
+              Situação atual:{" "}
+              {customer.restricted ? "Com restrição" : "Sem restrição"}.
+              Selecione a outra opção para alterar.
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <fieldset
+            className="grid grid-cols-1 gap-2 sm:grid-cols-2"
+            aria-label="Situação da restrição comercial"
+          >
             <Button
               type="button"
-              variant="destructive"
-              disabled={savingSection !== null}
-              onClick={() => {
-                if (!window.confirm("Marcar este cliente com restrição?"))
-                  return;
-                runAction(
-                  "restriction",
-                  updateCustomerRestrictionAction({
-                    customerId: customer.id,
-                    restricted: true,
-                  }),
-                );
-              }}
-            >
-              {savingSection === "restriction" ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : (
-                <ShieldAlert className="size-4" />
-              )}
-              Marcar com restrição
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              disabled={savingSection !== null}
+              variant={customer.restricted ? "outline" : "default"}
+              aria-pressed={!customer.restricted}
+              disabled={savingSection !== null || !customer.restricted}
               onClick={() => {
                 if (!window.confirm("Remover a restrição deste cliente?"))
                   return;
@@ -382,13 +380,208 @@ export function CustomerDetailForms({
                   }),
                 );
               }}
+              className="justify-between"
             >
-              <ShieldCheck className="size-4" />
-              Remover restrição
+              <span className="flex items-center gap-2">
+                {savingSection === "restriction" && customer.restricted ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <ShieldCheck className="size-4" />
+                )}
+                Sem restrição
+              </span>
+              {!customer.restricted && <Badge variant="secondary">Atual</Badge>}
             </Button>
-          </div>
+            <Button
+              type="button"
+              variant={customer.restricted ? "destructive" : "outline"}
+              aria-pressed={customer.restricted}
+              disabled={savingSection !== null || customer.restricted}
+              onClick={() => {
+                if (!window.confirm("Marcar este cliente com restrição?"))
+                  return;
+                runAction(
+                  "restriction",
+                  updateCustomerRestrictionAction({
+                    customerId: customer.id,
+                    restricted: true,
+                  }),
+                );
+              }}
+              className="justify-between"
+            >
+              <span className="flex items-center gap-2">
+                {savingSection === "restriction" && !customer.restricted ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <ShieldAlert className="size-4" />
+                )}
+                Com restrição
+              </span>
+              {customer.restricted && <Badge variant="secondary">Atual</Badge>}
+            </Button>
+          </fieldset>
         </div>
-        {statusContent}
+
+        <div className="space-y-3 rounded-lg border p-3 sm:p-4">
+          <div>
+            <h3 className="font-semibold">Status do cadastro</h3>
+            <p className="text-muted-foreground text-xs">
+              Situação atual: {customer.inactive ? "Inativo" : "Ativo"}.
+              Selecione a outra opção para alterar.
+            </p>
+          </div>
+          <fieldset
+            className="grid grid-cols-1 gap-2 sm:grid-cols-2"
+            aria-label="Status do cadastro"
+          >
+            <Button
+              type="button"
+              variant={customer.inactive ? "outline" : "default"}
+              aria-pressed={!customer.inactive}
+              disabled={savingSection !== null || !customer.inactive}
+              onClick={() => {
+                if (!window.confirm("Ativar este cliente?")) return;
+                runAction(
+                  "registrationStatus",
+                  updateCustomerInactiveAction({
+                    customerId: customer.id,
+                    inactive: false,
+                  }),
+                );
+              }}
+              className="justify-between"
+            >
+              <span className="flex items-center gap-2">
+                {savingSection === "registrationStatus" && customer.inactive ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Power className="size-4" />
+                )}
+                Ativo
+              </span>
+              {!customer.inactive && <Badge variant="secondary">Atual</Badge>}
+            </Button>
+            <Button
+              type="button"
+              variant={customer.inactive ? "destructive" : "outline"}
+              aria-pressed={customer.inactive}
+              disabled={savingSection !== null || customer.inactive}
+              onClick={() => {
+                if (!window.confirm("Inativar este cliente?")) return;
+                runAction(
+                  "registrationStatus",
+                  updateCustomerInactiveAction({
+                    customerId: customer.id,
+                    inactive: true,
+                  }),
+                );
+              }}
+              className="justify-between"
+            >
+              <span className="flex items-center gap-2">
+                {savingSection === "registrationStatus" &&
+                !customer.inactive ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <PowerOff className="size-4" />
+                )}
+                Inativo
+              </span>
+              {customer.inactive && <Badge variant="secondary">Atual</Badge>}
+            </Button>
+          </fieldset>
+        </div>
+
+        <div className="space-y-3 rounded-lg border p-3 sm:p-4">
+          <div>
+            <h3 className="font-semibold">Publicidade por e-mail</h3>
+            <p className="text-muted-foreground text-xs">
+              Situação atual:{" "}
+              {customer.emailMarketingEnabled ? "Enviar" : "Não enviar"}.
+              Selecione a outra opção para alterar.
+            </p>
+          </div>
+          <fieldset
+            className="grid grid-cols-1 gap-2 sm:grid-cols-2"
+            aria-label="Envio de publicidade por e-mail"
+          >
+            <Button
+              type="button"
+              variant={customer.emailMarketingEnabled ? "outline" : "default"}
+              aria-pressed={!customer.emailMarketingEnabled}
+              disabled={
+                savingSection !== null || !customer.emailMarketingEnabled
+              }
+              onClick={() => {
+                if (
+                  !window.confirm(
+                    "Desativar o envio de publicidade por e-mail para este cliente?",
+                  )
+                )
+                  return;
+                runAction(
+                  "emailMarketing",
+                  updateCustomerEmailMarketingAction({
+                    customerId: customer.id,
+                    enabled: false,
+                  }),
+                );
+              }}
+              className="justify-between"
+            >
+              <span className="flex items-center gap-2">
+                {savingSection === "emailMarketing" &&
+                customer.emailMarketingEnabled ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <MailX className="size-4" />
+                )}
+                Não enviar
+              </span>
+              {!customer.emailMarketingEnabled && (
+                <Badge variant="secondary">Atual</Badge>
+              )}
+            </Button>
+            <Button
+              type="button"
+              variant={customer.emailMarketingEnabled ? "default" : "outline"}
+              aria-pressed={customer.emailMarketingEnabled}
+              disabled={
+                savingSection !== null || customer.emailMarketingEnabled
+              }
+              onClick={() => {
+                if (
+                  !window.confirm(
+                    "Ativar o envio de publicidade por e-mail para este cliente?",
+                  )
+                )
+                  return;
+                runAction(
+                  "emailMarketing",
+                  updateCustomerEmailMarketingAction({
+                    customerId: customer.id,
+                    enabled: true,
+                  }),
+                );
+              }}
+              className="justify-between"
+            >
+              <span className="flex items-center gap-2">
+                {savingSection === "emailMarketing" &&
+                !customer.emailMarketingEnabled ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <MailCheck className="size-4" />
+                )}
+                Enviar
+              </span>
+              {customer.emailMarketingEnabled && (
+                <Badge variant="secondary">Atual</Badge>
+              )}
+            </Button>
+          </fieldset>
+        </div>
       </TabsContent>
 
       <TabsContent value="deletion">{deletionContent}</TabsContent>
