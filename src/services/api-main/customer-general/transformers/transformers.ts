@@ -87,6 +87,7 @@ export interface UICustomerDetail {
   sellerFlag: number;
   freeShipping: boolean;
   ppDiscountValue: number | null;
+  lastPurchase?: string;
   createdAt: string;
 }
 
@@ -222,7 +223,7 @@ export function transformCustomerDetail(
     id: isManagerDetail ? entity.ID_CLIENTE : entity.ID_USUARIO,
     storeId: entity.ID_LOJA ?? 0,
     customerTypeId: entity.ID_TIPO_CLIENTE ?? 0,
-    approved: isManagerDetail ? Number(entity.APROVADO) === 1 : false,
+    approved: isManagerDetail ? entity.APROVADO === "S" : false,
     restricted: isManagerDetail ? entity.RESTRICAO === 1 : false,
     inactive: isManagerDetail
       ? entity.INATIVO === 1
@@ -275,6 +276,9 @@ export function transformCustomerDetail(
     sellerFlag: entity.VENDEDOR ?? 0,
     freeShipping: isManagerDetail ? entity.FLAG_FRETE_GRATIS === 1 : false,
     ppDiscountValue: isManagerDetail ? entity.VL_PP_DESCONTO : null,
+    lastPurchase: isManagerDetail
+      ? (entity.DT_ULTIMA_COMPRA ?? undefined)
+      : undefined,
     createdAt: entity.DATADOCADASTRO ?? "",
   };
 }

@@ -263,7 +263,11 @@ export function CustomerDetails({
                 Cadastro
               </CardTitle>
             </CardHeader>
-            <CardContent className="px-4 sm:px-6">
+            <CardContent className="space-y-3 px-4 sm:px-6">
+              <DetailField
+                label="Data da última compra"
+                value={formatDate(customer.lastPurchase)}
+              />
               <DetailField
                 label="Data de cadastro"
                 value={formatDate(customer.createdAt)}
