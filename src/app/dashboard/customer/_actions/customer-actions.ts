@@ -32,6 +32,7 @@ const logger = createLogger("CustomerDashboardActions");
 const CUSTOMER_PATH = "/dashboard/customer";
 const CUSTOMER_TABLE_NAME = "tbl_pessoa";
 const CUSTOMER_PRIMARY_KEY_FIELD = "ID_TBL_PESSOA";
+const CUSTOMER_APPROVED_FIELD = "APROVADO";
 const CUSTOMER_RESTRICTION_FIELD = "RESTRICAO";
 const CUSTOMER_INACTIVE_FIELD = "INATIVO";
 const CUSTOMER_EMAIL_MARKETING_FIELD = "EMAIL_MKT";
@@ -121,6 +122,10 @@ const internetSchema = z.object({
 const restrictionSchema = z.object({
   customerId: customerIdSchema,
   restricted: z.boolean(),
+});
+const approvalSchema = z.object({
+  customerId: customerIdSchema,
+  approved: z.boolean(),
 });
 const inactiveSchema = z.object({
   customerId: customerIdSchema,
@@ -486,6 +491,42 @@ export async function updateCustomerRestrictionAction(
       safeOperationMessage(
         error,
         "Não foi possível alterar a restrição do cliente.",
+      ),
+      error,
+    );
+  }
+}
+
+export async function updateCustomerApprovalAction(
+  input: z.input<typeof approvalSchema>,
+): Promise<CustomerActionResult> {
+  const parsed = approvalSchema.safeParse(input);
+  if (!parsed.success) return safeFailure("Status de aprovação inválido.");
+
+  try {
+    const context = await getExistingCustomer(parsed.data.customerId);
+    if ("success" in context) return context;
+    await generalCallServiceApi.updateTableInlineField({
+      ...context.apiContext,
+      pe_table_name: CUSTOMER_TABLE_NAME,
+      pe_primary_key_field: CUSTOMER_PRIMARY_KEY_FIELD,
+      pe_register_id: parsed.data.customerId,
+      pe_field_type: FIELD_TYPE.BIGINT,
+      pe_field: CUSTOMER_APPROVED_FIELD,
+      pe_value_int: parsed.data.approved ? 1 : 0,
+    });
+    revalidateCustomer(parsed.data.customerId);
+    return {
+      success: true,
+      message: parsed.data.approved
+        ? "Cliente aprovado."
+        : "Cliente marcado como pendente.",
+    };
+  } catch (error) {
+    return safeFailure(
+      safeOperationMessage(
+        error,
+        "Não foi possível alterar a aprovação do cliente.",
       ),
       error,
     );

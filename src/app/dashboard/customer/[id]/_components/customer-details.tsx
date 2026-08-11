@@ -9,7 +9,6 @@ import {
   Phone,
   Store,
   Trash2,
-  UserRound,
 } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -323,28 +322,6 @@ export function CustomerDetails({
                   ))}
                 </div>
               )}
-            </CardContent>
-          </Card>
-        }
-        addressSummary={
-          <Card className="gap-4 py-4 sm:gap-6 sm:py-6">
-            <CardHeader className="px-4 sm:px-6">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <UserRound className="size-4" />
-                Localização resumida
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="px-4 sm:px-6">
-              <p className="text-sm">
-                {[customer.address, customer.addressNumber]
-                  .filter(Boolean)
-                  .join(", ") || "Endereço não informado"}
-              </p>
-              <p className="text-muted-foreground text-xs">
-                {[customer.neighborhood, customer.city, customer.state]
-                  .filter(Boolean)
-                  .join(" · ") || "Localidade não informada"}
-              </p>
             </CardContent>
           </Card>
         }

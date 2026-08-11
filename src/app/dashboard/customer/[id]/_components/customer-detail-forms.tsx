@@ -1,6 +1,9 @@
 "use client";
 
 import {
+  BadgeCheck,
+  Clock3,
+  Copy,
   Loader2,
   MailCheck,
   MailX,
@@ -9,12 +12,14 @@ import {
   Save,
   ShieldAlert,
   ShieldCheck,
+  UserRound,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { type FormEvent, type ReactNode, useState } from "react";
 import { toast } from "sonner";
 import {
   updateCustomerAddressAction,
+  updateCustomerApprovalAction,
   updateCustomerEmailMarketingAction,
   updateCustomerInactiveAction,
   updateCustomerInternetAction,
@@ -23,6 +28,7 @@ import {
 } from "@/app/dashboard/customer/_actions/customer-actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -34,6 +40,7 @@ type Section =
   | "notes"
   | "address"
   | "internet"
+  | "approval"
   | "restriction"
   | "registrationStatus"
   | "emailMarketing";
@@ -62,13 +69,63 @@ interface DetailValues {
 }
 
 interface CustomerDetailFormsProps {
-  addressSummary: ReactNode;
   customer: UICustomerDetail;
   deletionContent: ReactNode;
   imageContent: ReactNode;
   mobileImageGallery: ReactNode;
   miscellaneousContent: ReactNode;
   productsContent: ReactNode;
+}
+
+function buildAddressSummary(values: DetailValues, customerName: string) {
+  const normalize = (value: string) => value.trim();
+  const normalizedCustomerName = normalize(customerName);
+  const address = normalize(values.address);
+  const addressNumber = normalize(values.addressNumber);
+  const complement = normalize(values.complement);
+  const neighborhood = normalize(values.neighborhood);
+  const city = normalize(values.city);
+  const state = normalize(values.state);
+  const zipCode = normalize(values.zipCode);
+  const cityCode = normalize(values.cityCode);
+  const stateCode = normalize(values.stateCode);
+
+  const primaryLine = [
+    [address, addressNumber ? `nº ${addressNumber}` : ""]
+      .filter(Boolean)
+      .join(", "),
+    complement ? `Complemento: ${complement}` : "",
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  const localityLine = [
+    neighborhood ? `Bairro: ${neighborhood}` : "",
+    [city, state].filter(Boolean).join(" / "),
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  const referenceLine = [
+    zipCode ? `CEP: ${zipCode}` : "",
+    cityCode ? `Código do município: ${cityCode}` : "",
+    stateCode ? `Código da UF: ${stateCode}` : "",
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  const addressLines = [primaryLine, localityLine, referenceLine].filter(
+    Boolean,
+  );
+  const titleLine = normalizedCustomerName
+    ? `Endereço de ${normalizedCustomerName}.`
+    : "Endereço do cliente.";
+
+  return {
+    clipboardText: [titleLine, ...addressLines].join("\n"),
+    hasAddressData: addressLines.length > 0,
+    localityLine,
+    primaryLine,
+    referenceLine,
+    titleLine,
+  };
 }
 
 function toValues(customer: UICustomerDetail): DetailValues {
@@ -107,7 +164,6 @@ function SectionButton({ saving, label }: { saving: boolean; label: string }) {
 }
 
 export function CustomerDetailForms({
-  addressSummary,
   customer,
   deletionContent,
   imageContent,
@@ -121,6 +177,7 @@ export function CustomerDetailForms({
     {},
   );
   const [savingSection, setSavingSection] = useState<Section | null>(null);
+  const addressSummary = buildAddressSummary(values, customer.name);
 
   const setField = <Key extends keyof DetailValues>(
     field: Key,
@@ -149,6 +206,24 @@ export function CustomerDetailForms({
       toast.error("Não foi possível concluir a comunicação com o servidor.");
     } finally {
       setSavingSection(null);
+    }
+  };
+
+  const copyNotesToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(values.notes);
+      toast.success("Anotações copiadas para a área de transferência.");
+    } catch {
+      toast.error("Não foi possível copiar as anotações.");
+    }
+  };
+
+  const copyAddressToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(addressSummary.clipboardText);
+      toast.success("Endereço copiado para a área de transferência.");
+    } catch {
+      toast.error("Não foi possível copiar o endereço.");
     }
   };
 
@@ -251,10 +326,21 @@ export function CustomerDetailForms({
               {values.notes.length}/2000
             </p>
           </div>
-          <SectionButton
-            saving={savingSection === "notes"}
-            label="Salvar anotações"
-          />
+          <div className="flex flex-wrap gap-2">
+            <SectionButton
+              saving={savingSection === "notes"}
+              label="Salvar anotações"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              disabled={values.notes.length === 0}
+              onClick={copyNotesToClipboard}
+            >
+              <Copy className="size-4" />
+              Copiar anotações
+            </Button>
+          </div>
         </form>
       </TabsContent>
 
@@ -336,7 +422,39 @@ export function CustomerDetailForms({
             label="Salvar endereço"
           />
         </form>
-        {addressSummary}
+        <Card className="gap-4 py-4 sm:gap-6 sm:py-6">
+          <CardHeader className="px-4 sm:px-6">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <UserRound className="size-4" />
+              Localização resumida
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 px-4 sm:px-6">
+            <div className="space-y-1">
+              <p className="text-sm font-medium">{addressSummary.titleLine}</p>
+              <p className="text-sm">
+                {addressSummary.primaryLine || "Endereço não informado"}
+              </p>
+              <p className="text-muted-foreground text-xs">
+                {addressSummary.localityLine || "Localidade não informada"}
+              </p>
+              {addressSummary.referenceLine && (
+                <p className="text-muted-foreground text-xs">
+                  {addressSummary.referenceLine}
+                </p>
+              )}
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={!addressSummary.hasAddressData}
+              onClick={copyAddressToClipboard}
+            >
+              <Copy className="size-4" />
+              Copiar endereço
+            </Button>
+          </CardContent>
+        </Card>
       </TabsContent>
 
       <TabsContent value="image" className="space-y-3 sm:space-y-4">
@@ -351,6 +469,76 @@ export function CustomerDetailForms({
       <TabsContent value="miscellaneous">{miscellaneousContent}</TabsContent>
 
       <TabsContent value="status" className="space-y-3 sm:space-y-4">
+        <div className="space-y-3 rounded-lg border p-3 sm:p-4">
+          <div>
+            <h3 className="font-semibold">Aprovação do cliente</h3>
+            <p className="text-muted-foreground text-xs">
+              Situação atual: {customer.approved ? "APROVADO" : "PENDENTE"}.
+              Selecione a outra opção para alterar.
+            </p>
+          </div>
+          <fieldset
+            className="grid grid-cols-1 gap-2 sm:grid-cols-2"
+            aria-label="Situação da aprovação do cliente"
+          >
+            <Button
+              type="button"
+              variant={customer.approved ? "default" : "outline"}
+              aria-pressed={customer.approved}
+              disabled={savingSection !== null || customer.approved}
+              onClick={() => {
+                if (!window.confirm("Aprovar este cliente?")) return;
+                runAction(
+                  "approval",
+                  updateCustomerApprovalAction({
+                    customerId: customer.id,
+                    approved: true,
+                  }),
+                );
+              }}
+              className="justify-between"
+            >
+              <span className="flex items-center gap-2">
+                {savingSection === "approval" && !customer.approved ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <BadgeCheck className="size-4" />
+                )}
+                APROVADO
+              </span>
+              {customer.approved && <Badge variant="secondary">Atual</Badge>}
+            </Button>
+            <Button
+              type="button"
+              variant={customer.approved ? "outline" : "secondary"}
+              aria-pressed={!customer.approved}
+              disabled={savingSection !== null || !customer.approved}
+              onClick={() => {
+                if (!window.confirm("Marcar este cliente como pendente?"))
+                  return;
+                runAction(
+                  "approval",
+                  updateCustomerApprovalAction({
+                    customerId: customer.id,
+                    approved: false,
+                  }),
+                );
+              }}
+              className="justify-between"
+            >
+              <span className="flex items-center gap-2">
+                {savingSection === "approval" && customer.approved ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Clock3 className="size-4" />
+                )}
+                PENDENTE
+              </span>
+              {!customer.approved && <Badge variant="secondary">Atual</Badge>}
+            </Button>
+          </fieldset>
+        </div>
+
         <div className="space-y-3 rounded-lg border p-3 sm:p-4">
           <div>
             <h3 className="font-semibold">Restrição comercial</h3>
