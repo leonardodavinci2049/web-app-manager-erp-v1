@@ -18,6 +18,11 @@ import {
   CustomerUpdError,
   customerUpdServiceApi,
 } from "@/services/api-main/customer-upd";
+import {
+  FIELD_TYPE,
+  GeneralCallError,
+  generalCallServiceApi,
+} from "@/services/api-main/general-call";
 import type {
   CustomerActionResult,
   CustomerCreateValues,
@@ -25,6 +30,11 @@ import type {
 
 const logger = createLogger("CustomerDashboardActions");
 const CUSTOMER_PATH = "/dashboard/customer";
+const CUSTOMER_TABLE_NAME = "tbl_pessoa";
+const CUSTOMER_PRIMARY_KEY_FIELD = "ID_TBL_PESSOA";
+const CUSTOMER_RESTRICTION_FIELD = "RESTRICAO";
+const CUSTOMER_INACTIVE_FIELD = "INATIVO";
+const CUSTOMER_EMAIL_MARKETING_FIELD = "EMAIL_MKT";
 const customerIdSchema = z.number().int().positive();
 const optionalText = (max: number) => z.string().trim().max(max);
 const optionalEmail = optionalText(255).refine(
@@ -112,6 +122,14 @@ const restrictionSchema = z.object({
   customerId: customerIdSchema,
   restricted: z.boolean(),
 });
+const inactiveSchema = z.object({
+  customerId: customerIdSchema,
+  inactive: z.boolean(),
+});
+const emailMarketingSchema = z.object({
+  customerId: customerIdSchema,
+  enabled: z.boolean(),
+});
 const personTypeSchema = z.object({
   customerId: customerIdSchema,
   personTypeId: z.number().int().min(1).max(2),
@@ -137,7 +155,9 @@ function safeOperationMessage(error: unknown, fallback: string): string {
     (error instanceof CustomerUpdError &&
       error.code === "CUSTOMER_UPD_OPERATION_ERROR") ||
     (error instanceof CustomerInlineError &&
-      error.code === "CUSTOMER_INLINE_OPERATION_ERROR")
+      error.code === "CUSTOMER_INLINE_OPERATION_ERROR") ||
+    (error instanceof GeneralCallError &&
+      error.code === "GENERAL_CALL_OPERATION_ERROR")
   ) {
     const message = error.message.trim().slice(0, 300);
     if (message) return message;
@@ -445,10 +465,14 @@ export async function updateCustomerRestrictionAction(
   try {
     const context = await getExistingCustomer(parsed.data.customerId);
     if ("success" in context) return context;
-    await customerUpdServiceApi.updateFlag({
-      pe_customer_id: parsed.data.customerId,
-      pe_restriction: parsed.data.restricted ? 1 : 0,
+    await generalCallServiceApi.updateTableInlineField({
       ...context.apiContext,
+      pe_table_name: CUSTOMER_TABLE_NAME,
+      pe_primary_key_field: CUSTOMER_PRIMARY_KEY_FIELD,
+      pe_register_id: parsed.data.customerId,
+      pe_field_type: FIELD_TYPE.BIGINT,
+      pe_field: CUSTOMER_RESTRICTION_FIELD,
+      pe_value_int: parsed.data.restricted ? 1 : 0,
     });
     revalidateCustomer(parsed.data.customerId);
     return {
@@ -462,6 +486,78 @@ export async function updateCustomerRestrictionAction(
       safeOperationMessage(
         error,
         "Não foi possível alterar a restrição do cliente.",
+      ),
+      error,
+    );
+  }
+}
+
+export async function updateCustomerInactiveAction(
+  input: z.input<typeof inactiveSchema>,
+): Promise<CustomerActionResult> {
+  const parsed = inactiveSchema.safeParse(input);
+  if (!parsed.success) return safeFailure("Status do cadastro inválido.");
+
+  try {
+    const context = await getExistingCustomer(parsed.data.customerId);
+    if ("success" in context) return context;
+    await generalCallServiceApi.updateTableInlineField({
+      ...context.apiContext,
+      pe_table_name: CUSTOMER_TABLE_NAME,
+      pe_primary_key_field: CUSTOMER_PRIMARY_KEY_FIELD,
+      pe_register_id: parsed.data.customerId,
+      pe_field_type: FIELD_TYPE.BIGINT,
+      pe_field: CUSTOMER_INACTIVE_FIELD,
+      pe_value_int: parsed.data.inactive ? 1 : 0,
+    });
+    revalidateCustomer(parsed.data.customerId);
+    return {
+      success: true,
+      message: parsed.data.inactive
+        ? "Cadastro inativado."
+        : "Cadastro ativado.",
+    };
+  } catch (error) {
+    return safeFailure(
+      safeOperationMessage(
+        error,
+        "Não foi possível alterar o status do cadastro.",
+      ),
+      error,
+    );
+  }
+}
+
+export async function updateCustomerEmailMarketingAction(
+  input: z.input<typeof emailMarketingSchema>,
+): Promise<CustomerActionResult> {
+  const parsed = emailMarketingSchema.safeParse(input);
+  if (!parsed.success) return safeFailure("Opção de publicidade inválida.");
+
+  try {
+    const context = await getExistingCustomer(parsed.data.customerId);
+    if ("success" in context) return context;
+    await generalCallServiceApi.updateTableInlineField({
+      ...context.apiContext,
+      pe_table_name: CUSTOMER_TABLE_NAME,
+      pe_primary_key_field: CUSTOMER_PRIMARY_KEY_FIELD,
+      pe_register_id: parsed.data.customerId,
+      pe_field_type: FIELD_TYPE.BIGINT,
+      pe_field: CUSTOMER_EMAIL_MARKETING_FIELD,
+      pe_value_int: parsed.data.enabled ? 1 : 0,
+    });
+    revalidateCustomer(parsed.data.customerId);
+    return {
+      success: true,
+      message: parsed.data.enabled
+        ? "Envio de publicidade ativado."
+        : "Envio de publicidade desativado.",
+    };
+  } catch (error) {
+    return safeFailure(
+      safeOperationMessage(
+        error,
+        "Não foi possível alterar a opção de publicidade.",
       ),
       error,
     );

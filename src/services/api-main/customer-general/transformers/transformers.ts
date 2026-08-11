@@ -35,6 +35,9 @@ export interface UICustomerDetail {
   id: number;
   storeId: number;
   customerTypeId: number;
+  restricted: boolean;
+  inactive: boolean;
+  emailMarketingEnabled: boolean;
   accountStatus: string;
   name: string;
   email: string;
@@ -193,6 +196,11 @@ export function transformCustomerDetail(
     id: isManagerDetail ? entity.ID_CLIENTE : entity.ID_USUARIO,
     storeId: entity.ID_LOJA ?? 0,
     customerTypeId: entity.ID_TIPO_CLIENTE ?? 0,
+    restricted: isManagerDetail ? entity.RESTRICAO === 1 : false,
+    inactive: isManagerDetail
+      ? entity.INATIVO === 1
+      : entity.ACCOUNT_STATUS === "Inativo",
+    emailMarketingEnabled: isManagerDetail ? entity.EMAIL_MKT === 1 : false,
     accountStatus: isManagerDetail
       ? entity.INATIVO === 1
         ? "Inativo"
