@@ -36,6 +36,7 @@ const CUSTOMER_APPROVED_FIELD = "APROVADO";
 const CUSTOMER_RESTRICTION_FIELD = "RESTRICAO";
 const CUSTOMER_INACTIVE_FIELD = "INATIVO";
 const CUSTOMER_EMAIL_MARKETING_FIELD = "EMAIL_MKT";
+const CUSTOMER_FREE_SHIPPING_FIELD = "FLAG_FRETE_GRATIS";
 const customerIdSchema = z.number().int().positive();
 const optionalText = (max: number) => z.string().trim().max(max);
 const optionalEmail = optionalText(255).refine(
@@ -132,6 +133,10 @@ const inactiveSchema = z.object({
   inactive: z.boolean(),
 });
 const emailMarketingSchema = z.object({
+  customerId: customerIdSchema,
+  enabled: z.boolean(),
+});
+const freeShippingSchema = z.object({
   customerId: customerIdSchema,
   enabled: z.boolean(),
 });
@@ -600,6 +605,39 @@ export async function updateCustomerEmailMarketingAction(
         error,
         "Não foi possível alterar a opção de publicidade.",
       ),
+      error,
+    );
+  }
+}
+
+export async function updateCustomerFreeShippingAction(
+  input: z.input<typeof freeShippingSchema>,
+): Promise<CustomerActionResult> {
+  const parsed = freeShippingSchema.safeParse(input);
+  if (!parsed.success) return safeFailure("Tipo de frete inválido.");
+
+  try {
+    const context = await getExistingCustomer(parsed.data.customerId);
+    if ("success" in context) return context;
+    await generalCallServiceApi.updateTableInlineField({
+      ...context.apiContext,
+      pe_table_name: CUSTOMER_TABLE_NAME,
+      pe_primary_key_field: CUSTOMER_PRIMARY_KEY_FIELD,
+      pe_register_id: parsed.data.customerId,
+      pe_field_type: FIELD_TYPE.BIGINT,
+      pe_field: CUSTOMER_FREE_SHIPPING_FIELD,
+      pe_value_int: parsed.data.enabled ? 1 : 0,
+    });
+    revalidateCustomer(parsed.data.customerId);
+    return {
+      success: true,
+      message: parsed.data.enabled
+        ? "Frete grátis ativado."
+        : "Frete padrão ativado.",
+    };
+  } catch (error) {
+    return safeFailure(
+      safeOperationMessage(error, "Não foi possível alterar o tipo de frete."),
       error,
     );
   }
