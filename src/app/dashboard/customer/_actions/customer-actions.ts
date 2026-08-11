@@ -33,6 +33,8 @@ const CUSTOMER_PATH = "/dashboard/customer";
 const CUSTOMER_TABLE_NAME = "tbl_pessoa";
 const CUSTOMER_PRIMARY_KEY_FIELD = "ID_TBL_PESSOA";
 const CUSTOMER_APPROVED_FIELD = "APROVADO";
+const CUSTOMER_APPROVED_VALUE = "S";
+const CUSTOMER_PENDING_VALUE = "N";
 const CUSTOMER_RESTRICTION_FIELD = "RESTRICAO";
 const CUSTOMER_INACTIVE_FIELD = "INATIVO";
 const CUSTOMER_EMAIL_MARKETING_FIELD = "EMAIL_MKT";
@@ -516,9 +518,11 @@ export async function updateCustomerApprovalAction(
       pe_table_name: CUSTOMER_TABLE_NAME,
       pe_primary_key_field: CUSTOMER_PRIMARY_KEY_FIELD,
       pe_register_id: parsed.data.customerId,
-      pe_field_type: FIELD_TYPE.BIGINT,
+      pe_field_type: FIELD_TYPE.STRING,
       pe_field: CUSTOMER_APPROVED_FIELD,
-      pe_value_int: parsed.data.approved ? 1 : 0,
+      pe_value_str: parsed.data.approved
+        ? CUSTOMER_APPROVED_VALUE
+        : CUSTOMER_PENDING_VALUE,
     });
     revalidateCustomer(parsed.data.customerId);
     return {
