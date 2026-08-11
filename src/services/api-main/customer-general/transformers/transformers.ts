@@ -3,6 +3,7 @@ import type {
   CustomerLatestProduct,
   CustomerListItem,
   CustomerManagerDetail,
+  CustomerManagerListItem,
   CustomerPersonListItem,
   SellerInfo,
 } from "../types/customer-general-types";
@@ -28,6 +29,10 @@ export interface UICustomerListItem {
   approved?: string;
   gender?: string;
   restricted?: boolean;
+  inactive?: boolean;
+  emailMarketingEnabled?: boolean;
+  sellerFlag?: number;
+  freeShipping?: boolean;
   createdAt?: string;
 }
 
@@ -80,6 +85,8 @@ export interface UICustomerDetail {
   tiktok?: string;
   telegram?: string;
   sellerFlag: number;
+  freeShipping: boolean;
+  ppDiscountValue: number | null;
   createdAt: string;
 }
 
@@ -188,6 +195,24 @@ export function transformCustomerPersonList(
   return items.map(transformCustomerPersonListItem);
 }
 
+export function transformCustomerManagerListItem(
+  entity: CustomerManagerListItem,
+): UICustomerListItem {
+  return {
+    ...transformCustomerPersonListItem(entity),
+    inactive: entity.INATIVO === 1,
+    emailMarketingEnabled: entity.EMAIL_MKT === 1,
+    sellerFlag: entity.VENDEDOR ?? 0,
+    freeShipping: entity.FLAG_FRETE_GRATIS === 1,
+  };
+}
+
+export function transformCustomerManagerList(
+  items: CustomerManagerListItem[],
+): UICustomerListItem[] {
+  return items.map(transformCustomerManagerListItem);
+}
+
 export function transformCustomerDetail(
   entity: CustomerDetail | CustomerManagerDetail,
 ): UICustomerDetail {
@@ -248,6 +273,8 @@ export function transformCustomerDetail(
     telegram: entity.TELEGRAM ?? undefined,
     notes: entity.ANOTACOES ?? "",
     sellerFlag: entity.VENDEDOR ?? 0,
+    freeShipping: isManagerDetail ? entity.FLAG_FRETE_GRATIS === 1 : false,
+    ppDiscountValue: isManagerDetail ? entity.VL_PP_DESCONTO : null,
     createdAt: entity.DATADOCADASTRO ?? "",
   };
 }
