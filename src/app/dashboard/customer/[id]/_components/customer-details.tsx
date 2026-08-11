@@ -326,39 +326,6 @@ export function CustomerDetails({
             </CardContent>
           </Card>
         }
-        statusContent={
-          <Card className="gap-4 py-4 sm:gap-6 sm:py-6">
-            <CardHeader className="flex-row items-center justify-between px-4 sm:px-6">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <LockKeyhole className="size-4" />
-                Status do cadastro
-              </CardTitle>
-              <Badge variant="secondary">Pendente de API</Badge>
-            </CardHeader>
-            <CardContent className="space-y-3 px-4 sm:px-6">
-              <p className="text-muted-foreground text-xs">
-                A API atual não oferece contratos seguros para ativar ou
-                inativar clientes.
-              </p>
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                disabled
-              >
-                Ativar — Pendente de API
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                disabled
-              >
-                Inativar — Pendente de API
-              </Button>
-            </CardContent>
-          </Card>
-        }
         addressSummary={
           <Card className="gap-4 py-4 sm:gap-6 sm:py-6">
             <CardHeader className="px-4 sm:px-6">
