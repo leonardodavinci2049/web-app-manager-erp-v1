@@ -4,6 +4,7 @@ import {
   BadgeCheck,
   Clock3,
   Copy,
+  Gift,
   Loader2,
   MailCheck,
   MailX,
@@ -12,6 +13,7 @@ import {
   Save,
   ShieldAlert,
   ShieldCheck,
+  Truck,
   UserRound,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -21,6 +23,7 @@ import {
   updateCustomerAddressAction,
   updateCustomerApprovalAction,
   updateCustomerEmailMarketingAction,
+  updateCustomerFreeShippingAction,
   updateCustomerInactiveAction,
   updateCustomerInternetAction,
   updateCustomerNotesAction,
@@ -43,6 +46,7 @@ type Section =
   | "approval"
   | "restriction"
   | "registrationStatus"
+  | "shippingType"
   | "emailMarketing";
 
 const TAB_TRIGGER_CLASS_NAME =
@@ -468,14 +472,13 @@ export function CustomerDetailForms({
 
       <TabsContent value="miscellaneous">{miscellaneousContent}</TabsContent>
 
-      <TabsContent value="status" className="space-y-3 sm:space-y-4">
+      <TabsContent
+        value="status"
+        className="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-2"
+      >
         <div className="space-y-3 rounded-lg border p-3 sm:p-4">
           <div>
             <h3 className="font-semibold">Aprovação do cliente</h3>
-            <p className="text-muted-foreground text-xs">
-              Situação atual: {customer.approved ? "APROVADO" : "PENDENTE"}.
-              Selecione a outra opção para alterar.
-            </p>
           </div>
           <fieldset
             className="grid grid-cols-1 gap-2 sm:grid-cols-2"
@@ -510,7 +513,7 @@ export function CustomerDetailForms({
             </Button>
             <Button
               type="button"
-              variant={customer.approved ? "outline" : "secondary"}
+              variant={customer.approved ? "outline" : "default"}
               aria-pressed={!customer.approved}
               disabled={savingSection !== null || !customer.approved}
               onClick={() => {
@@ -542,11 +545,6 @@ export function CustomerDetailForms({
         <div className="space-y-3 rounded-lg border p-3 sm:p-4">
           <div>
             <h3 className="font-semibold">Restrição comercial</h3>
-            <p className="text-muted-foreground text-xs">
-              Situação atual:{" "}
-              {customer.restricted ? "Com restrição" : "Sem restrição"}.
-              Selecione a outra opção para alterar.
-            </p>
           </div>
           <fieldset
             className="grid grid-cols-1 gap-2 sm:grid-cols-2"
@@ -613,11 +611,82 @@ export function CustomerDetailForms({
 
         <div className="space-y-3 rounded-lg border p-3 sm:p-4">
           <div>
+            <h3 className="font-semibold">Tipo de frete</h3>
+          </div>
+          <fieldset
+            className="grid grid-cols-1 gap-2 sm:grid-cols-2"
+            aria-label="Tipo de frete do cliente"
+          >
+            <Button
+              type="button"
+              variant={customer.freeShipping ? "outline" : "default"}
+              aria-pressed={!customer.freeShipping}
+              disabled={savingSection !== null || !customer.freeShipping}
+              onClick={() => {
+                if (
+                  !window.confirm(
+                    "Alterar o tipo de frete deste cliente para Frete Padrão?",
+                  )
+                )
+                  return;
+                runAction(
+                  "shippingType",
+                  updateCustomerFreeShippingAction({
+                    customerId: customer.id,
+                    enabled: false,
+                  }),
+                );
+              }}
+              className="justify-between"
+            >
+              <span className="flex items-center gap-2">
+                {savingSection === "shippingType" && customer.freeShipping ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Truck className="size-4" />
+                )}
+                Frete Padrão
+              </span>
+              {!customer.freeShipping && (
+                <Badge variant="secondary">Atual</Badge>
+              )}
+            </Button>
+            <Button
+              type="button"
+              variant={customer.freeShipping ? "default" : "outline"}
+              aria-pressed={customer.freeShipping}
+              disabled={savingSection !== null || customer.freeShipping}
+              onClick={() => {
+                if (!window.confirm("Ativar o Frete Grátis para este cliente?"))
+                  return;
+                runAction(
+                  "shippingType",
+                  updateCustomerFreeShippingAction({
+                    customerId: customer.id,
+                    enabled: true,
+                  }),
+                );
+              }}
+              className="justify-between"
+            >
+              <span className="flex items-center gap-2">
+                {savingSection === "shippingType" && !customer.freeShipping ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Gift className="size-4" />
+                )}
+                Frete Grátis
+              </span>
+              {customer.freeShipping && (
+                <Badge variant="secondary">Atual</Badge>
+              )}
+            </Button>
+          </fieldset>
+        </div>
+
+        <div className="space-y-3 rounded-lg border p-3 sm:p-4">
+          <div>
             <h3 className="font-semibold">Status do cadastro</h3>
-            <p className="text-muted-foreground text-xs">
-              Situação atual: {customer.inactive ? "Inativo" : "Ativo"}.
-              Selecione a outra opção para alterar.
-            </p>
           </div>
           <fieldset
             className="grid grid-cols-1 gap-2 sm:grid-cols-2"
@@ -684,11 +753,6 @@ export function CustomerDetailForms({
         <div className="space-y-3 rounded-lg border p-3 sm:p-4">
           <div>
             <h3 className="font-semibold">Publicidade por e-mail</h3>
-            <p className="text-muted-foreground text-xs">
-              Situação atual:{" "}
-              {customer.emailMarketingEnabled ? "Enviar" : "Não enviar"}.
-              Selecione a outra opção para alterar.
-            </p>
           </div>
           <fieldset
             className="grid grid-cols-1 gap-2 sm:grid-cols-2"

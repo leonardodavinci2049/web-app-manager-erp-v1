@@ -12,7 +12,7 @@ import { BaseApiService } from "@/lib/axios/base-api-service";
 import {
   transformCustomerDetail,
   transformCustomerLatestProductList,
-  transformCustomerPersonList,
+  transformCustomerManagerList,
   transformSellerInfo,
   type UICustomerDetail,
   type UICustomerLatestProduct,
@@ -39,6 +39,7 @@ import type {
   CustomerLatestProduct,
   CustomerListItem,
   CustomerManagerDetail,
+  CustomerManagerListItem,
   CustomerPersonListItem,
   CustomerSearchAllRequest,
   CustomerSearchAllResponse,
@@ -424,7 +425,7 @@ export class CustomerGeneralServiceApi extends BaseApiService {
 
   extractManagerAllCustomers(
     response: CustomerFindManagerAllResponse,
-  ): CustomerPersonListItem[] {
+  ): CustomerManagerListItem[] {
     return response.data?.["Customer find manager All"] ?? [];
   }
 
@@ -565,7 +566,7 @@ export async function getCustomersPage(
   const normalizedTotal = Number(response.recordId);
 
   return {
-    items: transformCustomerPersonList(customers),
+    items: transformCustomerManagerList(customers),
     total:
       Number.isFinite(normalizedTotal) && normalizedTotal >= 0
         ? normalizedTotal
