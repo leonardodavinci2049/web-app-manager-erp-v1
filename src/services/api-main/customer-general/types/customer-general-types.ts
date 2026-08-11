@@ -105,8 +105,15 @@ export interface CustomerFindManagerAllRequest extends CustomerBaseRequest {
   pe_order_id?: number;
 }
 
+export interface CustomerManagerListItem extends CustomerPersonListItem {
+  INATIVO: number | null;
+  EMAIL_MKT: number | null;
+  VENDEDOR: number | null;
+  FLAG_FRETE_GRATIS: number | null;
+}
+
 export interface CustomerFindManagerAllResponse extends CustomerBaseResponse {
-  data: Record<string, CustomerPersonListItem[]>;
+  data: Record<string, CustomerManagerListItem[]>;
 }
 
 // ===== Find By ID =====
@@ -221,6 +228,8 @@ export interface CustomerManagerDetail {
   APROVADO: string | null;
   EMAIL_MKT: number | null;
   RESTRICAO: number | null;
+  FLAG_FRETE_GRATIS: number | null;
+  VL_PP_DESCONTO: number | null;
   DT_ULTIMA_COMPRA: string | null;
   ANOTACOES: string | null;
   DATADOCADASTRO: string | null;
