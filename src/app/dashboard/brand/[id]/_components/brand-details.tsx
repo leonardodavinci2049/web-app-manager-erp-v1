@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, CalendarDays, Info, Tag } from "lucide-react";
+import { ArrowLeft, CalendarDays, Info } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { UIBrand } from "@/services/api-main/brand/transformers/transformers";
+import { BrandImage } from "../../_components/brand-list/brand-image";
 import type { BrandProductDto } from "../../_components/types/brand-dashboard-types";
 import { BrandDeleteDialog } from "./brand-delete-dialog";
 import { BrandDetailForm } from "./brand-detail-form";
@@ -65,21 +66,30 @@ export function BrandDetails({
         </Link>
       </Button>
 
-      <div className="min-w-0">
-        <div className="flex flex-wrap items-center gap-2">
-          <Tag className="text-primary size-6" aria-hidden="true" />
-          <h1 className="break-words text-2xl font-bold">{brand.name}</h1>
-          <Badge variant={brand.inactive ? "secondary" : "outline"}>
-            {brand.inactive ? "Inativa" : "Ativa"}
-          </Badge>
-        </div>
-        <p className="text-muted-foreground mt-1 text-sm tabular-nums">
-          Marca ID {brand.id}
-        </p>
-      </div>
-
       <div className="grid gap-8 lg:grid-cols-[minmax(280px,500px)_minmax(0,1fr)]">
-        {imageGallery}
+        <aside className="hidden lg:block lg:row-span-2 lg:self-start lg:sticky lg:top-6">
+          {imageGallery}
+        </aside>
+
+        <div className="flex min-w-0 items-start gap-3">
+          <BrandImage
+            name={brand.name}
+            imagePath={brand.imagePath}
+            viewMode="list"
+          />
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="break-words text-2xl font-bold">{brand.name}</h1>
+              <Badge variant={brand.inactive ? "secondary" : "outline"}>
+                {brand.inactive ? "Inativa" : "Ativa"}
+              </Badge>
+            </div>
+            <p className="text-muted-foreground mt-1 text-sm tabular-nums">
+              Marca ID {brand.id}
+            </p>
+          </div>
+        </div>
+
         <div className="space-y-4">
           <Card>
             <CardHeader>
@@ -162,6 +172,9 @@ export function BrandDetails({
         </TabsContent>
 
         <TabsContent value="image" className="space-y-4">
+          <div className="mx-auto w-full max-w-[500px] lg:hidden">
+            {imageGallery}
+          </div>
           {imageTabContent}
         </TabsContent>
 

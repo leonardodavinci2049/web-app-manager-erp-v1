@@ -171,7 +171,7 @@ export function CarrierDetails({
             </Link>
           </Button>
 
-          <aside className="lg:row-span-3 lg:row-start-2 lg:self-start lg:sticky lg:top-6">
+          <aside className="hidden lg:block lg:row-span-3 lg:row-start-2 lg:self-start lg:sticky lg:top-6">
             {imageGallery}
           </aside>
 
@@ -450,7 +450,12 @@ export function CarrierDetails({
             <TabsTrigger value="deletion">Exclusão</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="image">{imageContent}</TabsContent>
+          <TabsContent value="image" className="space-y-3 sm:space-y-4">
+            <div className="mx-auto w-full max-w-[500px] lg:hidden">
+              {imageGallery}
+            </div>
+            {imageContent}
+          </TabsContent>
 
           <TabsContent value="deletion">
             <Card className="border-destructive/40 bg-destructive/5">
