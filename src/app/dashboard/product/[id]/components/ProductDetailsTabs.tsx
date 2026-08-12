@@ -17,12 +17,14 @@ interface ProductDetailsTabsProps {
   product: UIProductManager;
   productId: number;
   imagesContent: ReactNode;
+  mobileImageGallery: ReactNode;
 }
 
 export function ProductDetailsTabs({
   product,
   productId,
   imagesContent,
+  mobileImageGallery,
 }: ProductDetailsTabsProps) {
   const router = useRouter();
 
@@ -66,6 +68,9 @@ export function ProductDetailsTabs({
       </TabsContent>
 
       <TabsContent value="images" className="space-y-4">
+        <div className="mx-auto w-full max-w-[500px] lg:hidden">
+          {mobileImageGallery}
+        </div>
         {imagesContent}
       </TabsContent>
 

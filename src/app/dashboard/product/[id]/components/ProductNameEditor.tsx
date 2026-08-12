@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, Edit2, X } from "lucide-react";
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import { toast } from "sonner";
 import { updateProductName } from "@/app/actions/action-product-updates";
 import { Button } from "@/components/ui/button";
@@ -11,12 +11,14 @@ interface ProductNameEditorProps {
   productId: number;
   initialName: string;
   onUpdate?: (newName: string) => void;
+  metadata?: ReactNode;
 }
 
 export function ProductNameEditor({
   productId,
   initialName,
   onUpdate,
+  metadata,
 }: ProductNameEditorProps) {
   const MAX_CHARACTERS = 200;
   const [isEditing, setIsEditing] = useState(false);
@@ -101,7 +103,7 @@ export function ProductNameEditor({
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-1">
       {isEditing ? (
         <div className="space-y-3">
           <div className="space-y-2">
@@ -161,25 +163,31 @@ export function ProductNameEditor({
           </div>
         </div>
       ) : (
-        <div className="flex items-start gap-3 group">
-          <h1
-            className="text-xl md:text-3xl font-bold tracking-tight leading-tight cursor-pointer hover:text-primary transition-colors"
-            onDoubleClick={handleDoubleClick}
-            title="Clique duas vezes para editar"
-          >
-            {name}
-          </h1>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleEdit}
-            className="h-8 gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity mt-1"
-          >
-            <Edit2 className="h-4 w-4" />
-            <span className="sr-only">Editar</span>
-          </Button>
-        </div>
+        <h1
+          className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight leading-snug break-words cursor-pointer hover:text-primary transition-colors"
+          onDoubleClick={handleDoubleClick}
+          title="Clique duas vezes para editar"
+        >
+          {name}
+        </h1>
       )}
+
+      {metadata || !isEditing ? (
+        <div className="text-muted-foreground flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+          {metadata}
+          {!isEditing ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleEdit}
+              className="ml-auto h-7 gap-1 px-2 text-foreground"
+            >
+              <Edit2 className="h-3.5 w-3.5" />
+              <span className="sr-only">Editar nome do produto</span>
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
     </div>
   );
 }

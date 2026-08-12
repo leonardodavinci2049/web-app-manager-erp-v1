@@ -1,5 +1,4 @@
-import { Star } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { RegistryEntityImage } from "@/components/registry";
 import type {
   UIProductManager,
   UIProductManagerRelatedCategory,
@@ -46,53 +45,37 @@ export function ProductInfoDisplay({
     <div className="space-y-6">
       {/* Product Header */}
       <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          {/* Stock badge based on storeStock */}
-          {product.storeStock > 3 && (
-            <Badge
-              variant="default"
-              className="bg-green-600 hover:bg-green-700"
-            >
-              Estoque
-            </Badge>
-          )}
-          {product.storeStock > 0 && product.storeStock < 2 && (
-            <Badge variant="secondary">Estoque Baixo</Badge>
-          )}
-          {product.storeStock <= 0 && (
-            <Badge variant="destructive">Sem Estoque</Badge>
-          )}
-        </div>
-
-        <div>
-          <ProductNameEditor
-            productId={product.id}
-            initialName={product.name}
+        <div className="flex min-w-0 items-start gap-3">
+          <RegistryEntityImage
+            name={product.name}
+            imagePath={product.imagePath}
+            defaultImage="/default-images/no-product-image.png"
+            entityLabel="do produto"
+            viewMode="list"
           />
-          {product.sku && (
-            <p className="text-muted-foreground mt-1">SKU: {product.sku}</p>
-          )}
-          {product.model && (
-            <p className="text-muted-foreground">Modelo: {product.model}</p>
-          )}
-        </div>
-
-        {/* Rating Stars (Mock - in real app would come from reviews) */}
-        <div className="flex items-center gap-1">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Star
-              // biome-ignore lint/suspicious/noArrayIndexKey: static star rating list
-              key={`star-${i}`}
-              className={`h-4 w-4 ${
-                i < 4
-                  ? "fill-yellow-400 text-yellow-400"
-                  : "text-muted-foreground"
-              }`}
+          <div className="min-w-0 flex-1">
+            <ProductNameEditor
+              productId={product.id}
+              initialName={product.name}
+              metadata={
+                <>
+                  <span className="tabular-nums">ID: #{product.id}</span>
+                  {product.sku ? (
+                    <>
+                      <span aria-hidden="true">·</span>
+                      <span>SKU: {product.sku}</span>
+                    </>
+                  ) : null}
+                  {product.model ? (
+                    <>
+                      <span aria-hidden="true">·</span>
+                      <span>Modelo: {product.model}</span>
+                    </>
+                  ) : null}
+                </>
+              }
             />
-          ))}
-          <span className="text-sm text-muted-foreground ml-2">
-            (4.0 de 5 - 23 avaliações)
-          </span>
+          </div>
         </div>
       </div>
 

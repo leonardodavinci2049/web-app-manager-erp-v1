@@ -71,6 +71,13 @@ export function ProductDetailsLayout({
 
   const stockStatus = getStockStatus();
 
+  const imageGallery = (
+    <ProductImageGalleryServer
+      productId={productId}
+      productName={product.name}
+    />
+  );
+
   return (
     <div className="space-y-6">
       {/* Action Buttons */}
@@ -79,11 +86,8 @@ export function ProductDetailsLayout({
       </div>
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,500px)_minmax(0,1fr)]">
-        <aside className="lg:self-start lg:sticky lg:top-6">
-          <ProductImageGalleryServer
-            productId={productId}
-            productName={product.name}
-          />
+        <aside className="hidden lg:block lg:self-start lg:sticky lg:top-6">
+          {imageGallery}
         </aside>
 
         <ProductInfoDisplay
@@ -105,6 +109,7 @@ export function ProductDetailsLayout({
       <ProductDetailsTabs
         product={product}
         productId={productId}
+        mobileImageGallery={imageGallery}
         imagesContent={
           <ProductImagesListServer
             productId={productId}
@@ -127,7 +132,7 @@ export function ProductDetailsLayoutSkeleton() {
       {/* Main Layout Skeleton */}
       <div className="grid gap-8 lg:grid-cols-[minmax(0,500px)_minmax(0,1fr)]">
         {/* Left Column - Image Gallery */}
-        <aside className="lg:self-start lg:sticky lg:top-6">
+        <aside className="hidden lg:block lg:self-start lg:sticky lg:top-6">
           <ProductImageGallerySkeleton />
         </aside>
 
@@ -135,24 +140,12 @@ export function ProductDetailsLayoutSkeleton() {
         <div className="space-y-6">
           {/* Product Header */}
           <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Skeleton className="h-6 w-16" />
-              <Skeleton className="h-6 w-20" />
-            </div>
-            <div className="space-y-1">
-              <Skeleton className="h-8 w-3/4" />
-              <Skeleton className="h-4 w-1/3" />
-              <Skeleton className="h-4 w-1/4" />
-            </div>
-            <div className="flex items-center gap-1">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton
-                  // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton list
-                  key={`rating-skeleton-${i}`}
-                  className="h-4 w-4"
-                />
-              ))}
-              <Skeleton className="ml-2 h-4 w-28" />
+            <div className="flex items-start gap-3">
+              <Skeleton className="h-16 w-16 rounded-md sm:h-20 sm:w-20" />
+              <div className="min-w-0 flex-1 space-y-2 pt-1">
+                <Skeleton className="h-7 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+              </div>
             </div>
           </div>
 
