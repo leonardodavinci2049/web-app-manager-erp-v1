@@ -48,13 +48,15 @@ dashboard/
 
 Keep `page.tsx` small and server-side:
 
-1. Opt into request-time execution when required by Cache Components.
-2. Read the session from the current request headers.
-3. Redirect authenticated users to `/dashboard/catalog`.
-4. Redirect unauthenticated users and session-validation failures to
+1. Keep the page component synchronous and render the request-dependent redirect
+   child inside a route-local `<Suspense>` boundary.
+2. Opt into request-time execution with `connection()` inside that child.
+3. Read the session from the current request headers inside the same child.
+4. Redirect authenticated users to `/dashboard/catalog`.
+5. Redirect unauthenticated users and session-validation failures to
    `/sign-in`.
-5. Re-throw Next.js redirect errors before handling real failures.
-6. Log real server errors with `createLogger()`; do not use `console.error`.
+6. Re-throw Next.js redirect errors before handling real failures.
+7. Log real server errors with `createLogger()`; do not use `console.error`.
 
 Do not move organization-specific API context resolution or feature data
 loading into the redirect page.
@@ -62,6 +64,9 @@ loading into the redirect page.
 ## Shared Layout and Navigation
 
 - Keep `layout.tsx` as a Server Component.
+- Keep the layout component synchronous and resolve organization-specific
+  metadata in an async child under `<Suspense>`; session-derived organization
+  selection must not use `"use cache"`.
 - Do not expose organization metadata, credentials, or server-only context to
   Client Components beyond the minimal serializable values required by an
   existing provider.
