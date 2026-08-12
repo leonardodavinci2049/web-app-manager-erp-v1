@@ -21,18 +21,22 @@ through the sidebar projects list.
 
 ## Page Responsibilities
 
-`page.tsx` is an async **Server Component**. It:
+`page.tsx` is a **Server Component** with a synchronous route shell. It:
 
-1. Calls `await getAuthContext()` and destructures `{ session, authWarning }`.
-2. Derives `firstName`, `userInitials`, and a formatted `userRole` from
+1. Renders the async `WelcomePageContent` inside a route-local `<Suspense>`
+   boundary with an accessible loading fallback.
+2. Calls `await getAuthContext()` inside that child and destructures
+   `{ session, authWarning }`.
+3. Derives `firstName`, `userInitials`, and a formatted `userRole` from
    `session.user`.
-3. Renders `SiteHeaderWithBreadcrumb` (title "Início") and the greeting card,
+4. Renders `SiteHeaderWithBreadcrumb` (title "Início") and the greeting card,
    conditionally showing the `authWarning` `Alert`.
-4. Renders the `modules` card grid and the quick-access list, plus the
+5. Renders the `modules` card grid and the quick-access list, plus the
    `quickInfoItems` summary.
 
-There is no data fetching beyond the session; `connection()` is not used because
-nothing here depends on request-time dynamic data.
+There is no data fetching beyond the session. `connection()` is not needed
+because `getAuthContext()` already accesses request-time headers; keep that
+private runtime access inside `WelcomePageContent` and never cache it.
 
 ## Folder Structure
 
@@ -62,8 +66,9 @@ primary navigation lives in `src/app/dashboard/_components/app-sidebar/app-sideb
 
 ## Conventions for Changes
 
-- Keep `page.tsx` a Server Component. If interactive behavior is added later,
-  isolate `"use client"` in a colocated component.
+- Keep `page.tsx` a Server Component and its route shell synchronous. If
+  interactive behavior is added later, isolate `"use client"` in a colocated
+  component.
 - The `modules` and `quickInfoItems` arrays are presentation data; do not put
   secrets, tokens, or server-only context in them.
 - Keep user-facing text in Brazilian Portuguese and code/comments in US English.

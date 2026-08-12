@@ -35,7 +35,6 @@ async function ProductDetailsPageContent({
   productId: number;
   returnTo: string;
 }) {
-  await connection();
   const { apiContext } = await getAuthContext();
 
   const result = await getProductManagerById(productId, {

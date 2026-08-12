@@ -17,6 +17,7 @@ import {
   Wrench,
 } from "lucide-react";
 import Link from "next/link";
+import { Suspense } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -27,6 +28,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
 
 import { getAuthContext } from "@/server/auth-context";
 import { SiteHeaderWithBreadcrumb } from "../_components/header/site-header-with-breadcrumb";
@@ -163,7 +165,7 @@ function formatRole(role?: string | null) {
     .replace(/^./, (char) => char.toUpperCase());
 }
 
-export default async function WelcomePage() {
+async function WelcomePageContent() {
   const { session, authWarning } = await getAuthContext();
 
   const { user } = session;
@@ -398,5 +400,25 @@ export default async function WelcomePage() {
         </section>
       </main>
     </div>
+  );
+}
+
+function WelcomePageFallback() {
+  return (
+    <div
+      className="flex min-h-screen items-center justify-center gap-2 text-muted-foreground"
+      role="status"
+    >
+      <Spinner aria-hidden="true" />
+      <span className="text-sm">Carregando página inicial...</span>
+    </div>
+  );
+}
+
+export default function WelcomePage() {
+  return (
+    <Suspense fallback={<WelcomePageFallback />}>
+      <WelcomePageContent />
+    </Suspense>
   );
 }
