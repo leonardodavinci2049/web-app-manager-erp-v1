@@ -16,8 +16,9 @@ aliases), and the shared services, follow `../AGENTS.md`.
 fallback={<ProductDetailsLayoutSkeleton/>}>` wrapping a `ProductDetailsPageContent`
 async component, which:
 
-1. `await connection()` (request-time; called both in `page.tsx` and again inside
-   the content component).
+1. Calls `await connection()` once in `page.tsx`; the colocated `loading.tsx`
+   protects this request-time access, so the content component does not repeat
+   it.
 2. `await Promise.all([params, searchParams])`.
 3. Validate `id` with the local Zod `ProductPageParamsSchema` (`/^\d+$/` →
    `Number`); on failure `logger.error` + `notFound()`.
