@@ -251,7 +251,7 @@ Do not fork these into `[id]/`; keep them pointing at the parent.
 - Route, Server Action, cache behavior, or integration changes: also run
   `pnpm build` when viable.
 - Visual or interactive changes: validate `/dashboard/suppliers/[id]` in the
-  development server (port 5581) on desktop and mobile, including: valid and
+  development server (port set by the `PORT` env var) on desktop and mobile, including: valid and
   invalid IDs (`not-found.tsx`), the `returnTo` back link, the single edit form
   (success, validation errors, network failure), status activate/deactivate,
   delete confirm + redirect to `returnTo`, gallery upload (drag-and-drop and

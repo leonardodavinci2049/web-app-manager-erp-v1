@@ -340,7 +340,7 @@ Do not present these flows as functional and do not simulate them.
 - Route, Server Action, cache behavior, or integration changes: also run
   `pnpm build` when viable.
 - Visual or interactive changes: validate `/dashboard/customer` and
-  `/dashboard/customer/[id]` in the development server (port 5581) on desktop
+  `/dashboard/customer/[id]` in the development server (port set by the `PORT` env var) on desktop
   and mobile, including search, combined filters, active-filter removal,
   grid/list switching, pagination, empty and error states, create flow, section
   edits, gallery upload/primary/delete, and the `returnTo` back link.

@@ -148,7 +148,7 @@ DataTable "save" is a client-side `setTimeout` + toast, not a mutation.
 - TypeScript or React changes: run `pnpm lint`.
 - Route, auth, or integration changes: also run `pnpm build` when viable.
 - Visual or interactive changes: validate `/dashboard/report/panel` and the three
-  placeholder routes in the development server (port 5581) on desktop and mobile,
+  placeholder routes in the development server (port set by the `PORT` env var) on desktop and mobile,
   including the chart time-range toggle, the table sort/filter/reorder, and the
   breadcrumb.
 - This project currently has no automated test command; do not invent one.

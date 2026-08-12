@@ -277,7 +277,7 @@ and remove the "Pendente de API" badges together.
 - Route, Server Action, cache behavior, or integration changes: also run
   `pnpm build` when viable.
 - Visual or interactive changes: validate `/dashboard/seller` and
-  `/dashboard/seller/[id]` in the development server (port 5581) on desktop and
+  `/dashboard/seller/[id]` in the development server (port set by the `PORT` env var) on desktop and
   mobile, including search, combined filters, active-filter removal, grid/list
   switching, pagination, empty and error states, the read-only detail cards, the
   disabled "Pendente de API" controls, gallery upload/primary/delete (including

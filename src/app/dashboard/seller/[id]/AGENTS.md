@@ -227,7 +227,7 @@ badges together.
 - Route, Server Action, cache behavior, or integration changes: also run
   `pnpm build` when viable.
 - Visual or interactive changes: validate `/dashboard/seller/[id]` in the
-  development server (port 5581) on desktop and mobile, including: valid and
+  development server (port set by the `PORT` env var) on desktop and mobile, including: valid and
   invalid IDs (`not-found.tsx`), the `returnTo` back link, the read-only detail
   cards, the disabled "Pendente de API" controls, gallery upload (drag-and-drop
   and picker), primary promotion, deletion (including last-image rejection), zoom
