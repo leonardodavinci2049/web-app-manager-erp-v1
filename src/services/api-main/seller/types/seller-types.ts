@@ -72,6 +72,12 @@ export interface SellerFindByIdRequest extends SellerBaseRequest {
   pe_seller_id: number;
 }
 
+// ===== Find Manager By ID (V2) =====
+
+export interface SellerFindManagerByIdRequest extends SellerBaseRequest {
+  pe_seller_id: number;
+}
+
 export interface SellerDetail {
   ID_SELLER: number;
   ID_LOJA: number;
@@ -97,6 +103,66 @@ export interface SellerDetail {
 
 export interface SellerFindByIdResponse extends SellerBaseResponse {
   data: Record<string, SellerDetail[]>;
+}
+
+export interface SellerManagerDetail {
+  ID_SELLER: number;
+  ID_LOJA: number;
+  ID_TIPO_CLIENTE: number;
+  TIPO_CLIENTE: string;
+  NOME: string;
+  EMAIL: string | null;
+  FONE1: string | null;
+  WHATAPP1: string | null;
+  ID_PESSOA_TIPO: number;
+  ACCOUNT_TIPO: string;
+  PATH_IMAGEM: string | null;
+  CPF: string | null;
+  RG: string | null;
+  PRIMEIRO_NOME: string | null;
+  SOBRENOME: string | null;
+  DATADONASCIMENTO: string | null;
+  CNPJ: string | null;
+  RAZAO_SOCIAL: string | null;
+  NOME_FANTASIA: string | null;
+  INSC_ESTADUAL: string | null;
+  INSC_MUNICIPAL: string | null;
+  NOME_RESPONSAVEL: string | null;
+  CARGO_RESPONSAVEL: string | null;
+  ATIVIDADE_PRINCIPAL: string | null;
+  ID_VENDEDOR: number;
+  CEP: string | null;
+  ENDERECO: string | null;
+  ENDERECO_NUMERO: string | null;
+  COMPLEMENTO: string | null;
+  BAIRRO: string | null;
+  CIDADE: string | null;
+  UF: string | null;
+  REGIAO_PAIS: string | null;
+  PAIS: string | null;
+  COD_MUNICIPIO: number;
+  COD_UF: number;
+  WEBSITE: string | null;
+  FACEBOOK: string | null;
+  TWITTER: string | null;
+  LINKEDIN: string | null;
+  INSTAGRAM: string | null;
+  TIKTOK: string | null;
+  TELEGRAM: string | null;
+  INATIVO: number;
+  VENDEDOR: number;
+  APROVADO: string;
+  EMAIL_MKT: number;
+  RESTRICAO: number;
+  FLAG_FRETE_GRATIS: number;
+  VL_PP_DESCONTO: string | null;
+  DT_ULTIMA_COMPRA: string | null;
+  ANOTACOES: string | null;
+  DATADOCADASTRO: string | null;
+}
+
+export interface SellerFindManagerByIdResponse extends SellerBaseResponse {
+  data: Record<string, SellerManagerDetail[]>;
 }
 
 // ===== Error Classes =====

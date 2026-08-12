@@ -22,7 +22,10 @@ import type {
   SellerFindByIdResponse,
   SellerFindManagerAllRequest,
   SellerFindManagerAllResponse,
+  SellerFindManagerByIdRequest,
+  SellerFindManagerByIdResponse,
   SellerListItem,
+  SellerManagerDetail,
   SellerSearchAllRequest,
   SellerSearchAllResponse,
 } from "./types/seller-types";
@@ -30,6 +33,7 @@ import { SellerError, SellerNotFoundError } from "./types/seller-types";
 import {
   SellerFindByIdSchema,
   SellerFindManagerAllSchema,
+  SellerFindManagerByIdSchema,
   SellerSearchAllSchema,
 } from "./validation/seller-schemas";
 
@@ -139,6 +143,37 @@ export class SellerServiceApi extends BaseApiService {
     }
   }
 
+  async findManagerSellerById(
+    params: SellerFindManagerByIdRequest,
+  ): Promise<SellerFindManagerByIdResponse> {
+    try {
+      const validatedParams = SellerFindManagerByIdSchema.parse(params);
+      const requestBody = this.buildBasePayload(validatedParams);
+
+      const response = await this.post<SellerFindManagerByIdResponse>(
+        SELLER_ENDPOINTS.FIND_MANAGER_ID,
+        requestBody,
+      );
+
+      if (response.statusCode === API_STATUS_CODES.NOT_FOUND) {
+        throw new SellerNotFoundError(validatedParams);
+      }
+
+      if (isApiError(response.statusCode)) {
+        throw new SellerError(
+          response.message || "Erro ao buscar vendedor por ID no manager",
+          "SELLER_FIND_MANAGER_ID_ERROR",
+          response.statusCode,
+        );
+      }
+
+      return response;
+    } catch (error) {
+      logger.error("Erro ao buscar vendedor por ID no manager", error);
+      throw error;
+    }
+  }
+
   private normalizeEmptySellerSearchAllResponse(
     response: SellerSearchAllResponse,
   ): SellerSearchAllResponse {
@@ -195,6 +230,12 @@ export class SellerServiceApi extends BaseApiService {
     );
   }
 
+  extractManagerSellerById(
+    response: SellerFindManagerByIdResponse,
+  ): SellerManagerDetail | null {
+    return response.data?.["Seller Information"]?.[0] ?? null;
+  }
+
   isValidSellerSearchList(response: SellerSearchAllResponse): boolean {
     return (
       isApiSuccess(response.statusCode) &&
@@ -215,6 +256,13 @@ export class SellerServiceApi extends BaseApiService {
     return (
       isApiSuccess(response.statusCode) &&
       this.extractSellerById(response) !== null
+    );
+  }
+
+  isValidSellerManagerDetail(response: SellerFindManagerByIdResponse): boolean {
+    return (
+      isApiSuccess(response.statusCode) &&
+      this.extractManagerSellerById(response) !== null
     );
   }
 }

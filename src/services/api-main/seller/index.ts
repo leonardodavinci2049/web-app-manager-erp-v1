@@ -17,7 +17,10 @@ export type {
   SellerFindByIdResponse,
   SellerFindManagerAllRequest,
   SellerFindManagerAllResponse,
+  SellerFindManagerByIdRequest,
+  SellerFindManagerByIdResponse,
   SellerListItem,
+  SellerManagerDetail,
   SellerSearchAllRequest,
   SellerSearchAllResponse,
 } from "./types/seller-types";
