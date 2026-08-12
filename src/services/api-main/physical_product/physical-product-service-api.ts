@@ -118,6 +118,17 @@ export class PhysicalProductServiceApi extends BaseApiService {
         requestBody,
       );
 
+      if (
+        response.statusCode === API_STATUS_CODES.NOT_FOUND ||
+        response.statusCode === API_STATUS_CODES.EMPTY_RESULT
+      ) {
+        return {
+          ...response,
+          quantity: 0,
+          data: { "Order Item find all": [] },
+        };
+      }
+
       this.handleApiError(
         response,
         validatedParams,
@@ -289,6 +300,17 @@ export class PhysicalProductServiceApi extends BaseApiService {
         PHYSICAL_PRODUCT_ENDPOINTS.WARRANTY_SEARCH,
         requestBody,
       );
+
+      if (
+        response.statusCode === API_STATUS_CODES.NOT_FOUND ||
+        response.statusCode === API_STATUS_CODES.EMPTY_RESULT
+      ) {
+        return {
+          ...response,
+          quantity: 0,
+          data: { "Warranty search": [] },
+        };
+      }
 
       this.handleApiError(
         response,

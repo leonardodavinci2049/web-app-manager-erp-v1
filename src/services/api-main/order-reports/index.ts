@@ -2,6 +2,8 @@ export {
   OrderReportsServiceApi,
   orderReportsServiceApi,
 } from "./order-reports-service-api";
+export type { UIOrderListItem } from "./transformers/transformers";
+export { transformCustomerAllList } from "./transformers/transformers";
 
 export type {
   OrderCustomerAllEntity,

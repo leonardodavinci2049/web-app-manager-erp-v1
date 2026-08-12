@@ -7,7 +7,6 @@ import { getAuthContext } from "@/server/auth-context";
 import {
   CustomerNotFoundError,
   getCustomerById,
-  getCustomerLatestProducts,
 } from "@/services/api-main/customer-general";
 import { getSafeCustomerReturnTo } from "../_components";
 import { CustomerDetails } from "./_components/customer-details";
@@ -46,20 +45,7 @@ export default async function CustomerDetailsPage({
       throw error;
     },
   );
-  let hasProductsError = false;
-  const productsPromise = getCustomerLatestProducts(
-    customerId,
-    apiContext,
-    10,
-  ).catch((error) => {
-    hasProductsError = true;
-    logger.error("Erro ao carregar produtos recentes do cliente", error);
-    return [];
-  });
-  const [bundle, products] = await Promise.all([
-    detailPromise,
-    productsPromise,
-  ]);
+  const bundle = await detailPromise;
   if (!bundle) notFound();
 
   return (
@@ -79,8 +65,6 @@ export default async function CustomerDetailsPage({
               <CustomerDetails
                 customer={bundle.customer}
                 seller={bundle.seller}
-                products={products}
-                hasProductsError={hasProductsError}
                 returnTo={returnTo}
                 imageGallery={
                   <Suspense fallback={<CustomerImageGallerySkeleton />}>

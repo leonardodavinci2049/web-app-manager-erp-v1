@@ -2,7 +2,6 @@ import {
   ArrowLeft,
   BadgeCheck,
   CalendarDays,
-  History,
   LockKeyhole,
   Mail,
   MessageCircle,
@@ -17,21 +16,19 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type {
   UICustomerDetail,
-  UICustomerLatestProduct,
   UISellerInfo,
 } from "@/services/api-main/customer-general";
 import { CustomerImage } from "../../_components/customer-image";
 import { CustomerDetailForms } from "./customer-detail-forms";
 import { CustomerIdentitySection } from "./customer-identity-section";
 import { CustomerPersonBusinessSections } from "./customer-person-business-sections";
+import { CustomerPurchases } from "./customer-purchases";
 import { CustomerTypeSections } from "./customer-type-sections";
 import { RelatedSellerImage } from "./related-seller-image";
 
 interface CustomerDetailsProps {
   customer: UICustomerDetail;
   seller?: UISellerInfo;
-  products: UICustomerLatestProduct[];
-  hasProductsError: boolean;
   returnTo: string;
   imageGallery: ReactNode;
   imageContent: ReactNode;
@@ -44,15 +41,6 @@ function formatDate(value?: string): string {
   return new Intl.DateTimeFormat("pt-BR", {
     dateStyle: "long",
   }).format(timestamp);
-}
-
-function formatCurrency(value: string): string {
-  const amount = Number(value);
-  if (!Number.isFinite(amount)) return value;
-  return new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  }).format(amount);
 }
 
 function DetailField({
@@ -101,8 +89,6 @@ function RelatedSellerContact({
 export function CustomerDetails({
   customer,
   seller,
-  products,
-  hasProductsError,
   returnTo,
   imageGallery,
   imageContent,
@@ -275,60 +261,7 @@ export function CustomerDetails({
             </CardContent>
           </Card>
         }
-        productsContent={
-          <Card className="gap-4 py-4 sm:gap-6 sm:py-6">
-            <CardHeader className="px-4 sm:px-6">
-              <CardTitle className="flex items-center gap-2">
-                <History className="size-5" />
-                Produtos recentes
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="px-4 sm:px-6">
-              {hasProductsError ? (
-                <div className="rounded-lg border border-dashed p-6 text-center">
-                  <p className="font-medium">
-                    Não foi possível carregar os produtos recentes.
-                  </p>
-                  <p className="text-muted-foreground mt-1 text-xs">
-                    Os demais dados do cliente permanecem disponíveis.
-                  </p>
-                </div>
-              ) : products.length === 0 ? (
-                <div className="rounded-lg border border-dashed p-6 text-center">
-                  <p className="font-medium">Nenhum produto recente.</p>
-                </div>
-              ) : (
-                <div className="divide-y rounded-lg border">
-                  {products.map((product) => (
-                    <div
-                      key={`${product.movementId}-${product.productId}`}
-                      className="flex flex-wrap items-start justify-between gap-3 p-3"
-                    >
-                      <div className="min-w-0 flex-1">
-                        <p className="font-medium">{product.product}</p>
-                        <p className="text-muted-foreground text-xs">
-                          Pedido {product.orderId} · Produto {product.productId}
-                          {product.sku ? ` · SKU ${product.sku}` : ""}
-                        </p>
-                        <p className="text-muted-foreground text-xs">
-                          {formatDate(product.createdAt)}
-                        </p>
-                      </div>
-                      <div className="text-right text-sm">
-                        <p className="font-medium">
-                          {formatCurrency(product.total)}
-                        </p>
-                        <p className="text-muted-foreground text-xs">
-                          Quantidade: {product.quantity}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        }
+        productsContent={<CustomerPurchases customerId={customer.id} />}
         deletionContent={
           <Card className="gap-4 border-destructive/40 bg-destructive/5 py-4 sm:gap-6 sm:py-6">
             <CardHeader className="flex-row items-center justify-between px-4 sm:px-6">
