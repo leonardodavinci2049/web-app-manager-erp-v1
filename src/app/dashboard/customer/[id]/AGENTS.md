@@ -23,13 +23,10 @@ Client Components.
    `../_components`). The back link only accepts same-origin paths whose
    pathname is exactly `/dashboard/customer`.
 5. Obtain authenticated API context through `getAuthContext()`.
-6. Fetch the customer bundle (`getCustomerById`) and the latest products
-   (`getCustomerLatestProducts`, capped at 10) in parallel.
+6. Fetch the customer bundle (`getCustomerById`).
 7. Map `CustomerNotFoundError` to `notFound()`; rethrow other errors so the
    segment `error.tsx` boundary handles them.
-8. Isolate product failures: log and fall back to an empty list with
-   `hasProductsError` so the customer data still renders.
-9. Render the image gallery and the image list inside `<Suspense>` (fallback
+8. Render the image gallery and the image list inside `<Suspense>` (fallback
    `CustomerImageGallerySkeleton`), passing them to `CustomerDetails` as React
    nodes.
 
@@ -46,12 +43,16 @@ gallery read is shared by both nodes through React `cache()`.
 ├── error.tsx                                 # Detail error boundary (Client)
 ├── not-found.tsx                             # Invalid/inaccessible customer
 ├── _actions/
-│   └── customer-image-gallery-actions.ts     # Gallery upload/primary/delete
+│   ├── customer-image-gallery-actions.ts     # Gallery upload/primary/delete
+│   └── customer-purchases-actions.ts         # Authenticated lazy purchase reads
 └── _components/
     ├── customer-details.tsx                  # Top-level detail layout (Server)
     ├── customer-detail-forms.tsx             # Tabbed section editors (Client)
     ├── customer-identity-section.tsx         # General identity form (Client)
     ├── customer-person-business-sections.tsx # Person/business forms (Client)
+    ├── customer-purchases.tsx                # Purchase tabs/search state (Client)
+    ├── customer-purchases-lists.tsx          # Responsive tables/cards (Client)
+    ├── customer-purchases-types.ts           # Minimal purchase DTOs/results
     ├── customer-type-sections.tsx            # Person/customer type toggles (Client)
     ├── related-seller-image.tsx              # Seller avatar (Client)
     └── image-gallery/
@@ -72,13 +73,13 @@ gallery read is shared by both nodes through React `cache()`.
   ├── validates id -> notFound() on invalid
   ├── getAuthContext()
   ├── getCustomerById()          -> UICustomerDetailsBundle { customer, seller? }
-  ├── getCustomerLatestProducts()-> UICustomerLatestProduct[]   (isolated failure)
   └── <CustomerDetails> (Server)
         ├── identity + type + person/business sections (Client forms)
         ├── related seller block
-        ├── productsContent (recent purchases)
+        ├── productsContent -> <CustomerPurchases customerId>
         └── <CustomerDetailForms> (Client)
               ├── tabbed section editors -> ../../_actions/customer-actions
+              ├── purchase reads -> ../_actions/customer-purchases-actions
               └── imageContent / mobileImageGallery = <Suspense> nodes from page
 ```
 

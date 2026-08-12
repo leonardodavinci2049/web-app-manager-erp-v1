@@ -83,10 +83,21 @@ export class OrderReportsServiceApi extends BaseApiService {
         requestBody,
       );
 
-      return this.normalizeEmptyListResponse<OrderFindCustomerAllResponse>(
-        response,
-        "customer orders",
-      );
+      const normalizedResponse =
+        this.normalizeEmptyListResponse<OrderFindCustomerAllResponse>(
+          response,
+          "customer orders",
+        );
+
+      if (isApiError(normalizedResponse.statusCode)) {
+        throw new OrderReportsError(
+          normalizedResponse.message || "Erro ao buscar pedidos por cliente",
+          "ORDER_REPORTS_FIND_CUSTOMER_ALL_ERROR",
+          normalizedResponse.statusCode,
+        );
+      }
+
+      return normalizedResponse;
     } catch (error) {
       logger.error("Erro ao buscar pedidos por cliente", error);
       throw error;
@@ -301,6 +312,12 @@ export class OrderReportsServiceApi extends BaseApiService {
   }
 
   // === Métodos auxiliares ===
+
+  extractCustomerOrders(
+    response: OrderFindCustomerAllResponse,
+  ): OrderCustomerAllEntity[] {
+    return response.data?.["customer orders"] ?? [];
+  }
 
   private normalizeEmptyListResponse<
     T extends { statusCode: number; data: Record<string, unknown[]> },

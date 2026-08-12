@@ -103,13 +103,10 @@ Keep `[id]/page.tsx` as a Server Component. It should:
 4. Resolve `returnTo` with `getSafeCustomerReturnTo()` so the back link only
    accepts same-origin `/dashboard/customer` paths.
 5. Obtain authenticated API context through `getAuthContext()`.
-6. Fetch the customer bundle with `getCustomerById()` and the latest products
-   with `getCustomerLatestProducts()` in parallel.
+6. Fetch the customer bundle with `getCustomerById()`.
 7. Convert a `CustomerNotFoundError` into `notFound()`; rethrow other real
    errors so the segment error boundary handles them.
-8. Isolate product failures: log them and fall back to an empty list without
-   breaking the customer detail.
-9. Render the image gallery and the image list inside `<Suspense>` using the
+8. Render the image gallery and the image list inside `<Suspense>` using the
    cached `getCustomerGalleryInitialState()`.
 
 The detail page composes `CustomerDetails`, which receives the gallery and image
@@ -124,8 +121,8 @@ content as React nodes so the Suspense boundaries stay on the page.
   `getAuthorizedCustomerContext()` before mutating.
 - Never pass `apiContext`, session objects, tokens, raw integration entities, or
   internal errors to Client Components. Return only the DTOs defined in
-  `customer-dashboard-types.ts`, `image-gallery-types.ts`, and the
-  `customer-general` transformers.
+  `customer-dashboard-types.ts`, `customer-purchases-types.ts`,
+  `image-gallery-types.ts`, and the `customer-general` transformers.
 - Customer reads are organization-dependent. Do not add `"use cache"` unless the
   cache key safely isolates organization and private context.
 - Read the closest service-level `AGENTS.md` before modifying any module under
@@ -203,8 +200,11 @@ triggers a refetch.
 ## Detail UI
 
 - `CustomerDetails` is a Server Component that composes the identity summary,
-  type sections, personal/business sections, related seller, recent products,
-  registration date, and the "pending API" status/deletion cards.
+  type sections, personal/business sections, related seller, lazy purchase
+  history, registration date, and the "pending API" status/deletion cards.
+- `CustomerPurchases` is the Client boundary for the purchase sub-tabs. Each
+  sub-tab loads independently through authenticated Server Actions and keeps
+  its own debounced search, loading, error, and incremental-limit state.
 - `CustomerDetailForms` is a Client Component with a scrollable tab list. Each
   tab submits to a dedicated Server Action and uses `router.refresh()` on
   success. Keep section editing decoupled; do not create a single mega-form.
