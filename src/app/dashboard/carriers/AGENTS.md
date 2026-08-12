@@ -322,7 +322,7 @@ Do not present disabled flows as functional and do not simulate them.
 - Route, Server Action, cache behavior, or integration changes: also run
   `pnpm build` when viable.
 - Visual or interactive changes: validate `/dashboard/carriers` and
-  `/dashboard/carriers/[id]` in the development server (port 5581) on desktop and
+  `/dashboard/carriers/[id]` in the development server (port set by the `PORT` env var) on desktop and
   mobile, including search, status filter, sort/order, grid/list switching,
   pagination, empty and error states, create flow (including the notes two-step),
   edit save, delete confirm + redirect to `returnTo`, gallery upload/primary/delete

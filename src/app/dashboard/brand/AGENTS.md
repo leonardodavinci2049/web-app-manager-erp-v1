@@ -335,7 +335,7 @@ Do not present these flows as functional and do not simulate them.
 - Route, Server Action, cache behavior, or integration changes: also run
   `pnpm build` when viable.
 - Visual or interactive changes: validate `/dashboard/brand` and
-  `/dashboard/brand/[id]` in the development server (port 5581) on desktop and
+  `/dashboard/brand/[id]` in the development server (port set by the `PORT` env var) on desktop and
   mobile, including search, sort/order, grid/list switching, pagination, empty
   and error states, create flow, the single edit form, delete (including the
   products guard), related-products sub-pagination, gallery upload/primary/delete

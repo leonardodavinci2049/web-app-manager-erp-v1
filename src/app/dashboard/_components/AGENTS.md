@@ -17,7 +17,7 @@ _components/
 │   ├── app-sidebar.tsx          # Client: Sidebar shell + HARDCODED nav data
 │   ├── nav-main.tsx             # Renders the navMain sections passed from app-sidebar
 │   ├── nav-projects.tsx         # Renders the projects list passed from app-sidebar
-│   ├── nav-user.tsx             # Sidebar footer user menu (receives data, not session)
+│   ├── nav-user.tsx             # Sidebar footer user menu (reads the real session via useUserData)
 │   ├── sidebar-logo.tsx         # Brand/logo block in the sidebar header
 │   └── team-switcher.tsx        # Team/workspace selector
 └── header/
@@ -53,14 +53,13 @@ When changing a route, update the sidebar entries together with breadcrumbs,
 return links, redirects, and post-mutation navigation in that route (see
 `src/app/dashboard/AGENTS.md`, "Shared Layout and Navigation").
 
-### Hardcoded sample user — do not assume it reflects the session
+### Sample user data
 
-`data.user` (name "Comsuporte", email "mauro@comsuporte.com") and `data.teams` are
-**sample data** carried over from the shadcn template. `NavUser` in the sidebar
-footer receives this hardcoded user, **not** the authenticated session. The header
-user (see below) does use the real session. Do not "fix" this divergence by
-wiring the sidebar `NavUser` to the session without a deliberate decision, and do
-not assume the sidebar shows the logged-in user.
+`data.teams` is **sample data** carried over from the shadcn template. The
+sidebar footer `NavUser` no longer receives a hardcoded user: it reads the
+authenticated session itself through `useUserData()` (same hook as the header
+`HeaderNavUser`) and signs out through `useAuth()`. Do not reintroduce a
+hardcoded/sample `user` object into `data` or pass it to `NavUser`.
 
 ## SiteHeaderWithBreadcrumb
 
@@ -69,8 +68,8 @@ not assume the sidebar shows the logged-in user.
 1. Resolves the session with `auth.api.getSession({ headers: await headers() })`.
 2. Redirects to `/sign-in` when there is no session.
 3. Renders the `SidebarTrigger`, a `Breadcrumb` built from the `breadcrumbItems`
-   prop, a mobile title, `ModeToggle`, `LogoutButton`, and the header `NavUser`
-   (the real session user, inside `<Suspense>`).
+   prop, a mobile title, `ModeToggle`, `LogoutButton`, and `NavUser` (which reads
+   the real session client-side itself, inside `<Suspense>`).
 
 Props:
 
@@ -94,8 +93,8 @@ page.
   `src/app/dashboard/welcome/AGENTS.md`). The sidebar is the source of truth for
   primary navigation.
 - Do not pass server-only auth, database, or integration modules into the Client
-  sidebar. The header resolves the session server-side and passes only a minimal
-  serializable `user` object to its `NavUser`.
+  sidebar. `NavUser` resolves the session client-side via `useUserData()`; do not
+  hand it a server-resolved user object.
 - Keep user-facing text in Brazilian Portuguese and code/comments in US English.
 
 ## Verification
@@ -104,5 +103,5 @@ page.
 - TypeScript or React changes: run `pnpm lint`.
 - Navigation, layout, or auth-redirect changes: also run `pnpm build` when viable,
   and validate the sidebar links, breadcrumbs, and the unauthenticated redirect
-  in the development server (port 5581).
+  in the development server (port set by the `PORT` env var).
 - This project currently has no automated test command; do not invent one.
