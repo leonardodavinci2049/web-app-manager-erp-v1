@@ -34,20 +34,22 @@ import {
   IconTrendingUp,
 } from "@tabler/icons-react";
 import {
-  type ColumnDef,
   type ColumnFiltersState,
+  type ColumnVisibilityState,
   flexRender,
+  type SortingState,
+} from "@tanstack/react-table";
+import {
+  type LegacyColumnDef as ColumnDef,
   getCoreRowModel,
   getFacetedRowModel,
   getFacetedUniqueValues,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  type Row,
-  type SortingState,
-  useReactTable,
-  type VisibilityState,
-} from "@tanstack/react-table";
+  type LegacyRow as Row,
+  useLegacyTable as useReactTable,
+} from "@tanstack/react-table/legacy";
 import * as React from "react";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 import { toast } from "sonner";
@@ -338,7 +340,7 @@ export function DataTable({
   const [data, setData] = React.useState(() => initialData);
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({});
+    React.useState<ColumnVisibilityState>({});
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
   );
