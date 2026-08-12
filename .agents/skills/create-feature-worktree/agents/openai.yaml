@@ -1,0 +1,4 @@
+interface:
+  display_name: "Create Feature Worktree"
+  short_description: "Create a prepared Git feature worktree safely"
+  default_prompt: "Use $create-feature-worktree to create a prepared feature worktree for this repository."
