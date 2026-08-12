@@ -309,6 +309,15 @@ export const ACCOUNT_ENDPOINTS = {
   UPDATE_PASSWORD: "/account/v1/upd-account-password",
 } as const;
 
+// Endpoints de Order B2B
+export const ORDER_B2B_ENDPOINTS = {
+  FIND_BUDGET_CUSTOMER_ID: "/order-b2b/v2/order-find-budget-customer-id",
+  FIND_DASHBOARD_CUSTOMER_ID: "/order-b2b/v2/order-find-dashboard-customer-id",
+  FIND_ITEM_QT: "/order-b2b/v2/order-item-find-qt",
+  FIND_LATEST: "/order-b2b/v2/order-find-latest",
+  STATISTICS_CUSTOMER: "/order-b2b/v2/order-statistics-customer",
+} as const;
+
 // Endpoints de Order Items
 export const ORDER_ITEMS_ENDPOINTS = {
   FIND_ALL: "/order-items/v2/order-items-find-all",
@@ -320,6 +329,7 @@ export const ORDER_ITEMS_ENDPOINTS = {
   INSURANCE_VL: "/order-items/v2/order-items-insurance-vl",
   NOTES: "/order-items/v2/order-items-notes",
   QT: "/order-items/v2/order-items-qt",
+  UPD_INLINE_FIELD: "/order-items/v2/order-items-upd-inl-field",
   VALUE: "/order-items/v2/order-items-value",
 } as const;
 
@@ -354,8 +364,11 @@ export const ORDER_SALES_ENDPOINTS = {
   FIND_CO_PROTOCOL_ID: "/order-sales/v2/order-find-co-protocol-id",
   FIND_CO_SELLER_ID: "/order-sales/v2/order-find-co-seller-id",
   FIND_CO_SUMMARY_ID: "/order-sales/v2/order-find-co-summary-id",
+  FIND_CO_TIPO_FRETE: "/order-sales/v2/order-find-co-tipo-frete",
   FIND_DASHBOARD_ID: "/order-sales/v2/order-find-dashboard-id",
   FIND_EQUIPMENT_ID: "/order-sales/v2/order-find-equipment-id",
+  FIND_CART_ID: "/order-sales/v2/order-find-cart-id",
+  FIND_ORDER_ID: "/order-sales/v2/order-find-order-id",
 } as const;
 
 // Endpoints de Order Update
@@ -367,6 +380,7 @@ export const ORDER_UPD_ENDPOINTS = {
   UPD_PG_METHOD_ID: "/order-upd/v2/order-upd-pg-method-id",
   UPD_SELLER_ID: "/order-upd/v2/order-upd-seller-id",
   UPD_STATUS_ID: "/order-upd/v2/order-upd-status-id",
+  UPD_INLINE_FIELD: "/order-upd/v2/order-upd-inl-field",
 } as const;
 
 // Endpoints de Validação (Check if Exists)

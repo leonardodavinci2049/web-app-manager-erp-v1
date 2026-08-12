@@ -21,7 +21,8 @@ if [[ ! "${feature_slug}" =~ ^[a-z0-9]+([a-z0-9-]*[a-z0-9])?$ ]]; then
 fi
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-project_root="$(cd -- "${script_dir}/.." && pwd)"
+git_common_dir="$(git -C "${script_dir}" rev-parse --path-format=absolute --git-common-dir)"
+project_root="$(cd -- "${git_common_dir}/.." && pwd)"
 project_name="$(basename -- "${project_root}")"
 projects_root="$(cd -- "${project_root}/../.." && pwd)"
 worktrees_root="${MERCURY_WORKTREES_ROOT:-${projects_root}/mercury-worktrees}"
@@ -51,7 +52,7 @@ git -C "${project_root}" worktree add \
   "${worktree_path}" \
   "${base_ref}"
 
-for local_directory in .agents .codex; do
+for local_directory in .agents .codex .claude; do
   source_path="${project_root}/${local_directory}"
 
   if [[ -d "${source_path}" ]]; then
