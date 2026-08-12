@@ -313,7 +313,7 @@ contract arrives, wire the action, enable the control, and remove the
 - Route, Server Action, cache behavior, or integration changes: also run
   `pnpm build` when viable.
 - Visual or interactive changes: validate `/dashboard/customer/[id]` in the
-  development server (port 5581) on desktop and mobile, including: valid and
+  development server (port set by the `PORT` env var) on desktop and mobile, including: valid and
   invalid IDs (`not-found.tsx`), the `returnTo` back link, each section edit
   (success, validation errors, network failure), person-type switching, type
   toggles, restriction confirm flows, gallery upload (drag-and-drop and

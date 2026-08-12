@@ -12,7 +12,7 @@ Operational guide for agents working in `web-app-manager-erp-v1`. Be concise, fo
 ## Commands
 
 ```bash
-pnpm dev      # dotenv -e .env -- next dev; dev server on port 5581
+pnpm dev      # dotenv -e .env -- next dev; dev server on the port set by the `PORT` env var (see `.env`)
 pnpm lint     # biome check
 pnpm format   # biome format --write
 pnpm build    # production build

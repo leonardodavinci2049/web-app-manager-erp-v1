@@ -320,7 +320,7 @@ Do not present these as functional and do not simulate them.
 - Route, Server Action, cache behavior, or integration changes: also run
   `pnpm build` when viable.
 - Visual or interactive changes: validate `/dashboard/product/[id]` in the
-  development server (port 5581) on desktop and mobile, including: valid and
+  development server (port set by the `PORT` env var) on desktop and mobile, including: valid and
   invalid IDs (`not-found.tsx`), the `returnTo` back link (catalog and brand
   variants), each inline editor (name, short desc, full desc, general,
   characteristics, tax), the flags card, pricing and stock (page reload), the

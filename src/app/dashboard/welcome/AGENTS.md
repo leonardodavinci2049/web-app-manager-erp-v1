@@ -75,6 +75,6 @@ primary navigation lives in `src/app/dashboard/_components/app-sidebar/app-sideb
 - Documentation-only changes: review Markdown structure and references.
 - TypeScript or React changes: run `pnpm lint`.
 - Visual changes: validate `/dashboard/welcome` in the development server
-  (port 5581) on desktop and mobile, including the greeting, the `authWarning`
+  (port set by the `PORT` env var) on desktop and mobile, including the greeting, the `authWarning`
   state, and the module links (real vs. maintenance).
 - This project currently has no automated test command; do not invent one.

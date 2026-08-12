@@ -41,12 +41,6 @@ export async function SiteHeaderWithBreadcrumb({
     redirect("/sign-in");
   }
 
-  const user = {
-    name: session.user.name,
-    email: session.user.email,
-    avatar: session.user.image || "",
-  };
-
   return (
     <header className="flex h-(--header-height) w-full shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
       <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
@@ -96,7 +90,7 @@ export async function SiteHeaderWithBreadcrumb({
               <div className="bg-muted/30 h-10 w-32 animate-pulse rounded-full" />
             }
           >
-            <NavUser user={user} />
+            <NavUser />
           </Suspense>
         </div>
       </div>

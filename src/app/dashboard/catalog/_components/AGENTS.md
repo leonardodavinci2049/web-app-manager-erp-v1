@@ -121,4 +121,4 @@ Actions consumed: `action-product-updates` (name, price, stock), `action-product
 
 - TS/React changes: `pnpm lint` (Biome).
 - Changes in routes/Server Actions/caching/integrations: `pnpm build` when viable.
-- Visual/interactive changes: validate using `pnpm dev` (port 5581).
+- Visual/interactive changes: validate using `pnpm dev` (port set by the `PORT` env var).

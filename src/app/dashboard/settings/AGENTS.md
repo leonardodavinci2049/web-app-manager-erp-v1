@@ -44,5 +44,5 @@ settings/
 - Documentation-only changes: review Markdown structure and references.
 - TypeScript or React changes: run `pnpm lint`.
 - Visual changes: validate `/dashboard/settings` in the development server
-  (port 5581) — currently just the header and the static title.
+  (port set by the `PORT` env var) — currently just the header and the static title.
 - This project currently has no automated test command; do not invent one.

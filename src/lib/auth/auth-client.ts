@@ -20,8 +20,10 @@ import {
 } from "./permissions";
 
 export const authClient = createAuthClient({
-  /** The base URL of the server (optional if you're using the same domain) */
-  baseURL: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+  // The auth route handler is served from this same Next.js app at /api/auth,
+  // so requests are resolved against the current origin. This keeps session
+  // cookies (SameSite=Lax) same-origin even when the dev port differs from
+  // NEXT_PUBLIC_APP_URL, avoiding empty sessions in the client.
   plugins: [
     organizationClient({
       ac,

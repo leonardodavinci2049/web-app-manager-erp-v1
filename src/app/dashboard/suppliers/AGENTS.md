@@ -293,7 +293,7 @@ mutations are enabled and wired. Do not mark any flow as pending.
 - Route, Server Action, cache behavior, or integration changes: also run
   `pnpm build` when viable.
 - Visual or interactive changes: validate `/dashboard/suppliers` and
-  `/dashboard/suppliers/[id]` in the development server (port 5581) on desktop and
+  `/dashboard/suppliers/[id]` in the development server (port set by the `PORT` env var) on desktop and
   mobile, including search, status filter, sort/order, grid/list switching,
   pagination, empty and error states, create flow, the single edit form, status
   activate/deactivate, delete confirm + redirect to `returnTo`, gallery

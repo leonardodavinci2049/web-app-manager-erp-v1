@@ -187,7 +187,7 @@ Read the local `AGENTS.md` inside each service module before changing it.
   `pnpm build` when viable.
 - Visual or interactive changes: validate `/dashboard/product/new-product`,
   `/dashboard/product/import-products`, and the detail route (see `[id]/AGENTS.md`)
-  in the development server (port 5581) on desktop and mobile, including the
+  in the development server (port set by the `PORT` env var) on desktop and mobile, including the
   create flow (valid and invalid input, price/stock rules, success redirect to
   `/dashboard/catalog`) and the redirect behavior of `/dashboard/product`.
 - This project currently has no automated test command; do not invent one.

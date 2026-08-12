@@ -27,11 +27,6 @@ import { SidebarLogo } from "./sidebar-logo";
 
 // This is sample data.
 const data = {
-  user: {
-    name: "Comsuporte",
-    email: "mauro@comsuporte.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
   teams: [
     {
       name: "WinERP",
@@ -187,7 +182,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavProjects projects={data.projects} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
