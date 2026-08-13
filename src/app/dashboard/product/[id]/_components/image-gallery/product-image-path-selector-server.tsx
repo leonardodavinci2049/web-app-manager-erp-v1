@@ -1,19 +1,19 @@
-import { getProductGalleryInitialState } from "../../_components/image-gallery/product-image-gallery-server";
-import ProductImagesList from "./ProductImagesList";
+import { getProductGalleryInitialState } from "./product-image-gallery-server";
+import { ProductImagePathSelector } from "./product-image-path-selector";
 
-interface ProductImagesListServerProps {
+interface ProductImagePathSelectorServerProps {
   productId: number;
   initialProductImagePath: string;
 }
 
-export async function ProductImagesListServer({
+export async function ProductImagePathSelectorServer({
   productId,
   initialProductImagePath,
-}: ProductImagesListServerProps) {
+}: ProductImagePathSelectorServerProps) {
   const galleryState = await getProductGalleryInitialState(productId);
 
   return (
-    <ProductImagesList
+    <ProductImagePathSelector
       productId={productId}
       initialProductImagePath={initialProductImagePath}
       initialGalleryImages={galleryState.images}

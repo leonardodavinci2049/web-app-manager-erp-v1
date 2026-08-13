@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { usePtypes } from "@/hooks/use-ptypes";
 
-interface ChangeProductTypeDialogProps {
+interface ProductTypeChangeDialogProps {
   productId: number;
   currentTypeId: number;
   currentTypeName: string;
@@ -26,17 +26,17 @@ interface ChangeProductTypeDialogProps {
 }
 
 /**
- * ChangeProductTypeDialog Component
+ * ProductTypeChangeDialog component.
  *
  * Dialog to change the product type.
  * Allows searching and selecting from available types.
  */
-export function ChangeProductTypeDialog({
+export function ProductTypeChangeDialog({
   productId,
   currentTypeId,
   currentTypeName,
   onSuccess,
-}: ChangeProductTypeDialogProps) {
+}: ProductTypeChangeDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");

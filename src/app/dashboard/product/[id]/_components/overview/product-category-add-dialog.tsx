@@ -19,7 +19,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 import type { UITaxonomyMenuItem } from "@/services/api-main/taxonomy-base/transformers/transformers";
 
-interface AddCategoryDialogProps {
+interface ProductCategoryAddDialogProps {
   productId: number;
   existingCategoryIds?: number[]; // Optional now, not used for filtering
   onSuccess?: () => void;
@@ -36,15 +36,15 @@ function getLevelPrefix(level: number): string {
 }
 
 /**
- * AddCategoryDialog Component
+ * ProductCategoryAddDialog component.
  *
  * Dialog to add a category relationship to a product.
  * Allows searching and selecting from available categories.
  */
-export function AddCategoryDialog({
+export function ProductCategoryAddDialog({
   productId,
   onSuccess,
-}: AddCategoryDialogProps) {
+}: ProductCategoryAddDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isAdding, setIsAdding] = useState(false);

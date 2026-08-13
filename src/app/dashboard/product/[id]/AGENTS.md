@@ -13,7 +13,7 @@ services, follow `../AGENTS.md`.
 ## Detail Page Composition
 
 `page.tsx` is a Server Component. It renders one outer `<Suspense
-fallback={<ProductDetailsLayoutSkeleton/>}>` wrapping a `ProductDetailsPageContent`
+fallback={<ProductDetailLayoutSkeleton/>}>` wrapping a `ProductDetailsPageContent`
 async component, which:
 
 1. Calls `await connection()` once in `page.tsx`; the colocated `loading.tsx`
@@ -33,59 +33,67 @@ async component, which:
    `createLogger("ProductDetailsPageV2")`). On `!result` → `logger.warn` +
    `notFound()`. Destructure `{ product, relatedCategories }`.
 7. Render `SiteHeaderWithBreadcrumb` (title "Detalhes do Produto") and
-   `ProductDetailsLayout` (which renders the gallery + `ProductInfoDisplay` +
-   `ProductDetailsTabs`, with the images list injected as `imagesContent`).
+   `ProductDetailLayout` (which renders the gallery + `ProductOverview` +
+   `ProductDetailTabs`, with the PATH_IMAGEM selector injected as
+   `imagePathContent`).
 
-There is **no per-node `<Suspense>`** for the gallery vs. images list (unlike
+There is **no per-node `<Suspense>`** for the gallery vs. PATH_IMAGEM selector (unlike
 customer/brand). The whole content sits under one outer Suspense; the gallery
-renders inline inside `ProductDetailsLayout` without its own boundary.
+renders inline inside `ProductDetailLayout` without its own boundary.
 
 ## Folder Structure
 
 ```text
 [id]/
+├── AGENTS.md
 ├── page.tsx                                    # Server: id validation + getProductManagerById + Suspense
-├── loading.tsx                                 # Detail skeleton (ProductDetailsLayoutSkeleton)
+├── loading.tsx                                 # Detail skeleton (ProductDetailLayoutSkeleton)
 ├── not-found.tsx                               # Client: "Produto Não Encontrado" (NO error.tsx)
 ├── _actions/
 │   └── product-image-gallery-actions.ts        # upload/setPrimary/delete (colocated, Zod)
 └── _components/
-    ├── BackToCatalogButton.tsx                 # Server: <Link href={returnTo}>
-    ├── ProductDetailsLayout.tsx                # Server: composition + skeleton export
-    ├── ProductDetailsTabs.tsx                  # Client: 6-tab <Tabs>
-    ├── ProductInfoDisplay.tsx                  # Server: header, name/pricing/stock/categories/short-desc
-    ├── ProductNameEditor.tsx                   # Client inline editor -> updateProductName
-    ├── ShortDescriptionEditor.tsx              # Client inline editor -> updateProductShortDescription
-    ├── ProductPricingCard.tsx                  # Client 3-price editor -> updateProductPrice (reload)
-    ├── ProductCategoriesCard.tsx               # Server: related categories + add/delete triggers
-    ├── AddCategoryDialog.tsx                   # Client -> createTaxonomyRelationship
-    ├── DeleteCategoryButton.tsx                # Client -> deleteTaxonomyRelationship
-    ├── ChangeProductBrandDialog.tsx            # Client (useBrands) -> updateProductBrand
-    ├── ChangeProductTypeDialog.tsx             # Client (usePtypes) -> updateProductType
-    ├── image-gallery/                          # gallery subsystem (kebab-case)
-    │   ├── index.ts
-    │   ├── image-gallery-constants.ts          # PRODUCT_GALLERY_* constants
-    │   ├── image-gallery-types.ts              # ProductGalleryImage, InitialState, MutationResult
-    │   ├── image-gallery-skeleton.tsx          # ProductImageGallerySkeleton
-    │   ├── product-image-gallery-server.tsx    # getProductGalleryInitialState (cache()) + Server wrapper
-    │   ├── product-image-gallery-refresh.tsx   # Client state holder + router.refresh()
-    │   └── product-image-gallery.tsx           # Client: upload/grid/primary/delete/zoom
-    └── tab-cards/
-        ├── product-images-list-server.tsx      # Server: feeds cached gallery into the list
-        ├── ProductImagesList.tsx               # Client: PATH_IMAGEM viewer + "Usar no PATH_IMAGEM" (default export)
-        ├── ProductDescriptionEditor.tsx        # Client HTML editor (DOMPurify) -> updateProductDescription
-        ├── ProductGeneralDataCard.tsx          # Client -> updateProductGeneral
-        ├── ProductCharacteristicsCard.tsx      # Client -> updateProductCharacteristics
-        ├── ProductTaxValuesCard.tsx            # Client -> updateProductTaxValues
-        ├── ProductTechnicalDataCard.tsx        # Server: type/brand tables + embeds ProductFlagsCard
-        ├── ProductFlagsCard.tsx                # Client 9 switches (optimistic) -> updateProductFlags
-        ├── ProductMetadataCard.tsx             # Server: SEO + dates/slug (read-only)
-        └── ProductStockCard.tsx                # Client -> updateProductStock (reload)
+    ├── product-detail-layout.tsx                # Server: route-detail composition
+    ├── product-detail-layout-skeleton.tsx       # Loading structure
+    ├── overview/                                # First-fold product summary
+    │   ├── product-overview.tsx                 # Derives price/stock view data and composes summary
+    │   ├── product-identity-section.tsx         # Image, name, ID, SKU, and model
+    │   ├── product-name-editor.tsx              # Client -> updateProductName
+    │   ├── product-pricing-card.tsx             # Client -> updateProductPrice (reload)
+    │   ├── product-stock-card.tsx               # Client -> updateProductStock (reload)
+    │   ├── product-categories-card.tsx           # Category relationships
+    │   ├── product-category-add-dialog.tsx      # Client -> createTaxonomyRelationship
+    │   ├── product-category-remove-button.tsx   # Client -> deleteTaxonomyRelationship
+    │   └── product-sales-description-editor.tsx # Client -> updateProductShortDescription
+    ├── tabs/                                    # Second-fold tab navigation and content
+    │   ├── product-detail-tabs.tsx              # Client: six-tab orchestrator
+    │   ├── product-description-tab.tsx          # Client HTML editor
+    │   ├── product-images-tab.tsx               # Mobile gallery + PATH_IMAGEM selector slot
+    │   ├── product-specifications-tab.tsx       # General, characteristics, and tax cards
+    │   ├── product-technical-tab.tsx            # Type, brand, supplier, and flags
+    │   ├── product-metadata-tab.tsx             # Read-only SEO and dates
+    │   ├── product-deletion-tab.tsx             # Disabled pending-API state
+    │   ├── product-general-data-card.tsx
+    │   ├── product-characteristics-card.tsx
+    │   ├── product-tax-information-card.tsx
+    │   ├── product-flags-card.tsx
+    │   ├── product-brand-change-dialog.tsx
+    │   └── product-type-change-dialog.tsx
+    └── image-gallery/                           # Assets API + PATH_IMAGEM subsystem
+        ├── index.ts
+        ├── image-gallery-constants.ts          # PRODUCT_GALLERY_* constants
+        ├── image-gallery-types.ts              # ProductGalleryImage, InitialState, MutationResult
+        ├── image-gallery-skeleton.tsx          # ProductImageGallerySkeleton
+        ├── product-image-gallery-server.tsx    # getProductGalleryInitialState (cache()) + Server wrapper
+        ├── product-image-gallery-refresh.tsx   # Client state holder + router.refresh()
+        ├── product-image-gallery.tsx           # Client: upload/grid/primary/delete/zoom
+        ├── product-image-path-selector-server.tsx # Cached gallery adapter
+        └── product-image-path-selector.tsx     # Client: PATH_IMAGEM viewer and selector
 ```
 
-`_components/` holds all detail UI: PascalCase component files at the root,
-plus two kebab-case subfolders (`image-gallery/` and `tab-cards/`).
-`ProductImagesList.tsx` is a **default export** (everything else is named).
+Detail-only components stay under `[id]/_components`. Files use kebab-case,
+component exports use PascalCase, and folders group components by page region or
+subsystem rather than by visual primitive. Keep internal imports explicit in
+`overview/` and `tabs/`; `image-gallery/index.ts` is the subsystem public entry.
 
 ## Detail Data Flow
 
@@ -96,20 +104,21 @@ plus two kebab-case subfolders (`image-gallery/` and `tab-cards/`).
         ├── getSafeProductReturnTo()            # from @/app/dashboard/product/_components
         ├── getAuthContext()
         ├── getProductManagerById(id, { pe_type_business: 1 })  -> { product, relatedCategories }
-        └── <ProductDetailsLayout> (Server)
-              ├── BackToCatalogButton (returnTo)
+        └── <ProductDetailLayout> (Server)
+              ├── inline back-to-catalog link (returnTo)
               ├── left aside  -> ProductImageGalleryServer (inline, no own Suspense)
-              ├── right column -> ProductInfoDisplay
-              │     ├── ProductNameEditor / ShortDescriptionEditor
+              ├── right column -> ProductOverview
+              │     ├── ProductIdentitySection / ProductNameEditor
               │     ├── ProductPricingCard / ProductStockCard
-              │     └── ProductCategoriesCard (+ AddCategoryDialog / DeleteCategoryButton)
-              └── <ProductDetailsTabs> (Client)
-                    ├── description -> ProductDescriptionEditor
-                    ├── images      -> imagesContent node (ProductImagesList)
-                    ├── specs       -> General / Characteristics / Tax cards
-                    ├── technical   -> TechnicalDataCard (+ FlagsCard + Brand/Type dialogs)
-                    ├── metadata    -> MetadataCard (read-only)
-                    └── deletion    -> disabled "Pendente de API"
+              │     ├── ProductCategoriesCard (+ add/remove controls)
+              │     └── ProductSalesDescriptionEditor
+              └── <ProductDetailTabs> (Client)
+                    ├── description -> ProductDescriptionTab
+                    ├── images      -> ProductImagesTab + ProductImagePathSelector
+                    ├── specs       -> ProductSpecificationsTab
+                    ├── technical   -> ProductTechnicalTab
+                    ├── metadata    -> ProductMetadataTab
+                    └── deletion    -> ProductDeletionTab
 ```
 
 Pass only `UIProductManager` and `UIProductManagerRelatedCategory[]` DTOs to the
@@ -119,7 +128,7 @@ components; never forward `apiContext`, sessions, tokens, or raw entities.
 
 Editing is a set of **independent inline editors and tab cards**, each submitting
 to its own global Server Action (in `src/app/actions/`). There is no single
-mega-form and no sectioned form with shared state. `ProductDetailsTabs` (Client)
+mega-form and no sectioned form with shared state. `ProductDetailTabs` (Client)
 owns `const router = useRouter()` and a `handleDataChange = () => router.refresh()`
 passed to the technical card.
 
@@ -127,20 +136,20 @@ passed to the technical card.
 
 - `ProductNameEditor` — double-click or pencil to edit; `MAX_CHARACTERS = 200`;
   Ctrl+Enter saves, Esc cancels; → `updateProductName`.
-- `ShortDescriptionEditor` — `MAX_CHARACTERS = 1000`; → `updateProductShortDescription`.
-- `ProductDescriptionEditor` — `MAX_CHARACTERS = 10000`; `DOMPurify.sanitize` on
+- `ProductSalesDescriptionEditor` — `MAX_CHARACTERS = 1000`; → `updateProductShortDescription`.
+- `ProductDescriptionTab` — `MAX_CHARACTERS = 10000`; `DOMPurify.sanitize` on
   render and before save; renders via `dangerouslySetInnerHTML` (trusted admin
   content); → `updateProductDescription` in **`action-product-description`**
   (there is a same-named function in `action-product-updates` that this UI does
   **not** use).
-- `ProductGeneralDataCard` / `ProductCharacteristicsCard` / `ProductTaxValuesCard`
+- `ProductGeneralDataCard` / `ProductCharacteristicsCard` / `ProductTaxInformationCard`
   — pencil/check/X inline edit; Enter saves, Esc cancels. Characteristics converts
   `warrantyDays → warrantyMonths = Math.floor(days/30)`.
 
 ### Flags (`ProductFlagsCard`)
 
 Nine `Switch`es with **optimistic update + rollback**; the rule is `1 → ON`,
-`else → OFF`. **Gotcha:** `ProductTechnicalDataCard` hardcodes most flags to `0`
+`else → OFF`. **Gotcha:** `ProductTechnicalTab` hardcodes most flags to `0`
 at the call site — only `destaque`, `promocao`, `servico`, and `importado` are
 derived from the product. `controleFisico`, `controlarEstoque`, `consignado`,
 `websiteOff`, and `inativo` are always sent as `0`, so the card does not reflect
@@ -155,30 +164,30 @@ with **`window.location.reload()`** after success — a deviation from the
 you switch them to `router.refresh()`, remove the reload and add `revalidatePath`
 to the actions.
 
-### Tabs (`ProductDetailsTabs`, `defaultValue="description"`)
+### Tabs (`ProductDetailTabs`, `defaultValue="description"`)
 
 | Tab | Label | Content | Submits to |
 | --- | --- | --- | --- |
-| `description` | Descrição | `ProductDescriptionEditor` | `updateProductDescription` (`action-product-description`) |
-| `images` | Imagens | `imagesContent` node (`ProductImagesList`) | `updateProductImagePath` ("Usar no PATH_IMAGEM") |
-| `specifications` | Especificações | General + Characteristics + Tax cards | `updateProductGeneral` / `…Characteristics` / `…TaxValues` (`action-products`) |
-| `technical` | Dados Técnicos | `ProductTechnicalDataCard` (embeds `ProductFlagsCard` + brand/type dialogs) | `updateProductFlags` / `updateProductType` / `updateProductBrand` |
-| `metadata` | Metadados | `ProductMetadataCard` (read-only) | none |
-| `deletion` | Exclusão | Disabled "Excluir produto — Pendente de API" | none (pending) |
+| `description` | Descrição | `ProductDescriptionTab` | `updateProductDescription` (`action-product-description`) |
+| `images` | Imagens | `ProductImagesTab` + `ProductImagePathSelector` | `updateProductImagePath` ("Usar no PATH_IMAGEM") |
+| `specifications` | Especificações | `ProductSpecificationsTab` | `updateProductGeneral` / `…Characteristics` / `…TaxValues` (`action-products`) |
+| `technical` | Dados Técnicos | `ProductTechnicalTab` | `updateProductFlags` / `updateProductType` / `updateProductBrand` |
+| `metadata` | Metadados | `ProductMetadataTab` (read-only) | none |
+| `deletion` | Exclusão | `ProductDeletionTab` (disabled pending state) | none (pending) |
 
 ### Dialogs
 
-- `AddCategoryDialog` — calls `loadCategoriesMenuAction()` (from
+- `ProductCategoryAddDialog` — calls `loadCategoriesMenuAction()` (from
   `@/app/actions/action-categories`) on open, renders a searchable
   `UITaxonomyMenuItem` list, and on pick calls `createTaxonomyRelationship(categoryId,
   productId)` (from `@/app/actions/action-taxonomy`). It does **not** call
   `router.refresh()`; the UI updates via the action's `revalidatePath`.
-- `DeleteCategoryButton` — confirm → `deleteTaxonomyRelationship(taxonomyId,
+- `ProductCategoryRemoveButton` — confirm → `deleteTaxonomyRelationship(taxonomyId,
   productId)`.
-- `ChangeProductBrandDialog` — `useBrands()` (from `@/hooks/use-brands`, which
+- `ProductBrandChangeDialog` — `useBrands()` (from `@/hooks/use-brands`, which
   calls `loadBrandsListAction`) → on pick `updateProductBrand(productId, brandId)`
   (from `@/app/actions/action-product-updates`).
-- `ChangeProductTypeDialog` — `usePtypes()` (from `@/hooks/use-ptypes`) → on pick
+- `ProductTypeChangeDialog` — `usePtypes()` (from `@/hooks/use-ptypes`) → on pick
   `updateProductType(productId, typeId)`.
 
 ## Image Gallery Subsystem
@@ -193,14 +202,14 @@ the **Assets API** (source of truth for the image set) and the legacy
 - `getProductGalleryInitialState` is wrapped in React `cache()` (the `import { cache }
   from "react"` sits at the **bottom** of `product-image-gallery-server.tsx` —
   unusual placement, works via ES module hoisting). Shared by the gallery node and
-  the images-list node so the Assets API is hit once per request.
+  the PATH_IMAGEM selector node so the Assets API is hit once per request.
 - `ProductImageGallery` (Client): drag-drop + file picker upload (sequential,
   per-file MIME/size validation, rejects beyond `availableSlots`), thumbnail grid,
   primary promotion (confirm), delete (confirm, blocked when `images.length <= 1`),
   keyboard-navigable zoom dialog (ArrowLeft/Right), per-image error fallback to
   `DEFAULT_PRODUCT_IMAGE_URL`, `aria-live` status region, and `unoptimized` on
   remote `next/image` via `isRemoteImage()`.
-- `ProductImagesList` (Client, default export): the "Imagens" tab. Shows the
+- `ProductImagePathSelector` (Client, named export): the "Imagens" tab. Shows the
   current `PATH_IMAGEM` value and the Assets API list side by side, a manual
   "Atualizar" button, and a per-image **"Usar no PATH_IMAGEM"** button — which is
   **ENABLED** here (unlike customer/brand where it is absent or disabled).
@@ -279,10 +288,8 @@ pattern.
 - **Product deletion** — the "deletion" tab renders a disabled "Excluir produto —
   Pendente de API" button. Do not wire until a safe, idempotent delete contract
   exists.
-- **"Fornecedor" card** in `ProductTechnicalDataCard` is a static placeholder
+- **"Fornecedor" card** in `ProductTechnicalTab` is a static placeholder
   ("Nenhum fornecedor definido") with no data and no action.
-- **Star rating** in `ProductInfoDisplay` is a hardcoded mock ("4.0 de 5 - 23
-  avaliações") — not wired to any review API.
 - **Most `ProductFlagsCard` flags are hardcoded to `0`** at the call site — see
   "Editing Architecture".
 
@@ -290,14 +297,18 @@ Do not present these as functional and do not simulate them.
 
 ## Conventions for Changes
 
-- Keep `page.tsx` Server; keep `"use client"` on the interactive leaves (tabs,
-  editors, dialogs, flags, pricing, stock, gallery clients).
+- Keep `page.tsx`, `ProductDetailLayout`, `ProductOverview`, and
+  `ProductIdentitySection` as Server Components. Keep `"use client"` on the
+  interactive leaves and on `ProductDetailTabs`, which owns the tabs state.
+- Keep route-exclusive components in `[id]/_components`, files in kebab-case,
+  and React component exports in PascalCase. Group new components by
+  `overview`, `tabs`, or `image-gallery` according to responsibility.
 - When adding an editable field, align together: the `UIProductManager` field
   (transformers), the inline/update service method, the global action signature,
   and the editor/tab card. There is **no** route-local Zod schema file for these
   mutations (unlike the gallery actions).
 - When changing gallery behavior, keep `getProductGalleryInitialState` cached and
-  shared between the gallery node and the images-list node, and keep the
+  shared between the gallery node and the PATH_IMAGEM selector node, and keep the
   `PATH_IMAGEM` 300-char guard. Remember set-primary/delete do **not** sync
   `PATH_IMAGEM` today.
 - Two `updateProductDescription` actions exist — pick one and delete the other;

@@ -1,20 +1,20 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { UIProductManager } from "@/services/api-main/product-manager/transformers/transformers";
-import { ChangeProductBrandDialog } from "../ChangeProductBrandDialog";
-import { ChangeProductTypeDialog } from "../ChangeProductTypeDialog";
-import { ProductFlagsCard } from "./ProductFlagsCard";
+import { ProductBrandChangeDialog } from "./product-brand-change-dialog";
+import { ProductFlagsCard } from "./product-flags-card";
+import { ProductTypeChangeDialog } from "./product-type-change-dialog";
 
-interface ProductTechnicalDataCardProps {
+interface ProductTechnicalTabProps {
   product: UIProductManager;
   productId: number;
   onDataChange?: () => void;
 }
 
-export function ProductTechnicalDataCard({
+export function ProductTechnicalTab({
   product,
   productId,
   onDataChange,
-}: ProductTechnicalDataCardProps) {
+}: ProductTechnicalTabProps) {
   return (
     <div className="space-y-4">
       {/* Card 2 - Tipo */}
@@ -44,7 +44,7 @@ export function ProductTechnicalDataCard({
                     <td className="py-2 px-2 text-sm">{product.typeId}</td>
                     <td className="py-2 px-2 text-sm">{product.type}</td>
                     <td className="py-2 px-2">
-                      <ChangeProductTypeDialog
+                      <ProductTypeChangeDialog
                         productId={productId}
                         currentTypeId={product.typeId}
                         currentTypeName={product.type}
@@ -90,7 +90,7 @@ export function ProductTechnicalDataCard({
                     <td className="py-2 px-2 text-sm">{product.brandId}</td>
                     <td className="py-2 px-2 text-sm">{product.brand}</td>
                     <td className="py-2 px-2">
-                      <ChangeProductBrandDialog
+                      <ProductBrandChangeDialog
                         productId={productId}
                         currentBrandId={product.brandId}
                         currentBrandName={product.brand}

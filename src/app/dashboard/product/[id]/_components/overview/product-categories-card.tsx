@@ -9,8 +9,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { UIProductManagerRelatedCategory } from "@/services/api-main/product-manager/transformers/transformers";
-import { AddCategoryDialog } from "./AddCategoryDialog";
-import { DeleteCategoryButton } from "./DeleteCategoryButton";
+import { ProductCategoryAddDialog } from "./product-category-add-dialog";
+import { ProductCategoryRemoveButton } from "./product-category-remove-button";
 
 interface ProductCategoriesCardProps {
   relatedCategories: UIProductManagerRelatedCategory[];
@@ -39,7 +39,7 @@ export function ProductCategoriesCard({
             <FolderTree className="h-5 w-5" />
             Categorias Relacionadas
           </CardTitle>
-          <AddCategoryDialog
+          <ProductCategoryAddDialog
             productId={productId}
             existingCategoryIds={existingCategoryIds}
           />
@@ -68,7 +68,7 @@ export function ProductCategoriesCard({
                       {category.level ?? "-"}
                     </TableCell>
                     <TableCell className="text-center">
-                      <DeleteCategoryButton
+                      <ProductCategoryRemoveButton
                         taxonomyId={category.taxonomyId}
                         taxonomyName={category.name}
                         productId={productId}

@@ -23,7 +23,7 @@ function formatDate(dateString: string): string {
   }
 }
 
-interface ProductMetadataCardProps {
+interface ProductMetadataTabProps {
   metaTitle: string | null;
   metaDescription: string | null;
   createdAt: string;
@@ -31,13 +31,13 @@ interface ProductMetadataCardProps {
   slug: string | null;
 }
 
-export function ProductMetadataCard({
+export function ProductMetadataTab({
   metaTitle,
   metaDescription,
   createdAt,
   updatedAt,
   slug,
-}: ProductMetadataCardProps) {
+}: ProductMetadataTabProps) {
   return (
     <>
       {/* Card 1 - Metadados SEO */}

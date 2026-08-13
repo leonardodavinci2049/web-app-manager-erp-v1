@@ -1,4 +1,4 @@
-import { ProductDetailsLayoutSkeleton } from "@/app/dashboard/product/[id]/_components/ProductDetailsLayout";
+import { ProductDetailLayoutSkeleton } from "@/app/dashboard/product/[id]/_components/product-detail-layout-skeleton";
 import { SiteHeaderWithBreadcrumb } from "@/components/dashboard/header/site-header-with-breadcrumb";
 
 export default function ProductDetailsLoading() {
@@ -17,7 +17,7 @@ export default function ProductDetailsLoading() {
         <div className="@container/main flex flex-1 flex-col gap-6">
           <div className="flex flex-col gap-6 py-6">
             <div className="px-4 lg:px-6">
-              <ProductDetailsLayoutSkeleton />
+              <ProductDetailLayoutSkeleton />
             </div>
           </div>
         </div>

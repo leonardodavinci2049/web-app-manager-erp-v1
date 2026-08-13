@@ -3,10 +3,8 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { z } from "zod";
 import { getSafeProductReturnTo } from "@/app/dashboard/product/_components";
-import {
-  ProductDetailsLayout,
-  ProductDetailsLayoutSkeleton,
-} from "@/app/dashboard/product/[id]/_components/ProductDetailsLayout";
+import { ProductDetailLayout } from "@/app/dashboard/product/[id]/_components/product-detail-layout";
+import { ProductDetailLayoutSkeleton } from "@/app/dashboard/product/[id]/_components/product-detail-layout-skeleton";
 import { SiteHeaderWithBreadcrumb } from "@/components/dashboard/header/site-header-with-breadcrumb";
 import { createLogger } from "@/lib/logger";
 import { getAuthContext } from "@/server/auth-context";
@@ -61,7 +59,7 @@ async function ProductDetailsPageContent({
         <div className="flex flex-col gap-6 py-6">
           <div className="px-4 lg:px-6">
             {/* New Modern Product Details Layout */}
-            <ProductDetailsLayout
+            <ProductDetailLayout
               product={product}
               productId={productId}
               relatedCategories={relatedCategories}
@@ -129,7 +127,7 @@ export default async function ProductDetailsPage({
               <div className="@container/main flex flex-1 flex-col gap-6">
                 <div className="flex flex-col gap-6 py-6">
                   <div className="px-4 lg:px-6">
-                    <ProductDetailsLayoutSkeleton />
+                    <ProductDetailLayoutSkeleton />
                   </div>
                 </div>
               </div>
