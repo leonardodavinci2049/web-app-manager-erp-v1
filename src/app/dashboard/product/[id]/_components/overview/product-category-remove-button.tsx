@@ -15,7 +15,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-interface DeleteCategoryButtonProps {
+interface ProductCategoryRemoveButtonProps {
   taxonomyId: number;
   taxonomyName: string;
   productId: number;
@@ -23,17 +23,17 @@ interface DeleteCategoryButtonProps {
 }
 
 /**
- * DeleteCategoryButton Component
+ * ProductCategoryRemoveButton component.
  *
  * Button with confirmation dialog to delete a category relationship from a product.
  * Uses Dialog component to avoid issues with AlertDialog in Next.js.
  */
-export function DeleteCategoryButton({
+export function ProductCategoryRemoveButton({
   taxonomyId,
   taxonomyName,
   productId,
   onSuccess,
-}: DeleteCategoryButtonProps) {
+}: ProductCategoryRemoveButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 

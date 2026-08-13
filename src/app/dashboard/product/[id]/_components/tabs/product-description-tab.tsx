@@ -9,15 +9,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 
-interface ProductDescriptionEditorProps {
+interface ProductDescriptionTabProps {
   productId: number;
   initialDescription: string | null;
 }
 
-export function ProductDescriptionEditor({
+export function ProductDescriptionTab({
   productId,
   initialDescription,
-}: ProductDescriptionEditorProps) {
+}: ProductDescriptionTabProps) {
   const MAX_CHARACTERS = 10000;
   const [isEditing, setIsEditing] = useState(false);
   const [description, setDescription] = useState(initialDescription || "");

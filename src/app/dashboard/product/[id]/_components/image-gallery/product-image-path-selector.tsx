@@ -19,19 +19,19 @@ import { Separator } from "@/components/ui/separator";
 import { DEFAULT_PRODUCT_IMAGE_URL } from "../../_components/image-gallery/image-gallery-constants";
 import type { ProductGalleryImage } from "../../_components/image-gallery/image-gallery-types";
 
-interface ProductImagesListProps {
+interface ProductImagePathSelectorProps {
   productId: number;
   initialProductImagePath: string;
   initialGalleryImages: ProductGalleryImage[];
   initialGalleryError: string | null;
 }
 
-const ProductImagesList = ({
+export function ProductImagePathSelector({
   productId,
   initialProductImagePath,
   initialGalleryImages,
   initialGalleryError,
-}: ProductImagesListProps) => {
+}: ProductImagePathSelectorProps) {
   const router = useRouter();
   const [isRefreshing, startRefreshTransition] = useTransition();
   const [galleryImages, setGalleryImages] =
@@ -289,6 +289,4 @@ const ProductImagesList = ({
       </Card>
     </div>
   );
-};
-
-export default ProductImagesList;
+}

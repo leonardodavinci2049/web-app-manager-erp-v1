@@ -8,17 +8,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 
-interface ShortDescriptionEditorProps {
+interface ProductSalesDescriptionEditorProps {
   productId: number;
   initialDescription: string | null;
   onUpdate?: (newDescription: string) => void;
 }
 
-export function ShortDescriptionEditor({
+export function ProductSalesDescriptionEditor({
   productId,
   initialDescription,
   onUpdate,
-}: ShortDescriptionEditorProps) {
+}: ProductSalesDescriptionEditorProps) {
   const MAX_CHARACTERS = 1000;
   const [isEditing, setIsEditing] = useState(false);
   const [description, setDescription] = useState(initialDescription || "");

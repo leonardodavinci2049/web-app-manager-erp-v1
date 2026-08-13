@@ -18,19 +18,19 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useBrands } from "@/hooks/use-brands";
 
-interface ChangeProductBrandDialogProps {
+interface ProductBrandChangeDialogProps {
   productId: number;
   currentBrandId: number;
   currentBrandName: string;
   onSuccess?: () => void;
 }
 
-export function ChangeProductBrandDialog({
+export function ProductBrandChangeDialog({
   productId,
   currentBrandId,
   currentBrandName,
   onSuccess,
-}: ChangeProductBrandDialogProps) {
+}: ProductBrandChangeDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");

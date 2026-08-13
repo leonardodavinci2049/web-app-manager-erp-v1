@@ -15,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-interface ProductTaxValuesCardProps {
+interface ProductTaxInformationCardProps {
   productId: number;
   cfop?: string;
   cst?: string;
@@ -26,7 +26,7 @@ interface ProductTaxValuesCardProps {
   temp?: string;
 }
 
-export function ProductTaxValuesCard({
+export function ProductTaxInformationCard({
   productId,
   cfop = "",
   cst = "",
@@ -35,7 +35,7 @@ export function ProductTaxValuesCard({
   nbm = "",
   ppb = 0,
   temp = "",
-}: ProductTaxValuesCardProps) {
+}: ProductTaxInformationCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
