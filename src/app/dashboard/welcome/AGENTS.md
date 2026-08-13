@@ -16,7 +16,7 @@ It supports:
   list, each linking to a dashboard module.
 
 It is **not** the default authenticated destination: `/dashboard` redirects to
-`/dashboard/catalog` (see `src/app/dashboard/AGENTS.md`). Reach `/dashboard/welcome`
+`/dashboard/product` (see `src/app/dashboard/AGENTS.md`). Reach `/dashboard/welcome`
 through the sidebar projects list.
 
 ## Page Responsibilities
@@ -56,7 +56,7 @@ routes. Treat it as a manual index, not a source of truth:
   "Compras" link to `/dashboard/development` (the maintenance/stub route), even
   though `brand`, `suppliers`, and `carriers` routes now exist.
 - "Catálogo de Produtos", "Cadastro de Categorias", and "Relatórios" link to
-  real routes (`/dashboard/catalog`, `/dashboard/category`,
+  real routes (`/dashboard/product`, `/dashboard/category`,
   `/dashboard/report/panel`).
 
 When wiring a module to its real route, update the `href` here. The authoritative

@@ -145,7 +145,7 @@ export function CategoryMobileBottomBar({
             onClick={openFilters}
           />
           <BottomBarLink
-            href="/dashboard/catalog"
+            href="/dashboard/product"
             icon={<LayoutGrid className="size-5" aria-hidden="true" />}
             label="Catálogo"
           />

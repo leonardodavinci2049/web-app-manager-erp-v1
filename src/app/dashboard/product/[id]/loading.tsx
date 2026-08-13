@@ -9,7 +9,7 @@ export default function ProductDetailsLoading() {
         breadcrumbItems={[
           { label: "Dashboard", href: "/dashboard" },
           { label: "Produtos" },
-          { label: "Catálogo", href: "/dashboard/catalog" },
+          { label: "Catálogo", href: "/dashboard/product" },
           { label: "Detalhes", isActive: true },
         ]}
       />

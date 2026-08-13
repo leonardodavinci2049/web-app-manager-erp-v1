@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { z } from "zod";
-import { getSafeProductReturnTo } from "@/app/dashboard/catalog/_components";
+import { getSafeProductReturnTo } from "@/app/dashboard/product/_components";
 import {
   ProductDetailsLayout,
   ProductDetailsLayoutSkeleton,
@@ -103,9 +103,9 @@ export default async function ProductDetailsPage({
   );
   // O breadcrumb reflete a hierarquia canonica do produto; preserva filtros
   // quando a origem e o catalogo e mantem o path canonico nos demais casos.
-  const catalogHref = returnTo.startsWith("/dashboard/catalog")
+  const catalogHref = returnTo.startsWith("/dashboard/product")
     ? returnTo
-    : "/dashboard/catalog";
+    : "/dashboard/product";
 
   // Build breadcrumb items
   const breadcrumbItems = [

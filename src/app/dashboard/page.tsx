@@ -17,7 +17,7 @@ async function DashboardRedirect() {
       headers: await headers(),
     });
 
-    return redirect(session?.user ? "/dashboard/catalog" : "/sign-in");
+    return redirect(session?.user ? "/dashboard/product" : "/sign-in");
   } catch (error) {
     if (isRedirectError(error)) {
       throw error;

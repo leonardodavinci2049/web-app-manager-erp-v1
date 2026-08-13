@@ -7,8 +7,8 @@ and conventions that apply to every child route.
 Read the closest child `AGENTS.md` before changing a feature route. In
 particular:
 
-- `catalog/AGENTS.md` covers the product catalog route.
-- `catalog/_components/AGENTS.md` covers catalog UI internals.
+- `product/AGENTS.md` covers the product catalog and child product routes.
+- `product/_components/AGENTS.md` covers catalog UI internals.
 - `category/AGENTS.md` covers the category management route.
 
 ## Segment Responsibilities
@@ -17,10 +17,10 @@ particular:
   inset for every `/dashboard/*` route.
 - `page.tsx` is redirect-only. It must not render feature UI or fetch catalog
   data.
-- An authenticated request to `/dashboard` redirects to `/dashboard/catalog`.
+- An authenticated request to `/dashboard` redirects to `/dashboard/product`.
 - A request without a valid session redirects to `/sign-in`.
-- Feature screens belong in explicit child routes such as `catalog/`,
-  `category/`, `customer/`, `product/`, and `report/`.
+- Feature screens belong in explicit child routes such as `category/`,
+  `customer/`, `product/`, and `report/`.
 
 ## Structure
 
@@ -32,15 +32,16 @@ dashboard/
 ├── _components/
 │   ├── app-sidebar/                 # Shared dashboard navigation
 │   └── header/                      # Legacy/local header components
-├── catalog/
-│   ├── AGENTS.md                    # Catalog route guide
-│   ├── page.tsx
-│   ├── loading.tsx
-│   └── _components/
-│       └── AGENTS.md                # Catalog component guide
 ├── category/
 ├── customer/
 ├── product/
+│   ├── AGENTS.md                    # Product list and child-route guide
+│   ├── page.tsx                     # Canonical product catalog
+│   ├── loading.tsx
+│   ├── _components/
+│   │   └── AGENTS.md                # Catalog component guide
+│   ├── [id]/                        # Product detail
+│   └── new-product/                 # Product creation
 └── report/
 ```
 
@@ -52,7 +53,7 @@ Keep `page.tsx` small and server-side:
    child inside a route-local `<Suspense>` boundary.
 2. Opt into request-time execution with `connection()` inside that child.
 3. Read the session from the current request headers inside the same child.
-4. Redirect authenticated users to `/dashboard/catalog`.
+4. Redirect authenticated users to `/dashboard/product`.
 5. Redirect unauthenticated users and session-validation failures to
    `/sign-in`.
 6. Re-throw Next.js redirect errors before handling real failures.
@@ -71,7 +72,7 @@ loading into the redirect page.
   Client Components beyond the minimal serializable values required by an
   existing provider.
 - Shared sidebar components remain under `_components/app-sidebar`.
-- Navigation to the product catalog must use `/dashboard/catalog`.
+- Navigation to the product catalog must use `/dashboard/product`.
 - `/dashboard` remains a valid semantic home entry because it performs the
   authenticated redirect, but feature-specific links should target their
   canonical child route directly.

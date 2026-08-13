@@ -35,7 +35,7 @@ export default function NotFound() {
                 </CardHeader>
                 <CardContent className="flex flex-col gap-4">
                   <Button asChild className="w-full">
-                    <Link href="/dashboard/catalog">
+                    <Link href="/dashboard/product">
                       <ArrowLeft className="mr-2 h-4 w-4" />
                       Voltar para Catálogo
                     </Link>
