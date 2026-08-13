@@ -30,7 +30,7 @@ import type {
   CustomerPurchasedProductListItem,
   CustomerPurchasesActionResult,
   CustomerWarrantyListItem,
-} from "../_components/customer-purchases-types";
+} from "../_components/purchases/customer-purchases-types";
 
 const logger = createLogger("CustomerPurchasesActions");
 

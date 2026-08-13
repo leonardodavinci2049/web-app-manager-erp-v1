@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import type { UISellerInfo } from "@/services/api-main/customer-general";
-import { RelatedSellerImage } from "../related-seller-image";
+import { RelatedSellerImage } from "./related-seller-image";
 
 interface RelatedSellerSectionProps {
   seller?: UISellerInfo;

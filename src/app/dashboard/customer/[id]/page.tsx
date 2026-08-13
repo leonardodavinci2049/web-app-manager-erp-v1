@@ -9,7 +9,7 @@ import {
   getCustomerById,
 } from "@/services/api-main/customer-general";
 import { getSafeCustomerReturnTo } from "../_components";
-import { CustomerDetails } from "./_components/customer-details";
+import { CustomerDetailLayout } from "./_components/customer-detail-layout";
 import {
   CustomerImageGalleryServer,
   CustomerImageGallerySkeleton,
@@ -62,7 +62,7 @@ export default async function CustomerDetailsPage({
         <div className="@container/main flex flex-1 flex-col gap-4 sm:gap-6">
           <div className="flex flex-col gap-4 py-4 sm:gap-6 sm:py-6">
             <div className="px-3 sm:px-4 lg:px-6">
-              <CustomerDetails
+              <CustomerDetailLayout
                 customer={bundle.customer}
                 seller={bundle.seller}
                 returnTo={returnTo}
