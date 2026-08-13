@@ -6,7 +6,7 @@ import { getSafeProductReturnTo } from "@/app/dashboard/product/_components";
 import {
   ProductDetailsLayout,
   ProductDetailsLayoutSkeleton,
-} from "@/app/dashboard/product/[id]/components/ProductDetailsLayout";
+} from "@/app/dashboard/product/[id]/_components/ProductDetailsLayout";
 import { SiteHeaderWithBreadcrumb } from "@/components/dashboard/header/site-header-with-breadcrumb";
 import { createLogger } from "@/lib/logger";
 import { getAuthContext } from "@/server/auth-context";
