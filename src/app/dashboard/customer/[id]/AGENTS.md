@@ -27,11 +27,11 @@ Client Components.
 7. Map `CustomerNotFoundError` to `notFound()`; rethrow other errors so the
    segment `error.tsx` boundary handles them.
 8. Render the image gallery and the image list inside `<Suspense>` (fallback
-   `CustomerImageGallerySkeleton`), passing them to `CustomerDetails` as React
+   `CustomerImageGallerySkeleton`), passing them to `CustomerDetailLayout` as React
    nodes.
 
 The gallery and image nodes are built on the **page** (not inside
-`CustomerDetails`) so the Suspense boundaries remain server-owned and the cached
+`CustomerDetailLayout`) so the Suspense boundaries remain server-owned and the cached
 gallery read is shared by both nodes through React `cache()`.
 
 ## Folder Structure
@@ -46,15 +46,30 @@ gallery read is shared by both nodes through React `cache()`.
 │   ├── customer-image-gallery-actions.ts     # Gallery upload/primary/delete
 │   └── customer-purchases-actions.ts         # Authenticated lazy purchase reads
 └── _components/
-    ├── customer-details.tsx                  # Top-level detail layout (Server)
-    ├── customer-detail-forms.tsx             # Tabbed section editors (Client)
-    ├── customer-identity-section.tsx         # General identity form (Client)
-    ├── customer-person-business-sections.tsx # Person/business forms (Client)
-    ├── customer-purchases.tsx                # Purchase tabs/search state (Client)
-    ├── customer-purchases-lists.tsx          # Responsive tables/cards (Client)
-    ├── customer-purchases-types.ts           # Minimal purchase DTOs/results
-    ├── customer-type-sections.tsx            # Person/customer type toggles (Client)
-    ├── related-seller-image.tsx              # Seller avatar (Client)
+    ├── customer-detail-layout.tsx            # Top-level detail layout (Server)
+    ├── overview/                             # First-fold customer overview
+    │   ├── customer-head-data-section.tsx
+    │   ├── customer-identity-section.tsx
+    │   ├── customer-person-business-sections.tsx
+    │   ├── customer-type-sections.tsx
+    │   ├── related-seller-image.tsx
+    │   └── related-seller-section.tsx
+    ├── tabs/                                 # Second-fold tabs/content
+    │   ├── customer-detail-tabs.tsx
+    │   ├── customer-address-tab.tsx
+    │   ├── customer-deletion-tab.tsx
+    │   ├── customer-field.tsx
+    │   ├── customer-image-tab.tsx
+    │   ├── customer-internet-tab.tsx
+    │   ├── customer-notes-tab.tsx
+    │   ├── customer-registration-tab.tsx
+    │   ├── customer-section-action.ts
+    │   ├── customer-section-button.tsx
+    │   └── customer-status-tab.tsx
+    ├── purchases/                             # Purchase tabs/search state
+    │   ├── customer-purchases.tsx
+    │   ├── customer-purchases-lists.tsx
+    │   └── customer-purchases-types.ts
     └── image-gallery/
         ├── index.ts
         ├── image-gallery-constants.ts        # Entity type, limits, MIME, defaults
@@ -73,12 +88,12 @@ gallery read is shared by both nodes through React `cache()`.
   ├── validates id -> notFound() on invalid
   ├── getAuthContext()
   ├── getCustomerById()          -> UICustomerDetailsBundle { customer, seller? }
-  └── <CustomerDetails> (Server)
+  └── <CustomerDetailLayout> (Server)
         ├── identity + type + person/business sections (Client forms)
         ├── related seller block
         ├── productsContent -> <CustomerPurchases customerId>
-        └── <CustomerDetailForms> (Client)
-              ├── tabbed section editors -> ../../_actions/customer-actions
+        └── <CustomerDetailTabs> (Client)
+              ├── independent tab editors -> ../../_actions/customer-actions
               ├── purchase reads -> ../_actions/customer-purchases-actions
               └── imageContent / mobileImageGallery = <Suspense> nodes from page
 ```
@@ -94,7 +109,7 @@ state, its own Zod-validated Server Action, and a `router.refresh()` on success.
 There is no single mega-form and no shared editing context. Keep this
 decoupling when adding sections.
 
-The shared pattern (see `customer-detail-forms.tsx`, `customer-identity-section.tsx`,
+The shared pattern (see `tabs/customer-detail-tabs.tsx`, `overview/customer-identity-section.tsx`,
 `customer-person-business-sections.tsx`):
 
 1. `toValues(customer)` derives local form state from the server DTO.
@@ -107,7 +122,7 @@ The shared pattern (see `customer-detail-forms.tsx`, `customer-identity-section.
 
 Sections are spread across two components and two visual zones:
 
-- **Top identity zone** (`CustomerDetails`, rendered above the tabs):
+- **Top identity zone** (`CustomerDetailLayout`, rendered above the tabs):
   - `CustomerIdentitySection`: name, phone, WhatsApp, email →
     `updateCustomerGeneralAction`.
   - `CustomerTypeSections` (first instance, `showCustomerType: false`): person
@@ -117,7 +132,7 @@ Sections are spread across two components and two visual zones:
     business). Switching person type re-renders this block.
   - `CustomerTypeSections` (second instance, `showPersonType: false`): customer
     type toggle → `updateCustomerTypeCustomerAction`.
-- **Tabbed zone** (`CustomerDetailForms`): notes, address, status (restriction),
+- **Tabbed zone** (`CustomerDetailTabs`): notes, address, status (restriction),
   image, products (purchases), internet, miscellaneous (registration date),
   deletion.
 
@@ -129,12 +144,12 @@ Section-to-action mapping:
 | Person type | `customer-type-sections` | `updateCustomerTypePersonAction` |
 | Personal / business | `customer-person-business-sections` | `updateCustomerPersonalAction` / `updateCustomerBusinessAction` |
 | Customer type | `customer-type-sections` | `updateCustomerTypeCustomerAction` |
-| Notes | `customer-detail-forms` | `updateCustomerNotesAction` |
-| Address | `customer-detail-forms` | `updateCustomerAddressAction` |
-| Internet | `customer-detail-forms` | `updateCustomerInternetAction` |
-| Status (restriction) | `customer-detail-forms` | `updateCustomerRestrictionAction` |
-| Status (active/inactive) | `customer-detail-forms` | `updateCustomerInactiveAction` |
-| Status (email advertising) | `customer-detail-forms` | `updateCustomerEmailMarketingAction` |
+| Notes | `tabs/customer-notes-tab` | `updateCustomerNotesAction` |
+| Address | `tabs/customer-address-tab` | `updateCustomerAddressAction` |
+| Internet | `tabs/customer-internet-tab` | `updateCustomerInternetAction` |
+| Status (restriction) | `tabs/customer-status-tab` | `updateCustomerRestrictionAction` |
+| Status (active/inactive) | `tabs/customer-status-tab` | `updateCustomerInactiveAction` |
+| Status (email advertising) | `tabs/customer-status-tab` | `updateCustomerEmailMarketingAction` |
 
 Note: all these actions live in `../_actions/customer-actions.ts` (shared with
 the list's create flow), not in this folder. Reuse them; do not duplicate

@@ -57,12 +57,10 @@ customer/
     ├── _actions/
     │   └── customer-image-gallery-actions.ts  # Gallery upload/primary/delete
     └── _components/
-        ├── customer-details.tsx          # Detail composition (Server)
-        ├── customer-detail-forms.tsx     # Client: section editors + tabs
-        ├── customer-identity-section.tsx # Identity summary (Server)
-        ├── customer-person-business-sections.tsx  # Personal/business data
-        ├── customer-type-sections.tsx    # Client: person/customer type toggles
-        ├── related-seller-image.tsx      # Seller avatar (Server)
+        ├── customer-detail-layout.tsx    # Detail composition (Server)
+        ├── overview/                      # First-fold overview sections
+        ├── tabs/                          # Second-fold tabs and editors
+        ├── purchases/                     # Purchase tabs/search state
         └── image-gallery/
             ├── index.ts
             ├── image-gallery-constants.ts        # Entity type, limits, MIME
@@ -109,7 +107,7 @@ Keep `[id]/page.tsx` as a Server Component. It should:
 8. Render the image gallery and the image list inside `<Suspense>` using the
    cached `getCustomerGalleryInitialState()`.
 
-The detail page composes `CustomerDetails`, which receives the gallery and image
+The detail page composes `CustomerDetailLayout`, which receives the gallery and image
 content as React nodes so the Suspense boundaries stay on the page.
 
 ## Authentication and Data Isolation
@@ -121,7 +119,7 @@ content as React nodes so the Suspense boundaries stay on the page.
   `getAuthorizedCustomerContext()` before mutating.
 - Never pass `apiContext`, session objects, tokens, raw integration entities, or
   internal errors to Client Components. Return only the DTOs defined in
-  `customer-dashboard-types.ts`, `customer-purchases-types.ts`,
+  `customer-dashboard-types.ts`, `purchases/customer-purchases-types.ts`,
   `image-gallery-types.ts`, and the `customer-general` transformers.
 - Customer reads are organization-dependent. Do not add `"use cache"` unless the
   cache key safely isolates organization and private context.
@@ -199,15 +197,15 @@ triggers a refetch.
 
 ## Detail UI
 
-- `CustomerDetails` is a Server Component that composes the identity summary,
+- `CustomerDetailLayout` is a Server Component that composes the identity summary,
   type sections, personal/business sections, related seller, lazy purchase
   history, registration date, and the "pending API" status/deletion cards.
 - `CustomerPurchases` is the Client boundary for the purchase sub-tabs. Each
   sub-tab loads independently through authenticated Server Actions and keeps
   its own debounced search, loading, error, and incremental-limit state.
-- `CustomerDetailForms` is a Client Component with a scrollable tab list. Each
-  tab submits to a dedicated Server Action and uses `router.refresh()` on
-  success. Keep section editing decoupled; do not create a single mega-form.
+- `CustomerDetailTabs` is a Client Component with a scrollable tab list. Each
+  editable tab owns its local state and submits to a dedicated Server Action;
+  keep section editing decoupled and do not create a shared editing context.
 - `CustomerTypeSections` handles person type (`1`/`2`) and customer type
   (`1`/`3`) toggles and is reused with `showPersonType`/`showCustomerType` to
   avoid duplicating the section.
@@ -326,7 +324,7 @@ Do not present these flows as functional and do not simulate them.
   the `columnId` mapping in `mapCustomerFiltersToApi()`.
 - When adding a new detail section, align the service payload, the Zod schema in
   `customer-actions.ts`, the DTO, and the form section in
-  `customer-detail-forms.tsx`.
+  `tabs/customer-detail-tabs.tsx` and its individual tab components.
 - Keep `PATH_IMAGEM` synchronization in sync with gallery primary changes; a
   new gallery mutation that changes the primary image must update `PATH_IMAGEM`
   through the existing helper.

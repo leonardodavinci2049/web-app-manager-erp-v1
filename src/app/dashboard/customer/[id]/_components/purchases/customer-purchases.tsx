@@ -16,7 +16,7 @@ import {
   findCustomerOrdersAction,
   findCustomerPurchasedProductsAction,
   findCustomerWarrantiesAction,
-} from "../_actions/customer-purchases-actions";
+} from "../../_actions/customer-purchases-actions";
 import {
   CustomerOrdersList,
   CustomerPurchasedProductsList,

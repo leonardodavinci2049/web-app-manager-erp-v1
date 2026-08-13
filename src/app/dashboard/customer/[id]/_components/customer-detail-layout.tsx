@@ -1,22 +1,19 @@
-import { ArrowLeft, CalendarDays, LockKeyhole, Trash2 } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type {
   UICustomerDetail,
   UISellerInfo,
 } from "@/services/api-main/customer-general";
-import { CustomerDetailForms } from "./customer-detail-forms";
-import { CustomerPurchases } from "./customer-purchases";
-import { CustomerHeadDataSection } from "./sections/customer-head-data-section";
-import { CustomerIdentitySection } from "./sections/customer-identity-section";
-import { CustomerPersonBusinessSections } from "./sections/customer-person-business-sections";
-import { CustomerTypeSections } from "./sections/customer-type-sections";
-import { RelatedSellerSection } from "./sections/related-seller-section";
+import { CustomerHeadDataSection } from "./overview/customer-head-data-section";
+import { CustomerIdentitySection } from "./overview/customer-identity-section";
+import { CustomerPersonBusinessSections } from "./overview/customer-person-business-sections";
+import { CustomerTypeSections } from "./overview/customer-type-sections";
+import { RelatedSellerSection } from "./overview/related-seller-section";
+import { CustomerDetailTabs } from "./tabs/customer-detail-tabs";
 
-interface CustomerDetailsProps {
+interface CustomerDetailLayoutProps {
   customer: UICustomerDetail;
   seller?: UISellerInfo;
   returnTo: string;
@@ -24,39 +21,13 @@ interface CustomerDetailsProps {
   imageContent: ReactNode;
 }
 
-function formatDate(value?: string): string {
-  if (!value) return "Não informada";
-  const timestamp = Date.parse(value.replace(" ", "T"));
-  if (Number.isNaN(timestamp)) return value;
-  return new Intl.DateTimeFormat("pt-BR", {
-    dateStyle: "long",
-  }).format(timestamp);
-}
-
-function DetailField({
-  label,
-  value,
-}: {
-  label: string;
-  value?: string | number;
-}) {
-  return (
-    <div className="min-w-0">
-      <dt className="text-muted-foreground text-xs">{label}</dt>
-      <dd className="mt-1 wrap-break-word text-sm font-medium">
-        {value === undefined || value === "" ? "Não informado" : value}
-      </dd>
-    </div>
-  );
-}
-
-export function CustomerDetails({
+export function CustomerDetailLayout({
   customer,
   seller,
   returnTo,
   imageGallery,
   imageContent,
-}: CustomerDetailsProps) {
+}: CustomerDetailLayoutProps) {
   return (
     <div className="space-y-4 sm:space-y-6">
       <div className="grid gap-4 sm:gap-6 lg:grid-cols-[minmax(280px,500px)_minmax(0,1fr)]">
@@ -109,59 +80,17 @@ export function CustomerDetails({
 
       <div className="space-y-0.5 sm:space-y-1">
         <h2 className="text-base font-semibold sm:text-lg">
-          Editar cadastro por seção
+          Seções do cliente
         </h2>
         <p className="text-muted-foreground hidden text-sm sm:block">
-          Selecione uma seção para consultar e atualizar os dados do cliente.
+          Consulte e atualize os dados complementares do cliente.
         </p>
       </div>
 
-      <CustomerDetailForms
+      <CustomerDetailTabs
         customer={customer}
         imageContent={imageContent}
         mobileImageGallery={imageGallery}
-        miscellaneousContent={
-          <Card className="gap-4 py-4 sm:gap-6 sm:py-6">
-            <CardHeader className="px-4 sm:px-6">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <CalendarDays className="size-4" />
-                Cadastro
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 px-4 sm:px-6">
-              <DetailField
-                label="Data da última compra"
-                value={formatDate(customer.lastPurchase)}
-              />
-              <DetailField
-                label="Data de cadastro"
-                value={formatDate(customer.createdAt)}
-              />
-            </CardContent>
-          </Card>
-        }
-        productsContent={<CustomerPurchases customerId={customer.id} />}
-        deletionContent={
-          <Card className="gap-4 border-destructive/40 bg-destructive/5 py-4 sm:gap-6 sm:py-6">
-            <CardHeader className="flex-row items-center justify-between px-4 sm:px-6">
-              <CardTitle className="text-destructive flex items-center gap-2 text-base">
-                <LockKeyhole className="size-4" />
-                Zona de exclusão
-              </CardTitle>
-              <Badge variant="secondary">Pendente de API</Badge>
-            </CardHeader>
-            <CardContent className="space-y-3 px-4 sm:px-6">
-              <p className="text-muted-foreground text-sm">
-                A API atual não oferece um contrato seguro para excluir
-                clientes.
-              </p>
-              <Button type="button" variant="destructive" disabled>
-                <Trash2 className="size-4" />
-                Excluir — Pendente de API
-              </Button>
-            </CardContent>
-          </Card>
-        }
       />
     </div>
   );
