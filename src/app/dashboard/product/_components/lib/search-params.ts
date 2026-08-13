@@ -20,7 +20,7 @@ const VALID_SORT_OPTIONS = new Set<SortOption>([
   "price-desc",
 ]);
 
-const CATALOG_PATH = "/dashboard/catalog";
+const CATALOG_PATH = "/dashboard/product";
 const PRODUCT_PATH = "/dashboard/product";
 const BRAND_DETAIL_PATH_PATTERN = /^\/dashboard\/brand\/\d+$/;
 

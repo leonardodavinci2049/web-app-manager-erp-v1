@@ -23,10 +23,10 @@ async component, which:
 3. Validate `id` with the local Zod `ProductPageParamsSchema` (`/^\d+$/` →
    `Number`); on failure `logger.error` + `notFound()`.
 4. Resolve `returnTo` with `getSafeProductReturnTo()` (imported from
-   `@/app/dashboard/catalog/_components`). Accepts same-origin `/dashboard/catalog`,
+   `@/app/dashboard/product/_components`). Accepts same-origin `/dashboard/product`,
    `/dashboard/brand/<id>` (regex `/^\/dashboard\/brand\/\d+$/`), or `/dashboard`;
-   falls back to `/dashboard/catalog`. The breadcrumb "Catálogo" crumb uses
-   `returnTo` when it starts with `/dashboard/catalog` (preserving filters).
+   falls back to `/dashboard/product`. The breadcrumb "Catálogo" crumb uses
+   `returnTo` when it starts with `/dashboard/product` (preserving filters).
 5. `getAuthContext()` → `apiContext`.
 6. Call `getProductManagerById(productId, { ...apiContext, pe_type_business: 1 })`
    with `.catch()` → `undefined` on error (logs via
@@ -95,7 +95,7 @@ is named). Do not normalize one convention into the other without a decision.
 [id]/page.tsx (Server, one outer <Suspense>)
   └── ProductDetailsPageContent
         ├── validates id -> notFound() on invalid
-        ├── getSafeProductReturnTo()            # from @/app/dashboard/catalog/_components
+        ├── getSafeProductReturnTo()            # from @/app/dashboard/product/_components
         ├── getAuthContext()
         ├── getProductManagerById(id, { pe_type_business: 1 })  -> { product, relatedCategories }
         └── <ProductDetailsLayout> (Server)
@@ -237,7 +237,7 @@ ownership via `getAuthorizedProductContext`):
 
 - `uploadProductImageAction(formData)` — Zod `UploadSchema`; MIME/size checks;
   re-reads gallery; first image → primary + `PATH_IMAGEM` write; revalidates the
-  detail path + `/dashboard/catalog` on the PATH_IMAGEM path.
+  detail path + `/dashboard/product` on the PATH_IMAGEM path.
 - `setPrimaryProductImageAction(rawProductId, rawAssetId)` — Zod `{ productId,
   assetId: uuid }`; validates asset membership; no `PATH_IMAGEM` write, no
   revalidate.
@@ -265,7 +265,7 @@ pattern.
 
 ## Cross-Folder Imports
 
-- `@/app/dashboard/catalog/_components` → `getSafeProductReturnTo` (the detail
+- `@/app/dashboard/product/_components` → `getSafeProductReturnTo` (the detail
   depends on the **catalog** route for back-to-list safety; there is no product
   list of its own).
 - `@/app/actions/action-product-updates`, `action-products`,

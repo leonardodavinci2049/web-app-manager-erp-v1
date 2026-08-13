@@ -43,7 +43,7 @@ const data = {
       items: [
         {
           title: "Produtos",
-          url: "/dashboard/catalog",
+          url: "/dashboard/product",
         },
         {
           title: "Categorias",

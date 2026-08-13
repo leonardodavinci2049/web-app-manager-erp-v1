@@ -1,193 +1,159 @@
 # Product Route Agent Guide
 
 This file complements the repository and dashboard guides for
-`src/app/dashboard/product`. It covers the `product/` redirect, the
-`product/new-product/` create flow, and the `product/import-products/` placeholder,
-plus the cross-cutting conventions and anomalies that apply to the whole segment.
+`src/app/dashboard/product`. It governs the canonical `/dashboard/product`
+catalog page, its loading state, and its child routes.
 
-The product **detail** route (`[id]`) has its own guide: `[id]/AGENTS.md`. Read it
-before changing the detail page or any of its editors, dialogs, or gallery.
+For changes inside `_components`, also read `_components/AGENTS.md`.
 
-## Important: there is no product list here
+## Route Purpose
 
-`product/page.tsx` is a **redirect to `/dashboard/catalog`**. Product listing,
-search, URL state, grid/list view mode, pagination, and the create sheet all live
-in `src/app/dashboard/catalog` — document and change list behavior there, not
-here. The bare `/dashboard/product` path redirects so it never 404s.
+`/dashboard/product` is the canonical product catalog route. It supports:
 
-## Folder Structure
+- Product search, sorting, and combined catalog filters.
+- Grid and list presentation, with a desktop table for list mode.
+- Incremental result loading through the `limit` query parameter.
+- Navigation to product details while preserving the current catalog URL.
+- Inline updates for product name, prices, stock, and categories.
+- Main-image upload when a product has no valid image.
+
+Do not move this functionality back to `src/app/dashboard/page.tsx`; that page
+is reserved for session-aware redirection.
+
+## Route Structure
 
 ```text
 product/
 ├── AGENTS.md
-├── page.tsx                             # redirect("/dashboard/catalog")
-├── [id]/                                # Detail route (see [id]/AGENTS.md)
-│   └── AGENTS.md
-├── new-product/                         # Create flow
-│   ├── page.tsx                         # Server: header + <Suspense> form
-│   ├── validation.ts                    # DEAD CODE — not imported by the route
-│   └── components/
-│       ├── new-product-header.tsx       # Server: SiteHeaderWithBreadcrumb
-│       ├── new-product-form.tsx         # Client: next/form + inline validate -> createProductFromForm
-│       └── forms/
-│           ├── form-inputs.tsx          # Client: FormInput/Textarea/Currency/Integer inputs
-│           └── submit-button.tsx        # Client: SubmitButton (useFormStatus)
-└── import-products/
-    └── page.tsx                         # Placeholder: <UnderDevelopment title="Importar Produtos" />
+├── page.tsx                         # Authentication context and data reads
+├── loading.tsx                      # Route-specific loading UI
+├── error.tsx                        # Route-specific error boundary
+├── _actions/                        # Catalog-specific Server Actions
+├── _components/
+│   ├── AGENTS.md                    # Component-level conventions
+│   ├── index.ts                     # Public exports used by the page
+│   ├── catalog-shell.tsx
+│   ├── catalog-loading-products.tsx
+│   ├── catalog-toolbar/
+│   ├── product-grid/
+│   ├── product-card/
+│   ├── lib/
+│   └── types/
+├── [id]/                            # Product detail route; has its own guide
+└── new-product/                     # Standalone product creation route
 ```
 
-## new-product (create)
+Mutations consumed by the catalog remain in the global Server Actions under
+`src/app/actions`, including product updates, image upload, taxonomy
+relationships, and category reads.
 
-`new-product/page.tsx` is a **Server Component** shell: it renders
-`NewProductHeader` (breadcrumb Início / Produtos (`/dashboard/catalog`) / Adicionar
-Novo Produto), a `PageTitleSection`, and `<NewProductForm/>` inside `<Suspense>`.
-It does **not** call `connection()` or `getAuthContext()` and fetches nothing —
-auth happens inside the Server Action.
+## Page Responsibilities
 
-`NewProductForm` (Client) uses `next/form` with `action={handleFormSubmit}`:
+Keep `page.tsx` as a Server Component. It should:
 
-1. `validateForm(formData)` runs **client-side** rules (name ≥ 3 chars; each price
-   valid, non-zero, ≤ 2 000 000; `wholesalePrice <= retailPrice`; stock rules;
-   `brandId`/`typeId` positive integers). On error it toasts, sets validation
-   errors, and focuses the first invalid field.
-2. On success it `await createProductFromForm(formData)` (from
-   `@/app/actions/action-products`). On `success && productId` it toasts, calls
-   `router.refresh()`, and `router.push("/dashboard/catalog")`.
-3. Cancel navigates to `/dashboard/catalog`.
+1. Execute at request time because the reads depend on request and organization
+   context.
+2. Await `searchParams`.
+3. Obtain authenticated API context through `getAuthContext()`.
+4. Parse URL state with `parseCatalogSearchParams()`.
+5. Convert UI sorting with `mapSortToApiParams()`.
+6. Fetch products, brands, categories, and product types in parallel.
+7. Flatten the taxonomy with `flattenCategories()`.
+8. Build detail-page return navigation with
+   `buildCatalogReturnTo(searchParams, "/dashboard/product")`.
+9. Render `CatalogShell` with minimal UI DTOs.
 
-Form cards: Informações Básicas (name, reference), Preços (wholesale/retail/
-corporate via `FormCurrencyInput`, which keeps a comma display + dot hidden
-input), Estoque (`FormIntegerInput`), Marca e Tipo (`FormPositiveIntegerInput`),
-Informações Adicionais (`FormTextarea`). `SubmitButton` uses `useFormStatus()`.
+Do not duplicate filter parsing or URL construction in `page.tsx`.
 
-`createProductFromForm` (in `src/app/actions/action-products.ts`) validates with
-Zod `createProductFormSchema` (name 6–300, finite positive prices ≤ 2 000 000,
-`.refine(wholesalePrice <= retailPrice)`), auto-slugs via
-`generateSlugFromName`, optionally validates the taxonomy hierarchy via
-`getTaxonomyMenuManager`, and calls `productBaseServiceApi.createProduct`. It
-derives the new ID from `extractStoredProcedureResult(response)?.sp_return_id`
-and does **not** call `revalidatePath` (the form does `router.refresh()` +
-`router.push`).
+## Authentication and Data Isolation
 
-### new-product gotchas
+- `getAuthContext()` is mandatory for catalog data reads.
+- Authentication does not replace organization and resource authorization in
+  Server Actions or services.
+- Never pass `apiContext`, session objects, tokens, raw integration entities, or
+  internal errors to Client Components.
+- Catalog reads are organization-dependent. Do not add `"use cache"` unless
+  the cache key safely isolates organization and any other private context.
+- Read the closest service-level `AGENTS.md` before modifying a module under
+  `src/services/api-main`.
 
-- `validation.ts` (`CreateProductFormSchema`, `formatPrice`/`formatStock`/
-  `formatTags`) is **dead code** — not imported by this route. The form uses
-  inline `validateForm`; the server uses `createProductFormSchema` from
-  `action-products.ts`. Do not treat `validation.ts` as the source of truth.
-- A hidden `<input name="businessType" value="1">` is sent but **not consumed**
-  by the server schema.
-- `page.tsx` has an import-path typo: `import { NewProductForm } from
-  ".//components/new-product-form"` (double slash). It resolves today; fix when
-  touching the file.
-- `slug`, `model`, `description`, `tags`, and family/group/subgroup IDs exist in
-  `CreateProductData` / `createProductFormSchema` but are **not rendered** — the
-  form collects a subset only.
+## Integration Failures
 
-## import-products (placeholder)
+The page intentionally isolates failures from each catalog integration:
 
-`import-products/page.tsx` renders `<UnderDevelopment title="Importar Produtos" />`
-(from `@/components/common/under-development`). No data, no auth, no actions. This
-is a stub — do not document behavior beyond "placeholder".
+- Log relevant failures with `createLogger("CatalogPage")`.
+- Product failures fall back to an empty product result and zero total.
+- Brand, category, and product-type failures fall back to empty collections.
+- Keep client-facing output generic and safe.
 
-## Cross-Cutting Conventions and Anomalies
+Do not replace these isolated fallbacks with one catch that prevents the entire
+catalog from rendering unless the product requirement changes.
 
-The product route diverges from the customer/brand conventions in several ways.
-Read this section before assuming the usual pattern.
+## URL State
 
-### Server Actions live in two places
+`_components/lib/search-params.ts` is the source of truth for URL parsing and
+construction. Use its public helpers instead of rebuilding query strings.
 
-Unlike customer/brand (which colocate actions in `_actions/` inside the route),
-product splits mutations across two locations:
+| Parameter | Accepted value | Purpose |
+| --- | --- | --- |
+| `search` | text, up to 300 characters | Product search |
+| `category` | positive integer | Taxonomy filter |
+| `brand` | positive integer | Brand filter |
+| `type` | positive integer | Product-type filter |
+| `supplier` | positive integer | Supplier filter |
+| `physical` | positive integer | Physical-product filter |
+| `ean` | text | EAN filter |
+| `sales-list` | `1`–`3` | Sales presets |
+| `stock-list` | `1`–`3` | Stock presets |
+| `advanced` | `1`–`2` | Advanced presets |
+| `various-list` | `1`–`6` | Product flag presets |
+| `registration-period` | `1` | Enables the date interval |
+| `start-date` | `YYYY-MM-DD` | Interval start |
+| `end-date` | `YYYY-MM-DD` | Interval end |
+| `no-image` | `1` | Products without images |
+| `no-description` | `1` | Products without descriptions |
+| `no-sales-copy` | `1` | Products without sales copy |
+| `imported` | `1` or `2` | Imported/national state |
+| `inactive` | `0`, `1`, or `2` | Product activity state |
+| `premium` | `1` | Premium products |
+| `sort` | supported sort identifier | Catalog ordering |
+| `limit` | positive integer | Accumulated result quantity |
+| `page` | integer from zero | API page identifier |
 
-1. **Colocated gallery actions**: `[id]/_actions/product-image-gallery-actions.ts`
-   — Zod-validated, ownership re-checked via `getAuthorizedProductContext`,
-   `createLogger`, `revalidatePath`. Strong pattern (matches customer/brand).
-2. **Global actions** under `src/app/actions/`: `action-products.ts`,
-   `action-product-updates.ts`, `action-product-description.ts`,
-   `action-taxonomy.ts`, `action-categories.ts`. These power the detail editors
-   and dialogs. Most use **manual `if` validation (not Zod)**, most do **not
-   re-confirm the product exists** before mutating, and revalidation is
-   inconsistent (many actions revalidate nothing and rely on the client calling
-   `router.refresh()` or `window.location.reload()`).
+The grid/list view mode is not URL state. It remains a browser preference in
+`localStorage` under `catalog:product-view-mode`.
 
-When adding a product mutation, decide where it belongs: gallery mutations stay
-colocated; everything else currently goes in `src/app/actions/`. Prefer Zod and an
-ownership re-check to match the gallery-action strength.
+## Loading and Navigation
 
-### `components/` vs `_components/`
+- Keep `loading.tsx` colocated with the catalog route.
+- Its structure should reflect the catalog header, toolbar, and result
+  skeletons without fetching catalog data.
+- Canonical catalog links must use `/dashboard/product`.
+- Product detail links may include an encoded `returnTo` containing the
+  current catalog filters.
+- Return navigation must accept only safe same-origin catalog paths.
+- New-product success and cancellation flows should return to
+  `/dashboard/product`.
 
-The `[id]` segment uses **both** conventions: `components/` (PascalCase, NOT
-underscore-prefixed) holds the detail editors/dialogs/cards, while
-`_components/image-gallery/` (underscore, kebab-case) holds the gallery. Files
-inside `components/` are PascalCase (`ProductNameEditor.tsx`); gallery files are
-kebab-case. This is a deviation from customer/brand (which use `_components/`
-exclusively). Do not "normalize" one into the other without a deliberate decision.
+## Change Coordination
 
-### No `error.tsx` anywhere in this route
-
-There is no `error.tsx` at the product list or detail level. `notFound()` in the
-detail falls through to the local `[id]/not-found.tsx`; other unhandled errors
-bubble to the nearest ancestor boundary.
-
-### Logger and helper import inconsistency
-
-- `createLogger` is imported from **`@/lib/logger`** in the detail page and from
-  **`@/core/logger`** in all `src/app/actions/*` and the gallery actions. Both
-  define `createLogger`; pick one project-wide when you touch these files.
-- `isApiError` is imported from `@/services/api-assets/types/api-assets` in the
-  gallery actions and from **`@/types/api-assets`** in
-  `action-product-updates.ts`. Two aliases for the same concept.
-- There is **no `revalidateProduct()` helper** — every action calls
-  `revalidatePath` with literal path strings.
-
-### Two `updateProductDescription` functions
-
-`updateProductDescription` exists in both `action-product-updates.ts` and
-`action-product-description.ts`. The description editor imports the **latter**;
-the former is unused for this UI. Do not add a third; pick one and remove the
-other.
-
-### Hardcoded values and mocked data
-
-- `pe_type_business: 1` is hardcoded in every `getProductManagerById` call
-  (detail page, `getAuthorizedProductContext`, `updateProductImagePath`).
-- The detail shows a **mocked** star rating ("4.0 de 5 - 23 avaliações") and a
-  static "Fornecedor" placeholder card — neither is wired to an API.
-- Most `ProductFlagsCard` flags are hardcoded to `0` at the call site. See
-  `[id]/AGENTS.md`.
-
-## Services
-
-- `product-manager` (`src/services/api-main/product-manager`): detail read
-  `getProductManagerById` (returns `{ product: UIProductManager, relatedCategories:
-  UIProductManagerRelatedCategory[] } | undefined`) and list/search helpers used by
-  the catalog route.
-- `product-inline` (`src/services/api-main/product-inline`): `productInlineServiceApi`
-  inline updates — name, short description, description, image path
-  (`updateProductImagePathInline`, the PATH_IMAGEM write), stock, stock-min, type,
-  brand.
-- `product-update` (`src/services/api-main/product-update`): `productUpdateServiceApi`
-  stored-procedure-style updates — price, general, characteristics, tax values,
-  flags.
-- `product-base` (`src/services/api-main/product-base`): `productBaseServiceApi`
-  used by `createProductFromForm` (`createProduct`, `extractStoredProcedureResult`).
-- `taxonomy-rel` and `taxonomy-base` (`src/services/api-main`): category-relationship
-  create/delete and the taxonomy menu used by the category dialogs and create
-  validation.
-- `api-assets` (`src/services/api-assets`): `assetsApiService` gallery operations.
-
-Read the local `AGENTS.md` inside each service module before changing it.
+- A new or changed filter must update the filter type, parser, URL builder,
+  toolbar control, active-filter display, and API mapping together.
+- A new sort option must align the option list, validation set, and API mapping.
+- Preserve query parameters when changing only pagination or building a detail
+  link.
+- Keep grid, compact-list, and desktop-table behavior functionally aligned.
+- Use Brazilian Portuguese for user-facing catalog text and US English for
+  code, comments, and documentation.
 
 ## Verification
 
-- Documentation-only changes: review Markdown structure and references.
+- Documentation-only changes: review Markdown structure and paths.
 - TypeScript or React changes: run `pnpm lint`.
-- Route, Server Action, cache behavior, or integration changes: also run
+- Route data loading, Server Actions, cache behavior, or integrations: also run
   `pnpm build` when viable.
-- Visual or interactive changes: validate `/dashboard/product/new-product`,
-  `/dashboard/product/import-products`, and the detail route (see `[id]/AGENTS.md`)
-  in the development server (port set by the `PORT` env var) on desktop and mobile, including the
-  create flow (valid and invalid input, price/stock rules, success redirect to
-  `/dashboard/catalog`) and the redirect behavior of `/dashboard/product`.
+- Visual or interactive changes: validate `/dashboard/product` in the
+  development server on desktop and mobile, including search, combined filters,
+  active-filter removal, grid/list switching, pagination, empty state, detail
+  return, inline edits, and upload.
 - This project currently has no automated test command; do not invent one.

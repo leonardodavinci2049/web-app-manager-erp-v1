@@ -1,7 +1,7 @@
 # Product Catalog Components Agent Guide
 
-This guide governs `src/app/dashboard/catalog/_components`. It complements the
-repository, dashboard, and `catalog/AGENTS.md` guides. The closest applicable
+This guide governs `src/app/dashboard/product/_components`. It complements the
+repository, dashboard, and `product/AGENTS.md` guides. The closest applicable
 guide specializes broader instructions; repository-level rules still prevail
 in case of conflict.
 

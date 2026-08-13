@@ -172,7 +172,7 @@ export async function uploadProductImageAction(
           ...apiContext,
         });
         revalidatePath(`/dashboard/product/${productId}`);
-        revalidatePath("/dashboard/catalog");
+        revalidatePath("/dashboard/product");
       } catch (error) {
         logger.error(
           "First product image uploaded but PATH_IMAGEM update failed",
