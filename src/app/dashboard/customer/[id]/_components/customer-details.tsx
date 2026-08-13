@@ -18,13 +18,13 @@ import type {
   UICustomerDetail,
   UISellerInfo,
 } from "@/services/api-main/customer-general";
-import { CustomerImage } from "../../_components/customer-image";
 import { CustomerDetailForms } from "./customer-detail-forms";
-import { CustomerIdentitySection } from "./customer-identity-section";
-import { CustomerPersonBusinessSections } from "./customer-person-business-sections";
 import { CustomerPurchases } from "./customer-purchases";
-import { CustomerTypeSections } from "./customer-type-sections";
 import { RelatedSellerImage } from "./related-seller-image";
+import { CustomerHeadDataSection } from "./sections/customer-head-data-section";
+import { CustomerIdentitySection } from "./sections/customer-identity-section";
+import { CustomerPersonBusinessSections } from "./sections/customer-person-business-sections";
+import { CustomerTypeSections } from "./sections/customer-type-sections";
 
 interface CustomerDetailsProps {
   customer: UICustomerDetail;
@@ -53,7 +53,7 @@ function DetailField({
   return (
     <div className="min-w-0">
       <dt className="text-muted-foreground text-xs">{label}</dt>
-      <dd className="mt-1 break-words text-sm font-medium">
+      <dd className="mt-1 wrap-break-word text-sm font-medium">
         {value === undefined || value === "" ? "Não informado" : value}
       </dd>
     </div>
@@ -111,26 +111,7 @@ export function CustomerDetails({
         <aside className="hidden lg:sticky lg:top-6 lg:row-span-2 lg:row-start-2 lg:block lg:self-start">
           {imageGallery}
         </aside>
-        <div className="flex min-w-0 items-start gap-3">
-          <CustomerImage
-            name={customer.name}
-            imagePath={customer.imagePath}
-            viewMode="list"
-          />
-          <div className="min-w-0">
-            <h1 className="break-words text-xl font-bold sm:text-2xl">
-              {customer.name}
-            </h1>
-            <div className="text-muted-foreground flex min-w-0 items-center gap-2 overflow-x-auto whitespace-nowrap text-sm">
-              <span className="tabular-nums">ID: #{customer.id}</span>
-              <Badge variant="secondary">
-                {customer.accountStatus || "Status não informado"}
-              </Badge>
-              <span aria-hidden="true">·</span>
-              <span>{customer.accountType || "Tipo Não Informado"}</span>
-            </div>
-          </div>
-        </div>
+        <CustomerHeadDataSection customer={customer} />
 
         <div className="space-y-3 sm:space-y-4">
           <div className="space-y-3 sm:space-y-4">
