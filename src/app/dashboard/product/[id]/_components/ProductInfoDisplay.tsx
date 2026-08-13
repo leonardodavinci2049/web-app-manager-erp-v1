@@ -7,7 +7,7 @@ import { ProductCategoriesCard } from "./ProductCategoriesCard";
 import { ProductNameEditor } from "./ProductNameEditor";
 import { ProductPricingCard } from "./ProductPricingCard";
 import { ShortDescriptionEditor } from "./ShortDescriptionEditor";
-import { ProductStockCard } from "./tab-card-components/ProductStockCard";
+import { ProductStockCard } from "./tab-cards/ProductStockCard";
 
 interface ProductInfoDisplayProps {
   product: UIProductManager;

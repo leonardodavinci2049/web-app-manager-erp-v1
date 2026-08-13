@@ -5,14 +5,14 @@ import type {
   UIProductManagerRelatedCategory,
 } from "@/services/api-main/product-manager/transformers/transformers";
 import { formatCurrency } from "@/utils/common-utils";
+import { BackToCatalogButton } from "./BackToCatalogButton";
 import {
   ProductImageGalleryServer,
   ProductImageGallerySkeleton,
-} from "../_components/image-gallery";
-import { BackToCatalogButton } from "./BackToCatalogButton";
+} from "./image-gallery";
 import { ProductDetailsTabs } from "./ProductDetailsTabs";
 import { ProductInfoDisplay } from "./ProductInfoDisplay";
-import { ProductImagesListServer } from "./tab-card-components/product-images-list-server";
+import { ProductImagesListServer } from "./tab-cards/product-images-list-server";
 
 interface ProductDetailsLayoutProps {
   product: UIProductManager;

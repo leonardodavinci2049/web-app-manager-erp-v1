@@ -7,8 +7,8 @@ and brand/type dialogs, and the product image gallery subsystem.
 
 The closest applicable guide specializes broader instructions; repository-level
 rules still prevail in case of conflict. For the redirect, the create flow, the
-cross-cutting anomalies (action locations, `components/` vs `_components/`, logger
-aliases), and the shared services, follow `../AGENTS.md`.
+cross-cutting anomalies (action locations and logger aliases), and the shared
+services, follow `../AGENTS.md`.
 
 ## Detail Page Composition
 
@@ -49,16 +49,7 @@ renders inline inside `ProductDetailsLayout` without its own boundary.
 ├── not-found.tsx                               # Client: "Produto Não Encontrado" (NO error.tsx)
 ├── _actions/
 │   └── product-image-gallery-actions.ts        # upload/setPrimary/delete (colocated, Zod)
-├── _components/
-│   └── image-gallery/                          # gallery subsystem (kebab-case)
-│       ├── index.ts
-│       ├── image-gallery-constants.ts          # PRODUCT_GALLERY_* constants
-│       ├── image-gallery-types.ts              # ProductGalleryImage, InitialState, MutationResult
-│       ├── image-gallery-skeleton.tsx          # ProductImageGallerySkeleton
-│       ├── product-image-gallery-server.tsx    # getProductGalleryInitialState (cache()) + Server wrapper
-│       ├── product-image-gallery-refresh.tsx   # Client state holder + router.refresh()
-│       └── product-image-gallery.tsx           # Client: upload/grid/primary/delete/zoom
-└── components/                                 # *** PascalCase, NOT _components *** (deviation)
+└── _components/
     ├── BackToCatalogButton.tsx                 # Server: <Link href={returnTo}>
     ├── ProductDetailsLayout.tsx                # Server: composition + skeleton export
     ├── ProductDetailsTabs.tsx                  # Client: 6-tab <Tabs>
@@ -71,7 +62,15 @@ renders inline inside `ProductDetailsLayout` without its own boundary.
     ├── DeleteCategoryButton.tsx                # Client -> deleteTaxonomyRelationship
     ├── ChangeProductBrandDialog.tsx            # Client (useBrands) -> updateProductBrand
     ├── ChangeProductTypeDialog.tsx             # Client (usePtypes) -> updateProductType
-    └── tab-card-components/
+    ├── image-gallery/                          # gallery subsystem (kebab-case)
+    │   ├── index.ts
+    │   ├── image-gallery-constants.ts          # PRODUCT_GALLERY_* constants
+    │   ├── image-gallery-types.ts              # ProductGalleryImage, InitialState, MutationResult
+    │   ├── image-gallery-skeleton.tsx          # ProductImageGallerySkeleton
+    │   ├── product-image-gallery-server.tsx    # getProductGalleryInitialState (cache()) + Server wrapper
+    │   ├── product-image-gallery-refresh.tsx   # Client state holder + router.refresh()
+    │   └── product-image-gallery.tsx           # Client: upload/grid/primary/delete/zoom
+    └── tab-cards/
         ├── product-images-list-server.tsx      # Server: feeds cached gallery into the list
         ├── ProductImagesList.tsx               # Client: PATH_IMAGEM viewer + "Usar no PATH_IMAGEM" (default export)
         ├── ProductDescriptionEditor.tsx        # Client HTML editor (DOMPurify) -> updateProductDescription
@@ -84,10 +83,9 @@ renders inline inside `ProductDetailsLayout` without its own boundary.
         └── ProductStockCard.tsx                # Client -> updateProductStock (reload)
 ```
 
-`components/` is **PascalCase and not underscore-prefixed**, while
-`_components/image-gallery/` is underscore + kebab-case. Files inside `components/`
-are PascalCase; `ProductImagesList.tsx` is a **default export** (everything else
-is named). Do not normalize one convention into the other without a decision.
+`_components/` holds all detail UI: PascalCase component files at the root,
+plus two kebab-case subfolders (`image-gallery/` and `tab-cards/`).
+`ProductImagesList.tsx` is a **default export** (everything else is named).
 
 ## Detail Data Flow
 
