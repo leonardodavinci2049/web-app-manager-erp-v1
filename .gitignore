@@ -67,7 +67,7 @@ src/core/config-tenant
 
 # project generated files
 /scripts/*
-!/scripts/create-initial-prompt.sh
+!/scripts/create-initial-intention.sh
 /docs
 /API-documentation
 /API-assets-documentation

@@ -10,7 +10,7 @@ import {
 import { createLogger } from "@/core/logger";
 import { BaseApiService } from "@/lib/axios/base-api-service";
 import {
-  transformSellerDetail,
+  transformSellerManagerDetail,
   transformSellerList,
   type UISellerDetail,
   type UISellerListItem,
@@ -339,7 +339,7 @@ export async function getSellerById(
 ): Promise<UISellerDetail | undefined> {
   if (!params.pe_system_client_id) return undefined;
 
-  const response = await sellerServiceApi.findSellerById({
+  const response = await sellerServiceApi.findManagerSellerById({
     pe_seller_id: id,
     pe_system_client_id: params.pe_system_client_id,
     pe_organization_id: params.pe_organization_id,
@@ -348,6 +348,6 @@ export async function getSellerById(
     pe_user_role: params.pe_user_role,
     pe_person_id: params.pe_person_id,
   });
-  const seller = sellerServiceApi.extractSellerById(response);
-  return seller ? transformSellerDetail(seller) : undefined;
+  const seller = sellerServiceApi.extractManagerSellerById(response);
+  return seller ? transformSellerManagerDetail(seller) : undefined;
 }
