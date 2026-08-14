@@ -35,6 +35,7 @@ export interface UISellerDetail {
   personTypeId: number;
   accountType: string;
   cpf?: string;
+  rg?: string;
   firstName?: string;
   lastName?: string;
   imagePath?: string;
@@ -42,7 +43,35 @@ export interface UISellerDetail {
   cnpj?: string;
   legalName?: string;
   tradeName?: string;
+  stateRegistration?: string;
+  municipalRegistration?: string;
+  responsibleName?: string;
+  responsibleRole?: string;
+  mainActivity?: string;
+  zipCode?: string;
+  address?: string;
+  addressNumber?: string;
+  complement?: string;
+  neighborhood?: string;
+  city?: string;
+  state?: string;
+  countryRegion?: string;
+  country?: string;
+  cityCode?: number;
+  stateCode?: number;
+  website?: string;
+  facebook?: string;
+  twitter?: string;
+  linkedin?: string;
+  instagram?: string;
+  tiktok?: string;
+  telegram?: string;
+  notes?: string;
+  inactive?: boolean;
+  emailMarketingEnabled?: boolean;
+  freeShipping?: boolean;
   isSeller: boolean;
+  lastPurchase?: string;
   createdAt: string;
 }
 
@@ -122,7 +151,35 @@ export function transformSellerManagerDetail(
     cnpj: entity.CNPJ || undefined,
     legalName: entity.RAZAO_SOCIAL || undefined,
     tradeName: entity.NOME_FANTASIA || undefined,
+    stateRegistration: entity.INSC_ESTADUAL || undefined,
+    municipalRegistration: entity.INSC_MUNICIPAL || undefined,
+    responsibleName: entity.NOME_RESPONSAVEL || undefined,
+    responsibleRole: entity.CARGO_RESPONSAVEL || undefined,
+    mainActivity: entity.ATIVIDADE_PRINCIPAL || undefined,
+    zipCode: entity.CEP || undefined,
+    address: entity.ENDERECO || undefined,
+    addressNumber: entity.ENDERECO_NUMERO || undefined,
+    complement: entity.COMPLEMENTO || undefined,
+    neighborhood: entity.BAIRRO || undefined,
+    city: entity.CIDADE || undefined,
+    state: entity.UF || undefined,
+    countryRegion: entity.REGIAO_PAIS || undefined,
+    country: entity.PAIS || undefined,
+    cityCode: entity.COD_MUNICIPIO || undefined,
+    stateCode: entity.COD_UF || undefined,
+    website: entity.WEBSITE || undefined,
+    facebook: entity.FACEBOOK || undefined,
+    twitter: entity.TWITTER || undefined,
+    linkedin: entity.LINKEDIN || undefined,
+    instagram: entity.INSTAGRAM || undefined,
+    tiktok: entity.TIKTOK || undefined,
+    telegram: entity.TELEGRAM || undefined,
+    notes: entity.ANOTACOES || undefined,
+    inactive: entity.INATIVO === 1,
+    emailMarketingEnabled: entity.EMAIL_MKT === 1,
+    freeShipping: entity.FLAG_FRETE_GRATIS === 1,
     isSeller: entity.VENDEDOR === 1,
+    lastPurchase: entity.DT_ULTIMA_COMPRA || undefined,
     createdAt: entity.DATADOCADASTRO || "",
   };
 }

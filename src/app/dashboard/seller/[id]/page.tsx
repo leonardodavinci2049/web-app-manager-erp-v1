@@ -5,12 +5,13 @@ import { SiteHeaderWithBreadcrumb } from "@/components/dashboard/header/site-hea
 import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
 import { getSellerById, SellerNotFoundError } from "@/services/api-main/seller";
-import { getSafeSellerReturnTo, SellerDetails } from "../_components";
+import { getSafeSellerReturnTo } from "../_components";
 import {
   SellerImageGalleryServer,
   SellerImageGallerySkeleton,
   SellerImagesListServer,
 } from "./_components/image-gallery";
+import { SellerDetailLayout } from "./_components/seller-detail-layout";
 
 const logger = createLogger("SellerDetailsPage");
 
@@ -55,7 +56,7 @@ export default async function SellerDetailsPage({
         <div className="@container/main flex flex-1 flex-col gap-6">
           <div className="flex flex-col gap-6 py-6">
             <div className="px-3 lg:px-6">
-              <SellerDetails
+              <SellerDetailLayout
                 seller={seller}
                 returnTo={returnTo}
                 imageGallery={

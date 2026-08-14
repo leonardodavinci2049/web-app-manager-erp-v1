@@ -6,7 +6,7 @@ export {
   parseSellerSearchParams,
 } from "./lib/search-params";
 export { SellerDashboard } from "./seller-dashboard";
-export { SellerDetails } from "./seller-details";
+export { SellerImage } from "./seller-image";
 export {
   DEFAULT_SELLER_LIMIT,
   type SellerCategory,
