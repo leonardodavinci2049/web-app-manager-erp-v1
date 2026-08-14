@@ -42,12 +42,27 @@ export interface BrandFindByIdRequest extends BrandBaseRequest {
   pe_brand_id: number;
 }
 
+export interface BrandFindManagerByIdRequest extends BrandBaseRequest {
+  pe_brand_id: number;
+}
+
 export interface BrandDetail {
   ID_MARCA: number;
   MARCA: string;
   SLUG: string;
   PATH_IMAGEM: string;
   ANOTACOES: string | null;
+  INATIVO: number;
+  DT_UPDATE: string | null;
+  DATADOCADASTRO: string;
+}
+
+export interface BrandManagerDetail {
+  ID_MARCA: number;
+  MARCA: string | null;
+  SLUG: string | null;
+  PATH_IMAGEM: string;
+  ANOTACOES: string;
   INATIVO: number;
   DT_UPDATE: string | null;
   DATADOCADASTRO: string;
@@ -106,6 +121,18 @@ export interface BrandFindManagerAllResponse extends BrandBaseResponse {
 
 export interface BrandFindByIdResponse extends BrandBaseResponse {
   data: Record<string, BrandDetail[]>;
+}
+
+export interface BrandFindManagerByIdResponse {
+  statusCode: number;
+  message: string;
+  recordId: string | number;
+  quantity: number;
+  errorId: number;
+  info1?: string;
+  data: {
+    "Brand find manager Id": BrandManagerDetail[];
+  };
 }
 
 export interface BrandCreateResponse extends BrandBaseResponse {

@@ -31,7 +31,10 @@ import type {
   BrandFindByIdResponse,
   BrandFindManagerAllRequest,
   BrandFindManagerAllResponse,
+  BrandFindManagerByIdRequest,
+  BrandFindManagerByIdResponse,
   BrandListItem,
+  BrandManagerDetail,
   BrandSearchAllRequest,
   BrandSearchAllResponse,
   BrandUpdateRequest,
@@ -45,6 +48,7 @@ import {
   BrandFindAllSchema,
   BrandFindByIdSchema,
   BrandFindManagerAllSchema,
+  BrandFindManagerByIdSchema,
   BrandSearchAllSchema,
   BrandUpdateSchema,
 } from "./validation/brand-schemas";
@@ -190,6 +194,37 @@ export class BrandServiceApi extends BaseApiService {
       return response;
     } catch (error) {
       logger.error("Erro ao buscar marca por ID", error);
+      throw error;
+    }
+  }
+
+  async findManagerBrandById(
+    params: BrandFindManagerByIdRequest,
+  ): Promise<BrandFindManagerByIdResponse> {
+    try {
+      const validatedParams = BrandFindManagerByIdSchema.parse(params);
+      const requestBody = this.buildBasePayload(validatedParams);
+
+      const response = await this.post<BrandFindManagerByIdResponse>(
+        BRAND_ENDPOINTS.FIND_MANAGER_ID,
+        requestBody,
+      );
+
+      if (response.statusCode === API_STATUS_CODES.NOT_FOUND) {
+        throw new BrandNotFoundError(validatedParams);
+      }
+
+      if (isApiError(response.statusCode)) {
+        throw new BrandError(
+          response.message || "Erro ao buscar marca do Manager por ID",
+          "BRAND_FIND_MANAGER_BY_ID_ERROR",
+          response.statusCode,
+        );
+      }
+
+      return response;
+    } catch (error) {
+      logger.error("Erro ao buscar marca do Manager por ID", error);
       throw error;
     }
   }
@@ -344,6 +379,12 @@ export class BrandServiceApi extends BaseApiService {
 
   extractBrandById(response: BrandFindByIdResponse): BrandDetail | null {
     return response.data?.["Brand find All"]?.[0] ?? null;
+  }
+
+  extractManagerBrandById(
+    response: BrandFindManagerByIdResponse,
+  ): BrandManagerDetail | null {
+    return response.data?.["Brand find manager Id"]?.[0] ?? null;
   }
 
   extractStoredProcedureResult(
@@ -523,7 +564,7 @@ export async function getBrandById(
     return undefined;
   }
 
-  const response = await brandServiceApi.findBrandById({
+  const response = await brandServiceApi.findManagerBrandById({
     pe_brand_id: id,
     pe_system_client_id: params.pe_system_client_id,
     pe_organization_id: params.pe_organization_id,
@@ -533,7 +574,7 @@ export async function getBrandById(
     pe_person_id: params.pe_person_id,
   });
 
-  const brand = brandServiceApi.extractBrandById(response);
+  const brand = brandServiceApi.extractManagerBrandById(response);
   if (!brand) {
     return undefined;
   }

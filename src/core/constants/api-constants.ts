@@ -214,6 +214,7 @@ export const PTYPE_ENDPOINTS = {
 export const BRAND_ENDPOINTS = {
   FIND_ALL: "/brand/v2/brand-find-all",
   FIND_BY_ID: "/brand/v2/brand-find-id",
+  FIND_MANAGER_ID: "/brand/v2/brand-find-manager-id",
   SEARCH_ALL: "/brand/v2/brand-search-all",
   FIND_MANAGER_ALL: "/brand/v2/brand-find-manager-all",
   CREATE: "/brand/v2/brand-create",

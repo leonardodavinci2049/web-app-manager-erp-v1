@@ -1,4 +1,8 @@
-import type { BrandDetail, BrandListItem } from "../types/brand-types";
+import type {
+  BrandDetail,
+  BrandListItem,
+  BrandManagerDetail,
+} from "../types/brand-types";
 
 export interface UIBrand {
   id: number;
@@ -46,7 +50,7 @@ export function transformBrandDetailList(items: BrandDetail[]): UIBrand[] {
 }
 
 export function transformBrand(
-  entity: BrandListItem | BrandDetail | null | undefined,
+  entity: BrandListItem | BrandDetail | BrandManagerDetail | null | undefined,
 ): UIBrand | null {
   if (!entity) return null;
 

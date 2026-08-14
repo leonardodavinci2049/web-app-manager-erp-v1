@@ -28,6 +28,7 @@ export interface UISupplier {
   responsibleName?: string;
   responsibleRole?: string;
   rg?: string;
+  birthDate?: string;
   zipCode?: string;
   address?: string;
   addressNumber?: string;
@@ -123,6 +124,7 @@ export function transformSupplierDetail(entity: SupplierDetail): UISupplier {
     responsibleRole: entity.CARGO || undefined,
     cpf: entity.CPF || undefined,
     rg: entity.RG || undefined,
+    birthDate: entity.DATADONASCIMENTO ?? undefined,
     zipCode: entity.CEP || undefined,
     address: entity.ENDERECO || undefined,
     addressNumber: entity.ENDERECO_NUMERO || undefined,
@@ -142,6 +144,7 @@ export function transformSupplierDetail(entity: SupplierDetail): UISupplier {
     lastPurchaseAt: entity.DT_ULTIMA_COMPRA || undefined,
     createdAt: entity.DATADOCADASTRO || undefined,
     notes: entity.ANOTACOES || undefined,
+    updatedAt: entity.DT_UPDATE ?? undefined,
   };
 }
 

@@ -20,6 +20,7 @@ export interface UICarrier {
   responsibleRole?: string;
   cpf?: string;
   rg?: string;
+  birthDate?: string;
   imagePath?: string;
   zipCode?: string;
   address?: string;
@@ -38,6 +39,7 @@ export interface UICarrier {
   lastPurchaseDate?: string;
   notes?: string;
   inactive?: boolean;
+  updatedAt?: string;
   createdAt?: string;
 }
 
@@ -85,6 +87,7 @@ export function transformCarrierDetail(entity: CarrierDetail): UICarrier {
     responsibleRole: entity.CARGO || undefined,
     cpf: entity.CPF || undefined,
     rg: entity.RG || undefined,
+    birthDate: entity.DATADONASCIMENTO ?? undefined,
     imagePath: entity.PATH_IMAGEM ?? undefined,
     zipCode: entity.CEP || undefined,
     address: entity.ENDERECO || undefined,
@@ -103,6 +106,7 @@ export function transformCarrierDetail(entity: CarrierDetail): UICarrier {
     lastPurchaseDate: entity.DT_ULTIMA_COMPRA || undefined,
     notes: entity.ANOTACOES || undefined,
     inactive: entity.INATIVO === 1,
+    updatedAt: entity.DT_UPDATE ?? undefined,
     createdAt: entity.DATADOCADASTRO || undefined,
   };
 }

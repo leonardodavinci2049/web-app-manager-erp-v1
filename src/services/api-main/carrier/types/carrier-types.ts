@@ -79,6 +79,7 @@ export interface CarrierDetail {
   CARGO: string | null;
   CPF: string | null;
   RG: string | null;
+  DATADONASCIMENTO: string | null;
   CEP: string | null;
   ENDERECO: string | null;
   ENDERECO_NUMERO: string | null;
@@ -97,6 +98,7 @@ export interface CarrierDetail {
   DT_ULTIMA_COMPRA: string | null;
   ANOTACOES: string | null;
   INATIVO: number;
+  DT_UPDATE: string | null;
   DATADOCADASTRO: string | null;
 }
 

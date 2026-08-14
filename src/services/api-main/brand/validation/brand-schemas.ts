@@ -37,6 +37,16 @@ export const BrandFindByIdSchema = z.object({
   pe_brand_id: z.number().int().positive(),
 });
 
+export const BrandFindManagerByIdSchema = z.object({
+  pe_system_client_id: z.number().int().min(0).optional(),
+  pe_organization_id: z.string().max(200).optional(),
+  pe_user_id: z.string().max(200).optional(),
+  pe_user_name: z.string().max(200).optional(),
+  pe_user_role: z.string().max(200).optional(),
+  pe_person_id: z.number().optional(),
+  pe_brand_id: z.number().int().positive(),
+});
+
 export const BrandUpdateSchema = z.object({
   pe_system_client_id: z.number().int().min(0).optional(),
   pe_organization_id: z.string().max(200).optional(),
@@ -95,5 +105,8 @@ export type BrandFindManagerAllInput = z.infer<
   typeof BrandFindManagerAllSchema
 >;
 export type BrandFindByIdInput = z.infer<typeof BrandFindByIdSchema>;
+export type BrandFindManagerByIdInput = z.infer<
+  typeof BrandFindManagerByIdSchema
+>;
 export type BrandUpdateInput = z.infer<typeof BrandUpdateSchema>;
 export type BrandDeleteInput = z.infer<typeof BrandDeleteSchema>;
