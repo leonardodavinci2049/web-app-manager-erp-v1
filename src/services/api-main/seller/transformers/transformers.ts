@@ -1,4 +1,8 @@
-import type { SellerDetail, SellerListItem } from "../types/seller-types";
+import type {
+  SellerDetail,
+  SellerListItem,
+  SellerManagerDetail,
+} from "../types/seller-types";
 
 export interface UISellerListItem {
   id: number;
@@ -93,5 +97,32 @@ export function transformSellerDetail(entity: SellerDetail): UISellerDetail {
     tradeName: entity.NOME_FANTASIA || undefined,
     isSeller: entity.VENDEDOR === 1,
     createdAt: entity.DATADOCADASTRO,
+  };
+}
+
+export function transformSellerManagerDetail(
+  entity: SellerManagerDetail,
+): UISellerDetail {
+  return {
+    id: entity.ID_SELLER,
+    storeId: entity.ID_LOJA,
+    customerTypeId: entity.ID_TIPO_CLIENTE,
+    accountStatus: entity.INATIVO === 1 ? "Inativo" : "Ativo",
+    name: entity.NOME,
+    email: entity.EMAIL || undefined,
+    phone: entity.FONE1 || undefined,
+    whatsapp: entity.WHATAPP1 || undefined,
+    personTypeId: entity.ID_PESSOA_TIPO,
+    accountType: entity.ACCOUNT_TIPO,
+    cpf: entity.CPF || undefined,
+    firstName: entity.PRIMEIRO_NOME || undefined,
+    lastName: entity.SOBRENOME || undefined,
+    imagePath: entity.PATH_IMAGEM || undefined,
+    birthDate: entity.DATADONASCIMENTO || undefined,
+    cnpj: entity.CNPJ || undefined,
+    legalName: entity.RAZAO_SOCIAL || undefined,
+    tradeName: entity.NOME_FANTASIA || undefined,
+    isSeller: entity.VENDEDOR === 1,
+    createdAt: entity.DATADOCADASTRO || "",
   };
 }

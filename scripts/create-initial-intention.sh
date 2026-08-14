@@ -2,22 +2,22 @@
 
 set -euo pipefail
 
-if (( $# == 0 )); then
-  echo "Uso: $0 <nome do initial prompt>" >&2
-  echo "Exemplo: $0 implementar cadastro de fornecedores" >&2
+if (( $# < 1 )); then
+  echo "Uso: $0 \"<nome do prompt>\"" >&2
+  echo "Exemplo: $0 \"implementar cadastro de fornecedores\"" >&2
   exit 1
 fi
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 project_root="$(cd -- "${script_dir}/.." && pwd)"
-initial_prompt="$*"
+prompt_name="$*"
 
 if command -v iconv >/dev/null 2>&1; then
-  initial_prompt="$(printf '%s' "${initial_prompt}" | iconv -f UTF-8 -t ASCII//TRANSLIT)"
+  prompt_name="$(printf '%s' "${prompt_name}" | iconv -f UTF-8 -t ASCII//TRANSLIT)"
 fi
 
 slug="$(
-  printf '%s' "${initial_prompt}" \
+  printf '%s' "${prompt_name}" \
     | tr '[:upper:]' '[:lower:]' \
     | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//'
 )"
@@ -30,7 +30,7 @@ fi
 year="$(date '+%Y')"
 month="$(date '+%m')"
 timestamp="$(date '+%Y-%m-%d-%H%M')"
-destination_dir="${project_root}/docs/initial-prompt/${year}/${month}"
+destination_dir="${project_root}/docs/initial-intention/${year}/${month}"
 destination_file="${destination_dir}/${timestamp}-${slug}.md"
 
 mkdir -p -- "${destination_dir}"
