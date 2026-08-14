@@ -106,6 +106,7 @@ export interface SupplierDetail {
   CARGO: string | null;
   CPF: string | null;
   RG: string | null;
+  DATADONASCIMENTO: string | null;
   CEP: string | null;
   ENDERECO: string | null;
   ENDERECO_NUMERO: string | null;
@@ -123,6 +124,7 @@ export interface SupplierDetail {
   FRETADOR: number | null;
   INATIVO: number | null;
   DT_ULTIMA_COMPRA: string | null;
+  DT_UPDATE: string | null;
   DATADOCADASTRO: string | null;
   ANOTACOES: string | null;
 }
