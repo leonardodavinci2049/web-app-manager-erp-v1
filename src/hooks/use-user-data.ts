@@ -1,6 +1,11 @@
 "use client";
 
+import { useSyncExternalStore } from "react";
 import { authClient } from "@/lib/auth/auth-client";
+
+const subscribeToHydration = () => () => {};
+const getClientHydrationSnapshot = () => true;
+const getServerHydrationSnapshot = () => false;
 
 interface UserData {
   name: string;
@@ -15,6 +20,13 @@ export function useUserData(): {
   isLoading: boolean;
   error: string | null;
 } {
+  // Better Auth may already have session data during client-side navigation.
+  // Keep the first client render aligned with the server-rendered loading state.
+  const isHydrated = useSyncExternalStore(
+    subscribeToHydration,
+    getClientHydrationSnapshot,
+    getServerHydrationSnapshot,
+  );
   const { data: session, isPending } = authClient.useSession();
 
   const user: UserData | null = session?.user
@@ -37,8 +49,8 @@ export function useUserData(): {
         : null;
 
   return {
-    user,
-    isLoading: isPending,
-    error,
+    user: isHydrated ? user : null,
+    isLoading: !isHydrated || isPending,
+    error: isHydrated ? error : null,
   };
 }
