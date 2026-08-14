@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   Building2,
   CalendarDays,
+  Check,
   Globe,
   Loader2,
   MapPin,
@@ -11,6 +12,7 @@ import {
   Save,
   Trash2,
   UserRound,
+  Users,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -46,6 +48,16 @@ interface CarrierDetailsProps {
   imageContent: ReactNode;
 }
 
+type PersonTypeId = 1 | 2;
+
+const TAB_TRIGGER_CLASS_NAME =
+  "h-8 min-w-max flex-none snap-start px-3 text-xs sm:h-9 sm:text-sm lg:min-w-0 lg:px-2";
+
+const PERSON_TYPES = [
+  { id: 1, label: "Pessoa Física" },
+  { id: 2, label: "Pessoa Jurídica" },
+] as const;
+
 function formatDate(value?: string): string {
   if (!value) return "Não informada";
   const timestamp = Date.parse(value.replace(" ", "T"));
@@ -65,7 +77,7 @@ function DetailField({
   return (
     <div className="min-w-0">
       <dt className="text-muted-foreground text-xs">{label}</dt>
-      <dd className="mt-1 break-words text-sm font-medium">
+      <dd className="mt-1 whitespace-pre-wrap break-words text-sm font-medium">
         {value === undefined || value === "" ? "Não informado" : value}
       </dd>
     </div>
@@ -89,6 +101,13 @@ function toFormValues(carrier: UICarrier): CarrierFormValues {
   };
 }
 
+function resolvePersonTypeLabel(carrier: UICarrier): string {
+  if (carrier.typePerson) return carrier.typePerson;
+  if (carrier.typePersonId === 1) return "Pessoa Física";
+  if (carrier.typePersonId === 2) return "Pessoa Jurídica";
+  return "Tipo de pessoa não informado";
+}
+
 export function CarrierDetails({
   carrier,
   returnTo,
@@ -105,6 +124,13 @@ export function CarrierDetails({
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const currentPersonTypeId =
+    carrier.typePersonId === 1 || carrier.typePersonId === 2
+      ? carrier.typePersonId
+      : undefined;
+  const [selectedPersonTypeId, setSelectedPersonTypeId] = useState<
+    PersonTypeId | undefined
+  >(() => currentPersonTypeId);
 
   const setField = <Key extends keyof CarrierFormValues>(
     field: Key,
@@ -157,8 +183,8 @@ export function CarrierDetails({
 
   return (
     <>
-      <div className="space-y-6">
-        <div className="grid gap-6 lg:grid-cols-[minmax(280px,500px)_minmax(0,1fr)]">
+      <div className="space-y-4 sm:space-y-6">
+        <div className="grid gap-4 sm:gap-6 lg:grid-cols-[minmax(280px,500px)_minmax(0,1fr)]">
           <Button
             asChild
             variant="outline"
@@ -171,7 +197,7 @@ export function CarrierDetails({
             </Link>
           </Button>
 
-          <aside className="hidden lg:block lg:row-span-3 lg:row-start-2 lg:self-start lg:sticky lg:top-6">
+          <aside className="hidden lg:sticky lg:top-6 lg:row-span-2 lg:row-start-2 lg:block lg:self-start">
             {imageGallery}
           </aside>
 
@@ -195,131 +221,113 @@ export function CarrierDetails({
                 Transportadora ID {carrier.id}
               </p>
               <p className="text-muted-foreground text-sm">
-                {carrier.typePerson || "Tipo de pessoa não informado"}
+                {resolvePersonTypeLabel(carrier)}
               </p>
             </div>
           </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Building2 className="size-5" />
-                Conta e identificação
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                <DetailField label="ID da transportadora" value={carrier.id} />
-                <DetailField
-                  label="Tipo de pessoa"
-                  value={carrier.typePerson}
-                />
-                <DetailField
-                  label="Fretador"
-                  value={carrier.freightForwarder ? "Sim" : "Não"}
-                />
-                <DetailField
-                  label="Data de cadastro"
-                  value={formatDate(carrier.createdAt)}
-                />
-                <DetailField
-                  label="Última compra"
-                  value={formatDate(carrier.lastPurchaseDate)}
-                />
-                <DetailField
-                  label="Status"
-                  value={carrier.inactive ? "Inativo" : "Ativo"}
-                />
-              </dl>
-            </CardContent>
-          </Card>
-
-          <div className="space-y-4">
-            <div className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Phone className="size-5" />
-                    Contato
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                    <DetailField label="Telefone" value={carrier.phone} />
-                    <DetailField label="WhatsApp" value={carrier.whatsapp} />
-                    <DetailField label="Contato" value={carrier.contact} />
+          <div className="space-y-3 sm:space-y-4">
+            <Card className="gap-4 py-4 sm:gap-6 sm:py-6">
+              <CardHeader className="px-4 sm:px-6">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Phone className="size-4" />
+                  Geral
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="px-4 sm:px-6">
+                <dl className="grid gap-4 sm:grid-cols-2">
+                  <div className="sm:col-span-2">
+                    <DetailField label="Nome" value={carrier.name} />
+                  </div>
+                  <DetailField label="Telefone" value={carrier.phone} />
+                  <DetailField label="WhatsApp" value={carrier.whatsapp} />
+                  <DetailField label="Contato" value={carrier.contact} />
+                  <div className="sm:col-span-2">
                     <DetailField label="E-mail" value={carrier.email} />
+                  </div>
+                </dl>
+              </CardContent>
+            </Card>
+
+            <Card className="gap-4 py-4 sm:gap-6 sm:py-6">
+              <CardHeader className="px-4 sm:px-6">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Users className="size-4" />
+                  Tipo de pessoa
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="px-4 sm:px-6">
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  {PERSON_TYPES.map((option) => {
+                    const selected = option.id === selectedPersonTypeId;
+                    const current = option.id === currentPersonTypeId;
+
+                    return (
+                      <Button
+                        key={option.id}
+                        type="button"
+                        variant={selected ? "default" : "outline"}
+                        aria-pressed={selected}
+                        disabled={selected}
+                        onClick={() => setSelectedPersonTypeId(option.id)}
+                        className="justify-between"
+                      >
+                        <span className="flex items-center gap-2">
+                          {selected && <Check className="size-4" />}
+                          {option.label}
+                        </span>
+                        {current ? (
+                          <Badge variant="secondary">Atual</Badge>
+                        ) : selected ? (
+                          <Badge variant="secondary">Visualizando</Badge>
+                        ) : null}
+                      </Button>
+                    );
+                  })}
+                </div>
+                <p className="text-muted-foreground mt-3 text-xs">
+                  Selecione o tipo para visualizar os campos correspondentes. A
+                  seleção não altera o cadastro.
+                </p>
+              </CardContent>
+            </Card>
+
+            {selectedPersonTypeId === 1 && (
+              <Card className="gap-4 py-4 sm:gap-6 sm:py-6">
+                <CardHeader className="px-4 sm:px-6">
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <UserRound className="size-4" />
+                    Pessoa Física
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="px-4 sm:px-6">
+                  <dl className="grid gap-4 sm:grid-cols-2">
+                    <DetailField label="CPF" value={carrier.cpf} />
+                    <DetailField label="RG" value={carrier.rg} />
+                    <DetailField
+                      label="Data de nascimento"
+                      value={formatDate(carrier.birthDate)}
+                    />
                   </dl>
                 </CardContent>
               </Card>
+            )}
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Globe className="size-5" />
-                    Presença digital
+            {selectedPersonTypeId === 2 && (
+              <Card className="gap-4 py-4 sm:gap-6 sm:py-6">
+                <CardHeader className="px-4 sm:px-6">
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <Building2 className="size-4" />
+                    Pessoa Jurídica
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                    <DetailField label="Website" value={carrier.website} />
-                    <DetailField label="Facebook" value={carrier.facebook} />
-                    <DetailField label="Twitter" value={carrier.twitter} />
-                  </dl>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <MapPin className="size-5" />
-                    Endereço
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                    <DetailField label="CEP" value={carrier.zipCode} />
-                    <DetailField label="Logradouro" value={carrier.address} />
-                    <DetailField label="Número" value={carrier.addressNumber} />
-                    <DetailField
-                      label="Complemento"
-                      value={carrier.complement}
-                    />
-                    <DetailField label="Bairro" value={carrier.neighborhood} />
-                    <DetailField label="Cidade" value={carrier.city} />
-                    <DetailField label="UF" value={carrier.state} />
-                    <DetailField label="Região" value={carrier.countryRegion} />
-                    <DetailField label="País" value={carrier.country} />
-                    <DetailField
-                      label="Código do município"
-                      value={carrier.cityCode}
-                    />
-                    <DetailField
-                      label="Código da UF"
-                      value={carrier.stateCode}
-                    />
-                  </dl>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Building2 className="size-5" />
-                    Pessoa jurídica
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                <CardContent className="px-4 sm:px-6">
+                  <dl className="grid gap-4 sm:grid-cols-2">
                     <DetailField
                       label="Razão social"
                       value={carrier.companyName}
                     />
                     <DetailField label="CNPJ" value={carrier.cnpj} />
-                    <DetailField
-                      label="Data do CNPJ"
-                      value={formatDate(carrier.cnpjDate)}
-                    />
                     <DetailField
                       label="Inscrição estadual"
                       value={carrier.stateRegistration}
@@ -332,129 +340,222 @@ export function CarrierDetails({
                       label="Nome fantasia"
                       value={carrier.tradeName}
                     />
-                  </dl>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <UserRound className="size-5" />
-                    Pessoa física
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                    <DetailField label="CPF" value={carrier.cpf} />
-                    <DetailField label="RG" value={carrier.rg} />
                     <DetailField
-                      label="Responsável"
-                      value={carrier.responsibleName}
-                    />
-                    <DetailField
-                      label="Cargo do responsável"
-                      value={carrier.responsibleRole}
+                      label="Data do CNPJ"
+                      value={formatDate(carrier.cnpjDate)}
                     />
                   </dl>
                 </CardContent>
               </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Editar dados da transportadora</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    <CarrierFormFields
-                      values={values}
-                      errors={errors}
-                      disabled={isSaving || isDeleting}
-                      idPrefix="carrier-detail"
-                      notesAreWriteOnly={false}
-                      onChange={setField}
-                    />
-                    <Button
-                      type="submit"
-                      disabled={
-                        isSaving ||
-                        isDeleting ||
-                        values.name.trim() === "" ||
-                        values.notes.length > 2000
-                      }
-                    >
-                      {isSaving ? (
-                        <Loader2 className="size-4 animate-spin" />
-                      ) : (
-                        <Save className="size-4" />
-                      )}
-                      {isSaving ? "Salvando..." : "Salvar alterações"}
-                    </Button>
-                  </form>
-                </CardContent>
-              </Card>
-            </div>
-
-            <div className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <CalendarDays className="size-4" />
-                    Cadastro
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <DetailField
-                    label="Data de cadastro"
-                    value={formatDate(carrier.createdAt)}
-                  />
-                  <DetailField
-                    label="Última compra"
-                    value={formatDate(carrier.lastPurchaseDate)}
-                  />
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex-row items-center justify-between">
-                  <CardTitle className="text-base">
-                    Status do cadastro
-                  </CardTitle>
-                  <Badge
-                    variant={carrier.inactive ? "destructive" : "secondary"}
-                  >
-                    {carrier.inactive ? "Inativo" : "Ativo"}
-                  </Badge>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <p className="text-muted-foreground text-xs">
-                    A listagem aceita filtro de status, mas o endpoint de
-                    atualização não permite ativar ou inativar transportadoras.
-                  </p>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full"
-                    disabled
-                  >
-                    Alterar status — Pendente de API
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
+            )}
           </div>
         </div>
 
-        <Tabs defaultValue="deletion" className="w-full">
-          <TabsList className="grid h-auto w-full grid-cols-2">
-            <TabsTrigger value="image">Imagem</TabsTrigger>
-            <TabsTrigger value="deletion">Exclusão</TabsTrigger>
+        <div className="space-y-0.5 sm:space-y-1">
+          <h2 className="text-base font-semibold sm:text-lg">
+            Seções da transportadora
+          </h2>
+          <p className="text-muted-foreground hidden text-sm sm:block">
+            Consulte os dados complementares e acesse as ações da
+            transportadora.
+          </p>
+        </div>
+
+        <Tabs defaultValue="notes" className="w-full gap-3 sm:gap-4">
+          <TabsList
+            className="h-auto w-full snap-x justify-start gap-1 overflow-x-auto p-1 lg:grid lg:grid-cols-8 lg:overflow-visible"
+            aria-label="Seções do detalhe da transportadora"
+          >
+            <TabsTrigger value="notes" className={TAB_TRIGGER_CLASS_NAME}>
+              Anotações
+            </TabsTrigger>
+            <TabsTrigger value="image" className={TAB_TRIGGER_CLASS_NAME}>
+              Imagem
+            </TabsTrigger>
+            <TabsTrigger value="address" className={TAB_TRIGGER_CLASS_NAME}>
+              Endereço
+            </TabsTrigger>
+            <TabsTrigger value="internet" className={TAB_TRIGGER_CLASS_NAME}>
+              Internet
+            </TabsTrigger>
+            <TabsTrigger value="status" className={TAB_TRIGGER_CLASS_NAME}>
+              Status
+            </TabsTrigger>
+            <TabsTrigger
+              value="miscellaneous"
+              className={TAB_TRIGGER_CLASS_NAME}
+            >
+              Diversos
+            </TabsTrigger>
+            <TabsTrigger value="editing" className={TAB_TRIGGER_CLASS_NAME}>
+              Edição
+            </TabsTrigger>
+            <TabsTrigger value="deletion" className={TAB_TRIGGER_CLASS_NAME}>
+              Exclusão
+            </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="notes">
+            <Card className="gap-4 py-4 sm:gap-6 sm:py-6">
+              <CardHeader className="px-4 sm:px-6">
+                <CardTitle className="text-base">Anotações</CardTitle>
+              </CardHeader>
+              <CardContent className="px-4 sm:px-6">
+                <dl>
+                  <DetailField label="Anotações" value={carrier.notes} />
+                </dl>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           <TabsContent value="image" className="space-y-3 sm:space-y-4">
             <div className="mx-auto w-full max-w-[500px] lg:hidden">
               {imageGallery}
             </div>
             {imageContent}
+          </TabsContent>
+
+          <TabsContent value="address">
+            <Card className="gap-4 py-4 sm:gap-6 sm:py-6">
+              <CardHeader className="px-4 sm:px-6">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <MapPin className="size-4" />
+                  Endereço
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="px-4 sm:px-6">
+                <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  <DetailField label="CEP" value={carrier.zipCode} />
+                  <DetailField label="Endereço" value={carrier.address} />
+                  <DetailField label="Número" value={carrier.addressNumber} />
+                  <DetailField label="Complemento" value={carrier.complement} />
+                  <DetailField label="Bairro" value={carrier.neighborhood} />
+                  <DetailField label="Cidade" value={carrier.city} />
+                  <DetailField label="UF" value={carrier.state} />
+                  <DetailField label="País" value={carrier.country} />
+                  <DetailField
+                    label="Código do município"
+                    value={carrier.cityCode}
+                  />
+                  <DetailField label="Código da UF" value={carrier.stateCode} />
+                </dl>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="internet">
+            <Card className="gap-4 py-4 sm:gap-6 sm:py-6">
+              <CardHeader className="px-4 sm:px-6">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Globe className="size-4" />
+                  Internet
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="px-4 sm:px-6">
+                <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  <DetailField label="Website" value={carrier.website} />
+                  <DetailField label="Facebook" value={carrier.facebook} />
+                  <DetailField label="Twitter" value={carrier.twitter} />
+                </dl>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="status">
+            <Card className="gap-4 py-4 sm:gap-6 sm:py-6">
+              <CardHeader className="flex-row items-center justify-between px-4 sm:px-6">
+                <CardTitle className="text-base">Status</CardTitle>
+                <Badge variant={carrier.inactive ? "destructive" : "secondary"}>
+                  {carrier.inactive ? "Inativo" : "Ativo"}
+                </Badge>
+              </CardHeader>
+              <CardContent className="space-y-4 px-4 sm:px-6">
+                <dl className="grid gap-4 sm:grid-cols-2">
+                  <DetailField
+                    label="Fretador"
+                    value={
+                      carrier.freightForwarder === undefined
+                        ? undefined
+                        : carrier.freightForwarder
+                          ? "Sim"
+                          : "Não"
+                    }
+                  />
+                  <DetailField
+                    label="Status do cadastro"
+                    value={carrier.inactive ? "Inativo" : "Ativo"}
+                  />
+                </dl>
+                <p className="text-muted-foreground text-xs">
+                  A listagem aceita filtro de status, mas o endpoint de
+                  atualização não permite ativar ou inativar transportadoras.
+                </p>
+                <Button type="button" variant="outline" disabled>
+                  Alterar status — Pendente de API
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="miscellaneous">
+            <Card className="gap-4 py-4 sm:gap-6 sm:py-6">
+              <CardHeader className="px-4 sm:px-6">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <CalendarDays className="size-4" />
+                  Diversos
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="px-4 sm:px-6">
+                <dl className="grid gap-4 sm:grid-cols-2">
+                  <DetailField
+                    label="Data de cadastro"
+                    value={formatDate(carrier.createdAt)}
+                  />
+                  <DetailField
+                    label="Data de atualização"
+                    value={formatDate(carrier.updatedAt)}
+                  />
+                </dl>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="editing">
+            <Card className="gap-4 py-4 sm:gap-6 sm:py-6">
+              <CardHeader className="px-4 sm:px-6">
+                <CardTitle className="text-base">
+                  Editar dados da transportadora
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="px-4 sm:px-6">
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <CarrierFormFields
+                    values={values}
+                    errors={errors}
+                    disabled={isSaving || isDeleting}
+                    idPrefix="carrier-detail"
+                    notesAreWriteOnly={false}
+                    onChange={setField}
+                  />
+                  <Button
+                    type="submit"
+                    disabled={
+                      isSaving ||
+                      isDeleting ||
+                      values.name.trim() === "" ||
+                      values.notes.length > 2000
+                    }
+                  >
+                    {isSaving ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      <Save className="size-4" />
+                    )}
+                    {isSaving ? "Salvando..." : "Salvar alterações"}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="deletion">
