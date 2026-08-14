@@ -10,8 +10,8 @@ import {
 import { createLogger } from "@/core/logger";
 import { BaseApiService } from "@/lib/axios/base-api-service";
 import {
-  transformSellerManagerDetail,
   transformSellerList,
+  transformSellerManagerDetail,
   type UISellerDetail,
   type UISellerListItem,
 } from "./transformers/transformers";

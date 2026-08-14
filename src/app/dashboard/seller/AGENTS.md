@@ -6,14 +6,14 @@ This file complements the repository and dashboard guides for
 
 Read this before changing any file in this segment. For shared dashboard rules
 (root redirect, layout, sidebar), follow `src/app/dashboard/AGENTS.md`. For
-detail-specific architecture (the read-only detail composition and the gallery
-subsystem), follow `[id]/AGENTS.md`.
+detail-specific architecture (the sectioned editing composition, the sales tab,
+and the gallery subsystem), follow `[id]/AGENTS.md`.
 
 ## Route Purpose
 
-The seller segment is the registry for sellers ("Vendedores"). It is
-**read-only**: there is no create, update, delete, or activate/inactivate. Those
-flows render disabled with a "Pendente de API" badge. It supports:
+The seller segment is the registry for sellers ("Vendedores"). The list is
+read-only; the detail is **editable by section**. There is no create or delete —
+those flows render disabled with a "Pendente de API" badge. It supports:
 
 - Seller search, combined filters (category, no-image, status), and ordering on
   the list page.
@@ -21,13 +21,18 @@ flows render disabled with a "Pendente de API" badge. It supports:
 - Pagination through the `page` query parameter (zero-based).
 - Navigation to the detail page while preserving the current list URL via
   `returnTo`.
-- A read-only detail view (identity, business/personal data, contacts, status).
+- An editable detail view: general identity, person type, personal/business
+  data, notes, address, internet presence, and the status controls (free
+  shipping, active/inactive, e-mail marketing).
+- A "Vendas" tab with the seller's latest orders (filtered by `pe_seller_id`)
+  and a prepared-but-disabled "Produtos vendidos" sub-tab.
 - A seller image gallery backed by the Assets API, synchronized with the legacy
   `PATH_IMAGEM` column on `tbl_pessoa`.
 
-The **image gallery mutations ARE enabled** (upload/primary/delete) even though
-all entity CRUD is disabled. The list empty-state copy states "A criação de
-vendedores está pendente de suporte pela API."
+Customer type, related seller, customer approval, and commercial restriction are
+intentionally **not rendered** on the detail (out of scope for sellers). The
+list empty-state copy states "A criação de vendedores está pendente de suporte
+pela API."
 
 Do not move list behavior into `src/app/dashboard/page.tsx`; that page is
 reserved for session-aware redirection.
@@ -41,13 +46,12 @@ seller/
 ├── loading.tsx                           # List segment skeleton
 ├── error.tsx                             # List error boundary (Client)
 ├── _components/
-│   ├── index.ts                          # Public exports (incl. SellerDetails + URL helpers)
+│   ├── index.ts                          # Public exports (SellerImage + URL helpers)
 │   ├── seller-dashboard.tsx              # Server: composes grid/list subtrees -> toolbar
 │   ├── seller-toolbar.tsx                # Client: URL filters + view mode (NO create button)
 │   ├── seller-collection.tsx             # Server: grid cards + desktop table + empty/error
 │   ├── seller-pagination.tsx             # Server: thin RegistryPagination wrapper
 │   ├── seller-image.tsx                  # Client: avatar via shared RegistryEntityImage
-│   ├── seller-details.tsx                # Server: read-only detail composition (no form)
 │   ├── lib/
 │   │   └── search-params.ts              # Pure URL <-> filters mapping (single source of truth)
 │   └── types/
@@ -59,13 +63,21 @@ seller/
     ├── error.tsx                         # Detail error boundary (Client)
     ├── not-found.tsx                     # Invalid/inaccessible seller UI
     ├── _actions/
-    │   └── seller-image-gallery-actions.ts   # Gallery upload/primary/delete (ONLY actions)
+    │   ├── seller-actions.ts             # Route-local section update Server Actions
+    │   ├── seller-sales-actions.ts       # Authenticated lazy order reads
+    │   └── seller-image-gallery-actions.ts   # Gallery upload/primary/delete
     └── _components/
+        ├── seller-detail-layout.tsx      # Detail composition (Server)
+        ├── overview/                     # First-fold overview sections
+        ├── tabs/                         # Second-fold tabs and editors
+        ├── sales/                        # Sales tab: lazy orders + prepared products
+        ├── types/                        # SellerActionResult and detail DTOs
         └── image-gallery/                # Gallery subsystem (see [id]/AGENTS.md)
 ```
 
-There is **no parent `_actions/` folder** and **no create sheet** — seller cannot
-be created or mutated from the UI (only its gallery can). This differs from
+There is **no parent `_actions/` folder** and **no create sheet** — the seller
+cannot be created from the UI. All seller mutations are route-local to `[id]/`
+(section edits, sales reads, and gallery). This differs from
 brand/carriers/suppliers/ptype, which all have a parent `_actions/` for CRUD.
 
 ## List Page Responsibilities
@@ -103,7 +115,7 @@ Keep `[id]/page.tsx` as a Server Component. It should:
 7. Render `SiteHeaderWithBreadcrumb` (breadcrumb "Vendedores" links to
    `returnTo`; last crumb is `seller.name`) and a custom `max-w-[1400px]`
    container (this route does **not** use `RegistryPageShell`).
-8. Compose `SellerDetails` with the seller DTO, `returnTo`, and two
+8. Compose `SellerDetailLayout` with the seller DTO, `returnTo`, and two
    `<Suspense>` nodes built on the **page**: `imageGallery`
    (`SellerImageGalleryServer`) and `imageContent` (`SellerImagesListServer`).
 
@@ -113,12 +125,14 @@ There is no secondary fetch.
 
 - `getAuthContext()` is mandatory for both pages and every Server Action.
 - Authentication does not replace organization and resource authorization.
-  Gallery actions must re-resolve the authenticated context and re-confirm the
-  seller exists (`getAuthorizedSellerContext()`) before mutating.
+  Detail section actions and gallery actions must re-resolve the authenticated
+  context and re-confirm the seller exists and is still flagged as a seller
+  (`getExistingSeller()` / `getAuthorizedSellerContext()`) before mutating.
 - Never pass `apiContext`, session objects, tokens, raw entities, or internal
   errors to Client Components. Return only the DTOs defined in
-  `seller-dashboard-types.ts`, `image-gallery-types.ts`, and the seller
-  service's `UISellerListItem` / `UISellerDetail`.
+  `seller-dashboard-types.ts`, `[id]/_components/types/seller-detail-types.ts`,
+  `[id]/_components/sales/seller-sales-types.ts`, `image-gallery-types.ts`, and
+  the seller service's `UISellerListItem` / `UISellerDetail`.
 - Seller reads are organization-dependent. Do not add `"use cache"` unless the
   cache key safely isolates organization and private context.
 - Read the closest service-level `AGENTS.md` before modifying any module under
@@ -169,15 +183,18 @@ triggers a refetch.
 
 ## Detail UI
 
-`SellerDetails` is a **Server Component** (unique among the registry routes,
-whose detail components are Client) because the detail is entirely read-only —
-there is no form/edit state and no `router.refresh()`/`router.replace()`. It
-renders read-only cards: "Identificação", "Dados empresariais" (when business) /
-"Dados pessoais" (otherwise, conditional on `cnpj || legalName || tradeName`),
-"Contatos e documentos", an "Operações" card with disabled "Editar / Ativar /
-Inativar — Pendente de API" buttons, and a "Cadastro" card. A `<Tabs>` has two
-tabs: `image` (Imagem) and `deletion` (Exclusão, default) — the deletion tab is a
-disabled "Excluir — Pendente de API" button. See `[id]/AGENTS.md`.
+`SellerDetailLayout` (Server) mirrors the customer detail composition: a sticky
+gallery aside on desktop, the header (`SellerHeadDataSection`, reusing the list
+`SellerImage` avatar), the editable identity form (`SellerIdentitySection`), the
+person-type toggle (`SellerPersonTypeSection` — no customer-type toggle), and
+the personal/business section matching the current `personTypeId`
+(`SellerPersonBusinessSections`). Below, `SellerDetailTabs` (Client) renders
+eight tabs: **Anotações**, **Endereço**, **Status** (free shipping,
+active/inactive, e-mail marketing only), **Imagem**, **Vendas**, **Internet**,
+**Diversos** (registration dates), and **Exclusão** (disabled "Pendente de API").
+The "Vendas" tab has the sub-tabs **Pedidos** (functional, filtered by
+`pe_seller_id`) and **Produtos vendidos** (prepared, explicitly unavailable
+until a seller-filtered contract exists). See `[id]/AGENTS.md`.
 
 ## Image Gallery
 
@@ -209,32 +226,56 @@ carries `ID_CUSTOMER` because sellers are customers flagged as sellers). See
 
 ## Server Actions and Invariants
 
-There are **no create/update/delete/status actions** — those flows are disabled
-("Pendente de API"). The only Server Actions are the gallery mutations in
-`[id]/_actions/seller-image-gallery-actions.ts`:
+All seller Server Actions are route-local to `[id]/`:
 
-- `uploadSellerImageAction(formData)`, `setPrimarySellerImageAction(rawSellerId,
-  rawAssetId)`, `deleteSellerImageAction(rawSellerId, rawAssetId)`.
+- `[id]/_actions/seller-actions.ts` — section updates: general, notes, personal,
+  business, address, internet, person type, and the status flags (inactive,
+  e-mail marketing, free shipping). Every action validates with a route-local
+  Zod schema, re-resolves auth and re-confirms the seller through
+  `getExistingSeller()` (which also verifies `isSeller`), accepts only the
+  section values from the client (the table, key, and fields stay fixed on the
+  server), and calls `revalidateSeller()` after success. Updates write to
+  `tbl_pessoa` through the same services the customer route uses
+  (`customer-upd`, `customer-inline`, and `general-call` inline field updates).
+  Do **not** reuse the customer Server Actions themselves.
+- `[id]/_actions/seller-sales-actions.ts` — `findSellerOrdersAction()`, the
+  authenticated lazy read for the "Vendas > Pedidos" sub-tab. It validates the
+  search (numeric order ID) and limit (multiple of 20), re-confirms the seller,
+  and calls `orderReportsServiceApi.orderFindCustomerAll()` with
+  `pe_customer_id: 0` and `pe_seller_id` set to the seller ID, so orders are
+  always scoped to the selected seller.
+- `[id]/_actions/seller-image-gallery-actions.ts` — `uploadSellerImageAction(formData)`,
+  `setPrimarySellerImageAction(rawSellerId, rawAssetId)`,
+  `deleteSellerImageAction(rawSellerId, rawAssetId)`.
 
-They validate with Zod (`SellerIdSchema`, `AssetIdSchema`, `UploadSchema`),
-re-resolve auth and ownership via `getAuthorizedSellerContext()`, re-read the
-gallery before mutating, and call `revalidatePath` directly inside
-`updateSellerImagePath()` (there is **no** `revalidateSeller()` helper — there
-are no other actions to use one). Do not trust client-side gating; preserve the
-server-side re-validation, ownership checks, and limit enforcement.
+They validate with Zod, re-resolve auth and ownership via
+`getAuthorizedSellerContext()`, re-read the gallery before mutating, and call
+`revalidatePath` directly inside `updateSellerImagePath()`. Do not trust
+client-side gating; preserve the server-side re-validation, ownership checks,
+and limit enforcement.
 
 ## Services
 
 - `seller` (`src/services/api-main/seller`): a **read-only** single module. It
   provides `getSellersPage()` (list, via `findManagerAllSellers`) and
-  `getSellerById()` (detail, via `findSellerById`), plus `searchAllSellers`, the
-  `SellerServiceApi` class / `sellerServiceApi` instance, and errors
-  `SellerError`, `SellerNotFoundError`, `SellerValidationError`. There are
-  **no** `createSeller`/`updateSeller`/`deleteSeller` methods. Produces
-  `UISellerListItem` (list) and `UISellerDetail` (detail).
+  `getSellerById()` (detail, via `findManagerSellerById`), plus
+  `searchAllSellers`, the `SellerServiceApi` class / `sellerServiceApi`
+  instance, and errors `SellerError`, `SellerNotFoundError`,
+  `SellerValidationError`. There are **no** `createSeller`/`updateSeller`/
+  `deleteSeller` methods. Produces `UISellerListItem` (list) and the full
+  `UISellerDetail` (detail, including address, internet, notes, status flags,
+  and last purchase).
+- `customer-upd` (`src/services/api-main/customer-upd`): stored-procedure
+  updates on `tbl_pessoa` (general, personal, business, address, internet) used
+  by the seller detail actions with `pe_customer_id` = the seller's pessoa ID.
+- `customer-inline` (`src/services/api-main/customer-inline`): inline updates
+  for notes and person type used by the seller detail actions.
 - `general-call` (`src/services/api-main/general-call`):
-  `generalCallServiceApi.updateTableInlineField()` + `FIELD_TYPE`, used by gallery
-  actions for `PATH_IMAGEM`.
+  `generalCallServiceApi.updateTableInlineField()` + `FIELD_TYPE`, used to write
+  `PATH_IMAGEM`, `INATIVO`, `EMAIL_MKT`, and `FLAG_FRETE_GRATIS` on `tbl_pessoa`.
+- `order-reports` (`src/services/api-main/order-reports`):
+  `orderFindCustomerAll()` (with `pe_seller_id` + `pe_customer_id: 0`) powers
+  the "Vendas > Pedidos" sub-tab.
 - `api-assets` (`src/services/api-assets`): gallery read/upload/primary/delete
   via `assetsApiService`, plus `isApiError` / `isNotFoundApiError`.
 
@@ -242,21 +283,28 @@ Read the local `AGENTS.md` inside each service module before changing it.
 
 ## Pending API Features
 
-**Create, update, activate/inactivate, and delete are all disabled
-("Pendente de API").** The list empty-state and the detail "Operações" and
-"Exclusão" cards all surface this. Only gallery mutations are functional. Do not
-present these disabled flows as functional and do not simulate them. When safe
-contracts arrive, wire the actions (with a `getExistingSeller()` re-check), add
-`revalidateSeller()` or direct `revalidatePath` calls, enable the UI controls,
-and remove the "Pendente de API" badges together.
+- **Create**: there is no create sheet; the list empty state states creation is
+  pending API.
+- **Delete**: the "Exclusão" tab renders a disabled destructive button in a
+  danger zone with a "Pendente de API" badge.
+- **Produtos vendidos**: the sub-tab is rendered but explicitly unavailable
+  because no contract with a seller filter exists yet. It performs **no** query
+  and must not display unfiltered product data; wire it only after the specific
+  contract is created.
+
+Do not present these disabled flows as functional and do not simulate them. When
+safe contracts arrive, wire the actions (with a `getExistingSeller()` re-check),
+enable the UI controls, and remove the "Pendente de API" badges together.
 
 ## Conventions for Changes
 
-- Preserve `page.tsx` and `[id]/page.tsx` as Server Components. `SellerDetails`
-  is intentionally **Server and read-only**; do not add form/edit state or
-  convert it to Client without re-enabling mutations end-to-end.
-- Use the DTOs from `seller-dashboard-types.ts` and `image-gallery-types.ts`; do
-  not send raw API entities to Client Components.
+- Preserve `page.tsx` and `[id]/page.tsx` as Server Components. Keep each
+  editable detail section as an independent Client form with its own local
+  state; there is no shared editing context and no single save-all action.
+- Use the DTOs from `seller-dashboard-types.ts`,
+  `[id]/_components/types/seller-detail-types.ts`,
+  `[id]/_components/sales/seller-sales-types.ts`, and `image-gallery-types.ts`;
+  do not send raw API entities to Client Components.
 - Keep user-facing text in Brazilian Portuguese and code, comments, and technical
   documentation in US English. Use `createLogger()` for errors and return generic
   safe messages.
@@ -266,6 +314,11 @@ and remove the "Pendente de API" badges together.
   the filter control in the `RegistryFilterSheet`, the `removeFilter` logic, and
   the active-filter chips `useMemo` in `SellerToolbar`. (There is no
   `countSellerFilters`.)
+- When adding a detail section, align together: the `UISellerDetail` field, the
+  `transformSellerManagerDetail()` mapping, the Zod schema and action in
+  `[id]/_actions/seller-actions.ts`, the form section component, and the tab
+  entry (if applicable). Do not render customer type, related seller, customer
+  approval, commercial restriction, or warranties for sellers.
 - Keep `PATH_IMAGEM` synchronization in sync with gallery primary changes; a new
   gallery mutation that changes the primary image must call `updateSellerImagePath()`
   with the 300-char guard + `warning` partial-success behavior.
@@ -279,8 +332,10 @@ and remove the "Pendente de API" badges together.
 - Visual or interactive changes: validate `/dashboard/seller` and
   `/dashboard/seller/[id]` in the development server (port set by the `PORT` env var) on desktop and
   mobile, including search, combined filters, active-filter removal, grid/list
-  switching, pagination, empty and error states, the read-only detail cards, the
-  disabled "Pendente de API" controls, gallery upload/primary/delete (including
-  last-image rejection), zoom navigation, the PATH_IMAGEM viewer refresh, and the
+  switching, pagination, empty and error states, each detail section edit
+  (success, validation errors, failure), person-type switching, the status
+  confirm flows, the "Vendas" sub-tabs (orders scoped to the seller; sold
+  products unavailable), gallery upload/primary/delete (including last-image
+  rejection), zoom navigation, the PATH_IMAGEM viewer refresh, and the
   `returnTo` back link with valid and invalid `id`.
 - This project currently has no automated test command; do not invent one.
