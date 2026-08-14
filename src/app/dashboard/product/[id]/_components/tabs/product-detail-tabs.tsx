@@ -11,6 +11,9 @@ import { ProductMetadataTab } from "./product-metadata-tab";
 import { ProductSpecificationsTab } from "./product-specifications-tab";
 import { ProductTechnicalTab } from "./product-technical-tab";
 
+const TAB_TRIGGER_CLASS_NAME =
+  "h-8 min-w-max flex-none snap-start px-3 text-xs sm:h-9 sm:text-sm lg:min-w-0 lg:px-2";
+
 interface ProductDetailTabsProps {
   product: UIProductManager;
   imagePathContent: ReactNode;
@@ -30,28 +33,27 @@ export function ProductDetailTabs({
   };
 
   return (
-    <Tabs defaultValue="description" className="w-full">
-      <TabsList className="grid h-auto w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
-        <TabsTrigger value="description" className="min-h-9 whitespace-normal">
+    <Tabs defaultValue="description" className="w-full gap-3 sm:gap-4">
+      <TabsList
+        className="h-auto w-full snap-x justify-start gap-1 overflow-x-auto p-1 lg:grid lg:grid-cols-6 lg:overflow-visible"
+        aria-label="Seções do detalhe do produto"
+      >
+        <TabsTrigger value="description" className={TAB_TRIGGER_CLASS_NAME}>
           Descrição
         </TabsTrigger>
-        <TabsTrigger value="images" className="min-h-9 whitespace-normal">
+        <TabsTrigger value="images" className={TAB_TRIGGER_CLASS_NAME}>
           Imagens
         </TabsTrigger>
-
-        <TabsTrigger
-          value="specifications"
-          className="min-h-9 whitespace-normal"
-        >
+        <TabsTrigger value="specifications" className={TAB_TRIGGER_CLASS_NAME}>
           Especificações
         </TabsTrigger>
-        <TabsTrigger value="technical" className="min-h-9 whitespace-normal">
+        <TabsTrigger value="technical" className={TAB_TRIGGER_CLASS_NAME}>
           Dados Técnicos
         </TabsTrigger>
-        <TabsTrigger value="metadata" className="min-h-9 whitespace-normal">
+        <TabsTrigger value="metadata" className={TAB_TRIGGER_CLASS_NAME}>
           Metadados
         </TabsTrigger>
-        <TabsTrigger value="deletion" className="min-h-9 whitespace-normal">
+        <TabsTrigger value="deletion" className={TAB_TRIGGER_CLASS_NAME}>
           Exclusão
         </TabsTrigger>
       </TabsList>
