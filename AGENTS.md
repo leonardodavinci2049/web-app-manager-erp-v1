@@ -21,6 +21,16 @@ pnpm start    # production start with dotenv
 
 This project does not currently use automated tests. Do not invent or suggest test commands; if tests are added in the future, update this file.
 
+## Git Workflow
+
+- This repository follows Git Flow, with `develop` as the integration base for new development work.
+- Before changing tracked project files for each new implementation task requested in chat, inspect the current branch and working tree, update the local `develop` from `origin/develop` with a fast-forward-only operation when remote access is available, and create a dedicated `feature/<kebab-case-task-slug>` branch from `develop`. Do not implement directly on `develop` or `main`.
+- If the request explicitly continues work already associated with the current feature branch, keep using that branch instead of creating another one.
+- Read-only analysis, diagnosis, review, explanation, and status requests do not require a new branch unless they result in project file changes.
+- If the `develop` working tree contains local changes that still need to be committed, do not start the new implementation task or create its feature branch. Ask the user to commit those changes first and wait for confirmation before proceeding.
+- Preserve existing user changes. If the working tree is not clean or the current checkout cannot safely change branches, stop and report the conflict before creating the feature branch.
+- Do not merge, finish, delete, or push a feature branch without explicit user authorization.
+
 ## Architecture
 
 - `src/app`: App Router routes, layouts, pages, route handlers, and special files.
