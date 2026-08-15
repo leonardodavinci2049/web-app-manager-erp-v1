@@ -69,7 +69,7 @@ export interface PhysicalProductWarrantyMovCustomerRequest
 export interface PhysicalProductWarrantySearchRequest
   extends PhysicalProductBaseRequest {
   pe_customer_id?: number;
-  PE_search?: string;
+  pe_search?: string;
   pe_limit?: number;
 }
 
