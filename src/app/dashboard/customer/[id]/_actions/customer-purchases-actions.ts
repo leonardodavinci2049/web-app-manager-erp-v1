@@ -222,7 +222,7 @@ export async function findCustomerWarrantiesAction(
 
     const response = await physicalProductServiceApi.searchWarranties({
       pe_customer_id: parsed.data.customerId,
-      PE_search: parsed.data.search,
+      pe_search: parsed.data.search,
       pe_limit: parsed.data.limit,
       ...apiContext,
     });

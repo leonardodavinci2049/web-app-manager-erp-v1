@@ -58,7 +58,7 @@ export const PhysicalProductWarrantyMovCustomerSchema = z.object({
 export const PhysicalProductWarrantySearchSchema = z.object({
   ...baseContextSchema,
   pe_customer_id: z.number().int().optional(),
-  PE_search: z.string().max(300).optional(),
+  pe_search: z.string().max(300).optional(),
   pe_limit: z.number().int().optional(),
 });
 
