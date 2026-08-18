@@ -43,9 +43,9 @@ export const metadata: Metadata = {
     description: publicEnvs.NEXT_PUBLIC_COMPANY_META_DESCRIPTION,
     images: [
       {
-        url: "/images/logo/logo-horizontal-header1.png",
-        width: 1200,
-        height: 630,
+        url: "/images/logo/logo-header.png",
+        width: 800,
+        height: 288,
         alt: publicEnvs.NEXT_PUBLIC_COMPANY_NAME,
       },
     ],
@@ -54,7 +54,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: `${publicEnvs.NEXT_PUBLIC_COMPANY_META_TITLE_MAIN} | ${publicEnvs.NEXT_PUBLIC_COMPANY_META_TITLE_CAPTION}`,
     description: publicEnvs.NEXT_PUBLIC_COMPANY_META_DESCRIPTION,
-    images: ["/images/logo/logo-horizontal-header1.png"],
+    images: ["/images/logo/logo-header.png"],
   },
 };
 

@@ -1,6 +1,40 @@
+import { isRedirectError } from "next/dist/client/components/redirect-error";
+import { headers } from "next/headers";
 import Image from "next/image";
+import { redirect } from "next/navigation";
+import { connection } from "next/server";
+import { Suspense } from "react";
 import { Card } from "@/components/ui/card";
+import { auth } from "@/lib/auth/auth";
+import { createLogger } from "@/lib/logger";
 import { LoginForm } from "./LoginForm";
+
+const logger = createLogger("sign-in-page");
+
+async function SessionGate() {
+  await connection();
+
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    // Redirect authenticated users straight to the dashboard.
+    if (session?.user) {
+      return redirect("/dashboard");
+    }
+  } catch (error) {
+    // Preserve Next.js redirects thrown during session routing.
+    if (isRedirectError(error)) {
+      throw error;
+    }
+
+    // Keep the sign-in form available when session validation fails.
+    logger.error("Session validation error", error);
+  }
+
+  return null;
+}
 
 export default function LoginPage() {
   return (
@@ -17,7 +51,7 @@ export default function LoginPage() {
         <div className="relative flex items-center justify-center">
           <Image
             src="/images/auth/logo-winerp-banner-auth.png"
-            alt="Dashboard Background"
+            alt="WinERP Gestor"
             fill
             sizes="(max-width: 1024px) 100vw, 50vw"
             className="object-contain object-center"
@@ -30,6 +64,10 @@ export default function LoginPage() {
       <div className="w-full max-w-sm lg:hidden">
         <LoginForm />
       </div>
+
+      <Suspense fallback={null}>
+        <SessionGate />
+      </Suspense>
     </div>
   );
 }
