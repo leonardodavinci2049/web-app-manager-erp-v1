@@ -28,8 +28,8 @@ export default function ModeToggle() {
     return (
       <Button
         variant="ghost"
-        className="rounded-full w-10"
-        aria-label="Toggle Theme"
+        className="w-10 rounded-full"
+        aria-label="Alternar tema"
       >
         <div className="size-5" />
       </Button>
@@ -42,8 +42,8 @@ export default function ModeToggle() {
   return (
     <Button
       variant="ghost"
-      className="rounded-full w-10"
-      aria-label="Toggle Theme"
+      className="w-10 rounded-full"
+      aria-label="Alternar tema"
       onClick={() => setTheme(isDark ? "light" : "dark")}
     >
       {isDark ? (

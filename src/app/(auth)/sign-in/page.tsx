@@ -1,11 +1,14 @@
+import { ArrowLeft } from "lucide-react";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { headers } from "next/headers";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { Card } from "@/components/ui/card";
+import { publicEnvs } from "@/core/config/envs.client";
 import { auth } from "@/lib/auth/auth";
 import { createLogger } from "@/lib/logger";
+import { AuthPageCard } from "../components/auth-page-card";
 import { LoginForm } from "./LoginForm";
 
 const logger = createLogger("sign-in-page");
@@ -36,11 +39,26 @@ async function SessionGate() {
 }
 
 export default function LoginPage() {
+  const homeTitle =
+    publicEnvs.NEXT_PUBLIC_COMPANY_META_TITLE_MAIN ||
+    publicEnvs.NEXT_PUBLIC_COMPANY_NAME;
+
   return (
-    <div className="flex w-full items-center justify-center px-4 py-8 sm:px-6 sm:py-12">
-      <Card className="w-full max-w-md gap-8 border-white/70 bg-card/95 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.14)] backdrop-blur-sm sm:p-8 dark:border-border">
+    <div className="grid gap-6">
+      <AuthPageCard>
         <LoginForm />
-      </Card>
+      </AuthPageCard>
+
+      <Link
+        href="/"
+        className="group flex w-fit max-w-full items-start gap-2 px-1 text-sm leading-6 text-muted-foreground transition-colors hover:text-foreground focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+      >
+        <ArrowLeft
+          aria-hidden="true"
+          className="mt-1 size-4 shrink-0 transition-transform group-hover:-translate-x-0.5"
+        />
+        <span>Ir para {homeTitle || "a página inicial"}</span>
+      </Link>
 
       <Suspense fallback={null}>
         <SessionGate />

@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { AuthFormHeader } from "../components/auth-form-header";
 import SubmitButton from "../components/SubmitButton";
 import loginAction from "./login-action";
 
@@ -33,19 +34,15 @@ export function LoginForm({
 
   return (
     <div className={cn("flex flex-col gap-8", className)} {...props}>
-      <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="flex items-center justify-center gap-2 text-2xl font-semibold tracking-tight">
-          <LogIn aria-hidden="true" className="size-5" />
-          Entrar na conta
-        </h1>
-        <p className="text-muted-foreground text-sm text-balance">
-          Digite seus dados de acesso abaixo
-        </p>
-      </div>
+      <AuthFormHeader
+        icon={LogIn}
+        title="Entrar na conta"
+        description="Digite seus dados de acesso para continuar."
+      />
 
-      <div className="grid gap-7">
-        <Form action={formAction} className="grid gap-7">
-          <div className="grid gap-3">
+      <div className="grid gap-6">
+        <Form action={formAction} className="grid gap-6">
+          <div className="grid gap-2.5">
             <Label htmlFor={`email-${formId}`}>Email</Label>
             <Input
               id={`email-${formId}`}
@@ -54,8 +51,9 @@ export function LoginForm({
               placeholder="seu@email.com"
               required
               autoComplete="email"
+              aria-invalid={Boolean(state?.errors?.email)}
               className={cn(
-                "h-11 bg-muted/60 shadow-inner",
+                "h-12 rounded-lg bg-background px-3.5 shadow-xs",
                 state?.errors?.email &&
                   "border-destructive focus-visible:ring-destructive",
               )}
@@ -65,8 +63,16 @@ export function LoginForm({
             )}
           </div>
 
-          <div className="grid gap-3">
-            <Label htmlFor={`password-${formId}`}>Senha</Label>
+          <div className="grid gap-2.5">
+            <div className="flex items-center justify-between gap-4">
+              <Label htmlFor={`password-${formId}`}>Senha</Label>
+              <a
+                href="/forgot-password"
+                className="text-sm font-medium text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
+              >
+                Esqueceu a senha?
+              </a>
+            </div>
             <Input
               id={`password-${formId}`}
               name="password"
@@ -74,8 +80,9 @@ export function LoginForm({
               placeholder="••••••••"
               required
               autoComplete="current-password"
+              aria-invalid={Boolean(state?.errors?.password)}
               className={cn(
-                "h-11 bg-muted/60 shadow-inner",
+                "h-12 rounded-lg bg-background px-3.5 shadow-xs",
                 state?.errors?.password &&
                   "border-destructive focus-visible:ring-destructive",
               )}
@@ -85,14 +92,6 @@ export function LoginForm({
                 {state.errors.password}
               </p>
             )}
-            <div className="text-right">
-              <a
-                href="/forgot-password"
-                className="text-muted-foreground hover:text-foreground text-sm underline-offset-4 hover:underline"
-              >
-                Esqueceu a senha?
-              </a>
-            </div>
           </div>
 
           <SubmitButton />
