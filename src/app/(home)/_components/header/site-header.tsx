@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import ModeToggle from "@/components/theme/mode-toggle";
 import { Button } from "@/components/ui/button";
+import { CustomerAreaButton } from "../customer-area-button";
 import {
   buildWhatsappUrl,
   company,
@@ -22,12 +23,12 @@ export function SiteHeader() {
             className="inline-flex shrink-0 items-center"
             aria-label={`${company.name} - Página inicial`}
           >
-            <div className="relative h-9 w-36 sm:h-11 sm:w-44 md:h-10 md:w-44 lg:h-12 lg:w-48">
+            <div className="relative aspect-[25/9] w-36 sm:w-44 lg:w-48">
               <Image
                 src="/images/logo/logo-header.png"
                 alt={`${company.name} - WinERP Gestor`}
                 fill
-                sizes="(min-width: 1024px) 192px, (min-width: 768px) 176px, 160px"
+                sizes="(min-width: 1024px) 192px, (min-width: 640px) 176px, 144px"
                 className="object-contain object-left"
                 priority
               />
@@ -56,11 +57,11 @@ export function SiteHeader() {
           {/* Actions */}
           <div className="flex items-center gap-1 md:gap-2">
             <Link href="/sign-in">
-              <Button variant="ghost" className="gap-1.5">
+              <CustomerAreaButton className="gap-1.5">
                 <CircleUserRound className="size-5 md:size-4" />
                 <span className="hidden sm:inline">Área do Cliente</span>
                 <span className="sm:hidden">Acessar</span>
-              </Button>
+              </CustomerAreaButton>
             </Link>
             <ModeToggle />
             <Link href={whatsappUrl} className="hidden lg:inline-flex">

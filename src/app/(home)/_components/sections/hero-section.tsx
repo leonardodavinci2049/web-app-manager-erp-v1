@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { CustomerAreaButton } from "../customer-area-button";
 import { hero, highlights } from "../landing-content";
 
 export function HeroSection() {
@@ -34,14 +35,13 @@ export function HeroSection() {
                 </Button>
               </Link>
               <Link href={hero.secondaryCta.href} className="w-full sm:w-auto">
-                <Button
+                <CustomerAreaButton
                   size="lg"
-                  variant="outline"
-                  className="h-12 w-full bg-transparent px-6 text-base sm:w-auto"
+                  className="h-12 w-full px-6 text-base sm:w-auto"
                 >
                   <CircleUserRound className="size-4 sm:size-5" />
                   {hero.secondaryCta.label}
-                </Button>
+                </CustomerAreaButton>
               </Link>
             </div>
 

@@ -7,6 +7,7 @@ type MobileBarItem = {
   icon: LucideIcon;
   label: string;
   external?: boolean;
+  highlighted?: boolean;
 };
 
 /**
@@ -37,6 +38,7 @@ export function HomeMobileBottomBar() {
       href: "/sign-in",
       icon: LogIn,
       label: "Área do Cliente",
+      highlighted: true,
     },
   ];
 
@@ -54,7 +56,11 @@ export function HomeMobileBottomBar() {
               {...(item.external
                 ? { target: "_blank", rel: "noopener noreferrer" }
                 : {})}
-              className="flex min-h-[3.25rem] flex-col items-center justify-center gap-1 px-1 py-2 text-muted-foreground transition-colors hover:text-foreground focus-visible:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none aria-[current=page]:text-foreground"
+              className={`flex min-h-[3.25rem] flex-col items-center justify-center gap-1 px-1 py-2 transition-colors focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none ${
+                item.highlighted
+                  ? "text-success hover:text-success-hover focus-visible:text-success-hover"
+                  : "text-muted-foreground hover:text-foreground focus-visible:text-foreground aria-[current=page]:text-foreground"
+              }`}
             >
               <item.icon className="size-5" aria-hidden="true" />
               <span className="text-[0.6875rem] font-medium leading-none">
