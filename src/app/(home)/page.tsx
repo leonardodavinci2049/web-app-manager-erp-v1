@@ -1,31 +1,51 @@
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { connection } from "next/server";
+import { Suspense } from "react";
+import { Spinner } from "@/components/ui/spinner";
 import { auth } from "@/lib/auth/auth";
 
-export default async function HomePage() {
-  await connection();
+async function HomeRedirect() {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
     });
 
-    // Se usuário está logado E tem sessão válida
+    // Redirect authenticated users to the dashboard.
     if (session?.user) {
-      redirect("/dashboard");
+      return redirect("/dashboard");
     }
 
-    // Se não está logado OU sessão inválida
-    redirect("/sign-in");
+    // Redirect unauthenticated users to the sign-in page.
+    return redirect("/sign-in");
   } catch (error) {
-    // Se for um redirect, deixa passar (comportamento normal do Next.js)
+    // Preserve Next.js redirects thrown during session routing.
     if (isRedirectError(error)) {
       throw error;
     }
 
-    // Em caso de erro real na validação, redireciona para login
+    // Fall back to sign-in when session validation fails unexpectedly.
     console.error("Session validation error:", error);
-    redirect("/sign-in");
+    return redirect("/sign-in");
   }
+}
+
+function HomePageFallback() {
+  return (
+    <div
+      className="flex min-h-svh items-center justify-center gap-2 text-muted-foreground"
+      role="status"
+    >
+      <Spinner aria-hidden="true" className="size-8" />
+      <span className="sr-only">Verificando sessão...</span>
+    </div>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <Suspense fallback={<HomePageFallback />}>
+      <HomeRedirect />
+    </Suspense>
+  );
 }
