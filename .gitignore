@@ -56,19 +56,11 @@ src/core/config-tenant
 # agent files
 .agents/
 .codex/
-/.claude/
-
-# project skills
-!.agents/
-.agents/*
-!.agents/skills/
-.agents/skills/*
-!.agents/skills/create-feature-worktree/
-!.agents/skills/create-feature-worktree/**
+.github/
+.claude/
 
 # project generated files
 /scripts
-!/scripts/create-initial-intention.sh
 /docs
 /API-documentation
 /API-assets-documentation
