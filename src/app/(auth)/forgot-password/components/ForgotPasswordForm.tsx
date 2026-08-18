@@ -1,5 +1,6 @@
 "use client";
 
+import { KeyRound } from "lucide-react";
 import { useId, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -102,7 +103,8 @@ export function ForgotPasswordForm({
   return (
     <div className={cn("flex flex-col gap-8", className)} {...props}>
       <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="text-2xl font-semibold tracking-tight">
+        <h1 className="flex items-center justify-center gap-2 text-2xl font-semibold tracking-tight">
+          <KeyRound aria-hidden="true" className="size-5" />
           Recuperar senha
         </h1>
         <p className="text-muted-foreground text-sm text-balance">
