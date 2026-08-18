@@ -1,5 +1,6 @@
 "use client";
 
+import { KeyRound } from "lucide-react";
 import { useId, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -100,16 +101,19 @@ export function ForgotPasswordForm({
   };
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div className={cn("flex flex-col gap-8", className)} {...props}>
       <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="text-2xl font-bold">Recuperar senha</h1>
+        <h1 className="flex items-center justify-center gap-2 text-2xl font-semibold tracking-tight">
+          <KeyRound aria-hidden="true" className="size-5" />
+          Recuperar senha
+        </h1>
         <p className="text-muted-foreground text-sm text-balance">
           Digite seu email para receber instruções de recuperação
         </p>
       </div>
 
-      <div className="grid gap-6">
-        <form onSubmit={onSubmit} className="grid gap-6">
+      <div className="grid gap-7">
+        <form onSubmit={onSubmit} className="grid gap-7">
           <div className="grid gap-3">
             <Label htmlFor={`email-${formId}`}>Email</Label>
             <Input
@@ -120,6 +124,7 @@ export function ForgotPasswordForm({
               required
               autoComplete="email"
               className={cn(
+                "h-11 bg-muted/60 shadow-inner",
                 errors?.email &&
                   "border-destructive focus-visible:ring-destructive",
               )}
@@ -129,7 +134,7 @@ export function ForgotPasswordForm({
             )}
           </div>
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button type="submit" className="h-11 w-full" disabled={isLoading}>
             {isLoading ? "Enviando..." : "Enviar instruções"}
           </Button>
         </form>
