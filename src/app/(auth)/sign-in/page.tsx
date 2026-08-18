@@ -1,6 +1,5 @@
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { headers } from "next/headers";
-import Image from "next/image";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
@@ -38,32 +37,10 @@ async function SessionGate() {
 
 export default function LoginPage() {
   return (
-    <div className="flex items-center justify-center p-4">
-      {/* Card para telas grandes com formulário e imagem */}
-      <Card className="bg-card/50 hidden w-full max-w-5xl overflow-hidden border-0 shadow-2xl backdrop-blur-sm lg:grid lg:h-[600px] lg:grid-cols-2">
-        <div className="flex flex-col gap-4 p-6 md:p-10">
-          <div className="flex flex-1 items-center justify-center">
-            <div className="w-full max-w-sm">
-              <LoginForm />
-            </div>
-          </div>
-        </div>
-        <div className="relative flex items-center justify-center">
-          <Image
-            src="/images/auth/logo-winerp-banner-auth.png"
-            alt="WinERP Gestor"
-            fill
-            sizes="(max-width: 1024px) 100vw, 50vw"
-            className="object-contain object-center"
-            priority
-          />
-        </div>
-      </Card>
-
-      {/* Formulário simples para telas menores */}
-      <div className="w-full max-w-sm lg:hidden">
+    <div className="flex w-full items-center justify-center px-4 py-8 sm:px-6 sm:py-12">
+      <Card className="w-full max-w-md gap-8 border-white/70 bg-card/95 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.14)] backdrop-blur-sm sm:p-8 dark:border-border">
         <LoginForm />
-      </div>
+      </Card>
 
       <Suspense fallback={null}>
         <SessionGate />

@@ -31,16 +31,18 @@ export function LoginForm({
   }, [state]);
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div className={cn("flex flex-col gap-8", className)} {...props}>
       <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="text-2xl font-bold">Entrar na conta</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">
+          Entrar na conta
+        </h1>
         <p className="text-muted-foreground text-sm text-balance">
           Digite seus dados de acesso abaixo
         </p>
       </div>
 
-      <div className="grid gap-6">
-        <Form action={formAction} className="grid gap-6">
+      <div className="grid gap-7">
+        <Form action={formAction} className="grid gap-7">
           <div className="grid gap-3">
             <Label htmlFor={`email-${formId}`}>Email</Label>
             <Input
@@ -51,6 +53,7 @@ export function LoginForm({
               required
               autoComplete="email"
               className={cn(
+                "h-11 bg-muted/60 shadow-inner",
                 state?.errors?.email &&
                   "border-destructive focus-visible:ring-destructive",
               )}
@@ -70,6 +73,7 @@ export function LoginForm({
               required
               autoComplete="current-password"
               className={cn(
+                "h-11 bg-muted/60 shadow-inner",
                 state?.errors?.password &&
                   "border-destructive focus-visible:ring-destructive",
               )}
