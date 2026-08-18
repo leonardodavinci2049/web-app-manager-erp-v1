@@ -2,7 +2,7 @@ import { Clock, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import { cacheLife } from "next/cache";
 import Image from "next/image";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { CustomerAreaButton } from "../customer-area-button";
 import {
   buildWhatsappUrl,
   company,
@@ -142,7 +142,9 @@ export async function SiteFooter() {
               Já é cliente? Acesse o WinERP Gestor e continue de onde parou.
             </p>
             <Link href="/sign-in">
-              <Button className="w-full sm:w-auto">Área do Cliente</Button>
+              <CustomerAreaButton className="w-full sm:w-auto">
+                Área do Cliente
+              </CustomerAreaButton>
             </Link>
           </div>
         </div>
