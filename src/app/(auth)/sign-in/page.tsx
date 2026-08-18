@@ -5,7 +5,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { publicEnvs } from "@/core/config/envs.client";
 import { auth } from "@/lib/auth/auth";
 import { createLogger } from "@/lib/logger";
 import { AuthPageCard } from "../components/auth-page-card";
@@ -39,10 +38,6 @@ async function SessionGate() {
 }
 
 export default function LoginPage() {
-  const homeTitle =
-    publicEnvs.NEXT_PUBLIC_COMPANY_META_TITLE_MAIN ||
-    publicEnvs.NEXT_PUBLIC_COMPANY_NAME;
-
   return (
     <div className="grid gap-6">
       <AuthPageCard>
@@ -57,7 +52,7 @@ export default function LoginPage() {
           aria-hidden="true"
           className="mt-1 size-4 shrink-0 transition-transform group-hover:-translate-x-0.5"
         />
-        <span>Ir para {homeTitle || "a página inicial"}</span>
+        <span>Ir para a Home</span>
       </Link>
 
       <Suspense fallback={null}>

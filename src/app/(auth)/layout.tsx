@@ -78,21 +78,25 @@ export default function AuthLayout({
               width={800}
               height={288}
               priority
-              className="h-10 w-auto sm:h-12"
+              className="h-14 w-auto sm:h-16"
             />
           </Link>
 
           <ModeToggle />
         </header>
 
-        <main className="relative z-10 flex flex-1 items-center justify-center px-4 py-8 sm:px-8 sm:py-10">
-          <div className="w-full max-w-md">
-            <p className="mb-6 px-1 text-2xl font-semibold tracking-tight text-balance lg:hidden">
+        <main className="relative z-10 flex flex-1 flex-col px-4 py-8 sm:px-8 sm:py-10">
+          <div className="flex w-full flex-1 items-center justify-center lg:hidden">
+            <p className="w-full max-w-md px-1 text-2xl font-semibold tracking-tight text-balance">
               Acesso ao ambiente de gestão
             </p>
-
-            {children}
           </div>
+
+          <div className="flex w-full items-center justify-center lg:flex-1">
+            <div className="w-full max-w-md">{children}</div>
+          </div>
+
+          <div aria-hidden="true" className="flex-1 lg:hidden" />
         </main>
 
         <p className="relative z-10 px-5 pb-6 text-center text-xs text-muted-foreground lg:hidden">
