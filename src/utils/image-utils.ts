@@ -1,3 +1,8 @@
+import {
+  REMOTE_IMAGE_ORIGINS,
+  toImageOriginKey,
+} from "@/core/config/image-origins";
+
 /**
  * Image validation and fallback utilities
  */
@@ -6,8 +11,24 @@
 export const DEFAULT_PRODUCT_IMAGE = "/images/product/no-image.jpeg";
 
 /**
+ * Origins remotos permitidos para `next/image`.
+ * Derivado de `REMOTE_IMAGE_ORIGINS` (fonte única de verdade), consumido
+ * também por `images.remotePatterns` em `next.config.ts`.
+ */
+const ALLOWED_IMAGE_ORIGINS = new Set(
+  REMOTE_IMAGE_ORIGINS.map((origin) => toImageOriginKey(origin)),
+);
+
+function isAllowedImageOrigin(url: URL): boolean {
+  const port = url.port ? `:${url.port}` : "";
+  const originKey = `${url.protocol}//${url.hostname}${port}`;
+  return ALLOWED_IMAGE_ORIGINS.has(originKey);
+}
+
+/**
  * Valida se uma URL de imagem é válida
- * Note: Domain validation is handled by Next.js Image component via next.config.ts
+ * URLs remotas precisam pertencer aos origins configurados em
+ * `next.config.ts`; caso contrário o Next.js Image rejeita o render.
  */
 export function isValidImageUrl(url: string): boolean {
   if (!url || typeof url !== "string" || url.trim() === "") {
@@ -29,8 +50,8 @@ export function isValidImageUrl(url: string): boolean {
       return false;
     }
 
-    // Domínios são validados pelo Next.js Image component via next.config.ts
-    return true;
+    // Apenas origins configurados em next.config.ts
+    return isAllowedImageOrigin(urlObj);
   } catch {
     return false;
   }

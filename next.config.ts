@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { REMOTE_IMAGE_ORIGINS } from "./src/core/config/image-origins";
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -13,41 +14,12 @@ const nextConfig: NextConfig = {
   },
   images: {
     qualities: [75, 100],
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "images.unsplash.com",
-      },
-      {
-        protocol: "https",
-        hostname: "picsum.photos",
-      },
-      {
-        protocol: "https",
-        hostname: "mundialmegastore.com.br",
-        port: "",
-        pathname: "/**",
-      },
-      // Production assets domain
-      {
-        protocol: "https",
-        hostname: "assents01.comsuporte.com.br",
-        port: "",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "admin01.winerp.com.br",
-        port: "",
-        pathname: "/**",
-      },
-      {
-        protocol: "http",
-        hostname: "localhost",
-        port: "5573",
-        pathname: "/**",
-      },
-    ],
+    remotePatterns: REMOTE_IMAGE_ORIGINS.map((origin) => ({
+      protocol: origin.protocol,
+      hostname: origin.hostname,
+      port: origin.port ?? "",
+      pathname: origin.pathname ?? "/**",
+    })),
     dangerouslyAllowLocalIP: true,
   },
 };
