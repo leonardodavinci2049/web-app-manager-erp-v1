@@ -68,7 +68,7 @@ export function HeroSection() {
           <div className="relative px-4 sm:px-8 lg:px-0">
             <div className="relative mx-auto aspect-[634/800] w-full max-w-sm overflow-hidden rounded-2xl border border-border bg-card shadow-xl sm:max-w-md lg:max-w-lg">
               <Image
-                src="/images/auth/logo-winerp-banner-auth.png"
+                src="/images/home/winerp-banner.png"
                 alt="Identidade visual do sistema WinERP Gestor"
                 fill
                 sizes="(min-width: 1024px) 512px, (min-width: 640px) 448px, 384px"
