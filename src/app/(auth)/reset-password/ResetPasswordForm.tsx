@@ -15,6 +15,7 @@ import {
   type ResetPasswordFormData,
   validateResetPasswordData,
 } from "../_common-validations/validation";
+import { AuthFormHeader } from "../components/auth-form-header";
 
 interface ResetPasswordFormProps {
   token: string;
@@ -97,19 +98,15 @@ const ResetPasswordForm = ({ token }: ResetPasswordFormProps) => {
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="flex items-center justify-center gap-2 text-2xl font-semibold tracking-tight">
-          <LockKeyhole aria-hidden="true" className="size-5" />
-          Redefinir senha
-        </h1>
-        <p className="text-muted-foreground text-sm text-balance">
-          Digite sua nova senha abaixo
-        </p>
-      </div>
+      <AuthFormHeader
+        icon={LockKeyhole}
+        title="Redefinir senha"
+        description="Crie uma nova senha para recuperar o acesso à sua conta."
+      />
 
-      <div className="grid gap-7">
-        <form onSubmit={onSubmit} className="grid gap-7">
-          <div className="grid gap-3">
+      <div className="grid gap-6">
+        <form onSubmit={onSubmit} className="grid gap-6">
+          <div className="grid gap-2.5">
             <Label htmlFor={`newPassword-${formId}`}>Nova senha</Label>
             <Input
               id={`newPassword-${formId}`}
@@ -118,8 +115,9 @@ const ResetPasswordForm = ({ token }: ResetPasswordFormProps) => {
               placeholder="••••••••"
               required
               autoComplete="new-password"
+              aria-invalid={Boolean(errors?.password)}
               className={cn(
-                "h-11 bg-muted/60 shadow-inner",
+                "h-12 rounded-lg bg-background px-3.5 shadow-xs",
                 errors?.password &&
                   "border-destructive focus-visible:ring-destructive",
               )}
@@ -129,7 +127,7 @@ const ResetPasswordForm = ({ token }: ResetPasswordFormProps) => {
             )}
           </div>
 
-          <div className="grid gap-3">
+          <div className="grid gap-2.5">
             <Label htmlFor={`confirmPassword-${formId}`}>Confirmar senha</Label>
             <Input
               id={`confirmPassword-${formId}`}
@@ -138,8 +136,9 @@ const ResetPasswordForm = ({ token }: ResetPasswordFormProps) => {
               placeholder="Confirme sua senha"
               required
               autoComplete="new-password"
+              aria-invalid={Boolean(errors?.confirmPassword)}
               className={cn(
-                "h-11 bg-muted/60 shadow-inner",
+                "h-12 rounded-lg bg-background px-3.5 shadow-xs",
                 errors?.confirmPassword &&
                   "border-destructive focus-visible:ring-destructive",
               )}
@@ -151,14 +150,21 @@ const ResetPasswordForm = ({ token }: ResetPasswordFormProps) => {
             )}
           </div>
 
-          <Button type="submit" className="h-11 w-full" disabled={isLoading}>
+          <Button
+            type="submit"
+            className="h-12 w-full rounded-lg shadow-sm"
+            disabled={isLoading}
+          >
             {isLoading ? "Redefinindo..." : "Redefinir senha"}
           </Button>
         </form>
       </div>
 
-      <div className="text-center text-sm">
-        <a href="/sign-in" className="underline underline-offset-4">
+      <div className="border-t pt-6 text-center text-sm">
+        <a
+          href="/sign-in"
+          className="font-medium text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
+        >
           Voltar para o login
         </a>
       </div>
