@@ -1,9 +1,9 @@
 "use client";
 
+import { LockKeyhole } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type React from "react";
 import { useId, useState } from "react";
-
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -96,16 +96,19 @@ const ResetPasswordForm = ({ token }: ResetPasswordFormProps) => {
   };
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8">
       <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="text-2xl font-bold">Redefinir senha</h1>
+        <h1 className="flex items-center justify-center gap-2 text-2xl font-semibold tracking-tight">
+          <LockKeyhole aria-hidden="true" className="size-5" />
+          Redefinir senha
+        </h1>
         <p className="text-muted-foreground text-sm text-balance">
           Digite sua nova senha abaixo
         </p>
       </div>
 
-      <div className="grid gap-6">
-        <form onSubmit={onSubmit} className="grid gap-6">
+      <div className="grid gap-7">
+        <form onSubmit={onSubmit} className="grid gap-7">
           <div className="grid gap-3">
             <Label htmlFor={`newPassword-${formId}`}>Nova senha</Label>
             <Input
@@ -116,6 +119,7 @@ const ResetPasswordForm = ({ token }: ResetPasswordFormProps) => {
               required
               autoComplete="new-password"
               className={cn(
+                "h-11 bg-muted/60 shadow-inner",
                 errors?.password &&
                   "border-destructive focus-visible:ring-destructive",
               )}
@@ -135,6 +139,7 @@ const ResetPasswordForm = ({ token }: ResetPasswordFormProps) => {
               required
               autoComplete="new-password"
               className={cn(
+                "h-11 bg-muted/60 shadow-inner",
                 errors?.confirmPassword &&
                   "border-destructive focus-visible:ring-destructive",
               )}
@@ -146,7 +151,7 @@ const ResetPasswordForm = ({ token }: ResetPasswordFormProps) => {
             )}
           </div>
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button type="submit" className="h-11 w-full" disabled={isLoading}>
             {isLoading ? "Redefinindo..." : "Redefinir senha"}
           </Button>
         </form>
