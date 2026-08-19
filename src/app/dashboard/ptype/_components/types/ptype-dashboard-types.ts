@@ -21,3 +21,10 @@ export interface PtypeActionResult {
   ptypeId?: number;
   fieldErrors?: Record<string, string[]>;
 }
+
+export interface PtypeListingImageResult {
+  success: boolean;
+  message?: string;
+  error?: string;
+  warning?: string;
+}

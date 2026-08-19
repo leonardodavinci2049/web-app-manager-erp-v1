@@ -34,6 +34,7 @@ export function BrandCard({
           <BrandImage
             name={brandName}
             imagePath={imagePath}
+            brandId={brandId}
             viewMode="list"
             eager={eager}
           />
@@ -64,6 +65,7 @@ export function BrandCard({
         <BrandImage
           name={brandName}
           imagePath={imagePath}
+          brandId={brandId}
           viewMode="grid"
           eager={eager}
         />

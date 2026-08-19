@@ -36,3 +36,10 @@ export interface CarrierActionResult {
   carrierId?: number;
   fieldErrors?: Record<string, string[]>;
 }
+
+export interface CarrierListingImageResult {
+  success: boolean;
+  message?: string;
+  error?: string;
+  warning?: string;
+}

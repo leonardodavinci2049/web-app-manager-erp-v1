@@ -1,12 +1,14 @@
 "use client";
 
 import { RegistryEntityImage } from "@/components/registry";
+import { BrandImageUpload } from "./brand-image-upload";
 
 const DEFAULT_IMAGE = "/default-images/brand.webp";
 
 interface BrandImageProps {
   name: string;
   imagePath?: string;
+  brandId?: number;
   viewMode: "grid" | "list";
   size?: "sm" | "md";
   compact?: boolean;
@@ -16,17 +18,27 @@ interface BrandImageProps {
 
 /**
  * Imagem da marca (Client). Delega a exibicao padronizada ao componente
- * compartilhado, preservando a imagem padrao da marca.
+ * compartilhado, preservando a imagem padrao da marca. Quando `brandId`
+ * e' fornecido (listagem), o gatilho de upload funcional substitui o stub.
  */
 export function BrandImage({
   name,
   imagePath,
+  brandId,
   viewMode,
   size = "md",
   compact = false,
   eager = false,
   className,
 }: BrandImageProps) {
+  const uploadTrigger = brandId ? (
+    <BrandImageUpload
+      brandId={brandId}
+      viewMode={viewMode}
+      compact={size === "sm" ? true : compact}
+    />
+  ) : undefined;
+
   return (
     <RegistryEntityImage
       name={name}
@@ -38,6 +50,7 @@ export function BrandImage({
       compact={compact}
       eager={eager}
       className={className}
+      uploadTrigger={uploadTrigger}
     />
   );
 }

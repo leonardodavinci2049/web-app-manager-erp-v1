@@ -2,7 +2,11 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { createImageErrorHandler, getValidImageUrl } from "@/utils/image-utils";
+import {
+  createImageErrorHandler,
+  DEFAULT_PRODUCT_IMAGE,
+  getValidImageUrl,
+} from "@/utils/image-utils";
 import { RegistryImageUploadStub } from "./registry-image-upload-stub";
 import type { RegistryViewMode } from "./use-registry-view-mode";
 
@@ -18,15 +22,19 @@ interface RegistryEntityImageProps {
   compact?: boolean;
   eager?: boolean;
   className?: string;
+  uploadTrigger?: React.ReactNode;
 }
 
 /**
  * Imagem padronizada de cadastro (Client). Reproduz o padrao visual do catalogo
  * de produtos: no modo grade, um banner de proporcao 3/2 com zoom no hover e o
  * gatilho de upload quando nao ha imagem propria; no modo lista, um quadrado
- * arredondado. O tamanho "sm" renderiza um avatar compacto para linhas de
- * tabela, sem gatilho de upload. Cada modulo preserva sua propria imagem padrão
- * via `defaultImage`.
+ * arredondado. Cada modulo preserva sua propria imagem padrao via
+ * `defaultImage`. Quando `uploadTrigger` e' fornecido, ele substitui o stub
+ * visual nos tres modos — inclusive no avatar compacto `size="sm"` das tabelas
+ * — e so' aparece quando `PATH_IMAGEM` esta vazio, invalido ou falha ao
+ * carregar. O estado de erro e' derivado do path que falhou, portanto um novo
+ * `PATH_IMAGEM` apos o upload volta a ser carregado sem remontar o componente.
  */
 export function RegistryEntityImage({
   name,
@@ -38,28 +46,44 @@ export function RegistryEntityImage({
   compact = false,
   eager = false,
   className,
+  uploadTrigger,
 }: RegistryEntityImageProps) {
-  const [imageError, setImageError] = useState(false);
+  const [failedImagePath, setFailedImagePath] = useState<string | null>(null);
   const imageErrorHandler = createImageErrorHandler();
 
-  const hasRealImage =
+  const resolvedSrc = imagePath
+    ? getValidImageUrl(imagePath)
+    : DEFAULT_PRODUCT_IMAGE;
+  const hasValidImagePath =
     !!imagePath &&
     imagePath.trim() !== "" &&
     imagePath !== PRODUCT_FALLBACK &&
-    !imageError;
+    resolvedSrc !== DEFAULT_PRODUCT_IMAGE;
+  const imageError = failedImagePath !== null && failedImagePath === imagePath;
+  const hasRealImage = hasValidImagePath && !imageError;
 
-  const src = hasRealImage ? getValidImageUrl(imagePath) : defaultImage;
+  const src = hasRealImage ? resolvedSrc : defaultImage;
   const alt = `Imagem ${entityLabel} ${name}`;
 
   const handleImageError = hasRealImage
     ? (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-        setImageError(true);
+        setFailedImagePath(imagePath ?? "");
         imageErrorHandler.onError(e);
       }
     : undefined;
-  const handleImageLoad = hasRealImage ? () => setImageError(false) : undefined;
+  const handleImageLoad = hasRealImage
+    ? () => setFailedImagePath(null)
+    : undefined;
 
   const loading = eager ? "eager" : "lazy";
+
+  const fallbackTrigger = uploadTrigger ?? (
+    <RegistryImageUploadStub
+      viewMode={viewMode}
+      entityLabel={entityLabel}
+      compact={compact}
+    />
+  );
 
   if (viewMode === "list" && size === "sm") {
     return (
@@ -74,6 +98,7 @@ export function RegistryEntityImage({
           onError={handleImageError}
           onLoad={handleImageLoad}
         />
+        {!hasRealImage && uploadTrigger}
       </div>
     );
   }
@@ -95,13 +120,7 @@ export function RegistryEntityImage({
           onError={handleImageError}
           onLoad={handleImageLoad}
         />
-        {!hasRealImage && (
-          <RegistryImageUploadStub
-            viewMode={viewMode}
-            entityLabel={entityLabel}
-            compact={compact}
-          />
-        )}
+        {!hasRealImage && fallbackTrigger}
       </div>
     );
   }
@@ -120,13 +139,7 @@ export function RegistryEntityImage({
         onError={handleImageError}
         onLoad={handleImageLoad}
       />
-      {!hasRealImage && (
-        <RegistryImageUploadStub
-          viewMode={viewMode}
-          entityLabel={entityLabel}
-          compact={compact}
-        />
-      )}
+      {!hasRealImage && fallbackTrigger}
     </div>
   );
 }

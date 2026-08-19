@@ -82,6 +82,7 @@ function SupplierCard({
         <SupplierImage
           name={supplier.name}
           imagePath={supplier.imagePath}
+          supplierId={supplier.id}
           viewMode={viewMode}
         />
         <div className="min-w-0 flex-1 space-y-3">
@@ -254,6 +255,7 @@ export function SupplierCollection({
                       <SupplierImage
                         name={supplier.name}
                         imagePath={supplier.imagePath}
+                        supplierId={supplier.id}
                         viewMode="list"
                         size="sm"
                       />

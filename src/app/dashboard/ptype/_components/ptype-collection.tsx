@@ -100,6 +100,7 @@ export function PtypeCollection({
                 <PtypeImage
                   name={item.name}
                   imagePath={item.imagePath}
+                  ptypeId={item.id}
                   viewMode="grid"
                 />
                 <div className="min-w-0">
@@ -133,6 +134,7 @@ export function PtypeCollection({
                   <PtypeImage
                     name={item.name}
                     imagePath={item.imagePath}
+                    ptypeId={item.id}
                     viewMode="list"
                   />
                   <div className="min-w-0 flex-1">
@@ -179,6 +181,7 @@ export function PtypeCollection({
                       <PtypeImage
                         name={item.name}
                         imagePath={item.imagePath}
+                        ptypeId={item.id}
                         viewMode="list"
                         size="sm"
                       />

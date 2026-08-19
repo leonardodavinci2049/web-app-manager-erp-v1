@@ -96,6 +96,7 @@ function CustomerCard({
         <CustomerImage
           name={customer.name}
           imagePath={customer.imagePath}
+          customerId={customer.customerId}
           viewMode={viewMode}
         />
         <div className="min-w-0 flex-1 space-y-3">
@@ -272,6 +273,7 @@ export function CustomerCollection({
                       <CustomerImage
                         name={customer.name}
                         imagePath={customer.imagePath}
+                        customerId={customer.customerId}
                         viewMode="list"
                         size="sm"
                       />

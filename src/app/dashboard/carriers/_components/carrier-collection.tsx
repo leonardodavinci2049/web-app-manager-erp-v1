@@ -57,6 +57,7 @@ function CarrierCard({
         <CarrierImage
           name={carrier.name}
           imagePath={carrier.imagePath}
+          carrierId={carrier.id}
           viewMode={viewMode}
         />
         <div className="min-w-0 flex-1 space-y-3">
@@ -212,6 +213,7 @@ export function CarrierCollection({
                       <CarrierImage
                         name={carrier.name}
                         imagePath={carrier.imagePath}
+                        carrierId={carrier.id}
                         viewMode="list"
                         size="sm"
                       />
