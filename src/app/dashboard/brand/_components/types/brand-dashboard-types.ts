@@ -37,3 +37,10 @@ export interface BrandActionResult {
   brandId?: number;
   fieldErrors?: Record<string, string[]>;
 }
+
+export interface BrandListingImageResult {
+  success: boolean;
+  message?: string;
+  error?: string;
+  warning?: string;
+}

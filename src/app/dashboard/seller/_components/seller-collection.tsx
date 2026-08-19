@@ -76,6 +76,7 @@ function SellerCard({
         <SellerImage
           name={seller.name}
           imagePath={seller.imagePath}
+          sellerId={seller.id}
           viewMode={viewMode}
         />
         <div className="min-w-0 flex-1 space-y-3">
@@ -250,6 +251,7 @@ export function SellerCollection({
                       <SellerImage
                         name={seller.name}
                         imagePath={seller.imagePath}
+                        sellerId={seller.id}
                         viewMode="list"
                         size="sm"
                       />

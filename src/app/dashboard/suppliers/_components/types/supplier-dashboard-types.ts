@@ -21,3 +21,10 @@ export interface SupplierActionResult {
   supplierId?: number;
   fieldErrors?: Record<string, string[]>;
 }
+
+export interface SupplierListingImageResult {
+  success: boolean;
+  message?: string;
+  error?: string;
+  warning?: string;
+}

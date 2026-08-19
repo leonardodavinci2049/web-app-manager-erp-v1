@@ -34,6 +34,13 @@ export interface CustomerActionResult {
   fieldErrors?: Record<string, string[]>;
 }
 
+export interface CustomerListingImageResult {
+  success: boolean;
+  message?: string;
+  error?: string;
+  warning?: string;
+}
+
 export interface CustomerCreateValues {
   name: string;
   email: string;

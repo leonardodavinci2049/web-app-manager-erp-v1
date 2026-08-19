@@ -17,3 +17,10 @@ export interface SellerSearchParams {
   page: number;
   limit: SellerPageLimit;
 }
+
+export interface SellerListingImageResult {
+  success: boolean;
+  message?: string;
+  error?: string;
+  warning?: string;
+}
