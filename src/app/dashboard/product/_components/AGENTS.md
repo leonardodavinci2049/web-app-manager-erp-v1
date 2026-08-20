@@ -95,10 +95,12 @@ Each editor in `product-card/inline-update/` follows the same pattern:
 
 1. Local buffer (`tempX`) + display value (`displayX`).
 2. Local validation (size/range) with error `toast`.
-3. Calls the appropriate **Server Action** in `@/app/actions/*`.
+3. Calls the appropriate **Server Action**.
 4. On success: updates `displayX`, exits edit mode, and triggers `router.refresh()` to sync with the server.
 
-Actions consumed: `action-product-updates` (name, price, stock), `action-product-images` (upload), `action-taxonomy` (linkages), `action-categories` (category menu).
+Actions consumed: `action-product-updates` (name, price, stock),
+`../_actions/product-list-image-actions` (upload plus `PATH_IMAGEM` sync),
+`action-taxonomy` (linkages), `action-categories` (category menu).
 
 ## Relevant External Dependencies
 
