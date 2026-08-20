@@ -3,7 +3,7 @@
 import { Loader2, Upload } from "lucide-react";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
-import { uploadProductImageAction } from "@/app/actions/action-product-images";
+import { uploadProductListImageAction } from "../_actions/product-list-image-actions";
 
 interface ProductImageUploadProps {
   productId: string;
@@ -59,10 +59,11 @@ export function ProductImageUpload({
         formData.append("description", `${productName} - Imagem principal`);
         formData.append("altText", `Imagem do produto ${productName}`);
 
-        const result = await uploadProductImageAction(formData);
+        const result = await uploadProductListImageAction(formData);
 
         if (result.success) {
-          toast.success("Imagem enviada com sucesso!");
+          toast.success(result.message);
+          if (result.warning) toast.warning(result.warning);
           await onUploadSuccess?.();
         } else {
           toast.error(result.error || "Erro ao enviar imagem");

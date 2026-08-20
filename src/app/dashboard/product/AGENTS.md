@@ -43,9 +43,11 @@ product/
 └── new-product/                     # Standalone product creation route
 ```
 
-Mutations consumed by the catalog remain in the global Server Actions under
-`src/app/actions`, including product updates, image upload, taxonomy
-relationships, and category reads.
+Most mutations consumed by the catalog remain in the global Server Actions
+under `src/app/actions`, including product updates, taxonomy relationships, and
+category reads. Catalog image upload uses the colocated
+`_actions/product-list-image-actions.ts` action so the uploaded asset is made
+primary and its original URL is synchronized to `PATH_IMAGEM`.
 
 ## Page Responsibilities
 
