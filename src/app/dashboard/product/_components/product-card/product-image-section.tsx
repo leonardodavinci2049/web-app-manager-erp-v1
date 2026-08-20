@@ -32,6 +32,15 @@ function wasCreatedWithinLastWeek(createdAt?: string): boolean {
   return productAge >= 0 && productAge < ONE_WEEK_IN_MS;
 }
 
+function isLocalAssetsImage(url: string): boolean {
+  try {
+    const parsedUrl = new URL(url);
+    return parsedUrl.hostname === "localhost" && parsedUrl.port === "5573";
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Secao de imagem do card (Client): exibe a imagem do produto ou a imagem
  * padrao de fallback, com badges de estado (promocao/novo/importado/esgotado).
@@ -47,30 +56,37 @@ export function ProductImageSection({
   compact = false,
 }: ProductImageSectionProps) {
   const router = useRouter();
-  const [imageError, setImageError] = useState(false);
+  const [failedImagePath, setFailedImagePath] = useState<string | null>(null);
   const isOutOfStock = product.storeStock === 0;
   const isNew = wasCreatedWithinLastWeek(product.createdAt);
 
   const imageErrorHandler = createImageErrorHandler();
   const detailsHref = productDetailsHref ?? `/dashboard/product/${product.id}`;
+  const normalizedImagePath = product.imagePath?.trim() ?? "";
+  const resolvedImageSrc = getValidImageUrl(normalizedImagePath);
 
   const hasRealImage =
-    product.imagePath &&
-    product.imagePath.trim() !== "" &&
-    product.imagePath !== "/images/product/no-image.jpeg" &&
-    !imageError;
+    normalizedImagePath !== "" &&
+    normalizedImagePath !== "/images/product/no-image.jpeg" &&
+    resolvedImageSrc === normalizedImagePath &&
+    failedImagePath !== normalizedImagePath;
 
-  const imageSrc = hasRealImage
-    ? getValidImageUrl(product.imagePath)
-    : PLACEHOLDER_PRODUCT_IMAGE;
+  const imageSrc = hasRealImage ? resolvedImageSrc : PLACEHOLDER_PRODUCT_IMAGE;
 
   const handleImageError = hasRealImage
     ? (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-        setImageError(true);
+        setFailedImagePath(normalizedImagePath);
         imageErrorHandler.onError(e);
       }
     : undefined;
-  const handleImageLoad = hasRealImage ? () => setImageError(false) : undefined;
+  const handleImageLoad = hasRealImage
+    ? () => setFailedImagePath(null)
+    : undefined;
+
+  const handleUploadSuccess = () => {
+    setFailedImagePath(null);
+    router.refresh();
+  };
 
   if (viewMode === "list") {
     return (
@@ -87,6 +103,7 @@ export function ProductImageSection({
             className="rounded-md object-cover"
             sizes="80px"
             loading={eager ? "eager" : "lazy"}
+            unoptimized={isLocalAssetsImage(imageSrc)}
             onError={handleImageError}
             onLoad={handleImageLoad}
           />
@@ -113,7 +130,7 @@ export function ProductImageSection({
             productName={product.name}
             viewMode={viewMode}
             compact={compact}
-            onUploadSuccess={() => router.refresh()}
+            onUploadSuccess={handleUploadSuccess}
           />
         )}
       </div>
@@ -130,6 +147,7 @@ export function ProductImageSection({
           className="object-cover transition-transform duration-200 group-hover:scale-105"
           sizes="(max-width: 640px) 45vw, (max-width: 768px) 30vw, (max-width: 1200px) 25vw, 20vw"
           loading={eager ? "eager" : "lazy"}
+          unoptimized={isLocalAssetsImage(imageSrc)}
           onError={handleImageError}
           onLoad={handleImageLoad}
         />
@@ -178,7 +196,7 @@ export function ProductImageSection({
           productName={product.name}
           viewMode={viewMode}
           compact={compact}
-          onUploadSuccess={() => router.refresh()}
+          onUploadSuccess={handleUploadSuccess}
         />
       )}
     </div>
