@@ -53,7 +53,7 @@ export function SupplierImageUpload({
         return;
       }
       if (file.size > MAX_FILE_SIZE) {
-        toast.error("Arquivo muito grande. Limite: 2MB");
+        toast.error("A imagem ultrapassa o limite permitido de 2 MB.");
         return;
       }
 

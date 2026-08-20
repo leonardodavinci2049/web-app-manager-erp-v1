@@ -154,7 +154,7 @@ export function ProductImageGallery({
             continue;
           }
           if (file.size <= 0 || file.size > PRODUCT_GALLERY_MAX_FILE_SIZE) {
-            failures.push(`${file.name}: arquivo vazio ou maior que 10 MB`);
+            failures.push(`${file.name}: imagem vazia ou acima de 2 MB`);
             continue;
           }
 
@@ -451,7 +451,7 @@ export function ProductImageGallery({
       </div>
 
       <p className="text-xs text-muted-foreground">
-        JPEG, PNG, GIF ou WebP. Até 10 MB por arquivo e {PRODUCT_GALLERY_LIMIT}{" "}
+        JPEG, PNG, GIF ou WebP. Até 2 MB por arquivo e {PRODUCT_GALLERY_LIMIT}{" "}
         imagens.
       </p>
       <p className="sr-only" aria-live="polite" aria-atomic="true">

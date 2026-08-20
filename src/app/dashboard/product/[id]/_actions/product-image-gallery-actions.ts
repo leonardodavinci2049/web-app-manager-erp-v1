@@ -102,7 +102,7 @@ export async function uploadProductImageAction(
   if (file.size <= 0 || file.size > PRODUCT_GALLERY_MAX_FILE_SIZE) {
     return {
       success: false,
-      error: "A imagem deve ter até 10 MB e não pode estar vazia.",
+      error: "A imagem deve ter até 2 MB e não pode estar vazia.",
     };
   }
 

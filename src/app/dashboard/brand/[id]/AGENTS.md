@@ -170,7 +170,7 @@ list and detail UI).
   the gallery actions.
 - `image-gallery-skeleton.tsx`: Suspense fallback shared by both nodes.
 - `image-gallery-constants.ts`: `BRAND_GALLERY_ENTITY_TYPE` (`"BRAND"`),
-  `BRAND_GALLERY_LIMIT` (7), `BRAND_GALLERY_MAX_FILE_SIZE` (10 MB), accepted MIME
+  `BRAND_GALLERY_LIMIT` (7), `BRAND_GALLERY_MAX_FILE_SIZE` (2 MB), accepted MIME
   types, `BRAND_GALLERY_ACCEPT`, and `DEFAULT_BRAND_IMAGE_URL`.
 - `image-gallery-types.ts`: `BrandGalleryImage`, the discriminated
   `BrandGalleryInitialState`, and `BrandGalleryMutationResult`.

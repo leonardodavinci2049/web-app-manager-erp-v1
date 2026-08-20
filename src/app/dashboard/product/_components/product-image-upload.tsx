@@ -5,6 +5,8 @@ import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { uploadProductListImageAction } from "../_actions/product-list-image-actions";
 
+const MAX_FILE_SIZE = 2 * 1024 * 1024;
+
 interface ProductImageUploadProps {
   productId: string;
   productName: string;
@@ -45,8 +47,8 @@ export function ProductImageUpload({
         return;
       }
 
-      if (file.size > 10 * 1024 * 1024) {
-        toast.error("Arquivo muito grande. Limite: 10MB");
+      if (file.size > MAX_FILE_SIZE) {
+        toast.error("A imagem ultrapassa o limite permitido de 2 MB.");
         return;
       }
 

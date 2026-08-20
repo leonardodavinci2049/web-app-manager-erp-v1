@@ -152,7 +152,7 @@ list and detail UI).
 - `image-gallery-skeleton.tsx`: Suspense fallback shared by both nodes.
 - `image-gallery-constants.ts`: `SUPPLIERS_GALLERY_ENTITY_TYPE` (`"SUPPLIERS"` —
   plural), `SUPPLIERS_GALLERY_LIMIT` (7), `SUPPLIERS_GALLERY_MAX_FILE_SIZE`
-  (10 MB), accepted MIME types, `SUPPLIERS_GALLERY_ACCEPT`, and
+  (2 MB), accepted MIME types, `SUPPLIERS_GALLERY_ACCEPT`, and
   `DEFAULT_SUPPLIERS_IMAGE_URL`.
 - `image-gallery-types.ts`: `SupplierGalleryImage`, the discriminated
   `SupplierGalleryInitialState`, and `SupplierGalleryMutationResult`.

@@ -157,7 +157,7 @@ the list and detail UI).
   promotion is automatic via gallery actions only.
 - `image-gallery-skeleton.tsx`: Suspense fallback shared by both nodes.
 - `image-gallery-constants.ts`: `CARRIER_GALLERY_ENTITY_TYPE` (`"CARRIER"`),
-  `CARRIER_GALLERY_LIMIT` (7), `CARRIER_GALLERY_MAX_FILE_SIZE` (10 MB), accepted
+  `CARRIER_GALLERY_LIMIT` (7), `CARRIER_GALLERY_MAX_FILE_SIZE` (2 MB), accepted
   MIME types, `CARRIER_GALLERY_ACCEPT`, and `DEFAULT_CARRIER_IMAGE_URL`.
 - `image-gallery-types.ts`: `CarrierGalleryImage`, the discriminated
   `CarrierGalleryInitialState`, and `CarrierGalleryMutationResult`.
