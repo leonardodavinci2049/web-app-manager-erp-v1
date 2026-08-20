@@ -49,11 +49,11 @@ export const REMOTE_IMAGE_ORIGINS: readonly RemoteImageOrigin[] = [
 ];
 
 /**
- * Normalizes an origin into the `protocol//hostname:port` key used to
+ * Normalizes an origin into the `protocol://hostname:port` key used to
  * compare against `URL.origin`-like strings. An empty/omitted port means
  * the protocol default.
  */
 export function toImageOriginKey(origin: RemoteImageOrigin): string {
   const port = origin.port ? `:${origin.port}` : "";
-  return `${origin.protocol}//${origin.hostname}${port}`;
+  return `${origin.protocol}://${origin.hostname}${port}`;
 }
