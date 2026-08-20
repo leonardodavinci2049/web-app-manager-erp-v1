@@ -203,7 +203,7 @@ people records in the shared `tbl_pessoa` table.
   gallery actions.
 - `image-gallery-skeleton.tsx`: Suspense fallback shared by both nodes.
 - `image-gallery-constants.ts`: `SELLER_GALLERY_ENTITY_TYPE` (`"SELLER"`),
-  `SELLER_GALLERY_LIMIT` (7), `SELLER_GALLERY_MAX_FILE_SIZE` (10 MB), accepted
+  `SELLER_GALLERY_LIMIT` (7), `SELLER_GALLERY_MAX_FILE_SIZE` (2 MB), accepted
   MIME types, `SELLER_GALLERY_ACCEPT`, and `DEFAULT_SELLER_IMAGE_URL`.
 - `image-gallery-types.ts`: `SellerGalleryImage`, the discriminated
   `SellerGalleryInitialState`, and `SellerGalleryMutationResult`.

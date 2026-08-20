@@ -197,7 +197,7 @@ the **Assets API** (source of truth for the image set) and the legacy
 **`PATH_IMAGEM`** field (denormalized pointer read by the list and detail UI).
 
 - Constants: `PRODUCT_GALLERY_ENTITY_TYPE` (`"PRODUCT"`), `PRODUCT_GALLERY_LIMIT`
-  (7), `PRODUCT_GALLERY_MAX_FILE_SIZE` (10 MB), accepted MIME types
+  (7), `PRODUCT_GALLERY_MAX_FILE_SIZE` (2 MB), accepted MIME types
   (jpeg/png/gif/webp), `DEFAULT_PRODUCT_IMAGE_URL` (`/images/product/no-image.jpeg`).
 - `getProductGalleryInitialState` is wrapped in React `cache()` (the `import { cache }
   from "react"` sits at the **bottom** of `product-image-gallery-server.tsx` —

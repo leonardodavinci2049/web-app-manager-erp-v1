@@ -154,7 +154,7 @@ export function CategoryImageGallery({
             continue;
           }
           if (file.size <= 0 || file.size > CATEGORY_GALLERY_MAX_FILE_SIZE) {
-            failures.push(`${file.name}: arquivo vazio ou maior que 10 MB`);
+            failures.push(`${file.name}: imagem vazia ou acima de 2 MB`);
             continue;
           }
 
@@ -452,7 +452,7 @@ export function CategoryImageGallery({
 
       <p className="text-xs text-muted-foreground">
         Dimensão ideal: 1200 × 400 px (proporção 3:1); outras dimensões são
-        aceitas. JPEG, PNG, GIF ou WebP, até 10 MB por arquivo e{" "}
+        aceitas. JPEG, PNG, GIF ou WebP, até 2 MB por arquivo e{" "}
         {CATEGORY_GALLERY_LIMIT} imagens.
       </p>
       <p className="sr-only" aria-live="polite" aria-atomic="true">

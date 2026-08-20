@@ -153,7 +153,7 @@ list and detail UI).
   gallery actions.
 - `image-gallery-skeleton.tsx`: Suspense fallback shared by both nodes.
 - `image-gallery-constants.ts`: `PTYPE_GALLERY_ENTITY_TYPE` (`"PTYPE"`),
-  `PTYPE_GALLERY_LIMIT` (7), `PTYPE_GALLERY_MAX_FILE_SIZE` (10 MB), accepted MIME
+  `PTYPE_GALLERY_LIMIT` (7), `PTYPE_GALLERY_MAX_FILE_SIZE` (2 MB), accepted MIME
   types, `PTYPE_GALLERY_ACCEPT`, and `DEFAULT_PTYPE_IMAGE_URL`.
 - `image-gallery-types.ts`: `PtypeGalleryImage`, the discriminated
   `PtypeGalleryInitialState`, and `PtypeGalleryMutationResult`.

@@ -10,6 +10,7 @@ import {
 import type { ProductGalleryMutationResult } from "../[id]/_components/image-gallery/image-gallery-types";
 
 const logger = createLogger("ProductListImageActions");
+const LISTING_IMAGE_MAX_FILE_SIZE = 2 * 1024 * 1024;
 
 /**
  * Uploads the image selected from the catalog and synchronizes the legacy
@@ -18,6 +19,14 @@ const logger = createLogger("ProductListImageActions");
 export async function uploadProductListImageAction(
   formData: FormData,
 ): Promise<ProductGalleryMutationResult> {
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size > LISTING_IMAGE_MAX_FILE_SIZE) {
+    return {
+      success: false,
+      error: "A imagem deve ter até 2 MB.",
+    };
+  }
+
   const uploadResult = await uploadProductImageAction(formData);
   if (!uploadResult.success) return uploadResult;
 

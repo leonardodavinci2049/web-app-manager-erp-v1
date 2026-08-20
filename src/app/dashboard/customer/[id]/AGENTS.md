@@ -208,7 +208,7 @@ the image set) and the legacy **`PATH_IMAGEM`** column on `tbl_pessoa`
   gallery actions instead.
 - `image-gallery-skeleton.tsx`: Suspense fallback shared by both nodes.
 - `image-gallery-constants.ts`: `CUSTOMER_GALLERY_ENTITY_TYPE` (`"CUSTOMER"`),
-  `CUSTOMER_GALLERY_LIMIT` (7), `CUSTOMER_GALLERY_MAX_FILE_SIZE` (10 MB),
+  `CUSTOMER_GALLERY_LIMIT` (7), `CUSTOMER_GALLERY_MAX_FILE_SIZE` (2 MB),
   accepted MIME types, `CUSTOMER_GALLERY_ACCEPT`, and
   `DEFAULT_CUSTOMER_IMAGE_URL`.
 - `image-gallery-types.ts`: `CustomerGalleryImage`, the discriminated
