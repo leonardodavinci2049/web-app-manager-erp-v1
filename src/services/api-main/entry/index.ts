@@ -1,7 +1,15 @@
 export {
   EntryServiceApi,
   entryServiceApi,
+  getEntriesPage,
+  getEntryById,
 } from "./entry-service-api";
+
+export type {
+  UIEntryDetail,
+  UIEntryListItem,
+  UIEntrySummary,
+} from "./transformers/transformers";
 
 export type {
   EntryCreateRequest,
