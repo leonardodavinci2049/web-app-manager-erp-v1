@@ -98,23 +98,9 @@ const data = {
     },
 
     {
-      title: "Entrada de produtos",
-      url: "#",
-      icon: Truck,
-      items: [
-        {
-          title: "Lista de Entrada",
-          url: "/dashboard/development",
-        },
-        {
-          title: "Nova Entrada",
-          url: "/dashboard/development",
-        },
-        {
-          title: "Ajuste de Entrada",
-          url: "/dashboard/development",
-        },
-      ],
+      title: "Entrada",
+      url: "/dashboard/entry",
+      icon: Truck,  
     },
 
     {
