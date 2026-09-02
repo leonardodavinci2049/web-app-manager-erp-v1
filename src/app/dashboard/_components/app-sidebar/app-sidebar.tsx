@@ -80,7 +80,7 @@ const data = {
     {
       title: "Compras",
       url: "/dashboard/development",
-      icon: ShoppingCart, 
+      icon: ShoppingCart,
     },
 
     {
