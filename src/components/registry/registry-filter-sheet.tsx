@@ -43,7 +43,7 @@ export function RegistryFilterSheet({
           className="hidden h-11 shrink-0 gap-1.5 shadow-sm md:inline-flex"
         >
           <Filter className="size-4" aria-hidden="true" />
-          <span className="hidden lg:inline">Filtros e ordenação</span>
+          <span className="hidden lg:inline">Filtros</span>
           <span className="lg:hidden">Filtros</span>
           {activeCount > 0 && (
             <Badge
@@ -62,7 +62,7 @@ export function RegistryFilterSheet({
         <SheetHeader className="border-b p-4 pr-12">
           <SheetTitle className="flex items-center gap-2">
             <Filter className="size-4" aria-hidden="true" />
-            Filtros e ordenação
+            Filtros
           </SheetTitle>
         </SheetHeader>
         <div className="min-h-0 flex-1 space-y-5 overflow-y-auto p-4">

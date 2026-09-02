@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutGrid, Plus, Rows3, Table2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import {
   type ReactNode,
@@ -17,6 +17,7 @@ import {
   RegistryMobileBottomBar,
   RegistryResults,
   RegistrySearch,
+  RegistryViewModeToggle,
 } from "@/components/registry";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -30,7 +31,6 @@ import {
   type EntrySearchParams,
   type EntrySort,
 } from "../types/entry-dashboard-types";
-import { EntryViewModeToggle } from "./entry-view-mode-toggle";
 import { useEntryViewMode } from "./use-entry-view-mode";
 
 const VIEW_MODE_STORAGE_KEY = "dashboard:entry-view-mode";
@@ -151,15 +151,6 @@ export function EntryToolbar({
     [pathname, router, searchState],
   );
 
-  const desktopViewOptions = [
-    { value: "grid" as const, label: "Grade", icon: LayoutGrid },
-    { value: "table" as const, label: "Tabela", icon: Table2 },
-  ];
-  const mobileViewOptions = [
-    { value: "grid" as const, label: "Grade", icon: LayoutGrid },
-    { value: "cards" as const, label: "Lista de cards", icon: Rows3 },
-  ];
-
   return (
     <div className="space-y-4 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0">
       <div className="bg-background/95 supports-[backdrop-filter]:bg-background/80 sticky top-0 z-20 -mx-3 border-b px-3 py-3 shadow-sm backdrop-blur lg:-mx-6 lg:px-6">
@@ -239,17 +230,12 @@ export function EntryToolbar({
               </select>
             </div>
           </RegistryFilterSheet>
-          <EntryViewModeToggle
-            viewMode={viewMode}
-            options={desktopViewOptions}
-            onToggle={updateViewMode}
+          <RegistryViewModeToggle
+            viewMode={viewMode === "table" ? "list" : "grid"}
+            onToggle={() =>
+              updateViewMode(viewMode === "table" ? "grid" : "table")
+            }
             className="hidden md:inline-flex"
-          />
-          <EntryViewModeToggle
-            viewMode={viewMode}
-            options={mobileViewOptions}
-            onToggle={updateViewMode}
-            className="md:hidden"
           />
           <Button
             type="button"
