@@ -63,6 +63,7 @@ ptype/
     │   └── ptype-image-gallery-actions.ts# Gallery upload/primary/delete
     └── _components/
         ├── ptype-details.tsx             # Detail composition (Client, single mega-form) — LOCAL
+        ├── tabs/                         # Tab orchestrator + one component per tab
         └── image-gallery/                # Gallery subsystem (see [id]/AGENTS.md)
 ```
 
@@ -183,10 +184,12 @@ the parent `_components/index.ts`). It owns form state and drives
 `router.refresh()` after update/status and `router.replace(returnTo)` after
 delete. Editing is a **single mega-form** (name + notes). The layout includes a
 read-only "Detalhes do tipo" card (status, `productRegistrationFlag`,
-`createdAt`, commission rates), a "Cadastro" card, a **"Status do cadastro" card
-with active status buttons**, and a `<Tabs>` with `image` and `deletion` (default)
-tabs. Activate/deactivate/delete share a single `AlertDialog` via a
-`Confirmation` union. See `[id]/AGENTS.md`.
+`createdAt`, commission rates) and `PtypeDetailTabs`. The Client orchestrator
+delegates `annotations`, `image`, `miscellaneous`, and `deletion` to dedicated
+components under `_components/tabs`; `annotations` is the default first tab.
+`miscellaneous` places the "Status do cadastro" action card above the
+"Cadastro" date card. Activate/deactivate/delete share a single `AlertDialog`
+via a `Confirmation` union. See `[id]/AGENTS.md`.
 
 ## Image Gallery
 
