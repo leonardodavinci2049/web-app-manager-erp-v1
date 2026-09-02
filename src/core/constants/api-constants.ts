@@ -397,6 +397,22 @@ export const CHECK_ENDPOINTS = {
   PRODUCT_SLUG: "/check/v3/check-if-product-slug-exists",
 } as const;
 
+// Endpoints de Entry (Entradas de Estoque)
+export const ENTRY_ENDPOINTS = {
+  FIND_ALL: "/entry/v2/entry-find-all",
+  FIND_BY_ID: "/entry/v2/entry-find-id",
+  FIND_SEARCH: "/entry/v2/entry-find-search",
+  CREATE: "/entry/v2/entry-create",
+  DELETE: "/entry/v2/entry-delete",
+  PROCESS_INVENTORY: "/entry/v2/entry-process-inventory",
+  UPD_CARRIER_ID: "/entry/v2/entry-upd-carrier-id",
+  UPD_GENERAL_FIELD: "/entry/v2/entry-upd-general-field",
+  UPD_MAIN: "/entry/v2/entry-upd-main",
+  UPD_NOTES: "/entry/v2/entry-upd-notes",
+  UPD_SUPPLIER_ID: "/entry/v2/entry-upd-supplier-id",
+  UPD_TAX_RATES: "/entry/v2/entry-upd-tax-rates",
+} as const;
+
 // Configurações padrão do sistema
 export const SYSTEM_CONFIG = {
   ID_SYSTEM: 1,
