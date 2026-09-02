@@ -10,6 +10,12 @@ import {
 import { createLogger } from "@/core/logger";
 import { BaseApiService } from "@/lib/axios/base-api-service";
 import {
+  transformEntryDetail,
+  transformEntryList,
+  type UIEntryDetail,
+  type UIEntryListItem,
+} from "./transformers/transformers";
+import {
   type EntryCreateRequest,
   type EntryDeleteRequest,
   type EntryDetail,
@@ -438,3 +444,90 @@ export class EntryServiceApi extends BaseApiService {
 }
 
 export const entryServiceApi = new EntryServiceApi();
+
+export interface GetEntriesPageParams {
+  search?: string;
+  page?: number;
+  pageSize?: number;
+  columnId?: 1 | 2 | 3;
+  orderId?: 1 | 2;
+  pe_system_client_id?: number;
+  pe_organization_id?: string;
+  pe_user_id?: string;
+  pe_user_name?: string;
+  pe_user_role?: string;
+  pe_person_id?: number;
+}
+
+/**
+ * Leitura paginada de entradas para a central de entradas. Baseada em
+ * `findAllEntries`, retorna `{ items, total }` onde `total` e' derivado do
+ * contrato de paginacao do endpoint (`recordId`) com fallback seguro para
+ * `quantity` ou a quantidade carregada. Sem cache.
+ */
+export async function getEntriesPage(
+  params: GetEntriesPageParams = {},
+): Promise<{ items: UIEntryListItem[]; total: number }> {
+  if (!params.pe_system_client_id) {
+    return { items: [], total: 0 };
+  }
+
+  const response = await entryServiceApi.findAllEntries({
+    pe_search: params.search ?? "",
+    pe_qt_records: params.pageSize ?? 50,
+    pe_page_id: params.page ?? 0,
+    pe_column_id: params.columnId ?? 1,
+    pe_order_id: params.orderId ?? 2,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
+
+  const entries = entryServiceApi.extractEntries(response);
+  const filteredTotal = Number(response.recordId);
+
+  return {
+    items: transformEntryList(entries),
+    total:
+      Number.isFinite(filteredTotal) && filteredTotal >= 0
+        ? filteredTotal
+        : (response.quantity ?? entries.length),
+  };
+}
+
+export async function getEntryById(
+  id: number,
+  params: {
+    pe_system_client_id?: number;
+    pe_organization_id?: string;
+    pe_user_id?: string;
+    pe_user_name?: string;
+    pe_user_role?: string;
+    pe_person_id?: number;
+  } = {},
+): Promise<UIEntryDetail | undefined> {
+  if (!params.pe_system_client_id) {
+    return undefined;
+  }
+
+  const response = await entryServiceApi.findEntryById({
+    pe_entry_id: id,
+    pe_system_client_id: params.pe_system_client_id,
+    pe_organization_id: params.pe_organization_id,
+    pe_user_id: params.pe_user_id,
+    pe_user_name: params.pe_user_name,
+    pe_user_role: params.pe_user_role,
+    pe_person_id: params.pe_person_id,
+  });
+
+  const detail = entryServiceApi.extractEntryDetail(response);
+  if (!detail) {
+    return undefined;
+  }
+
+  const summary = entryServiceApi.extractEntrySummary(response);
+  return transformEntryDetail(detail, summary);
+}
