@@ -68,10 +68,11 @@ brand/
     │   ├── brand-detail-actions.ts       # updateBrandAction, deleteBrandAction
     │   └── brand-image-gallery-actions.ts# Gallery upload/primary/delete
     └── _components/
-        ├── brand-details.tsx             # Client: top-level detail layout + tabs
+        ├── brand-details.tsx             # Client: top-level detail layout
         ├── brand-detail-form.tsx         # Client: single name+notes edit form
         ├── brand-delete-dialog.tsx       # Client: delete confirm (blocked by products)
         ├── brand-products-list.tsx       # Client: related products + sub-pagination
+        ├── tabs/                         # Tab orchestrator + one component per tab
         └── image-gallery/                # Gallery subsystem (see [id]/AGENTS.md)
 ```
 
@@ -207,12 +208,15 @@ triggers a refetch.
 ## Detail UI
 
 `BrandDetails` is a **Client Component** (unlike customer's `CustomerDetails`,
-which is Server) because it owns form/edit state and drives `router.refresh()`.
-The page remains Server and hands it DTOs plus the two Suspense nodes. The
-detail layout is a sticky left aside with the gallery, a right column with the
-"Dados do cadastro" card (`BrandDetailForm`) and a "Cadastro" card, and a single
-`<Tabs>` with three tabs: `products` (`BrandProductsList`), `image`
-(`imageTabContent`), and `deletion` (`BrandDeleteDialog`).
+which is Server) because it drives `router.refresh()` after form edits. The page
+remains Server and hands it DTOs plus the two Suspense nodes. The detail layout
+is a sticky left aside with the gallery, a right column with the "Dados do
+cadastro" card (`BrandDetailForm`), followed by `BrandDetailTabs`. The Client
+orchestrator delegates the `annotations`, `products`, `image`, `miscellaneous`,
+and `deletion` content to dedicated components under `_components/tabs` and
+drives `router.replace(returnTo)` after deletion. `annotations` is the default
+first tab. The `miscellaneous` tab holds the read-only inactive status and the
+registration dates cards.
 
 Editing is a **single mega-form** (`BrandDetailForm`: name + notes together),
 not sectioned. See `[id]/AGENTS.md` for the full editing model, the type/read-only

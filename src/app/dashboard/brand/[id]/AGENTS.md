@@ -41,10 +41,17 @@ React `cache()`.
 │   ├── brand-detail-actions.ts             # updateBrandAction, deleteBrandAction
 │   └── brand-image-gallery-actions.ts      # Gallery upload/primary/delete
 └── _components/
-    ├── brand-details.tsx                   # Top-level detail layout + tabs (Client)
+    ├── brand-details.tsx                   # Top-level detail layout (Client)
     ├── brand-detail-form.tsx               # Single name+notes edit form (Client)
     ├── brand-delete-dialog.tsx             # Delete confirm, blocked by products (Client)
     ├── brand-products-list.tsx             # Related products + sub-pagination (Client)
+    ├── tabs/
+    │   ├── brand-detail-tabs.tsx           # Five-tab orchestrator (Client)
+    │   ├── brand-annotations-tab.tsx       # Read-only ANOTACOES value
+    │   ├── brand-products-tab.tsx          # Related-products tab
+    │   ├── brand-images-tab.tsx            # Mobile gallery + images-list slots
+    │   ├── brand-miscellaneous-tab.tsx     # INATIVO status + registry dates
+    │   └── brand-deletion-tab.tsx          # Deletion guard + dialog
     └── image-gallery/
         ├── index.ts
         ├── image-gallery-constants.ts      # Entity type, limits, MIME, defaults
@@ -73,11 +80,12 @@ boundary.
         ├── header (name, inactive Badge, id)
         ├── left aside  -> imageGallery node (<Suspense>)
         ├── right column -> BrandDetailForm (name+notes) -> updateBrandAction
-        ├── "Cadastro" card (createdAt/updatedAt)
-        └── <Tabs>
-              ├── products -> BrandProductsList (read-only, sub-paginated)
-              ├── image    -> imageTabContent node (<Suspense>, BrandImagesList)
-              └── deletion -> BrandDeleteDialog -> deleteBrandAction
+        └── <BrandDetailTabs> (Client)
+              ├── annotations -> BrandAnnotationsTab (read-only notes)
+              ├── products -> BrandProductsTab -> BrandProductsList
+              ├── image    -> BrandImagesTab -> imageTabContent node (<Suspense>)
+              ├── miscellaneous -> BrandMiscellaneousTab (status + dates)
+              └── deletion -> BrandDeletionTab -> BrandDeleteDialog
 ```
 
 Pass only `UIBrand` and `BrandProductDto` values to the components; never forward
@@ -86,20 +94,23 @@ Pass only `UIBrand` and `BrandProductDto` values to the components; never forwar
 ## `BrandDetails` Is a Client Component
 
 Unlike customer's `CustomerDetails` (Server), `BrandDetails` is a **Client
-Component** because it owns form/edit state and drives `router.refresh()` after
-edits and `router.replace(returnTo)` after deletion. The page stays Server and
-hands it DTOs plus the two Suspense nodes. Do not "fix" this asymmetry by moving
-it to `[id]/_components` or converting it to a Server Component without a
-deliberate decision.
+Component** because it drives `router.refresh()` after form edits. Its child
+`BrandDetailTabs` is also a Client Component and drives
+`router.replace(returnTo)` after deletion. The page stays Server and hands the
+detail tree DTOs plus the two Suspense nodes. Do not "fix" this asymmetry by
+converting it to a Server Component without a deliberate decision.
 
 Composition:
 
 - Header: back link (`returnTo`), title with a `Tag` icon, an active/inactive
   `Badge` derived from `brand.inactive`, and the numeric ID.
 - Two-column grid: a left aside with the `imageGallery` node, and a right column
-  with the "Dados do cadastro" card (`BrandDetailForm`) and a "Cadastro" card
-  (`createdAt`/`updatedAt` formatted in `pt-BR`).
-- A single `<Tabs>` with `products`, `image`, and `deletion` tabs.
+  with the "Dados do cadastro" card (`BrandDetailForm`).
+- `BrandDetailTabs`, with `annotations`, `products`, `image`, `miscellaneous`,
+  and `deletion` tabs whose content is split into one component per tab under
+  `_components/tabs`. `annotations` is the default first tab and displays
+  `brand.notes`; `miscellaneous` displays the `brand.inactive` status card above
+  the registration dates card.
 
 ## Single-Form Editing Model
 
@@ -139,7 +150,8 @@ Deletion is **enabled** (unlike customer, where it is disabled) but dual-gated:
   recordsQuantity: 1 })` before deleting and refuses when `total > 0`. Direct or
   concurrent calls cannot bypass this.
 
-On success, the dialog calls `onSuccess`, which runs `router.replace(returnTo)`.
+On success, the dialog calls `onSuccess`, which is provided by
+`BrandDetailTabs` and runs `router.replace(returnTo)`.
 
 ## Image Gallery Subsystem
 
