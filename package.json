@@ -1,6 +1,6 @@
 {
   "name": "web-app-manager-erp-v1",
-  "version": "1.1.21",
+  "version": "1.1.22",
   "private": true,
   "scripts": {
     "dev": "dotenv -e .env -- next dev",
@@ -22,7 +22,7 @@
     "@tabler/icons-react": "^3.46.0",
     "@tanstack/react-table": "^9.2.4",
     "axios": "^1.20.0",
-    "better-auth": "^1.7.2",
+    "better-auth": "^1.6.26",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
