@@ -79,22 +79,8 @@ const data = {
 
     {
       title: "Compras",
-      url: "#",
-      icon: ShoppingCart,
-      items: [
-        {
-          title: "Lista de Compras",
-          url: "/dashboard/development",
-        },
-        {
-          title: "Necessidade de Compras",
-          url: "/dashboard/development",
-        },
-        {
-          title: "Nova Compra",
-          url: "/dashboard/development",
-        },
-      ],
+      url: "/dashboard/development",
+      icon: ShoppingCart, 
     },
 
     {
@@ -102,7 +88,11 @@ const data = {
       url: "/dashboard/entry",
       icon: Truck,
     },
-
+    {
+      title: "Saída",
+      url: "/dashboard/development",
+      icon: Truck,
+    },
     {
       title: "Relatórios",
       url: "#",
