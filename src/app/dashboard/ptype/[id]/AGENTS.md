@@ -41,7 +41,13 @@ React `cache()`.
 │   ├── ptype-detail-actions.ts             # updatePtypeAction, setPtypeStatusAction, deletePtypeAction
 │   └── ptype-image-gallery-actions.ts      # Gallery upload/primary/delete
 └── _components/
-    ├── ptype-details.tsx                   # Top-level detail layout + tabs (Client) — LOCAL
+    ├── ptype-details.tsx                   # Top-level detail layout (Client) — LOCAL
+    ├── tabs/
+    │   ├── ptype-detail-tabs.tsx           # Four-tab orchestrator (Client)
+    │   ├── ptype-annotations-tab.tsx       # Read-only ANOTACOES value
+    │   ├── ptype-images-tab.tsx            # Mobile gallery + images-list slots
+    │   ├── ptype-miscellaneous-tab.tsx     # Status controls + registration date
+    │   └── ptype-deletion-tab.tsx          # Delete action card
     └── image-gallery/
         ├── index.ts
         ├── image-gallery-constants.ts      # Entity type, limits, MIME, defaults
@@ -71,10 +77,11 @@ parent `_components/index.ts`.
         ├── header (PtypeImage, name, status Badge)
         ├── "Detalhes do tipo" read-only card (status, registration flag, dates, commission rates)
         ├── edit form (name + notes) -> updatePtypeAction
-        ├── "Cadastro" + "Status do cadastro" cards (active status buttons)
-        └── <Tabs>
-              ├── Imagem   -> imageContent node (<Suspense>, PtypeImagesList)
-              └── Exclusão -> delete confirm -> deletePtypeAction
+        └── <PtypeDetailTabs> (Client)
+              ├── Anotações -> PtypeAnnotationsTab (read-only notes)
+              ├── Imagem    -> PtypeImagesTab -> imageContent node (<Suspense>)
+              ├── Diversos  -> PtypeMiscellaneousTab (status controls + date)
+              └── Exclusão  -> PtypeDeletionTab -> delete confirmation
 ```
 
 Pass only the `UIPtype` DTO to the components; never forward `apiContext`, raw
@@ -101,6 +108,10 @@ machinery.
 - Around the form, a read-only "Detalhes do tipo" card shows status,
   `productRegistrationFlag` (Habilitado/Não habilitado), `createdAt`, and the
   `retailCommissionRate` / `wholesaleCommissionRate` percentages.
+- `PtypeDetailTabs` renders `annotations`, `image`, `miscellaneous`, and
+  `deletion`, with one component per tab under `_components/tabs`. `annotations`
+  is the default first tab and displays `item.notes`. `miscellaneous` places the
+  active status controls above the registration date card.
 
 When adding an editable field, extend `updateSchema` in
 `ptype-detail-actions.ts` and the single form; do not introduce a sectioned
@@ -108,9 +119,10 @@ model.
 
 ## Status Change (Enabled)
 
-The "Status do cadastro" card renders active "Marcar como ativo" / "Marcar como
-inativo" buttons that submit to `setPtypeStatusAction({ ptypeId, inactive })` and
-call `router.refresh()` on success.
+The "Status do cadastro" card lives at the top of `PtypeMiscellaneousTab` and
+renders active "Marcar como ativo" / "Marcar como inativo" buttons. The shared
+confirmation flow submits to `setPtypeStatusAction({ ptypeId, inactive })` and
+calls `router.refresh()` on success.
 
 ## Deletion (Enabled)
 

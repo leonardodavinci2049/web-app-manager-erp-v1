@@ -2,9 +2,6 @@
 
 import {
   ArrowLeft,
-  CalendarDays,
-  CheckCircle2,
-  CircleOff,
   Loader2,
   Percent,
   Save,
@@ -31,7 +28,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import type { UIPtype } from "@/services/api-main/ptype";
 import { PtypeImage } from "../../_components/ptype-image";
@@ -40,6 +36,7 @@ import {
   setPtypeStatusAction,
   updatePtypeAction,
 } from "../_actions/ptype-detail-actions";
+import { PtypeDetailTabs } from "./tabs/ptype-detail-tabs";
 
 type Confirmation = "activate" | "deactivate" | "delete";
 
@@ -264,7 +261,7 @@ export function PtypeDetails({
             </CardContent>
           </Card>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit}>
             <Card>
               <CardHeader>
                 <CardTitle>Dados do cadastro</CardTitle>
@@ -329,103 +326,18 @@ export function PtypeDetails({
                 </Button>
               </CardContent>
             </Card>
-
-            <div className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <CalendarDays className="size-4" />
-                    Cadastro
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground text-xs">
-                    Data de cadastro
-                  </p>
-                  <p className="mt-1 text-sm font-medium">
-                    {formatDate(item.createdAt)}
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex-row items-center justify-between">
-                  <CardTitle className="text-base">
-                    Status do cadastro
-                  </CardTitle>
-                  <Badge variant={item.inactive ? "destructive" : "secondary"}>
-                    {item.inactive ? "Inativo" : "Ativo"}
-                  </Badge>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <p className="text-muted-foreground text-xs">
-                    Confirme a operação para definir explicitamente o status
-                    deste tipo de produto.
-                  </p>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => setConfirmation("activate")}
-                    disabled={isSaving || isMutating}
-                  >
-                    <CheckCircle2 className="size-4" />
-                    Marcar como ativo
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => setConfirmation("deactivate")}
-                    disabled={isSaving || isMutating}
-                  >
-                    <CircleOff className="size-4" />
-                    Marcar como inativo
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
           </form>
         </div>
 
-        <Tabs defaultValue="deletion" className="w-full">
-          <TabsList className="grid h-auto w-full grid-cols-2">
-            <TabsTrigger value="image">Imagem</TabsTrigger>
-            <TabsTrigger value="deletion">Exclusão</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="image" className="space-y-3 sm:space-y-4">
-            <div className="mx-auto w-full max-w-[500px] lg:hidden">
-              {imageGallery}
-            </div>
-            {imageContent}
-          </TabsContent>
-
-          <TabsContent value="deletion">
-            <Card className="border-destructive/40 bg-destructive/5">
-              <CardHeader>
-                <CardTitle className="text-destructive text-base">
-                  Zona de exclusão
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p className="text-muted-foreground text-sm">
-                  A API verificará vínculos existentes e informará quando a
-                  exclusão não for permitida.
-                </p>
-                <Button
-                  type="button"
-                  variant="destructive"
-                  onClick={() => setConfirmation("delete")}
-                  disabled={isSaving || isMutating}
-                >
-                  <Trash2 className="size-4" />
-                  Excluir tipo de produto
-                </Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+        <PtypeDetailTabs
+          item={item}
+          imageGallery={imageGallery}
+          imageContent={imageContent}
+          actionsDisabled={isSaving || isMutating}
+          onActivate={() => setConfirmation("activate")}
+          onDeactivate={() => setConfirmation("deactivate")}
+          onDelete={() => setConfirmation("delete")}
+        />
       </div>
 
       <AlertDialog
