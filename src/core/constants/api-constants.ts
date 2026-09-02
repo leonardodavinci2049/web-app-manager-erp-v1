@@ -413,6 +413,25 @@ export const ENTRY_ENDPOINTS = {
   UPD_TAX_RATES: "/entry/v2/entry-upd-tax-rates",
 } as const;
 
+// Endpoints de Entry Item (Itens de Entrada de Estoque)
+export const ENTRY_ITEM_ENDPOINTS = {
+  FIND_ALL: "/entry-item/v2/entry-item-find-all",
+  FIND_ENTRY_ID: "/entry-item/v2/entry-item-find-entry-id",
+  FIND_BY_ID: "/entry-item/v2/entry-item-find-id",
+  FIND_SEARCH: "/entry-item/v2/entry-item-find-search",
+  PRODUCT_SEARCH: "/entry-item/v2/entry-item-product-search",
+  CREATE: "/entry-item/v2/entry-item-create",
+  DELETE: "/entry-item/v2/entry-item-delete",
+  UPD_DOLLAR_VALUE: "/entry-item/v2/entry-item-upd-dollar-value",
+  UPD_GENERAL_FIELD: "/entry-item/v2/entry-item-upd-general-field",
+  UPD_MAIN: "/entry-item/v2/entry-item-upd-main",
+  UPD_NOTES: "/entry-item/v2/entry-item-upd-notes",
+  UPD_PRODUCT_COST: "/entry-item/v2/entry-item-upd-product-cost",
+  UPD_PRODUCT_PRICE: "/entry-item/v2/entry-item-upd-product-price",
+  UPD_TAX_CODES: "/entry-item/v2/entry-item-upd-tax-codes",
+  UPD_TAX_RATES: "/entry-item/v2/entry-item-upd-tax-rates",
+} as const;
+
 // Configurações padrão do sistema
 export const SYSTEM_CONFIG = {
   ID_SYSTEM: 1,
