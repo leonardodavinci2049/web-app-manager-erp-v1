@@ -170,7 +170,7 @@ export function CustomerFilterPanel({
           className="hidden h-11 shrink-0 gap-1.5 px-3 shadow-sm sm:px-4 md:inline-flex"
         >
           <Filter className="size-4" />
-          <span className="hidden sm:inline">Filtros e ordenação</span>
+          <span className="hidden sm:inline">Filtros</span>
           {filterCount > 0 && (
             <Badge
               variant="secondary"
@@ -188,7 +188,7 @@ export function CustomerFilterPanel({
         <SheetHeader className="border-b p-4 pr-12">
           <SheetTitle className="flex items-center gap-2">
             <Filter className="size-4" />
-            Filtros e ordenação
+            Filtros
           </SheetTitle>
         </SheetHeader>
 
