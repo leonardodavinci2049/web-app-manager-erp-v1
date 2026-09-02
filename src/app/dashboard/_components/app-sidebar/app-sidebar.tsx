@@ -100,7 +100,7 @@ const data = {
     {
       title: "Entrada",
       url: "/dashboard/entry",
-      icon: Truck,  
+      icon: Truck,
     },
 
     {
