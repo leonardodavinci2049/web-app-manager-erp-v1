@@ -1,13 +1,9 @@
 import {
   ArrowLeft,
   Banknote,
-  Boxes,
   CalendarClock,
-  ClipboardList,
   ExternalLink,
   FileText,
-  Percent,
-  StickyNote,
   Truck,
 } from "lucide-react";
 import Link from "next/link";
@@ -22,6 +18,7 @@ import {
   formatEntryMoney,
   formatEntryNumber,
 } from "../../_components/lib/format";
+import { EntryDetailTabs } from "./tabs/entry-detail-tabs";
 
 interface EntryDetailsProps {
   entry: UIEntryDetail;
@@ -70,9 +67,10 @@ function SectionCard({
 
 /**
  * Detalhe somente leitura da entrada (Server Component). Agrupa os dados em
- * cards de identificacao, fornecedor/transportadora, nota, valores, tributos,
- * status, resumo e anotacoes. A galeria de imagens do fornecedor e' injetada
- * pela pagina via `imageGallery` (no' `<Suspense>`).
+ * cards de identificacao, fornecedor/transportadora, nota e valores. Tributos,
+ * status, resumo e anotacoes ficam organizados em abas abaixo do conteudo
+ * principal. A galeria de imagens do fornecedor e' injetada pela pagina via
+ * `imageGallery` (no' `<Suspense>`).
  */
 export function EntryDetails({
   entry,
@@ -205,106 +203,10 @@ export function EntryDetails({
               />
             </dl>
           </SectionCard>
-
-          <SectionCard icon={<Percent className="size-4" />} title="Tributos">
-            <dl className="grid gap-4 sm:grid-cols-2">
-              <DetailField
-                label="Alíquota de ICMS"
-                value={formatEntryNumber(entry.icmsRate)}
-              />
-              <DetailField
-                label="Alíquota de IPI"
-                value={formatEntryNumber(entry.ipiRate)}
-              />
-              <DetailField
-                label="Valor de ICMS"
-                value={formatEntryMoney(entry.icmsValue)}
-              />
-              <DetailField
-                label="Valor de IPI"
-                value={formatEntryMoney(entry.ipiValue)}
-              />
-              <DetailField
-                label="Valor de PIS"
-                value={formatEntryMoney(entry.pisValue)}
-              />
-              <DetailField
-                label="Valor de COFINS"
-                value={formatEntryMoney(entry.cofinsValue)}
-              />
-              <DetailField
-                label="Valor de IBS"
-                value={formatEntryMoney(entry.ibsValue)}
-              />
-              <DetailField
-                label="Valor de CBS"
-                value={formatEntryMoney(entry.cbsValue)}
-              />
-            </dl>
-          </SectionCard>
-
-          <SectionCard icon={<Boxes className="size-4" />} title="Status">
-            <dl className="grid gap-4 sm:grid-cols-2">
-              <div className="flex flex-wrap gap-1 sm:col-span-2">
-                <EntryStatusBadge label="Estoque" value={entry.stockStatus} />
-                <EntryStatusBadge label="Físico" value={entry.physicalStatus} />
-                <EntryStatusBadge label="Etiqueta" value={entry.labelStatus} />
-              </div>
-              <DetailField
-                label="Data de entrada em estoque"
-                value={
-                  entry.stockEntryDate
-                    ? formatEntryDate(entry.stockEntryDate)
-                    : "Não informada"
-                }
-              />
-              <DetailField
-                label="Hora de entrada em estoque"
-                value={entry.stockEntryTime ?? "Não informada"}
-              />
-            </dl>
-          </SectionCard>
-
-          <SectionCard
-            icon={<ClipboardList className="size-4" />}
-            title="Resumo"
-          >
-            <dl className="grid gap-4 sm:grid-cols-2">
-              <DetailField
-                label="Quantidade de movimento"
-                value={entry.summary?.movementQuantity ?? 0}
-              />
-              <DetailField
-                label="Total em real"
-                value={
-                  entry.summary
-                    ? formatEntryMoney(entry.summary.totalReal)
-                    : "—"
-                }
-              />
-              <DetailField
-                label="Total em dólar"
-                value={
-                  entry.summary
-                    ? formatEntryNumber(entry.summary.totalDollar)
-                    : "—"
-                }
-              />
-            </dl>
-          </SectionCard>
-
-          <SectionCard
-            icon={<StickyNote className="size-4" />}
-            title="Anotações"
-          >
-            <p className="text-sm whitespace-pre-wrap break-words">
-              {entry.notes?.trim()
-                ? entry.notes
-                : "Nenhuma anotação registrada."}
-            </p>
-          </SectionCard>
         </div>
       </div>
+
+      <EntryDetailTabs entry={entry} />
     </div>
   );
 }
