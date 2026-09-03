@@ -36,7 +36,7 @@ const data = {
   ],
   navMain: [
     {
-      title: "Painel ",
+      title: "Cadastros ",
       url: "/dashboard",
       icon: LayoutDashboard,
       isActive: true,
@@ -63,7 +63,7 @@ const data = {
         },
 
         {
-          title: "Tipos de produtos",
+          title: "Tipos",
           url: "/dashboard/ptype",
         },
         {
