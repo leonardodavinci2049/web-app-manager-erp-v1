@@ -51,7 +51,7 @@ renders inline inside `ProductDetailLayout` without its own boundary.
 ├── error.tsx                                   # Client: detail error boundary with retry
 ├── not-found.tsx                               # Client: "Produto Não Encontrado"
 ├── _actions/
-│   └── product-image-gallery-actions.ts        # upload/setPrimary/delete (colocated, Zod)
+│   └── product-image-gallery-actions.ts        # upload/setPrimary/delete/PATH sync (colocated, Zod)
 └── _components/
     ├── product-detail-layout.tsx                # Server: route-detail composition via shared shells
     ├── product-detail-layout-skeleton.tsx       # Loading structure aligned with the final geometry
@@ -180,7 +180,7 @@ shells and the image tab composition come from
 | Tab | Label | Content | Submits to |
 | --- | --- | --- | --- |
 | `notes` | Anotações | `ProductDescriptionTab` (edits `product.notes`/`ANOTACOES`) | `updateProductDescription` (`action-product-description`) |
-| `image` | Imagem | shared `DetailImageTab` + `ProductImagePathSelector` | `updateProductImagePath` ("Usar no PATH_IMAGEM") |
+| `image` | Imagem | shared `DetailImageTab` + `ProductImagePathSelector` | `updateProductImagePathFromPrimaryAction` ("Atualizar") |
 | `specifications` | Especificações | `ProductSpecificationsTab` | `updateProductGeneral` / `…Characteristics` / `…TaxValues` (`action-products`) |
 | `technical` | Dados Técnicos | `ProductTechnicalTab` | `updateProductFlags` / `updateProductType` / `updateProductBrand` |
 | `metadata` | Metadados | `ProductMetadataTab` (read-only) | none |
@@ -220,12 +220,12 @@ the **Assets API** (source of truth for the image set) and the legacy
   keyboard-navigable zoom dialog (ArrowLeft/Right), per-image error fallback to
   `DEFAULT_PRODUCT_IMAGE_URL`, `aria-live` status region, and `unoptimized` on
   remote `next/image` via `isRemoteImage()`.
-- `ProductImagePathSelector` (Client, named export): the "Imagem" tab content. Shows the
-  current `PATH_IMAGEM` value and the Assets API list side by side, a manual
-  "Atualizar" button, and a per-image **"Usar no PATH_IMAGEM"** button — which is
-  **ENABLED** here (unlike customer/brand where it is absent or disabled).
+- `ProductImagePathSelector` (Client, named export): the "Imagem" tab content.
+  Shows the current `PATH_IMAGEM` value and the Assets API list side by side.
+  The first card has an **"Atualizar"** button that copies the primary image's
+  original URL; the gallery card has no per-image PATH action.
 
-### PATH_IMAGEM synchronization — partial (deviation)
+### PATH_IMAGEM synchronization — manual repair
 
 Unlike customer/brand (which sync `PATH_IMAGEM` on all three flows), product uses
 a **dedicated inline endpoint** and syncs on **two flows only**:
@@ -238,11 +238,11 @@ a **dedicated inline endpoint** and syncs on **two flows only**:
   `{ success: true, warning }` (partial success; asset not rolled back).
 - **Primary change** (`setPrimaryProductImageAction`) and **primary deletion**
   (`deleteProductImageAction`): promote/advance the primary in the Assets API but
-  **do NOT write `PATH_IMAGEM`** and do **not** call `revalidatePath`. The intended
-  fallback is the manual "Usar no PATH_IMAGEM" button (`updateProductImagePath` in
-  `action-product-updates.ts`), which re-reads the product + gallery, enforces the
-  300-char limit, detects `alreadyExists`, writes `PATH_IMAGEM`, and
-  `revalidatePath("/dashboard/product/${productId}")`.
+  **do NOT write `PATH_IMAGEM`** and do **not** call `revalidatePath`.
+- **Manual repair** (`updateProductImagePathFromPrimaryAction`): re-reads the
+  product and gallery server-side, selects the current primary image, validates
+  its original URL, skips the write when already equal, and otherwise updates
+  `PATH_IMAGEM` and revalidates the list and detail paths.
 
 Keep this partial-sync model in mind: after set-primary/delete, `PATH_IMAGEM` may
 be stale until the user (or a future fix) triggers the manual write. Last-image
@@ -259,6 +259,8 @@ ownership via `getAuthorizedProductContext`):
 - `setPrimaryProductImageAction(rawProductId, rawAssetId)` — Zod `{ productId,
   assetId: uuid }`; validates asset membership; no `PATH_IMAGEM` write, no
   revalidate.
+- `updateProductImagePathFromPrimaryAction(rawProductId)` — copies the current
+  primary image's original URL to `PATH_IMAGEM`, skipping an identical value.
 - `deleteProductImageAction(rawProductId, rawAssetId)` — last-image rejection;
   promotes next candidate; no `PATH_IMAGEM` write, no revalidate.
 
@@ -321,7 +323,7 @@ Do not present these as functional and do not simulate them.
 - When changing gallery behavior, keep `getProductGalleryInitialState` cached and
   shared between the gallery node and the PATH_IMAGEM selector node, and keep the
   `PATH_IMAGEM` 300-char guard. Remember set-primary/delete do **not** sync
-  `PATH_IMAGEM` today.
+  `PATH_IMAGEM` automatically; the first-card action repairs it explicitly.
 - Two `updateProductDescription` actions exist — pick one and delete the other;
   do not add a third.
 - After editing prices/stock, the UI does `window.location.reload()`. If you
@@ -346,6 +348,6 @@ Do not present these as functional and do not simulate them.
   variants), each inline editor (name, short desc, full desc, general,
   characteristics, tax), the flags card, pricing and stock (page reload), the
   category add/delete dialogs, the brand/type change dialogs, the gallery
-  upload/primary/delete/zoom, the manual "Usar no PATH_IMAGEM" flow, and the
+  upload/primary/delete/zoom, the first-card "Atualizar" PATH_IMAGEM flow, and the
   disabled deletion tab.
 - This project currently has no automated test command; do not invent one.

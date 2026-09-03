@@ -1,55 +1,83 @@
 "use client";
 
-import {
-  CircleAlert,
-  ExternalLink,
-  Image as ImageIcon,
-  RefreshCw,
-} from "lucide-react";
+import { ExternalLink, Image as ImageIcon, RefreshCw } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { updateCustomerImagePathFromPrimaryAction } from "../../_actions/customer-image-gallery-actions";
 import { DEFAULT_CUSTOMER_IMAGE_URL } from "./image-gallery-constants";
 import type { CustomerGalleryImage } from "./image-gallery-types";
 
 interface CustomerImagesListProps {
+  customerId: number;
   initialCustomerImagePath: string;
   initialGalleryImages: CustomerGalleryImage[];
 }
 
 export function CustomerImagesList({
+  customerId,
   initialCustomerImagePath,
   initialGalleryImages,
 }: CustomerImagesListProps) {
   const router = useRouter();
-  const [isRefreshing, startRefreshTransition] = useTransition();
+  const [isUpdating, startUpdateTransition] = useTransition();
   const [galleryImages, setGalleryImages] =
     useState<CustomerGalleryImage[]>(initialGalleryImages);
   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
   const [hasCustomerImageError, setHasCustomerImageError] = useState(false);
   const customerImagePath = initialCustomerImagePath;
-
-  const refreshGallery = useCallback(() => {
-    setImageErrors(new Set());
-    startRefreshTransition(() => router.refresh());
-  }, [router]);
+  const primaryImage = useMemo(
+    () => galleryImages.find((image) => image.isPrimary),
+    [galleryImages],
+  );
 
   useEffect(() => {
     setGalleryImages(initialGalleryImages);
   }, [initialGalleryImages]);
 
+  const updateImagePath = () => {
+    startUpdateTransition(async () => {
+      const result = await updateCustomerImagePathFromPrimaryAction(customerId);
+      if (!result.success) {
+        toast.error(result.error);
+        return;
+      }
+
+      toast.success(result.message);
+      setHasCustomerImageError(false);
+      setImageErrors(new Set());
+      router.refresh();
+    });
+  };
+
   return (
     <div className="space-y-3 sm:space-y-4">
       <Card className="gap-4 py-4 sm:gap-6 sm:py-6">
         <CardHeader className="px-4 pb-3 sm:px-6">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <ImageIcon className="h-5 w-5" />
-            Imagem cadastrada no cliente
-          </CardTitle>
+          <div className="flex items-center justify-between gap-3">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <ImageIcon className="h-5 w-5" />
+              Imagem cadastrada no cliente
+            </CardTitle>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={updateImagePath}
+              disabled={isUpdating || !primaryImage}
+            >
+              <RefreshCw
+                className={`mr-1 h-4 w-4 ${isUpdating ? "animate-spin" : ""}`}
+                aria-hidden="true"
+              />
+              Atualizar
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="px-4 sm:px-6">
           {customerImagePath ? (
@@ -98,23 +126,10 @@ export function CustomerImagesList({
 
       <Card className="gap-4 py-4 sm:gap-6 sm:py-6">
         <CardHeader className="px-4 pb-3 sm:px-6">
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <ImageIcon className="h-5 w-5" />
-              Galeria de Imagens (Assets API)
-            </CardTitle>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={refreshGallery}
-              disabled={isRefreshing}
-            >
-              <RefreshCw
-                className={`h-4 w-4 mr-1 ${isRefreshing ? "animate-spin" : ""}`}
-              />
-              Atualizar
-            </Button>
-          </div>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <ImageIcon className="h-5 w-5" />
+            Galeria de Imagens (Assets API)
+          </CardTitle>
         </CardHeader>
         <CardContent className="px-4 sm:px-6">
           {galleryImages.length === 0 ? (
@@ -131,15 +146,6 @@ export function CustomerImagesList({
               </div>
 
               <Separator />
-
-              <p className="flex items-start gap-2 rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-amber-700 dark:text-amber-400">
-                <CircleAlert
-                  className="mt-0.5 size-4 shrink-0"
-                  aria-hidden="true"
-                />
-                A atualização de PATH_IMAGEM está pendente de um método
-                específico na API de clientes.
-              </p>
 
               <div className="space-y-4 mt-3">
                 {galleryImages.map((image, index) => (
@@ -203,20 +209,10 @@ export function CustomerImagesList({
                         Abrir preview em nova aba
                       </a>
 
-                      <div>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          disabled
-                        >
-                          <CircleAlert className="mr-1 h-3 w-3" />
-                          {customerImagePath.trim() ===
-                          image.urls.original.trim()
-                            ? "Já cadastrada"
-                            : "Usar no PATH_IMAGEM — API pendente"}
-                        </Button>
-                      </div>
+                      {customerImagePath.trim() ===
+                        image.urls.original.trim() && (
+                        <Badge variant="secondary">Em PATH_IMAGEM</Badge>
+                      )}
                     </div>
                   </div>
                 ))}

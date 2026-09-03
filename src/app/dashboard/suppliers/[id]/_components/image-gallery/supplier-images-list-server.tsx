@@ -14,6 +14,7 @@ export async function SupplierImagesListServer({
 
   return (
     <SupplierImagesList
+      supplierId={supplierId}
       initialSupplierImagePath={initialSupplierImagePath}
       initialGalleryImages={galleryState.images}
     />

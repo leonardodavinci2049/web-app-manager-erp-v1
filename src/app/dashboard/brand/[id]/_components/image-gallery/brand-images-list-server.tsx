@@ -14,6 +14,7 @@ export async function BrandImagesListServer({
 
   return (
     <BrandImagesList
+      brandId={brandId}
       initialBrandImagePath={initialBrandImagePath}
       initialGalleryImages={galleryState.images}
       initialGalleryError={

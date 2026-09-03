@@ -53,9 +53,9 @@ function getSafeApiLogMessage(message: string | string[]): string {
 
 async function getAuthorizedCarrierContext(carrierId: number) {
   const { apiContext } = await getAuthContext();
-  const result = await getCarrierById(carrierId, apiContext);
+  const carrier = await getCarrierById(carrierId, apiContext);
 
-  return result ? apiContext : null;
+  return carrier ? { apiContext, carrier } : null;
 }
 
 async function updateCarrierImagePath(
@@ -129,13 +129,14 @@ export async function uploadCarrierImageAction(
   }
 
   try {
-    const apiContext = await getAuthorizedCarrierContext(carrierId);
-    if (!apiContext) {
+    const authorizedCarrier = await getAuthorizedCarrierContext(carrierId);
+    if (!authorizedCarrier) {
       return {
         success: false,
         error: "Transportadora não encontrada ou inacessível.",
       };
     }
+    const { apiContext } = authorizedCarrier;
 
     const gallery = await readCarrierGallery(carrierId);
     if (!gallery) {
@@ -230,13 +231,14 @@ export async function setPrimaryCarrierImageAction(
 
   const { assetId, carrierId } = parsedInput.data;
   try {
-    const apiContext = await getAuthorizedCarrierContext(carrierId);
-    if (!apiContext) {
+    const authorizedCarrier = await getAuthorizedCarrierContext(carrierId);
+    if (!authorizedCarrier) {
       return {
         success: false,
         error: "Transportadora não encontrada ou inacessível.",
       };
     }
+    const { apiContext } = authorizedCarrier;
 
     const gallery = await readCarrierGallery(carrierId);
     if (!gallery) {
@@ -351,6 +353,82 @@ export async function setPrimaryCarrierImageAction(
   }
 }
 
+export async function updateCarrierImagePathFromPrimaryAction(
+  rawCarrierId: number | string,
+): Promise<CarrierGalleryMutationResult> {
+  const parsedCarrierId = CarrierIdSchema.safeParse(rawCarrierId);
+  if (!parsedCarrierId.success) {
+    return { success: false, error: "Transportadora inválida." };
+  }
+
+  const carrierId = parsedCarrierId.data;
+  try {
+    const authorizedCarrier = await getAuthorizedCarrierContext(carrierId);
+    if (!authorizedCarrier) {
+      return {
+        success: false,
+        error: "Transportadora não encontrada ou inacessível.",
+      };
+    }
+
+    const gallery = await readCarrierGallery(carrierId);
+    if (!gallery) {
+      return {
+        success: false,
+        error: "Não foi possível validar a imagem principal.",
+      };
+    }
+
+    const primaryImage = gallery.images.find((image) => image.isPrimary);
+    if (!primaryImage) {
+      return {
+        success: false,
+        error: "A galeria não possui uma imagem principal.",
+      };
+    }
+
+    const imagePath = primaryImage.urls.original.trim();
+    if (!imagePath || imagePath.length > CARRIER_IMAGE_PATH_MAX_LENGTH) {
+      logger.error("Primary carrier image has an invalid original URL", {
+        carrierId,
+        assetId: primaryImage.id,
+        imagePathLength: imagePath.length,
+      });
+      return {
+        success: false,
+        error: "A URL original da imagem principal é inválida.",
+      };
+    }
+
+    if ((authorizedCarrier.carrier.imagePath ?? "").trim() === imagePath) {
+      return {
+        success: true,
+        message: "PATH_IMAGEM já está atualizado com a imagem principal.",
+      };
+    }
+
+    await updateCarrierImagePath(
+      carrierId,
+      imagePath,
+      authorizedCarrier.apiContext,
+    );
+
+    return {
+      success: true,
+      message: "PATH_IMAGEM atualizado com a imagem principal.",
+    };
+  } catch (error) {
+    logger.error("Unexpected carrier PATH_IMAGEM synchronization failure", {
+      carrierId,
+      error,
+    });
+    return {
+      success: false,
+      error: "Não foi possível atualizar PATH_IMAGEM.",
+    };
+  }
+}
+
 export async function deleteCarrierImageAction(
   rawCarrierId: number | string,
   rawAssetId: string,
@@ -364,13 +442,14 @@ export async function deleteCarrierImageAction(
 
   const { assetId, carrierId } = parsedInput.data;
   try {
-    const apiContext = await getAuthorizedCarrierContext(carrierId);
-    if (!apiContext) {
+    const authorizedCarrier = await getAuthorizedCarrierContext(carrierId);
+    if (!authorizedCarrier) {
       return {
         success: false,
         error: "Transportadora não encontrada ou inacessível.",
       };
     }
+    const { apiContext } = authorizedCarrier;
 
     const gallery = await readCarrierGallery(carrierId);
     if (!gallery) {

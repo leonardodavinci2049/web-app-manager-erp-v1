@@ -1,21 +1,15 @@
 "use client";
 
-import {
-  Check,
-  ExternalLink,
-  Image as ImageIcon,
-  RefreshCw,
-  Save,
-} from "lucide-react";
+import { ExternalLink, Image as ImageIcon, RefreshCw } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
-import { updateProductImagePath } from "@/app/actions/action-product-updates";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { updateProductImagePathFromPrimaryAction } from "../../_actions/product-image-gallery-actions";
 import { DEFAULT_PRODUCT_IMAGE_URL } from "../../_components/image-gallery/image-gallery-constants";
 import type { ProductGalleryImage } from "../../_components/image-gallery/image-gallery-types";
 
@@ -33,77 +27,61 @@ export function ProductImagePathSelector({
   initialGalleryError,
 }: ProductImagePathSelectorProps) {
   const router = useRouter();
-  const [isRefreshing, startRefreshTransition] = useTransition();
+  const [isUpdating, startUpdateTransition] = useTransition();
   const [galleryImages, setGalleryImages] =
     useState<ProductGalleryImage[]>(initialGalleryImages);
   const [error, setError] = useState<string | null>(initialGalleryError);
   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
-  const [productImagePath, setProductImagePath] = useState(
-    initialProductImagePath,
-  );
   const [hasProductImageError, setHasProductImageError] = useState(false);
-  const [updatingImageId, setUpdatingImageId] = useState<string | null>(null);
-
-  const refreshGallery = useCallback(() => {
-    setImageErrors(new Set());
-    startRefreshTransition(() => router.refresh());
-  }, [router]);
+  const productImagePath = initialProductImagePath;
+  const primaryImage = useMemo(
+    () => galleryImages.find((image) => image.isPrimary),
+    [galleryImages],
+  );
 
   useEffect(() => {
     setGalleryImages(initialGalleryImages);
     setError(initialGalleryError);
   }, [initialGalleryError, initialGalleryImages]);
 
-  useEffect(() => {
-    setProductImagePath(initialProductImagePath);
-    setHasProductImageError(false);
-  }, [initialProductImagePath]);
-
-  const handleUpdateProductImagePath = useCallback(
-    async (image: ProductGalleryImage) => {
-      const originalUrl = image.urls.original.trim();
-
-      if (productImagePath.trim() === originalUrl) {
-        toast.info("Esta imagem já está cadastrada no campo PATH_IMAGEM");
+  const updateImagePath = () => {
+    startUpdateTransition(async () => {
+      const result = await updateProductImagePathFromPrimaryAction(productId);
+      if (!result.success) {
+        toast.error(result.error);
         return;
       }
 
-      setUpdatingImageId(image.id);
-
-      try {
-        const result = await updateProductImagePath(productId, image.id);
-
-        if (!result.success) {
-          toast.error(result.error || "Erro ao atualizar PATH_IMAGEM");
-          return;
-        }
-
-        if (result.alreadyExists) {
-          setProductImagePath(result.imagePath ?? originalUrl);
-          toast.info("Esta imagem já está cadastrada no campo PATH_IMAGEM");
-          return;
-        }
-
-        setProductImagePath(result.imagePath ?? originalUrl);
-        setHasProductImageError(false);
-        toast.success("Campo PATH_IMAGEM atualizado com sucesso");
-      } catch (_error) {
-        toast.error("Erro ao conectar com o servidor");
-      } finally {
-        setUpdatingImageId(null);
-      }
-    },
-    [productId, productImagePath],
-  );
+      toast.success(result.message);
+      setHasProductImageError(false);
+      setImageErrors(new Set());
+      router.refresh();
+    });
+  };
 
   return (
     <div className="space-y-4">
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <ImageIcon className="h-5 w-5" />
-            Imagem cadastrada no produto
-          </CardTitle>
+          <div className="flex items-center justify-between gap-3">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <ImageIcon className="h-5 w-5" />
+              Imagem cadastrada no produto
+            </CardTitle>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={updateImagePath}
+              disabled={isUpdating || !primaryImage}
+            >
+              <RefreshCw
+                className={`mr-1 h-4 w-4 ${isUpdating ? "animate-spin" : ""}`}
+                aria-hidden="true"
+              />
+              Atualizar
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {productImagePath ? (
@@ -152,23 +130,10 @@ export function ProductImagePathSelector({
 
       <Card>
         <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <ImageIcon className="h-5 w-5" />
-              Galeria de Imagens (Assets API)
-            </CardTitle>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={refreshGallery}
-              disabled={isRefreshing}
-            >
-              <RefreshCw
-                className={`h-4 w-4 mr-1 ${isRefreshing ? "animate-spin" : ""}`}
-              />
-              Atualizar
-            </Button>
-          </div>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <ImageIcon className="h-5 w-5" />
+            Galeria de Imagens (Assets API)
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {error ? (
@@ -252,33 +217,10 @@ export function ProductImagePathSelector({
                         Abrir preview em nova aba
                       </a>
 
-                      <div>
-                        <Button
-                          type="button"
-                          variant={
-                            productImagePath.trim() ===
-                            image.urls.original.trim()
-                              ? "secondary"
-                              : "outline"
-                          }
-                          size="sm"
-                          disabled={updatingImageId !== null}
-                          onClick={() => handleUpdateProductImagePath(image)}
-                        >
-                          {updatingImageId === image.id ? (
-                            <RefreshCw className="mr-1 h-3 w-3 animate-spin" />
-                          ) : productImagePath.trim() ===
-                            image.urls.original.trim() ? (
-                            <Check className="mr-1 h-3 w-3" />
-                          ) : (
-                            <Save className="mr-1 h-3 w-3" />
-                          )}
-                          {productImagePath.trim() ===
-                          image.urls.original.trim()
-                            ? "Já cadastrada"
-                            : "Usar no PATH_IMAGEM"}
-                        </Button>
-                      </div>
+                      {productImagePath.trim() ===
+                        image.urls.original.trim() && (
+                        <Badge variant="secondary">Em PATH_IMAGEM</Badge>
+                      )}
                     </div>
                   </div>
                 ))}

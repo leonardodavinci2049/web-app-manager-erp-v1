@@ -51,9 +51,9 @@ function getSafeApiLogMessage(message: string | string[]): string {
 
 async function getAuthorizedBrandContext(brandId: number) {
   const { apiContext } = await getAuthContext();
-  const result = await getBrandById(brandId, apiContext);
+  const brand = await getBrandById(brandId, apiContext);
 
-  return result ? apiContext : null;
+  return brand ? { apiContext, brand } : null;
 }
 
 async function updateBrandImagePath(
@@ -122,13 +122,14 @@ export async function uploadBrandImageAction(
   }
 
   try {
-    const apiContext = await getAuthorizedBrandContext(brandId);
-    if (!apiContext) {
+    const authorizedBrand = await getAuthorizedBrandContext(brandId);
+    if (!authorizedBrand) {
       return {
         success: false,
         error: "Marca não encontrada ou inacessível.",
       };
     }
+    const { apiContext } = authorizedBrand;
 
     const gallery = await readBrandGallery(brandId);
     if (!gallery) {
@@ -223,13 +224,14 @@ export async function setPrimaryBrandImageAction(
 
   const { assetId, brandId } = parsedInput.data;
   try {
-    const apiContext = await getAuthorizedBrandContext(brandId);
-    if (!apiContext) {
+    const authorizedBrand = await getAuthorizedBrandContext(brandId);
+    if (!authorizedBrand) {
       return {
         success: false,
         error: "Marca não encontrada ou inacessível.",
       };
     }
+    const { apiContext } = authorizedBrand;
 
     const gallery = await readBrandGallery(brandId);
     if (!gallery) {
@@ -341,6 +343,78 @@ export async function setPrimaryBrandImageAction(
   }
 }
 
+export async function updateBrandImagePathFromPrimaryAction(
+  rawBrandId: number | string,
+): Promise<BrandGalleryMutationResult> {
+  const parsedBrandId = BrandIdSchema.safeParse(rawBrandId);
+  if (!parsedBrandId.success) {
+    return { success: false, error: "Marca inválida." };
+  }
+
+  const brandId = parsedBrandId.data;
+  try {
+    const authorizedBrand = await getAuthorizedBrandContext(brandId);
+    if (!authorizedBrand) {
+      return {
+        success: false,
+        error: "Marca não encontrada ou inacessível.",
+      };
+    }
+
+    const gallery = await readBrandGallery(brandId);
+    if (!gallery) {
+      return {
+        success: false,
+        error: "Não foi possível validar a imagem principal.",
+      };
+    }
+
+    const primaryImage = gallery.images.find((image) => image.isPrimary);
+    if (!primaryImage) {
+      return {
+        success: false,
+        error: "A galeria não possui uma imagem principal.",
+      };
+    }
+
+    const imagePath = primaryImage.urls.original.trim();
+    if (!imagePath || imagePath.length > BRAND_IMAGE_PATH_MAX_LENGTH) {
+      logger.error("Primary brand image has an invalid original URL", {
+        brandId,
+        assetId: primaryImage.id,
+        imagePathLength: imagePath.length,
+      });
+      return {
+        success: false,
+        error: "A URL original da imagem principal é inválida.",
+      };
+    }
+
+    if ((authorizedBrand.brand.imagePath ?? "").trim() === imagePath) {
+      return {
+        success: true,
+        message: "PATH_IMAGEM já está atualizado com a imagem principal.",
+      };
+    }
+
+    await updateBrandImagePath(brandId, imagePath, authorizedBrand.apiContext);
+
+    return {
+      success: true,
+      message: "PATH_IMAGEM atualizado com a imagem principal.",
+    };
+  } catch (error) {
+    logger.error("Unexpected brand PATH_IMAGEM synchronization failure", {
+      brandId,
+      error,
+    });
+    return {
+      success: false,
+      error: "Não foi possível atualizar PATH_IMAGEM.",
+    };
+  }
+}
+
 export async function deleteBrandImageAction(
   rawBrandId: number | string,
   rawAssetId: string,
@@ -354,13 +428,14 @@ export async function deleteBrandImageAction(
 
   const { assetId, brandId } = parsedInput.data;
   try {
-    const apiContext = await getAuthorizedBrandContext(brandId);
-    if (!apiContext) {
+    const authorizedBrand = await getAuthorizedBrandContext(brandId);
+    if (!authorizedBrand) {
       return {
         success: false,
         error: "Marca não encontrada ou inacessível.",
       };
     }
+    const { apiContext } = authorizedBrand;
 
     const gallery = await readBrandGallery(brandId);
     if (!gallery) {

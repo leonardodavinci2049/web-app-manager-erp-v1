@@ -53,9 +53,11 @@ function getSafeApiLogMessage(message: string | string[]): string {
 
 async function getAuthorizedCustomerContext(customerId: number) {
   const { apiContext } = await getAuthContext();
-  const result = await getCustomerById(customerId, apiContext);
+  const customerBundle = await getCustomerById(customerId, apiContext);
 
-  return result ? apiContext : null;
+  return customerBundle
+    ? { apiContext, customer: customerBundle.customer }
+    : null;
 }
 
 async function updateCustomerImagePath(
@@ -126,13 +128,14 @@ export async function uploadCustomerImageAction(
   }
 
   try {
-    const apiContext = await getAuthorizedCustomerContext(customerId);
-    if (!apiContext) {
+    const authorizedCustomer = await getAuthorizedCustomerContext(customerId);
+    if (!authorizedCustomer) {
       return {
         success: false,
-        error: "Cliente não encontrada ou inacessível.",
+        error: "Cliente não encontrado ou inacessível.",
       };
     }
+    const { apiContext } = authorizedCustomer;
 
     const gallery = await readCustomerGallery(customerId);
     if (!gallery) {
@@ -227,13 +230,14 @@ export async function setPrimaryCustomerImageAction(
 
   const { assetId, customerId } = parsedInput.data;
   try {
-    const apiContext = await getAuthorizedCustomerContext(customerId);
-    if (!apiContext) {
+    const authorizedCustomer = await getAuthorizedCustomerContext(customerId);
+    if (!authorizedCustomer) {
       return {
         success: false,
-        error: "Cliente não encontrada ou inacessível.",
+        error: "Cliente não encontrado ou inacessível.",
       };
     }
+    const { apiContext } = authorizedCustomer;
 
     const gallery = await readCustomerGallery(customerId);
     if (!gallery) {
@@ -345,6 +349,82 @@ export async function setPrimaryCustomerImageAction(
   }
 }
 
+export async function updateCustomerImagePathFromPrimaryAction(
+  rawCustomerId: number | string,
+): Promise<CustomerGalleryMutationResult> {
+  const parsedCustomerId = CustomerIdSchema.safeParse(rawCustomerId);
+  if (!parsedCustomerId.success) {
+    return { success: false, error: "Cliente inválido." };
+  }
+
+  const customerId = parsedCustomerId.data;
+  try {
+    const authorizedCustomer = await getAuthorizedCustomerContext(customerId);
+    if (!authorizedCustomer) {
+      return {
+        success: false,
+        error: "Cliente não encontrado ou inacessível.",
+      };
+    }
+
+    const gallery = await readCustomerGallery(customerId);
+    if (!gallery) {
+      return {
+        success: false,
+        error: "Não foi possível validar a imagem principal.",
+      };
+    }
+
+    const primaryImage = gallery.images.find((image) => image.isPrimary);
+    if (!primaryImage) {
+      return {
+        success: false,
+        error: "A galeria não possui uma imagem principal.",
+      };
+    }
+
+    const imagePath = primaryImage.urls.original.trim();
+    if (!imagePath || imagePath.length > CUSTOMER_IMAGE_PATH_MAX_LENGTH) {
+      logger.error("Primary customer image has an invalid original URL", {
+        customerId,
+        assetId: primaryImage.id,
+        imagePathLength: imagePath.length,
+      });
+      return {
+        success: false,
+        error: "A URL original da imagem principal é inválida.",
+      };
+    }
+
+    if ((authorizedCustomer.customer.imagePath ?? "").trim() === imagePath) {
+      return {
+        success: true,
+        message: "PATH_IMAGEM já está atualizado com a imagem principal.",
+      };
+    }
+
+    await updateCustomerImagePath(
+      customerId,
+      imagePath,
+      authorizedCustomer.apiContext,
+    );
+
+    return {
+      success: true,
+      message: "PATH_IMAGEM atualizado com a imagem principal.",
+    };
+  } catch (error) {
+    logger.error("Unexpected customer PATH_IMAGEM synchronization failure", {
+      customerId,
+      error,
+    });
+    return {
+      success: false,
+      error: "Não foi possível atualizar PATH_IMAGEM.",
+    };
+  }
+}
+
 export async function deleteCustomerImageAction(
   rawCustomerId: number | string,
   rawAssetId: string,
@@ -358,13 +438,14 @@ export async function deleteCustomerImageAction(
 
   const { assetId, customerId } = parsedInput.data;
   try {
-    const apiContext = await getAuthorizedCustomerContext(customerId);
-    if (!apiContext) {
+    const authorizedCustomer = await getAuthorizedCustomerContext(customerId);
+    if (!authorizedCustomer) {
       return {
         success: false,
-        error: "Cliente não encontrada ou inacessível.",
+        error: "Cliente não encontrado ou inacessível.",
       };
     }
+    const { apiContext } = authorizedCustomer;
 
     const gallery = await readCustomerGallery(customerId);
     if (!gallery) {

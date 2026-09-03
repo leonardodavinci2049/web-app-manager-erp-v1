@@ -68,7 +68,7 @@ brand/
     ├── not-found.tsx                     # Invalid/inaccessible brand UI
     ├── _actions/
     │   ├── brand-detail-actions.ts       # updateBrandAction, deleteBrandAction
-    │   └── brand-image-gallery-actions.ts# Gallery upload/primary/delete
+    │   └── brand-image-gallery-actions.ts# Gallery upload/primary/delete/PATH sync
     └── _components/
         ├── brand-detail-layout.tsx       # Server: detail composition via shared shells
         ├── brand-detail-form.tsx         # Client: single name+notes edit form
@@ -236,11 +236,12 @@ list and detail UI).
   brand ID stringified.
 - The gallery is capped at `BRAND_GALLERY_LIMIT` (7) images and accepts only
   `BRAND_GALLERY_ACCEPTED_MIME_TYPES` up to `BRAND_GALLERY_MAX_FILE_SIZE`
-  (10 MB).
+  (2 MB).
 - `getBrandGalleryInitialState()` is wrapped in React `cache()` so the gallery
   node and the images-list node share a single Assets API read per request.
-- `PATH_IMAGEM` synchronization is mandatory on three flows (first upload,
-  primary change, primary deletion) and writes through
+- `PATH_IMAGEM` synchronization is mandatory on four flows (first upload,
+  primary change, primary deletion, and manual update from the first card) and
+  writes through
   `brandServiceApi.updateBrandInlineField` (table `tbl_produto_marca`, key
   `ID_MARCA`, field `PATH_IMAGEM`, max 300 chars). If the original URL is empty
   or exceeds 300 chars, the write is skipped and the action returns a `warning`
@@ -346,6 +347,6 @@ Do not present these flows as functional and do not simulate them.
   mobile, including search, sort/order, grid/list switching, pagination, empty
   and error states, create flow, the single edit form, delete (including the
   products guard), related-products sub-pagination, gallery upload/primary/delete
-  (including last-image rejection), zoom navigation, the PATH_IMAGEM viewer
-  refresh, and the `returnTo` back link with valid and invalid `id`.
+  (including last-image rejection), zoom navigation, the first-card PATH_IMAGEM
+  update, and the `returnTo` back link with valid and invalid `id`.
 - This project currently has no automated test command; do not invent one.

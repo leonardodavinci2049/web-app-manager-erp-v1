@@ -41,7 +41,7 @@ React `cache()`.
 ├── not-found.tsx                           # Invalid/inaccessible brand UI
 ├── _actions/
 │   ├── brand-detail-actions.ts             # updateBrandAction, deleteBrandAction
-│   └── brand-image-gallery-actions.ts      # Gallery upload/primary/delete
+│   └── brand-image-gallery-actions.ts      # Gallery upload/primary/delete/PATH sync
 └── _components/
     ├── brand-detail-layout.tsx             # Top-level detail layout (Server, shared shells)
     ├── brand-detail-form.tsx               # Single name+notes edit form (Client)
@@ -173,10 +173,10 @@ list and detail UI).
   upload, thumbnail grid, primary promotion, deletion (with confirmation),
   keyboard-navigable zoom dialog, per-image error fallback to
   `DEFAULT_BRAND_IMAGE_URL`, and an `aria-live` status region for screen readers.
-- `brand-images-list.tsx`: read-only viewer. Shows the current `PATH_IMAGEM`
-  value and the Assets API image list side by side, with a manual refresh button.
-  There is **no** "Usar no PATH_IMAGEM" button; promotion is automatic through
-  the gallery actions.
+- `brand-images-list.tsx`: viewer and manual synchronization control. Shows the
+  current `PATH_IMAGEM` value and the Assets API image list side by side. The
+  first card's "Atualizar" button copies the primary image's original URL; the
+  gallery card has no per-image PATH action.
 - `image-gallery-skeleton.tsx`: Suspense fallback shared by both nodes.
 - `image-gallery-constants.ts`: `BRAND_GALLERY_ENTITY_TYPE` (`"BRAND"`),
   `BRAND_GALLERY_LIMIT` (7), `BRAND_GALLERY_MAX_FILE_SIZE` (2 MB), accepted MIME
@@ -191,14 +191,15 @@ list and detail UI).
   reason; valid files are uploaded sequentially.
 - The last remaining image cannot be deleted; the delete action and the client
   button both enforce this.
-- All three mutations (`uploadBrandImageAction`, `setPrimaryBrandImageAction`,
-  `deleteBrandImageAction`) live in `_actions/brand-image-gallery-actions.ts`,
+- All four mutations (`uploadBrandImageAction`, `setPrimaryBrandImageAction`,
+  `deleteBrandImageAction`, `updateBrandImagePathFromPrimaryAction`) live in
+  `_actions/brand-image-gallery-actions.ts`,
   re-resolve auth and ownership via `getAuthorizedBrandContext()`, and re-read the
   gallery before mutating.
 
 ### PATH_IMAGEM synchronization
 
-`PATH_IMAGEM` is kept in sync with the Assets API primary image on three flows,
+`PATH_IMAGEM` is kept in sync with the Assets API primary image on four flows,
 writing through `brandServiceApi.updateBrandInlineField` (table `tbl_produto_marca`,
 key `ID_MARCA`, field `PATH_IMAGEM`, max 300 chars, `FIELD_TYPE.STRING`):
 
@@ -208,6 +209,9 @@ key `ID_MARCA`, field `PATH_IMAGEM`, max 300 chars, `FIELD_TYPE.STRING`):
    If the image was already primary, the action still repairs `PATH_IMAGEM`.
 3. **Primary deletion**: the next candidate (by sort order) is promoted to
    primary and its URL is written to `PATH_IMAGEM`.
+4. **Manual update**: the first-card button re-reads the brand and gallery,
+   copies the current primary image's original URL, and skips an identical
+   `PATH_IMAGEM` write.
 
 If the original URL is empty or exceeds 300 characters, the `PATH_IMAGEM` write
 is skipped and the action returns a `warning`. The asset operation is **not**

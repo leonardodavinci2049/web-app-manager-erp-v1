@@ -53,9 +53,9 @@ function getSafeApiLogMessage(message: string | string[]): string {
 
 async function getAuthorizedPtypeContext(ptypeId: number) {
   const { apiContext } = await getAuthContext();
-  const result = await getPtypeById(ptypeId, apiContext);
+  const ptype = await getPtypeById(ptypeId, apiContext);
 
-  return result ? apiContext : null;
+  return ptype ? { apiContext, ptype } : null;
 }
 
 async function updatePtypeImagePath(
@@ -129,13 +129,14 @@ export async function uploadPtypeImageAction(
   }
 
   try {
-    const apiContext = await getAuthorizedPtypeContext(ptypeId);
-    if (!apiContext) {
+    const authorizedPtype = await getAuthorizedPtypeContext(ptypeId);
+    if (!authorizedPtype) {
       return {
         success: false,
-        error: "Tipo de produto não encontrada ou inacessível.",
+        error: "Tipo de produto não encontrado ou inacessível.",
       };
     }
+    const { apiContext } = authorizedPtype;
 
     const gallery = await readPtypeGallery(ptypeId);
     if (!gallery) {
@@ -230,13 +231,14 @@ export async function setPrimaryPtypeImageAction(
 
   const { assetId, ptypeId } = parsedInput.data;
   try {
-    const apiContext = await getAuthorizedPtypeContext(ptypeId);
-    if (!apiContext) {
+    const authorizedPtype = await getAuthorizedPtypeContext(ptypeId);
+    if (!authorizedPtype) {
       return {
         success: false,
-        error: "Tipo de produto não encontrada ou inacessível.",
+        error: "Tipo de produto não encontrado ou inacessível.",
       };
     }
+    const { apiContext } = authorizedPtype;
 
     const gallery = await readPtypeGallery(ptypeId);
     if (!gallery) {
@@ -351,6 +353,78 @@ export async function setPrimaryPtypeImageAction(
   }
 }
 
+export async function updatePtypeImagePathFromPrimaryAction(
+  rawPtypeId: number | string,
+): Promise<PtypeGalleryMutationResult> {
+  const parsedPtypeId = PtypeIdSchema.safeParse(rawPtypeId);
+  if (!parsedPtypeId.success) {
+    return { success: false, error: "Tipo de produto inválido." };
+  }
+
+  const ptypeId = parsedPtypeId.data;
+  try {
+    const authorizedPtype = await getAuthorizedPtypeContext(ptypeId);
+    if (!authorizedPtype) {
+      return {
+        success: false,
+        error: "Tipo de produto não encontrado ou inacessível.",
+      };
+    }
+
+    const gallery = await readPtypeGallery(ptypeId);
+    if (!gallery) {
+      return {
+        success: false,
+        error: "Não foi possível validar a imagem principal.",
+      };
+    }
+
+    const primaryImage = gallery.images.find((image) => image.isPrimary);
+    if (!primaryImage) {
+      return {
+        success: false,
+        error: "A galeria não possui uma imagem principal.",
+      };
+    }
+
+    const imagePath = primaryImage.urls.original.trim();
+    if (!imagePath || imagePath.length > PTYPE_IMAGE_PATH_MAX_LENGTH) {
+      logger.error("Primary ptype image has an invalid original URL", {
+        ptypeId,
+        assetId: primaryImage.id,
+        imagePathLength: imagePath.length,
+      });
+      return {
+        success: false,
+        error: "A URL original da imagem principal é inválida.",
+      };
+    }
+
+    if ((authorizedPtype.ptype.imagePath ?? "").trim() === imagePath) {
+      return {
+        success: true,
+        message: "PATH_IMAGEM já está atualizado com a imagem principal.",
+      };
+    }
+
+    await updatePtypeImagePath(ptypeId, imagePath, authorizedPtype.apiContext);
+
+    return {
+      success: true,
+      message: "PATH_IMAGEM atualizado com a imagem principal.",
+    };
+  } catch (error) {
+    logger.error("Unexpected ptype PATH_IMAGEM synchronization failure", {
+      ptypeId,
+      error,
+    });
+    return {
+      success: false,
+      error: "Não foi possível atualizar PATH_IMAGEM.",
+    };
+  }
+}
+
 export async function deletePtypeImageAction(
   rawPtypeId: number | string,
   rawAssetId: string,
@@ -364,13 +438,14 @@ export async function deletePtypeImageAction(
 
   const { assetId, ptypeId } = parsedInput.data;
   try {
-    const apiContext = await getAuthorizedPtypeContext(ptypeId);
-    if (!apiContext) {
+    const authorizedPtype = await getAuthorizedPtypeContext(ptypeId);
+    if (!authorizedPtype) {
       return {
         success: false,
-        error: "Tipo de produto não encontrada ou inacessível.",
+        error: "Tipo de produto não encontrado ou inacessível.",
       };
     }
+    const { apiContext } = authorizedPtype;
 
     const gallery = await readPtypeGallery(ptypeId);
     if (!gallery) {

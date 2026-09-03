@@ -53,9 +53,9 @@ function getSafeApiLogMessage(message: string | string[]): string {
 
 async function getAuthorizedSupplierContext(supplierId: number) {
   const { apiContext } = await getAuthContext();
-  const result = await getSupplierById(supplierId, apiContext);
+  const supplier = await getSupplierById(supplierId, apiContext);
 
-  return result ? apiContext : null;
+  return supplier ? { apiContext, supplier } : null;
 }
 
 async function updateSupplierImagePath(
@@ -129,13 +129,14 @@ export async function uploadSupplierImageAction(
   }
 
   try {
-    const apiContext = await getAuthorizedSupplierContext(supplierId);
-    if (!apiContext) {
+    const authorizedSupplier = await getAuthorizedSupplierContext(supplierId);
+    if (!authorizedSupplier) {
       return {
         success: false,
-        error: "Fornecedor não encontrada ou inacessível.",
+        error: "Fornecedor não encontrado ou inacessível.",
       };
     }
+    const { apiContext } = authorizedSupplier;
 
     const gallery = await readSupplierGallery(supplierId);
     if (!gallery) {
@@ -230,13 +231,14 @@ export async function setPrimarySupplierImageAction(
 
   const { assetId, supplierId } = parsedInput.data;
   try {
-    const apiContext = await getAuthorizedSupplierContext(supplierId);
-    if (!apiContext) {
+    const authorizedSupplier = await getAuthorizedSupplierContext(supplierId);
+    if (!authorizedSupplier) {
       return {
         success: false,
-        error: "Fornecedor não encontrada ou inacessível.",
+        error: "Fornecedor não encontrado ou inacessível.",
       };
     }
+    const { apiContext } = authorizedSupplier;
 
     const gallery = await readSupplierGallery(supplierId);
     if (!gallery) {
@@ -351,6 +353,82 @@ export async function setPrimarySupplierImageAction(
   }
 }
 
+export async function updateSupplierImagePathFromPrimaryAction(
+  rawSupplierId: number | string,
+): Promise<SupplierGalleryMutationResult> {
+  const parsedSupplierId = SupplierIdSchema.safeParse(rawSupplierId);
+  if (!parsedSupplierId.success) {
+    return { success: false, error: "Fornecedor inválido." };
+  }
+
+  const supplierId = parsedSupplierId.data;
+  try {
+    const authorizedSupplier = await getAuthorizedSupplierContext(supplierId);
+    if (!authorizedSupplier) {
+      return {
+        success: false,
+        error: "Fornecedor não encontrado ou inacessível.",
+      };
+    }
+
+    const gallery = await readSupplierGallery(supplierId);
+    if (!gallery) {
+      return {
+        success: false,
+        error: "Não foi possível validar a imagem principal.",
+      };
+    }
+
+    const primaryImage = gallery.images.find((image) => image.isPrimary);
+    if (!primaryImage) {
+      return {
+        success: false,
+        error: "A galeria não possui uma imagem principal.",
+      };
+    }
+
+    const imagePath = primaryImage.urls.original.trim();
+    if (!imagePath || imagePath.length > SUPPLIER_IMAGE_PATH_MAX_LENGTH) {
+      logger.error("Primary supplier image has an invalid original URL", {
+        supplierId,
+        assetId: primaryImage.id,
+        imagePathLength: imagePath.length,
+      });
+      return {
+        success: false,
+        error: "A URL original da imagem principal é inválida.",
+      };
+    }
+
+    if ((authorizedSupplier.supplier.imagePath ?? "").trim() === imagePath) {
+      return {
+        success: true,
+        message: "PATH_IMAGEM já está atualizado com a imagem principal.",
+      };
+    }
+
+    await updateSupplierImagePath(
+      supplierId,
+      imagePath,
+      authorizedSupplier.apiContext,
+    );
+
+    return {
+      success: true,
+      message: "PATH_IMAGEM atualizado com a imagem principal.",
+    };
+  } catch (error) {
+    logger.error("Unexpected supplier PATH_IMAGEM synchronization failure", {
+      supplierId,
+      error,
+    });
+    return {
+      success: false,
+      error: "Não foi possível atualizar PATH_IMAGEM.",
+    };
+  }
+}
+
 export async function deleteSupplierImageAction(
   rawSupplierId: number | string,
   rawAssetId: string,
@@ -364,13 +442,14 @@ export async function deleteSupplierImageAction(
 
   const { assetId, supplierId } = parsedInput.data;
   try {
-    const apiContext = await getAuthorizedSupplierContext(supplierId);
-    if (!apiContext) {
+    const authorizedSupplier = await getAuthorizedSupplierContext(supplierId);
+    if (!authorizedSupplier) {
       return {
         success: false,
-        error: "Fornecedor não encontrada ou inacessível.",
+        error: "Fornecedor não encontrado ou inacessível.",
       };
     }
+    const { apiContext } = authorizedSupplier;
 
     const gallery = await readSupplierGallery(supplierId);
     if (!gallery) {
