@@ -1,6 +1,5 @@
 export type { RegistryActiveFilter } from "./registry-active-filters";
 export { RegistryActiveFilters } from "./registry-active-filters";
-export { RegistryDetailLoading } from "./registry-detail-loading";
 export { RegistryEntityImage } from "./registry-entity-image";
 export { RegistryFilterSheet } from "./registry-filter-sheet";
 export { RegistryImageUploadStub } from "./registry-image-upload-stub";

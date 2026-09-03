@@ -4,7 +4,8 @@ import {
   formatEntryMoney,
   formatEntryNumber,
 } from "../../../_components/lib/format";
-import { EntryTabCard, EntryTabField } from "./entry-tab-card";
+import { EntryDetailField } from "../entry-detail-field";
+import { EntrySectionCard } from "../entry-section-card";
 
 interface EntryTaxesTabProps {
   entry: UIEntryDetail;
@@ -12,41 +13,41 @@ interface EntryTaxesTabProps {
 
 export function EntryTaxesTab({ entry }: EntryTaxesTabProps) {
   return (
-    <EntryTabCard icon={<Percent className="size-4" />} title="Tributos">
+    <EntrySectionCard icon={<Percent className="size-4" />} title="Tributos">
       <dl className="grid gap-4 sm:grid-cols-2">
-        <EntryTabField
+        <EntryDetailField
           label="Alíquota de ICMS"
           value={formatEntryNumber(entry.icmsRate)}
         />
-        <EntryTabField
+        <EntryDetailField
           label="Alíquota de IPI"
           value={formatEntryNumber(entry.ipiRate)}
         />
-        <EntryTabField
+        <EntryDetailField
           label="Valor de ICMS"
           value={formatEntryMoney(entry.icmsValue)}
         />
-        <EntryTabField
+        <EntryDetailField
           label="Valor de IPI"
           value={formatEntryMoney(entry.ipiValue)}
         />
-        <EntryTabField
+        <EntryDetailField
           label="Valor de PIS"
           value={formatEntryMoney(entry.pisValue)}
         />
-        <EntryTabField
+        <EntryDetailField
           label="Valor de COFINS"
           value={formatEntryMoney(entry.cofinsValue)}
         />
-        <EntryTabField
+        <EntryDetailField
           label="Valor de IBS"
           value={formatEntryMoney(entry.ibsValue)}
         />
-        <EntryTabField
+        <EntryDetailField
           label="Valor de CBS"
           value={formatEntryMoney(entry.cbsValue)}
         />
       </dl>
-    </EntryTabCard>
+    </EntrySectionCard>
   );
 }

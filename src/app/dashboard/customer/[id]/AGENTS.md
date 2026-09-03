@@ -48,18 +48,17 @@ gallery read is shared by both nodes through React `cache()`.
 └── _components/
     ├── customer-detail-layout.tsx            # Top-level detail layout (Server)
     ├── overview/                             # First-fold customer overview
-    │   ├── customer-head-data-section.tsx
+    │   ├── customer-head-data-section.tsx    # Heading via shared DetailRecordHeading (image only below lg)
     │   ├── customer-identity-section.tsx
     │   ├── customer-person-business-sections.tsx
     │   ├── customer-type-sections.tsx
     │   ├── related-seller-image.tsx
     │   └── related-seller-section.tsx
     ├── tabs/                                 # Second-fold tabs/content
-    │   ├── customer-detail-tabs.tsx
+    │   ├── customer-detail-tabs.tsx          # Uses shared DetailTabsList/DetailTabTrigger/DetailImageTab
     │   ├── customer-address-tab.tsx
-    │   ├── customer-deletion-tab.tsx
+    │   ├── customer-deletion-tab.tsx         # Shared DetailDeletionCard frame
     │   ├── customer-field.tsx
-    │   ├── customer-image-tab.tsx
     │   ├── customer-internet-tab.tsx
     │   ├── customer-notes-tab.tsx
     │   ├── customer-registration-tab.tsx
@@ -80,6 +79,13 @@ gallery read is shared by both nodes through React `cache()`.
         ├── customer-image-gallery.tsx        # Upload + grid + zoom + actions (Client)
         └── customer-images-list.tsx          # PATH_IMAGEM viewer + gallery list (Client)
 ```
+
+Structural shells (grid/back link, record heading, tab list/triggers, image
+tab composition, deletion frame, detail skeleton) come from
+`@/app/dashboard/_components/detail-page` and must not be forked here. Tab
+order: **Anotações**, Endereço, Status, **Imagem**, Compras, Internet,
+Diversos, **Exclusão** (always last). The header avatar renders only below
+`lg`; on desktop the sticky gallery is the single image surface.
 
 ## Detail Data Flow
 

@@ -1,3 +1,4 @@
+import { DetailRecordHeading } from "@/app/dashboard/_components/detail-page";
 import { RegistryEntityImage } from "@/components/registry";
 import type { UIProductManager } from "@/services/api-main/product-manager/transformers/transformers";
 import { ProductNameEditor } from "./product-name-editor";
@@ -10,8 +11,8 @@ export function ProductIdentitySection({
   product,
 }: ProductIdentitySectionProps) {
   return (
-    <div className="space-y-4">
-      <div className="flex min-w-0 items-start gap-3">
+    <DetailRecordHeading
+      image={
         <RegistryEntityImage
           name={product.name}
           imagePath={product.imagePath}
@@ -19,30 +20,30 @@ export function ProductIdentitySection({
           entityLabel="do produto"
           viewMode="list"
         />
-        <div className="min-w-0 flex-1">
-          <ProductNameEditor
-            productId={product.id}
-            initialName={product.name}
-            metadata={
-              <>
-                <span className="tabular-nums">ID: #{product.id}</span>
-                {product.sku ? (
-                  <>
-                    <span aria-hidden="true">·</span>
-                    <span>SKU: {product.sku}</span>
-                  </>
-                ) : null}
-                {product.model ? (
-                  <>
-                    <span aria-hidden="true">·</span>
-                    <span>Modelo: {product.model}</span>
-                  </>
-                ) : null}
-              </>
-            }
-          />
-        </div>
-      </div>
-    </div>
+      }
+      title={
+        <ProductNameEditor
+          productId={product.id}
+          initialName={product.name}
+          metadata={
+            <>
+              <span className="tabular-nums">ID: #{product.id}</span>
+              {product.sku ? (
+                <>
+                  <span aria-hidden="true">·</span>
+                  <span>SKU: {product.sku}</span>
+                </>
+              ) : null}
+              {product.model ? (
+                <>
+                  <span aria-hidden="true">·</span>
+                  <span>Modelo: {product.model}</span>
+                </>
+              ) : null}
+            </>
+          }
+        />
+      }
+    />
   );
 }
