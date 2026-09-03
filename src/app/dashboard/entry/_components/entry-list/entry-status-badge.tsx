@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 type BadgeVariant = NonNullable<VariantProps<typeof badgeVariants>["variant"]>;
 
 interface EntryStatusBadgeProps {
-  label: string;
+  label?: string;
   value: string;
 }
 
@@ -16,14 +16,16 @@ function resolveVariant(value: string): BadgeVariant {
 }
 
 /**
- * Badge de status da entrada (estoque/fisico/etiqueta). Exibe o rotulo
- * devolvido pela API com variante coerente ao estado.
+ * Badge de status da entrada (estoque/fisico/etiqueta). Exibe o valor com
+ * variante coerente ao estado; o rotulo e opcional e usado como prefixo e
+ * tooltip quando informado.
  */
 export function EntryStatusBadge({ label, value }: EntryStatusBadgeProps) {
   const display = value?.trim() ? value.trim() : "—";
+  const text = label ? `${label}: ${display}` : display;
   return (
-    <Badge variant={resolveVariant(display)} title={`${label}: ${display}`}>
-      {label}: {display}
+    <Badge variant={resolveVariant(display)} title={text}>
+      {text}
     </Badge>
   );
 }
