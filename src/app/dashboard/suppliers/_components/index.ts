@@ -6,7 +6,6 @@ export {
   parseSupplierSearchParams,
 } from "./lib/search-params";
 export { SupplierDashboard } from "./supplier-dashboard";
-export { SupplierDetails } from "./supplier-details";
 export {
   DEFAULT_SUPPLIER_LIMIT,
   type SupplierActionResult,
