@@ -51,16 +51,15 @@ cached gallery read is shared by both nodes through React `cache()`.
 └── _components/
     ├── seller-detail-layout.tsx              # Top-level detail layout (Server)
     ├── overview/                             # First-fold seller overview
-    │   ├── seller-head-data-section.tsx      # Server: avatar + name + badges
+    │   ├── seller-head-data-section.tsx      # Heading via shared DetailRecordHeading (image only below lg)
     │   ├── seller-identity-section.tsx       # Client: form nome/telefone/whatsapp/email
     │   ├── seller-person-type-section.tsx    # Client: person type toggle (1/2)
     │   └── seller-person-business-sections.tsx # Client: PF or PJ form
     ├── tabs/                                 # Second-fold tabs/content
-    │   ├── seller-detail-tabs.tsx            # Client: <Tabs> with 8 tabs
+    │   ├── seller-detail-tabs.tsx            # Client: <Tabs> with 8 tabs (shared list/trigger/image-tab shells)
     │   ├── seller-address-tab.tsx            # Client: address form + summary
-    │   ├── seller-deletion-tab.tsx           # Server: disabled danger zone
+    │   ├── seller-deletion-tab.tsx           # Disabled danger zone (shared DetailDeletionCard frame)
     │   ├── seller-field.tsx                  # Server (presentational): Input+Label+error
-    │   ├── seller-image-tab.tsx              # Server: gallery slot (mobile + imageContent)
     │   ├── seller-internet-tab.tsx           # Client: digital presence form
     │   ├── seller-notes-tab.tsx              # Client: notes textarea + copy
     │   ├── seller-registration-tab.tsx       # Server: read-only dates
@@ -76,6 +75,13 @@ cached gallery read is shared by both nodes through React `cache()`.
     │   └── seller-detail-types.ts            # SellerActionResult
     └── image-gallery/                        # Gallery subsystem (unchanged)
 ```
+
+Structural shells (grid/back link, record heading, tab list/triggers, image
+tab composition, deletion frame, detail skeleton) come from
+`@/app/dashboard/_components/detail-page` and must not be forked here. Tab
+order: **Anotações**, Endereço, Status, **Imagem**, Vendas, Internet, Diversos,
+**Exclusão** (always last). The header avatar renders only below `lg`; on
+desktop the sticky gallery is the single image surface.
 
 ## Detail Data Flow
 

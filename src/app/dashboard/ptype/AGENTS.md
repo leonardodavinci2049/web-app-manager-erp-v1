@@ -43,7 +43,7 @@ ptype/
 ├── _actions/
 │   └── ptype-actions.ts                  # createPtypeAction (list-only mutation)
 ├── _components/
-│   ├── index.ts                          # Public exports (URL helpers + types; NOT PtypeDetails)
+│   ├── index.ts                          # Public exports (URL helpers + types; NOT the detail layout)
 │   ├── ptype-dashboard.tsx               # Server: composes grid/list subtrees -> toolbar
 │   ├── ptype-toolbar.tsx                 # Client: URL filters + view mode + create
 │   ├── ptype-collection.tsx             # Server: grid cards + desktop table + empty/error
@@ -57,22 +57,24 @@ ptype/
 └── [id]/
     ├── AGENTS.md                         # Detail route guide
     ├── page.tsx                          # Detail: auth + getPtypeById + Suspense nodes
-    ├── loading.tsx                       # Detail skeleton (NO error.tsx / not-found.tsx here)
+    ├── loading.tsx                       # Detail skeleton (RegistryDetailLoading, variant="ptype")
+    ├── error.tsx                         # Detail error boundary (Client)
+    ├── not-found.tsx                     # Invalid/inaccessible ptype UI
     ├── _actions/
     │   ├── ptype-detail-actions.ts       # updatePtypeAction, setPtypeStatusAction, deletePtypeAction
     │   └── ptype-image-gallery-actions.ts# Gallery upload/primary/delete
     └── _components/
-        ├── ptype-details.tsx             # Detail composition (Client, single mega-form) — LOCAL
+        ├── ptype-detail-layout.tsx       # Server: detail composition via shared shells
+        ├── overview/                     # Heading, read-only details card, single form card
         ├── tabs/                         # Tab orchestrator + one component per tab
         └── image-gallery/                # Gallery subsystem (see [id]/AGENTS.md)
 ```
 
-This follows the **brand** layout, not the carriers layout: only the create
-action lives in the parent `_actions/`; update/status/delete live **locally** in
-`[id]/_actions/ptype-detail-actions.ts`; `PtypeDetails` lives **locally** in
-`[id]/_components`. The detail segment has **no** `error.tsx` and **no**
-`not-found.tsx` (only `loading.tsx`) — `notFound()` renders the nearest parent
-not-found UI and unhandled errors bubble to the parent boundary.
+This follows the **brand** action split, not the carriers layout: only the
+create action lives in the parent `_actions/`; update/status/delete live
+**locally** in `[id]/_actions/ptype-detail-actions.ts`. The detail segment owns
+dedicated `error.tsx` and `not-found.tsx` files and composes the shared shells
+from `@/app/dashboard/_components/detail-page`.
 
 ## List Page Responsibilities
 
@@ -109,10 +111,10 @@ Keep `[id]/page.tsx` as a Server Component. It should:
 7. Render `SiteHeaderWithBreadcrumb` (breadcrumb "Tipos de produtos" links to
    `returnTo`; last crumb is `item.name`) and a custom `max-w-[1400px]`
    container (this route does **not** use `RegistryPageShell`).
-8. Compose `PtypeDetails` (imported from `./_components/ptype-details`) with the
-   DTO, `returnTo`, and two `<Suspense>` nodes built on the **page**:
-   `imageGallery` (`PtypeImageGalleryServer`) and `imageContent`
-   (`PtypeImagesListServer`).
+8. Compose `PtypeDetailLayout` (imported from
+   `./_components/ptype-detail-layout`) with the DTO, `returnTo`, and two
+   `<Suspense>` nodes built on the **page**: `imageGallery`
+   (`PtypeImageGalleryServer`) and `imageContent` (`PtypeImagesListServer`).
 
 ## Authentication and Data Isolation
 
@@ -178,18 +180,19 @@ triggers a refetch.
 
 ## Detail UI
 
-`PtypeDetails` is a **Client Component** living **locally** in
-`[id]/_components/ptype-details.tsx` (brand-style placement, not re-exported from
-the parent `_components/index.ts`). It owns form state and drives
-`router.refresh()` after update/status and `router.replace(returnTo)` after
-delete. Editing is a **single mega-form** (name + notes). The layout includes a
-read-only "Detalhes do tipo" card (status, `productRegistrationFlag`,
-`createdAt`, commission rates) and `PtypeDetailTabs`. The Client orchestrator
-delegates `annotations`, `image`, `miscellaneous`, and `deletion` to dedicated
-components under `_components/tabs`; `annotations` is the default first tab.
-`miscellaneous` places the "Status do cadastro" action card above the
-"Cadastro" date card. Activate/deactivate/delete share a single `AlertDialog`
-via a `Confirmation` union. See `[id]/AGENTS.md`.
+`PtypeDetailLayout` is a **Server Component** composing the shared shells from
+`@/app/dashboard/_components/detail-page`. Editing remains a **single
+mega-form** (name + notes) in `overview/ptype-detail-form-section.tsx` (Client),
+which drives `router.refresh()` after updates. The layout also includes the
+record heading (`overview/ptype-head-data-section.tsx`, image only below `lg`)
+and the read-only "Detalhes do tipo" card
+(`overview/ptype-type-details-section.tsx`: status, `productRegistrationFlag`,
+`createdAt`, commission rates). `PtypeDetailTabs` (Client) delegates
+`annotations`, `image`, `miscellaneous`, and `deletion` to dedicated components
+under `_components/tabs`; `annotations` is the default first tab.
+`miscellaneous` places the "Status do cadastro" action card (with its own
+confirm dialog) above the "Cadastro" date card, and `deletion` owns its delete
+dialog and redirects to `returnTo` on success. See `[id]/AGENTS.md`.
 
 ## Image Gallery
 
@@ -272,8 +275,9 @@ mutations are enabled and wired. Do not mark any flow as pending.
 
 ## Conventions for Changes
 
-- Preserve `page.tsx` and `[id]/page.tsx` as Server Components. Keep `PtypeDetails`
-  Client and local to `[id]/_components/`.
+- Preserve `page.tsx`, `[id]/page.tsx`, and `PtypeDetailLayout` as Server
+  Components. Keep the form/status/deletion Client leaves focused and local to
+  `[id]/_components/`.
 - Keep the brand-style action split: create in parent `_actions/`; update/status/
   delete in `[id]/_actions/ptype-detail-actions.ts`. Do not move detail actions
   into the parent or vice versa.
@@ -290,7 +294,7 @@ mutations are enabled and wired. Do not mark any flow as pending.
 - When adding a sort option, align the `VALID_SORTS` set, the `<select>` options
   in `PtypeToolbar`, and the `columnId` mapping in `mapPtypeFiltersToApi()`.
 - When adding a new editable field, align together: `updateSchema` in
-  `ptype-detail-actions.ts`, the single `PtypeDetails` form, the `updatePtype`
+  `ptype-detail-actions.ts`, the single `PtypeDetailFormSection` form, the `updatePtype`
   payload, and the `UIPtype`/transformer field. Keep the single-form model.
 - Keep `PATH_IMAGEM` synchronization in step with any gallery primary change; a
   new gallery mutation that changes the primary image must call

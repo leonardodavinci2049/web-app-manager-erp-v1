@@ -23,8 +23,8 @@ numbered sequence; the key points:
    exactly `/dashboard/brand`) and `productPage` with `parsePositiveInt`.
 4. `getAuthContext()`, then fetch the brand (`getBrandById`) and related products
    (`getProductsManager`) in parallel with isolated failure handling.
-5. Render `BrandDetails` with DTOs plus two server-owned `<Suspense>` nodes:
-   `imageGallery` (`BrandImageGalleryServer`) and `imageTabContent`
+5. Render `BrandDetailLayout` with DTOs plus two server-owned `<Suspense>` nodes:
+   `imageGallery` (`BrandImageGalleryServer`) and `imageContent`
    (`BrandImagesListServer`).
 
 The gallery and image nodes are built on the **page** so the Suspense boundaries
@@ -37,21 +37,25 @@ React `cache()`.
 [id]/
 ├── page.tsx                                # Detail composition (Server)
 ├── loading.tsx                             # Detail skeleton (RegistryDetailLoading, variant="brand")
+├── error.tsx                               # Detail error boundary (Client)
+├── not-found.tsx                           # Invalid/inaccessible brand UI
 ├── _actions/
 │   ├── brand-detail-actions.ts             # updateBrandAction, deleteBrandAction
 │   └── brand-image-gallery-actions.ts      # Gallery upload/primary/delete
 └── _components/
-    ├── brand-details.tsx                   # Top-level detail layout (Client)
+    ├── brand-detail-layout.tsx             # Top-level detail layout (Server, shared shells)
     ├── brand-detail-form.tsx               # Single name+notes edit form (Client)
     ├── brand-delete-dialog.tsx             # Delete confirm, blocked by products (Client)
     ├── brand-products-list.tsx             # Related products + sub-pagination (Client)
+    ├── overview/
+    │   ├── brand-head-data-section.tsx     # Heading via shared DetailRecordHeading (image only below lg)
+    │   └── brand-detail-form-section.tsx   # "Dados do cadastro" card wrapping BrandDetailForm (Client)
     ├── tabs/
-    │   ├── brand-detail-tabs.tsx           # Five-tab orchestrator (Client)
+    │   ├── brand-detail-tabs.tsx           # Five-tab orchestrator (Client, shared list/trigger/image-tab)
     │   ├── brand-annotations-tab.tsx       # Read-only ANOTACOES value
     │   ├── brand-products-tab.tsx          # Related-products tab
-    │   ├── brand-images-tab.tsx            # Mobile gallery + images-list slots
     │   ├── brand-miscellaneous-tab.tsx     # INATIVO status + registry dates
-    │   └── brand-deletion-tab.tsx          # Deletion guard + dialog
+    │   └── brand-deletion-tab.tsx          # Deletion guard + dialog (shared DetailDeletionCard frame)
     └── image-gallery/
         ├── index.ts
         ├── image-gallery-constants.ts      # Entity type, limits, MIME, defaults
@@ -64,9 +68,12 @@ React `cache()`.
         └── brand-images-list.tsx           # PATH_IMAGEM viewer + gallery list (Client)
 ```
 
-There is no `error.tsx` and no `not-found.tsx` in this segment. `notFound()`
-renders the nearest parent not-found UI and unhandled errors bubble to the parent
-boundary.
+Structural shells (grid/back link, record heading, tab list/triggers, image
+tab composition, deletion frame, detail skeleton) come from
+`@/app/dashboard/_components/detail-page` and must not be forked here. Tab
+order: **Anotações**, **Imagem**, Produtos, Diversos, **Exclusão** (always
+last). The header avatar renders only below `lg`; on desktop the sticky gallery
+is the single image surface.
 
 ## Detail Data Flow
 
@@ -76,41 +83,31 @@ boundary.
   ├── getAuthContext()
   ├── getBrandById()       -> UIBrand
   ├── getProductsManager() -> UIProductManager[]   (isolated failure -> hasProductsError)
-  └── <BrandDetails> (Client)
-        ├── header (name, inactive Badge, id)
-        ├── left aside  -> imageGallery node (<Suspense>)
-        ├── right column -> BrandDetailForm (name+notes) -> updateBrandAction
+  └── <BrandDetailLayout> (Server, shared shells)
+        ├── overview/brand-head-data-section.tsx   (name, inactive Badge, id; image only below lg)
+        ├── overview/brand-detail-form-section.tsx -> BrandDetailForm -> updateBrandAction
         └── <BrandDetailTabs> (Client)
               ├── annotations -> BrandAnnotationsTab (read-only notes)
-              ├── products -> BrandProductsTab -> BrandProductsList
-              ├── image    -> BrandImagesTab -> imageTabContent node (<Suspense>)
+              ├── image      -> shared DetailImageTab -> imageContent node (<Suspense>)
+              ├── products   -> BrandProductsTab -> BrandProductsList
               ├── miscellaneous -> BrandMiscellaneousTab (status + dates)
-              └── deletion -> BrandDeletionTab -> BrandDeleteDialog
+              └── deletion   -> BrandDeletionTab -> BrandDeleteDialog
 ```
 
 Pass only `UIBrand` and `BrandProductDto` values to the components; never forward
 `apiContext`, raw entities, or errors.
 
-## `BrandDetails` Is a Client Component
+## `BrandDetailLayout` Is a Server Component
 
-Unlike customer's `CustomerDetails` (Server), `BrandDetails` is a **Client
-Component** because it drives `router.refresh()` after form edits. Its child
-`BrandDetailTabs` is also a Client Component and drives
-`router.replace(returnTo)` after deletion. The page stays Server and hands the
-detail tree DTOs plus the two Suspense nodes. Do not "fix" this asymmetry by
-converting it to a Server Component without a deliberate decision.
+`BrandDetailLayout` composes the shared `DetailPageLayout` (back link, sticky
+desktop gallery aside, heading, overview column, sections title, tabs slot) and
+stays server-side. Interactive responsibilities live in focused Client leaves:
 
-Composition:
-
-- Header: back link (`returnTo`), title with a `Tag` icon, an active/inactive
-  `Badge` derived from `brand.inactive`, and the numeric ID.
-- Two-column grid: a left aside with the `imageGallery` node, and a right column
-  with the "Dados do cadastro" card (`BrandDetailForm`).
-- `BrandDetailTabs`, with `annotations`, `products`, `image`, `miscellaneous`,
-  and `deletion` tabs whose content is split into one component per tab under
-  `_components/tabs`. `annotations` is the default first tab and displays
-  `brand.notes`; `miscellaneous` displays the `brand.inactive` status card above
-  the registration dates card.
+- `overview/brand-detail-form-section.tsx` wraps `BrandDetailForm` in the
+  "Dados do cadastro" card and calls `router.refresh()` through `onSaved`.
+- `BrandDetailTabs` (Client) drives `router.replace(returnTo)` after deletion
+  and composes the five tabs; the image tab uses the shared `DetailImageTab`
+  with the mobile gallery node.
 
 ## Single-Form Editing Model
 
@@ -263,7 +260,7 @@ split; do not move detail actions into the parent or vice versa.
 ## Conventions for Changes
 
 - Preserve `page.tsx` as a Server Component. Keep `"use client"` limited to the
-  interactive components (`BrandDetails`, `BrandDetailForm`, `BrandDeleteDialog`,
+  interactive components (`BrandDetailFormSection`, `BrandDetailForm`, `BrandDeleteDialog`,
   `BrandProductsList`, `BrandImage`, the gallery clients).
 - Keep the single-form editing model; do not introduce a shared sectioned context
   or a single save-all action without an explicit decision.
@@ -288,7 +285,7 @@ split; do not move detail actions into the parent or vice versa.
   `pnpm build` when viable.
 - Visual or interactive changes: validate `/dashboard/brand/[id]` in the
   development server (port set by the `PORT` env var) on desktop and mobile, including: valid and
-  invalid IDs (parent `not-found` UI), the `returnTo` back link, the single edit
+  invalid IDs (dedicated `not-found.tsx`), the `returnTo` back link, the single edit
   form (success, validation errors, network failure), delete (including the
   products guard and the redirect to `returnTo`), related-products sub-pagination
   and round-trip `productReturnTo`, gallery upload (drag-and-drop and picker),

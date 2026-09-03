@@ -14,9 +14,9 @@ export default function ProductDetailsLoading() {
         ]}
       />
       <main className="mx-auto flex w-full max-w-[1400px] min-w-0 flex-1 flex-col">
-        <div className="@container/main flex flex-1 flex-col gap-6">
-          <div className="flex flex-col gap-6 py-6">
-            <div className="px-4 lg:px-6">
+        <div className="@container/main flex flex-1 flex-col gap-4 sm:gap-6">
+          <div className="flex flex-col gap-4 py-4 sm:gap-6 sm:py-6">
+            <div className="px-3 sm:px-4 lg:px-6">
               <ProductDetailLayoutSkeleton />
             </div>
           </div>

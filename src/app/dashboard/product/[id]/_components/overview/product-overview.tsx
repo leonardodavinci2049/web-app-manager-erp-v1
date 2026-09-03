@@ -4,7 +4,6 @@ import type {
 } from "@/services/api-main/product-manager/transformers/transformers";
 import { formatCurrency } from "@/utils/common-utils";
 import { ProductCategoriesCard } from "./product-categories-card";
-import { ProductIdentitySection } from "./product-identity-section";
 import { ProductPricingCard } from "./product-pricing-card";
 import { ProductSalesDescriptionEditor } from "./product-sales-description-editor";
 import { ProductStockCard } from "./product-stock-card";
@@ -45,9 +44,7 @@ export function ProductOverview({
       : ({ label: "Em Estoque", variant: "default" } as const);
 
   return (
-    <div className="space-y-6">
-      <ProductIdentitySection product={product} />
-
+    <div className="space-y-3 sm:space-y-4">
       <ProductPricingCard
         productId={product.id}
         retailPrice={retailPrice}

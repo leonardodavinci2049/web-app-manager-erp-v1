@@ -64,21 +64,23 @@ brand/
     ├── AGENTS.md                         # Detail route guide
     ├── page.tsx                          # Detail: auth + brand + products reads + Suspense
     ├── loading.tsx                       # Detail skeleton (RegistryDetailLoading, variant="brand")
+    ├── error.tsx                         # Detail error boundary (Client)
+    ├── not-found.tsx                     # Invalid/inaccessible brand UI
     ├── _actions/
     │   ├── brand-detail-actions.ts       # updateBrandAction, deleteBrandAction
     │   └── brand-image-gallery-actions.ts# Gallery upload/primary/delete
     └── _components/
-        ├── brand-details.tsx             # Client: top-level detail layout
+        ├── brand-detail-layout.tsx       # Server: detail composition via shared shells
         ├── brand-detail-form.tsx         # Client: single name+notes edit form
         ├── brand-delete-dialog.tsx       # Client: delete confirm (blocked by products)
         ├── brand-products-list.tsx       # Client: related products + sub-pagination
+        ├── overview/                     # Heading + "Dados do cadastro" card
         ├── tabs/                         # Tab orchestrator + one component per tab
         └── image-gallery/                # Gallery subsystem (see [id]/AGENTS.md)
 ```
 
-The detail segment has **no** `error.tsx` and **no** `not-found.tsx`: `notFound()`
-renders the nearest parent not-found UI and unhandled errors bubble to the
-parent boundary. There is no `_hooks/` or `_utils/` folder in either segment.
+The detail segment owns dedicated `error.tsx` and `not-found.tsx` files. There
+is no `_hooks/` or `_utils/` folder in either segment.
 
 ## List Page Responsibilities
 
@@ -125,14 +127,15 @@ Keep `[id]/page.tsx` as a Server Component. It should:
 9. Guard a null brand return with a final `if (!brand) notFound()`.
 10. Build `productReturnTo` so product detail can round-trip back to the same
     brand/products page.
-11. Render `BrandDetails`, passing the brand DTO, the products DTO, and two
+11. Render `BrandDetailLayout`, passing the brand DTO, the products DTO, and two
     `<Suspense>` nodes built on the **page**: `imageGallery`
-    (`BrandImageGalleryServer`) and `imageTabContent` (`BrandImagesListServer`).
+    (`BrandImageGalleryServer`) and `imageContent` (`BrandImagesListServer`).
 
-The gallery and image nodes are built on the page (not inside `BrandDetails`) so
-the Suspense boundaries stay server-owned and the cached gallery read is shared
-by both nodes through React `cache()`. `BrandDetails` itself is a **Client
-Component**; see `[id]/AGENTS.md` for why.
+The gallery and image nodes are built on the page (not inside
+`BrandDetailLayout`) so the Suspense boundaries remain server-owned and the
+cached gallery read is shared by both nodes through React `cache()`.
+`BrandDetailLayout` is a Server Component composing the shared shells from
+`@/app/dashboard/_components/detail-page`; see `[id]/AGENTS.md`.
 
 ## Authentication and Data Isolation
 
@@ -207,16 +210,16 @@ triggers a refetch.
 
 ## Detail UI
 
-`BrandDetails` is a **Client Component** (unlike customer's `CustomerDetails`,
-which is Server) because it drives `router.refresh()` after form edits. The page
-remains Server and hands it DTOs plus the two Suspense nodes. The detail layout
-is a sticky left aside with the gallery, a right column with the "Dados do
-cadastro" card (`BrandDetailForm`), followed by `BrandDetailTabs`. The Client
-orchestrator delegates the `annotations`, `products`, `image`, `miscellaneous`,
-and `deletion` content to dedicated components under `_components/tabs` and
-drives `router.replace(returnTo)` after deletion. `annotations` is the default
-first tab. The `miscellaneous` tab holds the read-only inactive status and the
-registration dates cards.
+`BrandDetailLayout` is a **Server Component** that composes the shared detail
+shells from `@/app/dashboard/_components/detail-page`: a sticky left aside with
+the gallery, the record heading (`overview/brand-head-data-section.tsx`, image
+only below `lg`), a right column with the "Dados do cadastro" card
+(`overview/brand-detail-form-section.tsx` wrapping `BrandDetailForm`), followed
+by `BrandDetailTabs`. The Client tab orchestrator delegates the `annotations`,
+`image`, `products`, `miscellaneous`, and `deletion` content to dedicated
+components under `_components/tabs` and drives `router.replace(returnTo)` after
+deletion. `annotations` is the default first tab. The `miscellaneous` tab holds
+the read-only inactive status and the registration dates cards.
 
 Editing is a **single mega-form** (`BrandDetailForm`: name + notes together),
 not sectioned. See `[id]/AGENTS.md` for the full editing model, the type/read-only
@@ -295,8 +298,8 @@ Read the local `AGENTS.md` inside each service module before changing it.
 None in the disabled-flow sense. Brand has functional create, update, delete
 (with a referential guard), and gallery mutations.
 
-- The brand status (`inactive`) is **display-only** via the `Badge` in
-  `BrandDetails`. There is no activate/inactivate control and no "Pendente de
+- The brand status (`inactive`) is **display-only** via the `Badge` in the
+  record heading. There is no activate/inactivate control and no "Pendente de
   API" placeholder. If a safe status-mutation contract arrives, add the control,
   wire a new action, and surface it explicitly.
 - `BrandImagesList` has no manual PATH_IMAGEM assignment button. Promotion is

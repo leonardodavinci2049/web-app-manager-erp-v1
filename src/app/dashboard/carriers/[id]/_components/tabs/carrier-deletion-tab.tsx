@@ -4,6 +4,7 @@ import { Loader2, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import { DetailDeletionCard } from "@/app/dashboard/_components/detail-page";
 import { deleteCarrierAction } from "@/app/dashboard/carriers/_actions/carrier-actions";
 import {
   AlertDialog,
@@ -16,7 +17,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { UICarrier } from "@/services/api-main/carrier";
 
 interface CarrierDeletionTabProps {
@@ -52,27 +52,20 @@ export function CarrierDeletionTab({
 
   return (
     <>
-      <Card className="gap-4 border-destructive/40 bg-destructive/5 py-4 sm:gap-6 sm:py-6">
-        <CardHeader className="px-4 sm:px-6">
-          <CardTitle className="text-destructive text-base">
-            Zona de exclusão
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3 px-4 sm:px-6">
-          <p className="text-muted-foreground text-sm">
-            A API validará eventuais vínculos antes de aceitar a exclusão.
-          </p>
-          <Button
-            type="button"
-            variant="destructive"
-            disabled={isDeleting}
-            onClick={() => setIsOpen(true)}
-          >
-            <Trash2 className="size-4" />
-            Excluir transportadora
-          </Button>
-        </CardContent>
-      </Card>
+      <DetailDeletionCard>
+        <p className="text-muted-foreground text-sm">
+          A API validará eventuais vínculos antes de aceitar a exclusão.
+        </p>
+        <Button
+          type="button"
+          variant="destructive"
+          disabled={isDeleting}
+          onClick={() => setIsOpen(true)}
+        >
+          <Trash2 className="size-4" />
+          Excluir transportadora
+        </Button>
+      </DetailDeletionCard>
 
       <AlertDialog
         open={isOpen}

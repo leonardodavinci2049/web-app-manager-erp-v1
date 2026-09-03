@@ -1,6 +1,4 @@
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { DetailPageLayout } from "@/app/dashboard/_components/detail-page";
 import type {
   UIProductManager,
   UIProductManagerRelatedCategory,
@@ -9,6 +7,7 @@ import {
   ProductImageGalleryServer,
   ProductImagePathSelectorServer,
 } from "./image-gallery";
+import { ProductIdentitySection } from "./overview/product-identity-section";
 import { ProductOverview } from "./overview/product-overview";
 import { ProductDetailTabs } from "./tabs/product-detail-tabs";
 
@@ -33,27 +32,20 @@ export function ProductDetailLayout({
   );
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <Button asChild variant="outline" size="sm">
-          <Link href={returnTo}>
-            <ArrowLeft className="mr-2 size-4" />
-            Voltar ao catálogo
-          </Link>
-        </Button>
-      </div>
-
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,500px)_minmax(0,1fr)]">
-        <aside className="hidden lg:block lg:self-start lg:sticky lg:top-6">
-          {imageGallery}
-        </aside>
-
+    <DetailPageLayout
+      returnTo={returnTo}
+      backLinkLabel="Voltar ao catálogo"
+      imageGallery={imageGallery}
+      heading={<ProductIdentitySection product={product} />}
+      overview={
         <ProductOverview
           product={product}
           relatedCategories={relatedCategories}
         />
-      </div>
-
+      }
+      sectionsTitle="Seções do produto"
+      sectionsDescription="Consulte e atualize os dados complementares do produto."
+    >
       <ProductDetailTabs
         product={product}
         mobileImageGallery={imageGallery}
@@ -64,6 +56,6 @@ export function ProductDetailLayout({
           />
         }
       />
-    </div>
+    </DetailPageLayout>
   );
 }

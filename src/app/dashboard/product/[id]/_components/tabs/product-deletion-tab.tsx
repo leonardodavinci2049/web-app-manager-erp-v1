@@ -1,22 +1,21 @@
+import { LockKeyhole, Trash2 } from "lucide-react";
+import { DetailDeletionCard } from "@/app/dashboard/_components/detail-page";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function ProductDeletionTab() {
   return (
-    <Card className="border-destructive/40 bg-destructive/5">
-      <CardHeader>
-        <CardTitle className="text-destructive text-base">
-          Zona de exclusão
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <p className="text-muted-foreground text-sm">
-          A exclusão de produtos ainda não está disponível nesta tela.
-        </p>
-        <Button type="button" variant="destructive" disabled>
-          Excluir produto — Pendente de API
-        </Button>
-      </CardContent>
-    </Card>
+    <DetailDeletionCard
+      titleIcon={<LockKeyhole className="size-4" />}
+      badge={<Badge variant="secondary">Pendente de API</Badge>}
+    >
+      <p className="text-muted-foreground text-sm">
+        A API atual não oferece um contrato seguro para excluir produtos.
+      </p>
+      <Button type="button" variant="destructive" disabled>
+        <Trash2 className="size-4" />
+        Excluir produto — Pendente de API
+      </Button>
+    </DetailDeletionCard>
   );
 }

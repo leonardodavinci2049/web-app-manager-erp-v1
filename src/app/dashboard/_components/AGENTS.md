@@ -2,12 +2,14 @@
 
 This file complements the repository and dashboard guides for
 `src/app/dashboard/_components`. It covers the shared dashboard chrome consumed by
-every `/dashboard/*` route: the application sidebar and the site header with
-breadcrumb.
+every `/dashboard/*` route: the application sidebar, the site header with
+breadcrumb, and the shared registration detail-page shells.
 
-Read this before changing navigation, breadcrumbs, or the shared header. For the
-shared layout shell, redirect behavior, and dashboard-wide rules, follow
-`src/app/dashboard/AGENTS.md`.
+Read this before changing navigation, breadcrumbs, the shared header, or any
+registration detail layout. For the shared layout shell, redirect behavior, and
+dashboard-wide rules, follow `src/app/dashboard/AGENTS.md`. For the full detail
+route contract, follow
+`docs/architectural-patterns/registration-details-page/registration-details-page.md`.
 
 ## Scope
 
@@ -20,10 +22,24 @@ _components/
 │   ├── nav-user.tsx             # Sidebar footer user menu (reads the real session via useUserData)
 │   ├── sidebar-logo.tsx         # Brand/logo block in the sidebar header
 │   └── team-switcher.tsx        # Team/workspace selector
-└── header/
-    ├── site-header-with-breadcrumb.tsx  # Server: header + breadcrumb + session user
-    ├── header-nav-user.tsx              # Header user chip (real session)
-    └── logout-button.tsx                # Sign-out action
+├── header/
+│   ├── site-header-with-breadcrumb.tsx  # Server: header + breadcrumb + session user
+│   ├── header-nav-user.tsx              # Header user chip (real session)
+│   └── logout-button.tsx                # Sign-out action
+└── detail-page/                 # Shared registration detail shells (all 8 detail routes)
+    ├── index.ts                 # Public API
+    ├── detail-back-link.tsx     # Back-to-list button
+    ├── detail-page-layout.tsx   # Grid + sticky gallery aside + heading/overview + tabs slot
+    ├── overview/
+    │   └── detail-record-heading.tsx   # Record heading; image rendered only below lg
+    ├── tabs/
+    │   ├── detail-tabs-list.tsx        # Scrollable TabsList + static desktop grid class
+    │   ├── detail-tab-trigger.tsx      # TabsTrigger with the standard responsive classes
+    │   └── detail-deletion-card.tsx    # "Zona de exclusão" danger-zone frame
+    ├── image-gallery/
+    │   └── detail-image-tab.tsx        # Imagem tab composition (mobile gallery + content)
+    └── loading/
+        └── registry-detail-loading.tsx # Detail segment skeletons (moved from src/components/registry)
 ```
 
 ## AppSidebar
@@ -82,6 +98,28 @@ This header is the standard top bar for most feature routes (catalog, category,
 customer, brand, carriers, etc.). Pass route-appropriate `title` and
 `breadcrumbItems` from each page; do not duplicate session resolution in the
 page.
+
+## Detail-Page Shared Shells
+
+`detail-page/` holds only entity-agnostic visual/structural composition reused
+by the registration detail routes (customer, seller, suppliers, carriers,
+brand, ptype, entry, product). Each component receives primitives or
+`ReactNode` props and never branches per entity. Domain DTOs, contracts,
+Server Actions, forms, confirmation flows, gallery limits, and messages stay in
+each route.
+
+Conventions:
+
+- Import shared shells from `@/app/dashboard/_components/detail-page`.
+- The record heading image is rendered only below `lg`; on desktop the sticky
+  gallery aside is the single image surface.
+- Tab order in every route: **Anotações** first, **Imagem** after the common
+  tabs and before domain-specific ones, **Exclusão** last.
+- `RegistryDetailLoading` lives here (not in `src/components/registry`) because
+  only detail routes consume it; `RegistryEntityImage` and `RegistryPageShell`
+  remain in `src/components/registry` shared with the listings.
+- Do not add entity-specific props, permissions, or conditional entity rules to
+  these components.
 
 ## Conventions for Changes
 

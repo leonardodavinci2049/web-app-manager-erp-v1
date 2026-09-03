@@ -48,15 +48,16 @@ renders inline inside `ProductDetailLayout` without its own boundary.
 ├── AGENTS.md
 ├── page.tsx                                    # Server: id validation + getProductManagerById + Suspense
 ├── loading.tsx                                 # Detail skeleton (ProductDetailLayoutSkeleton)
-├── not-found.tsx                               # Client: "Produto Não Encontrado" (NO error.tsx)
+├── error.tsx                                   # Client: detail error boundary with retry
+├── not-found.tsx                               # Client: "Produto Não Encontrado"
 ├── _actions/
 │   └── product-image-gallery-actions.ts        # upload/setPrimary/delete (colocated, Zod)
 └── _components/
-    ├── product-detail-layout.tsx                # Server: route-detail composition
-    ├── product-detail-layout-skeleton.tsx       # Loading structure
+    ├── product-detail-layout.tsx                # Server: route-detail composition via shared shells
+    ├── product-detail-layout-skeleton.tsx       # Loading structure aligned with the final geometry
     ├── overview/                                # First-fold product summary
     │   ├── product-overview.tsx                 # Derives price/stock view data and composes summary
-    │   ├── product-identity-section.tsx         # Image, name, ID, SKU, and model
+    │   ├── product-identity-section.tsx         # Shared heading; image only below lg
     │   ├── product-name-editor.tsx              # Client -> updateProductName
     │   ├── product-pricing-card.tsx             # Client -> updateProductPrice (reload)
     │   ├── product-stock-card.tsx               # Client -> updateProductStock (reload)
@@ -66,12 +67,11 @@ renders inline inside `ProductDetailLayout` without its own boundary.
     │   └── product-sales-description-editor.tsx # Client -> updateProductShortDescription
     ├── tabs/                                    # Second-fold tab navigation and content
     │   ├── product-detail-tabs.tsx              # Client: six-tab orchestrator
-    │   ├── product-description-tab.tsx          # Client HTML editor
-    │   ├── product-images-tab.tsx               # Mobile gallery + PATH_IMAGEM selector slot
+    │   ├── product-description-tab.tsx          # Client HTML editor (Anotações tab)
+    │   ├── product-deletion-tab.tsx             # Disabled pending-API state (shared frame)
     │   ├── product-specifications-tab.tsx       # General, characteristics, and tax cards
     │   ├── product-technical-tab.tsx            # Type, brand, supplier, and flags
     │   ├── product-metadata-tab.tsx             # Read-only SEO and dates
-    │   ├── product-deletion-tab.tsx             # Disabled pending-API state
     │   ├── product-general-data-card.tsx
     │   ├── product-characteristics-card.tsx
     │   ├── product-tax-information-card.tsx
@@ -89,6 +89,12 @@ renders inline inside `ProductDetailLayout` without its own boundary.
         ├── product-image-path-selector-server.tsx # Cached gallery adapter
         └── product-image-path-selector.tsx     # Client: PATH_IMAGEM viewer and selector
 ```
+
+Structural shells (grid/back link, record heading, tab list/triggers, image
+tab composition, deletion frame) come from
+`@/app/dashboard/_components/detail-page` and must not be forked here; the
+route keeps its own loading skeleton because the product content sits under a
+single outer `Suspense`.
 
 Detail-only components stay under `[id]/_components`. Files use kebab-case,
 component exports use PascalCase, and folders group components by page region or
@@ -113,12 +119,12 @@ subsystem rather than by visual primitive. Keep internal imports explicit in
               │     ├── ProductCategoriesCard (+ add/remove controls)
               │     └── ProductSalesDescriptionEditor
               └── <ProductDetailTabs> (Client)
-                    ├── description -> ProductDescriptionTab
-                    ├── images      -> ProductImagesTab + ProductImagePathSelector
+                    ├── notes       -> ProductDescriptionTab (Anotações; edits product.notes)
+                    ├── image       -> shared DetailImageTab + ProductImagePathSelector
                     ├── specs       -> ProductSpecificationsTab
                     ├── technical   -> ProductTechnicalTab
                     ├── metadata    -> ProductMetadataTab
-                    └── deletion    -> ProductDeletionTab
+                    └── deletion    -> ProductDeletionTab (shared frame)
 ```
 
 Pass only `UIProductManager` and `UIProductManagerRelatedCategory[]` DTOs to the
@@ -164,12 +170,17 @@ with **`window.location.reload()`** after success — a deviation from the
 you switch them to `router.refresh()`, remove the reload and add `revalidatePath`
 to the actions.
 
-### Tabs (`ProductDetailTabs`, `defaultValue="description"`)
+### Tabs (`ProductDetailTabs`, `defaultValue="notes"`)
+
+Tab order follows the registration standard: **Anotações** first, **Imagem**
+second, domain tabs in the middle, **Exclusão** last. The tab list/trigger
+shells and the image tab composition come from
+`@/app/dashboard/_components/detail-page`.
 
 | Tab | Label | Content | Submits to |
 | --- | --- | --- | --- |
-| `description` | Descrição | `ProductDescriptionTab` | `updateProductDescription` (`action-product-description`) |
-| `images` | Imagens | `ProductImagesTab` + `ProductImagePathSelector` | `updateProductImagePath` ("Usar no PATH_IMAGEM") |
+| `notes` | Anotações | `ProductDescriptionTab` (edits `product.notes`/`ANOTACOES`) | `updateProductDescription` (`action-product-description`) |
+| `image` | Imagem | shared `DetailImageTab` + `ProductImagePathSelector` | `updateProductImagePath` ("Usar no PATH_IMAGEM") |
 | `specifications` | Especificações | `ProductSpecificationsTab` | `updateProductGeneral` / `…Characteristics` / `…TaxValues` (`action-products`) |
 | `technical` | Dados Técnicos | `ProductTechnicalTab` | `updateProductFlags` / `updateProductType` / `updateProductBrand` |
 | `metadata` | Metadados | `ProductMetadataTab` (read-only) | none |
@@ -209,7 +220,7 @@ the **Assets API** (source of truth for the image set) and the legacy
   keyboard-navigable zoom dialog (ArrowLeft/Right), per-image error fallback to
   `DEFAULT_PRODUCT_IMAGE_URL`, `aria-live` status region, and `unoptimized` on
   remote `next/image` via `isRemoteImage()`.
-- `ProductImagePathSelector` (Client, named export): the "Imagens" tab. Shows the
+- `ProductImagePathSelector` (Client, named export): the "Imagem" tab content. Shows the
   current `PATH_IMAGEM` value and the Assets API list side by side, a manual
   "Atualizar" button, and a per-image **"Usar no PATH_IMAGEM"** button — which is
   **ENABLED** here (unlike customer/brand where it is absent or disabled).
