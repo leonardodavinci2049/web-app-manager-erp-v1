@@ -31,6 +31,7 @@ dashboard/
 ├── page.tsx                         # Session-aware redirect only
 ├── _components/
 │   ├── app-sidebar/                 # Shared dashboard navigation
+│   ├── detail-page/                 # Shared registration detail shells
 │   └── header/                      # Legacy/local header components
 ├── category/
 ├── customer/

@@ -45,7 +45,6 @@ tokens, or internal errors to components.
     │   ├── supplier-notes-tab.tsx
     │   ├── supplier-address-tab.tsx
     │   ├── supplier-status-tab.tsx
-    │   ├── supplier-image-tab.tsx
     │   ├── supplier-internet-tab.tsx
     │   ├── supplier-miscellaneous-tab.tsx
     │   ├── supplier-editing-tab.tsx
@@ -62,6 +61,13 @@ tokens, or internal errors to components.
         └── supplier-images-list.tsx
 ```
 
+Structural shells (grid/back link, record heading, tab list/triggers, image
+tab composition, deletion frame, detail skeleton) come from
+`@/app/dashboard/_components/detail-page` and must not be forked here. Tab
+order: **Anotações**, Endereço, Status, **Imagem**, Internet, Diversos, Edição,
+**Exclusão** (always last). The header avatar renders only below `lg`; on
+desktop the sticky gallery is the single image surface.
+
 ## Layout and Responsive Behavior
 
 `SupplierDetailLayout` is a Server Component. It renders:
@@ -69,7 +75,8 @@ tokens, or internal errors to components.
 - A safe back-to-suppliers link.
 - A two-column desktop grid with a sticky gallery on the left and overview on
   the right.
-- A compact heading with image, name, ID, status, and person type.
+- A compact heading with name, ID, status, and person type; the avatar renders
+  only below `lg` (on desktop the sticky gallery is the single image surface).
 - Independent overview cards.
 - Full-width detail tabs below the grid.
 

@@ -8,7 +8,7 @@ import { BrandNotFoundError } from "@/services/api-main/brand";
 import { getBrandById } from "@/services/api-main/brand/brand-service-api";
 import { getProductsManager } from "@/services/api-main/product-manager/product-manager-service-api";
 import { BRAND_PRODUCT_PAGE_SIZE, getSafeBrandReturnTo } from "../_components";
-import { BrandDetails } from "./_components/brand-details";
+import { BrandDetailLayout } from "./_components/brand-detail-layout";
 import {
   BrandImageGalleryServer,
   BrandImageGallerySkeleton,
@@ -84,10 +84,10 @@ export default async function BrandDetailPage({
         ]}
       />
       <div className="mx-auto flex w-full max-w-[1400px] min-w-0 flex-1 flex-col">
-        <div className="@container/main flex flex-1 flex-col gap-6">
-          <div className="flex flex-col gap-6 py-6">
-            <div className="px-3 lg:px-6">
-              <BrandDetails
+        <div className="@container/main flex flex-1 flex-col gap-4 sm:gap-6">
+          <div className="flex flex-col gap-4 py-4 sm:gap-6 sm:py-6">
+            <div className="px-3 sm:px-4 lg:px-6">
+              <BrandDetailLayout
                 brand={brand}
                 products={productsResult.products.map((product) => ({
                   id: product.id,
@@ -111,7 +111,7 @@ export default async function BrandDetailPage({
                     />
                   </Suspense>
                 }
-                imageTabContent={
+                imageContent={
                   <Suspense fallback={<BrandImageGallerySkeleton />}>
                     <BrandImagesListServer
                       brandId={brand.id}

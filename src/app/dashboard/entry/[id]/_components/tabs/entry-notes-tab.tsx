@@ -1,5 +1,5 @@
 import { StickyNote } from "lucide-react";
-import { EntryTabCard } from "./entry-tab-card";
+import { EntrySectionCard } from "../entry-section-card";
 
 interface EntryNotesTabProps {
   notes: string;
@@ -7,10 +7,13 @@ interface EntryNotesTabProps {
 
 export function EntryNotesTab({ notes }: EntryNotesTabProps) {
   return (
-    <EntryTabCard icon={<StickyNote className="size-4" />} title="Anotações">
+    <EntrySectionCard
+      icon={<StickyNote className="size-4" />}
+      title="Anotações"
+    >
       <p className="whitespace-pre-wrap break-words text-sm">
         {notes.trim() ? notes : "Nenhuma anotação registrada."}
       </p>
-    </EntryTabCard>
+    </EntrySectionCard>
   );
 }

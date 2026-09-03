@@ -23,8 +23,9 @@ numbered sequence; the key points:
 3. Resolve `returnTo` with `getSafePtypeReturnTo()` (same-origin, pathname
    exactly `/dashboard/ptype`).
 4. `getAuthContext()`, then fetch the single product type (`getPtypeById`).
-5. Render `PtypeDetails` (imported from `./_components/ptype-details`) with the
-   DTO, `returnTo`, and two server-owned `<Suspense>` nodes: `imageGallery`
+5. Render `PtypeDetailLayout` (imported from
+   `./_components/ptype-detail-layout`) with the DTO, `returnTo`, and two
+   server-owned `<Suspense>` nodes: `imageGallery`
    (`PtypeImageGalleryServer`) and `imageContent` (`PtypeImagesListServer`).
 
 The gallery and image nodes are built on the **page** so the Suspense boundaries
@@ -36,18 +37,23 @@ React `cache()`.
 ```text
 [id]/
 ├── page.tsx                                # Detail composition (Server)
-├── loading.tsx                             # Detail skeleton (NO error.tsx / not-found.tsx)
+├── loading.tsx                             # Detail skeleton (RegistryDetailLoading, variant="ptype")
+├── error.tsx                               # Detail error boundary (Client)
+├── not-found.tsx                           # Invalid/inaccessible ptype UI
 ├── _actions/
 │   ├── ptype-detail-actions.ts             # updatePtypeAction, setPtypeStatusAction, deletePtypeAction
 │   └── ptype-image-gallery-actions.ts      # Gallery upload/primary/delete
 └── _components/
-    ├── ptype-details.tsx                   # Top-level detail layout (Client) — LOCAL
+    ├── ptype-detail-layout.tsx             # Top-level detail layout (Server, shared shells)
+    ├── overview/
+    │   ├── ptype-head-data-section.tsx     # Heading via shared DetailRecordHeading (image only below lg)
+    │   ├── ptype-type-details-section.tsx  # Read-only "Detalhes do tipo" card
+    │   └── ptype-detail-form-section.tsx   # "Dados do cadastro" form card (Client)
     ├── tabs/
-    │   ├── ptype-detail-tabs.tsx           # Four-tab orchestrator (Client)
+    │   ├── ptype-detail-tabs.tsx           # Four-tab orchestrator (Client, shared list/trigger/image-tab)
     │   ├── ptype-annotations-tab.tsx       # Read-only ANOTACOES value
-    │   ├── ptype-images-tab.tsx            # Mobile gallery + images-list slots
-    │   ├── ptype-miscellaneous-tab.tsx     # Status controls + registration date
-    │   └── ptype-deletion-tab.tsx          # Delete action card
+    │   ├── ptype-miscellaneous-tab.tsx     # Status controls (own confirm dialog) + registration date
+    │   └── ptype-deletion-tab.tsx          # Delete action card (own confirm dialog, shared frame)
     └── image-gallery/
         ├── index.ts
         ├── image-gallery-constants.ts      # Entity type, limits, MIME, defaults
@@ -60,11 +66,12 @@ React `cache()`.
         └── ptype-images-list.tsx           # PATH_IMAGEM viewer + gallery list (Client)
 ```
 
-The detail segment has **no** `error.tsx` and **no** `not-found.tsx` — `notFound()`
-renders the nearest parent not-found UI and unhandled errors bubble to the parent
-boundary. `PtypeDetails` lives **locally** here (brand-style placement); it is
-imported directly from `./_components/ptype-details`, not re-exported from the
-parent `_components/index.ts`.
+Structural shells (grid/back link, record heading, tab list/triggers, image
+tab composition, deletion frame, detail skeleton) come from
+`@/app/dashboard/_components/detail-page` and must not be forked here. Tab
+order: **Anotações**, **Imagem**, Diversos, **Exclusão** (always last). The
+header avatar renders only below `lg`; on desktop the sticky gallery is the
+single image surface.
 
 ## Detail Data Flow
 
@@ -73,28 +80,35 @@ parent `_components/index.ts`.
   ├── validates id -> notFound() on invalid
   ├── getAuthContext()
   ├── getPtypeById() -> UIPtype | undefined   (null -> notFound())
-  └── <PtypeDetails> (Client, from ./_components)
-        ├── header (PtypeImage, name, status Badge)
-        ├── "Detalhes do tipo" read-only card (status, registration flag, dates, commission rates)
-        ├── edit form (name + notes) -> updatePtypeAction
+  └── <PtypeDetailLayout> (Server, shared shells)
+        ├── overview/ptype-head-data-section.tsx      (name, status Badge, id; image only below lg)
+        ├── overview/ptype-type-details-section.tsx   (read-only status/flag/dates/commissions)
+        ├── overview/ptype-detail-form-section.tsx    (Client: name+notes form) -> updatePtypeAction
         └── <PtypeDetailTabs> (Client)
               ├── Anotações -> PtypeAnnotationsTab (read-only notes)
-              ├── Imagem    -> PtypeImagesTab -> imageContent node (<Suspense>)
-              ├── Diversos  -> PtypeMiscellaneousTab (status controls + date)
-              └── Exclusão  -> PtypeDeletionTab -> delete confirmation
+              ├── Imagem    -> shared DetailImageTab -> imageContent node (<Suspense>)
+              ├── Diversos  -> PtypeMiscellaneousTab (status controls with own confirm dialog + date)
+              └── Exclusão  -> PtypeDeletionTab -> delete confirmation (own dialog)
 ```
 
-Pass only the `UIPtype` DTO to the components; never forward `apiContext`, raw
-entities, or errors.
+Pass only the `UIPtype` DTO to the components; never forward `apiContext`,
+raw entities, or errors.
 
-## `PtypeDetails` Is a Client Component
+## `PtypeDetailLayout` Is a Server Component
 
-`PtypeDetails` is a **Client Component** living **locally** in
-`[id]/_components/ptype-details.tsx` (brand-style placement, unlike carriers/
-suppliers/seller whose detail component lives in the parent `_components/`). It
-owns form state and drives `router.refresh()` after update/status and
-`router.replace(returnTo)` after delete. The detail body does **not** use
-`RegistryPageShell`; it uses a custom `max-w-[1400px]` container.
+`PtypeDetailLayout` composes the shared `DetailPageLayout` (back link, sticky
+desktop gallery aside, heading, overview column, sections title, tabs slot) and
+stays server-side. Interactive state lives in focused Client leaves:
+
+- `overview/ptype-detail-form-section.tsx` owns the single form state (name +
+  notes) and calls `updatePtypeAction` + `router.refresh()` on success.
+- `PtypeMiscellaneousTab` owns its activate/deactivate confirmation dialog and
+  calls `setPtypeStatusAction` + `router.refresh()`.
+- `PtypeDeletionTab` owns its delete confirmation dialog, calls
+  `deletePtypeAction`, and `router.replace(returnTo)` on success.
+
+The detail body does **not** use `RegistryPageShell`; it uses the shared
+`max-w-[1400px]` container composed by the page.
 
 ## Single Mega-Form Editing
 
@@ -131,8 +145,8 @@ it calls `deletePtypeAction(item.id)` and then `router.replace(returnTo)`. There
 is **no client-side referential guard** — the API validates relations and
 rejects the deletion when they exist, surfaced via `getSafeOperationMessage()`.
 
-A single `AlertDialog` handles all three confirmations (activate, deactivate,
-delete) via a `Confirmation` union.
+Each confirmation lives in its own tab: `PtypeMiscellaneousTab` owns the
+activate/deactivate dialog and `PtypeDeletionTab` owns the delete dialog.
 
 ## Image Gallery Subsystem
 
@@ -243,13 +257,14 @@ split; do not move detail actions into the parent or vice versa.
 
 ## Conventions for Changes
 
-- Preserve `page.tsx` as a Server Component. Keep `"use client"` limited to the
-  interactive components (`PtypeDetails`, `PtypeCreateSheet`, `PtypeImage`, the
-  gallery clients, `PtypeImagesList`).
+- Preserve `page.tsx` and `PtypeDetailLayout` as Server Components. Keep
+  `"use client"` limited to the interactive components
+  (`PtypeDetailFormSection`, `PtypeMiscellaneousTab`, `PtypeDeletionTab`,
+  `PtypeCreateSheet`, `PtypeImage`, the gallery clients, `PtypeImagesList`).
 - Keep the single mega-form; do not introduce a shared sectioned context or
   per-section actions.
 - When adding a new editable field, align together: `updateSchema` in
-  `ptype-detail-actions.ts`, the single `PtypeDetails` form, the `updatePtype`
+  `ptype-detail-actions.ts`, the single `PtypeDetailFormSection` form, the `updatePtype`
   payload, and the `UIPtype`/transformer field.
 - When changing gallery behavior, keep the Assets API as the source of truth for
   the image set and `PATH_IMAGEM` as a denormalized pointer. Any mutation that
@@ -269,7 +284,7 @@ split; do not move detail actions into the parent or vice versa.
   `pnpm build` when viable.
 - Visual or interactive changes: validate `/dashboard/ptype/[id]` in the
   development server (port set by the `PORT` env var) on desktop and mobile, including: valid and
-  invalid IDs (parent `not-found` UI), the `returnTo` back link, the single edit
+  invalid IDs (dedicated `not-found.tsx`), the `returnTo` back link, the single edit
   form (success, validation errors, network failure), status activate/deactivate,
   delete confirm + redirect to `returnTo`, gallery upload (drag-and-drop and
   picker), primary promotion, deletion (including last-image rejection), zoom

@@ -6,7 +6,7 @@ import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
 import { EntryNotFoundError, getEntryById } from "@/services/api-main/entry";
 import { getSafeEntryReturnTo } from "../_components";
-import { EntryDetails } from "./_components/entry-details";
+import { EntryDetailLayout } from "./_components/entry-detail-layout";
 import {
   EntryImageGalleryServer,
   EntryImageGallerySkeleton,
@@ -57,10 +57,10 @@ export default async function EntryDetailsPage({
         ]}
       />
       <div className="mx-auto flex w-full max-w-[1400px] min-w-0 flex-1 flex-col">
-        <div className="@container/main flex flex-1 flex-col gap-6">
-          <div className="flex flex-col gap-6 py-6">
-            <div className="px-3 lg:px-6">
-              <EntryDetails
+        <div className="@container/main flex flex-1 flex-col gap-4 sm:gap-6">
+          <div className="flex flex-col gap-4 py-4 sm:gap-6 sm:py-6">
+            <div className="px-3 sm:px-4 lg:px-6">
+              <EntryDetailLayout
                 entry={entry}
                 returnTo={returnTo}
                 imageGallery={

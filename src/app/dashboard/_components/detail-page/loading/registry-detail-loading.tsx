@@ -69,7 +69,9 @@ function ImageGallerySkeleton() {
 function DetailIdentitySkeleton({ withImage = true }: { withImage?: boolean }) {
   return (
     <div className="flex min-w-0 items-start gap-3" aria-hidden="true">
-      {withImage && <Skeleton className="size-12 shrink-0 rounded-xl" />}
+      {withImage && (
+        <Skeleton className="size-12 shrink-0 rounded-xl lg:hidden" />
+      )}
       <div className="min-w-0 flex-1 space-y-2">
         <div className="flex flex-wrap items-center gap-2">
           <Skeleton className="h-8 w-56 max-w-full" />
@@ -223,9 +225,9 @@ export function RegistryDetailLoading({
         breadcrumbItems={breadcrumbItems}
       />
       <main className="mx-auto flex w-full max-w-[1400px] min-w-0 flex-1 flex-col">
-        <div className="@container/main flex flex-1 flex-col gap-6">
-          <div className="flex flex-col gap-6 py-6">
-            <div className="w-full px-3 lg:px-6">{content}</div>
+        <div className="@container/main flex flex-1 flex-col gap-4 sm:gap-6">
+          <div className="flex flex-col gap-4 py-4 sm:gap-6 sm:py-6">
+            <div className="w-full px-3 sm:px-4 lg:px-6">{content}</div>
           </div>
         </div>
       </main>

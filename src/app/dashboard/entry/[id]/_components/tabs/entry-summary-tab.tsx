@@ -6,7 +6,8 @@ import {
   formatEntryMoney,
   formatEntryNumber,
 } from "../../../_components/lib/format";
-import { EntryTabCard, EntryTabField } from "./entry-tab-card";
+import { EntryDetailField } from "../entry-detail-field";
+import { EntrySectionCard } from "../entry-section-card";
 
 interface EntrySummaryTabProps {
   entry: UIEntryDetail;
@@ -15,14 +16,14 @@ interface EntrySummaryTabProps {
 export function EntrySummaryTab({ entry }: EntrySummaryTabProps) {
   return (
     <div className="grid gap-3 sm:gap-4 lg:grid-cols-2 lg:items-start">
-      <EntryTabCard icon={<Boxes className="size-4" />} title="Status">
+      <EntrySectionCard icon={<Boxes className="size-4" />} title="Status">
         <dl className="grid gap-4 sm:grid-cols-2">
           <div className="flex flex-wrap gap-1 sm:col-span-2">
             <EntryStatusBadge label="Estoque" value={entry.stockStatus} />
             <EntryStatusBadge label="Físico" value={entry.physicalStatus} />
             <EntryStatusBadge label="Etiqueta" value={entry.labelStatus} />
           </div>
-          <EntryTabField
+          <EntryDetailField
             label="Data de entrada em estoque"
             value={
               entry.stockEntryDate
@@ -30,33 +31,36 @@ export function EntrySummaryTab({ entry }: EntrySummaryTabProps) {
                 : "Não informada"
             }
           />
-          <EntryTabField
+          <EntryDetailField
             label="Hora de entrada em estoque"
             value={entry.stockEntryTime ?? "Não informada"}
           />
         </dl>
-      </EntryTabCard>
+      </EntrySectionCard>
 
-      <EntryTabCard icon={<ClipboardList className="size-4" />} title="Resumo">
+      <EntrySectionCard
+        icon={<ClipboardList className="size-4" />}
+        title="Resumo"
+      >
         <dl className="grid gap-4 sm:grid-cols-2">
-          <EntryTabField
+          <EntryDetailField
             label="Quantidade de movimento"
             value={entry.summary?.movementQuantity ?? 0}
           />
-          <EntryTabField
+          <EntryDetailField
             label="Total em real"
             value={
               entry.summary ? formatEntryMoney(entry.summary.totalReal) : "—"
             }
           />
-          <EntryTabField
+          <EntryDetailField
             label="Total em dólar"
             value={
               entry.summary ? formatEntryNumber(entry.summary.totalDollar) : "—"
             }
           />
         </dl>
-      </EntryTabCard>
+      </EntrySectionCard>
     </div>
   );
 }

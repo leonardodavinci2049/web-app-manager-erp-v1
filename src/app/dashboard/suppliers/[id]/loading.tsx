@@ -1,4 +1,4 @@
-import { RegistryDetailLoading } from "@/components/registry";
+import { RegistryDetailLoading } from "@/app/dashboard/_components/detail-page";
 
 export default function SupplierDetailsLoading() {
   return (
