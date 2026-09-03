@@ -12,7 +12,10 @@ export interface UIEntryListItem {
   carrier: string;
   invoiceNumber: string;
   model: string;
+  movementQuantity: number;
   totalInvoice: string;
+  totalReal: string;
+  totalDollar: string;
   totalProducts: string;
   stockStatus: string;
   physicalStatus: string;
@@ -71,7 +74,10 @@ export function transformEntryListItem(entity: EntryListItem): UIEntryListItem {
     carrier: entity.TRANSPORTADORA,
     invoiceNumber: entity.NUMERODANOTA,
     model: entity.MODELO,
+    movementQuantity: entity.QT_MOVIMENTO,
     totalInvoice: entity.VL_TOTAL_NOTA,
+    totalReal: entity.VL_TOTAL_REAL,
+    totalDollar: entity.VL_TOTAL_DOLAR,
     totalProducts: entity.VL_TOTAL_PRODUTO,
     stockStatus: entity.STATUS_ESTOQUE,
     physicalStatus: entity.STATUS_FISICO,

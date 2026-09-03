@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/table";
 import type { UIEntryListItem } from "@/services/api-main/entry/transformers/transformers";
 import { formatEntryDate, formatEntryMoney } from "../lib/format";
+import { EntryImage } from "./entry-image";
 import { EntryStatusBadge } from "./entry-status-badge";
 
 interface EntryTableProps {
@@ -20,8 +21,10 @@ interface EntryTableProps {
 
 /**
  * Tabela de entradas para o modo tabela em telas desktop (Server Component).
- * Colunas: ID, data de entrada, fornecedor, transportadora, nota, modelo,
- * valores, status e acoes. A acao abre a pagina de detalhes.
+ * Colunas: imagem do fornecedor, ID + status de estoque, fornecedor,
+ * transportadora, nota + valor total, itens/totais real/dolar, status
+ * fisico/etiqueta, data de entrada, modelo e acoes. A acao abre a pagina de
+ * detalhes.
  */
 export function EntryTable({ entries, buildDetailHref }: EntryTableProps) {
   return (
@@ -29,15 +32,17 @@ export function EntryTable({ entries, buildDetailHref }: EntryTableProps) {
       <Table aria-label="Lista de entradas">
         <TableHeader className="bg-muted/50">
           <TableRow>
-            <TableHead className="w-20">ID</TableHead>
-            <TableHead className="w-28">Entrada</TableHead>
+            <TableHead className="w-20">Imagem</TableHead>
+            <TableHead className="min-w-40">ID</TableHead>
             <TableHead className="min-w-48">Fornecedor</TableHead>
             <TableHead className="min-w-36">Transportadora</TableHead>
-            <TableHead className="w-24">Nota</TableHead>
+            <TableHead className="min-w-36">Nota</TableHead>
+            <TableHead className="min-w-36 text-right">
+              Itens / Real / Dólar
+            </TableHead>
+            <TableHead className="min-w-48">Status</TableHead>
+            <TableHead className="w-28">Entrada</TableHead>
             <TableHead className="w-28">Modelo</TableHead>
-            <TableHead className="w-32 text-right">Total nota</TableHead>
-            <TableHead className="w-32 text-right">Total produtos</TableHead>
-            <TableHead className="w-64">Status</TableHead>
             <TableHead className="w-16 text-right">
               <span className="sr-only">Ações</span>
             </TableHead>
@@ -46,11 +51,21 @@ export function EntryTable({ entries, buildDetailHref }: EntryTableProps) {
         <TableBody className="[&_tr:nth-child(even)]:bg-muted/30">
           {entries.map((entry) => (
             <TableRow key={entry.id}>
-              <TableCell className="text-muted-foreground tabular-nums">
-                {entry.id}
+              <TableCell>
+                <EntryImage
+                  name={entry.supplier}
+                  imagePath={entry.imagePath}
+                  viewMode="list"
+                  size="sm"
+                />
               </TableCell>
-              <TableCell className="text-muted-foreground whitespace-nowrap tabular-nums">
-                {formatEntryDate(entry.entryDate)}
+              <TableCell className="whitespace-nowrap">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-muted-foreground tabular-nums">
+                    {entry.id}
+                  </span>
+                  <EntryStatusBadge label="Estoque" value={entry.stockStatus} />
+                </div>
               </TableCell>
               <TableCell className="min-w-48 whitespace-normal break-words font-medium">
                 <Link
@@ -63,19 +78,29 @@ export function EntryTable({ entries, buildDetailHref }: EntryTableProps) {
               <TableCell className="whitespace-normal break-words">
                 {entry.carrier}
               </TableCell>
-              <TableCell className="tabular-nums">
-                {entry.invoiceNumber}
+              <TableCell className="whitespace-nowrap">
+                <div className="flex flex-col gap-0.5">
+                  <span className="font-medium tabular-nums">
+                    {entry.invoiceNumber}
+                  </span>
+                  <span className="text-muted-foreground tabular-nums">
+                    {formatEntryMoney(entry.totalInvoice)}
+                  </span>
+                </div>
               </TableCell>
-              <TableCell>{entry.model}</TableCell>
-              <TableCell className="text-right tabular-nums">
-                {formatEntryMoney(entry.totalInvoice)}
+              <TableCell className="text-right align-top">
+                <div className="flex flex-col gap-0.5 tabular-nums">
+                  <span>{entry.movementQuantity} itens</span>
+                  <span>{formatEntryMoney(entry.totalReal)}</span>
+                  <span>
+                    {formatEntryMoney(entry.totalDollar, {
+                      currency: "USD",
+                    })}
+                  </span>
+                </div>
               </TableCell>
-              <TableCell className="text-right tabular-nums">
-                {formatEntryMoney(entry.totalProducts)}
-              </TableCell>
-              <TableCell>
+              <TableCell className="align-top">
                 <div className="flex flex-wrap gap-1">
-                  <EntryStatusBadge label="Estoque" value={entry.stockStatus} />
                   <EntryStatusBadge
                     label="Físico"
                     value={entry.physicalStatus}
@@ -86,6 +111,10 @@ export function EntryTable({ entries, buildDetailHref }: EntryTableProps) {
                   />
                 </div>
               </TableCell>
+              <TableCell className="text-muted-foreground whitespace-nowrap tabular-nums">
+                {formatEntryDate(entry.entryDate)}
+              </TableCell>
+              <TableCell>{entry.model}</TableCell>
               <TableCell className="text-right">
                 <Button asChild size="icon" variant="ghost">
                   <Link href={buildDetailHref(entry.id)}>
