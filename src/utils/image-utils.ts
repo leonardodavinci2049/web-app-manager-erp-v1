@@ -26,6 +26,22 @@ function isAllowedImageOrigin(url: URL): boolean {
 }
 
 /**
+ * Verifica se a URL aponta para o servidor local de assets.
+ * Imagens do assets local devem ser renderizadas com `unoptimized` para que o
+ * carregamento aconteca direto no navegador: se o servidor estiver offline,
+ * apenas o fallback client-side e' acionado, sem fetch (e erro) no servidor
+ * Next.js atraves do otimizador `/_next/image`.
+ */
+export function isLocalAssetsImage(url: string): boolean {
+  try {
+    const parsedUrl = new URL(url);
+    return parsedUrl.hostname === "localhost" && parsedUrl.port === "5573";
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Valida se uma URL de imagem é válida
  * URLs remotas precisam pertencer aos origins configurados em
  * `next.config.ts`; caso contrário o Next.js Image rejeita o render.
