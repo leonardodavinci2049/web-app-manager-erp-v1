@@ -13,7 +13,7 @@ export function SupplierHeadDataSection({
 }: SupplierHeadDataSectionProps) {
   return (
     <DetailRecordHeading
-      image={
+      mobileImage={
         <SupplierImage
           name={supplier.name}
           imagePath={supplier.imagePath}

@@ -13,7 +13,7 @@ export function CarrierHeadDataSection({
 }: CarrierHeadDataSectionProps) {
   return (
     <DetailRecordHeading
-      image={
+      mobileImage={
         <CarrierImage
           key={carrier.imagePath}
           name={carrier.name}

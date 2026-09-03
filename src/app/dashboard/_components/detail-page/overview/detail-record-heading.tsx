@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 interface DetailRecordHeadingProps {
-  image?: ReactNode;
+  mobileImage: ReactNode;
   title: ReactNode;
   metadata?: ReactNode;
 }
@@ -12,13 +12,13 @@ interface DetailRecordHeadingProps {
  * aside is the single image surface.
  */
 export function DetailRecordHeading({
-  image,
+  mobileImage,
   title,
   metadata,
 }: DetailRecordHeadingProps) {
   return (
     <div className="flex min-w-0 items-start gap-3">
-      {image ? <div className="shrink-0 lg:hidden">{image}</div> : null}
+      <div className="shrink-0 lg:hidden">{mobileImage}</div>
       <div className="min-w-0">
         {title}
         {metadata ? (

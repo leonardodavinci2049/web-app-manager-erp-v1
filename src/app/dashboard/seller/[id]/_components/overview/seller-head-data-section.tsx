@@ -13,7 +13,7 @@ interface SellerHeadDataSectionProps {
 export function SellerHeadDataSection({ seller }: SellerHeadDataSectionProps) {
   return (
     <DetailRecordHeading
-      image={
+      mobileImage={
         <SellerImage
           name={seller.name}
           imagePath={seller.imagePath}
