@@ -3,48 +3,81 @@
 import { ExternalLink, Image as ImageIcon, RefreshCw } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { updateSupplierImagePathFromPrimaryAction } from "../../_actions/supplier-image-gallery-actions";
 import { DEFAULT_SUPPLIERS_IMAGE_URL } from "./image-gallery-constants";
 import type { SupplierGalleryImage } from "./image-gallery-types";
 
 interface SupplierImagesListProps {
+  supplierId: number;
   initialSupplierImagePath: string;
   initialGalleryImages: SupplierGalleryImage[];
 }
 
 export function SupplierImagesList({
+  supplierId,
   initialSupplierImagePath,
   initialGalleryImages,
 }: SupplierImagesListProps) {
   const router = useRouter();
-  const [isRefreshing, startRefreshTransition] = useTransition();
+  const [isUpdating, startUpdateTransition] = useTransition();
   const [galleryImages, setGalleryImages] =
     useState<SupplierGalleryImage[]>(initialGalleryImages);
   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
   const [hasSupplierImageError, setHasSupplierImageError] = useState(false);
   const supplierImagePath = initialSupplierImagePath;
-
-  const refreshGallery = useCallback(() => {
-    setImageErrors(new Set());
-    startRefreshTransition(() => router.refresh());
-  }, [router]);
+  const primaryImage = useMemo(
+    () => galleryImages.find((image) => image.isPrimary),
+    [galleryImages],
+  );
 
   useEffect(() => {
     setGalleryImages(initialGalleryImages);
   }, [initialGalleryImages]);
 
+  const updateImagePath = () => {
+    startUpdateTransition(async () => {
+      const result = await updateSupplierImagePathFromPrimaryAction(supplierId);
+      if (!result.success) {
+        toast.error(result.error);
+        return;
+      }
+
+      toast.success(result.message);
+      setHasSupplierImageError(false);
+      setImageErrors(new Set());
+      router.refresh();
+    });
+  };
+
   return (
     <div className="space-y-4">
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <ImageIcon className="h-5 w-5" />
-            Imagem cadastrada no fornecedor
-          </CardTitle>
+          <div className="flex items-center justify-between gap-3">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <ImageIcon className="h-5 w-5" />
+              Imagem cadastrada no fornecedor
+            </CardTitle>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={updateImagePath}
+              disabled={isUpdating || !primaryImage}
+            >
+              <RefreshCw
+                className={`mr-1 h-4 w-4 ${isUpdating ? "animate-spin" : ""}`}
+                aria-hidden="true"
+              />
+              Atualizar
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {supplierImagePath ? (
@@ -93,23 +126,10 @@ export function SupplierImagesList({
 
       <Card>
         <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <ImageIcon className="h-5 w-5" />
-              Galeria de Imagens (Assets API)
-            </CardTitle>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={refreshGallery}
-              disabled={isRefreshing}
-            >
-              <RefreshCw
-                className={`h-4 w-4 mr-1 ${isRefreshing ? "animate-spin" : ""}`}
-              />
-              Atualizar
-            </Button>
-          </div>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <ImageIcon className="h-5 w-5" />
+            Galeria de Imagens (Assets API)
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {galleryImages.length === 0 ? (

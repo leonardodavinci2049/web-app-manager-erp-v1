@@ -43,7 +43,7 @@ gallery read is shared by both nodes through React `cache()`.
 ├── error.tsx                                 # Detail error boundary (Client)
 ├── not-found.tsx                             # Invalid/inaccessible customer
 ├── _actions/
-│   ├── customer-image-gallery-actions.ts     # Gallery upload/primary/delete
+│   ├── customer-image-gallery-actions.ts     # Gallery upload/primary/delete/PATH sync
 │   └── customer-purchases-actions.ts         # Authenticated lazy purchase reads
 └── _components/
     ├── customer-detail-layout.tsx            # Top-level detail layout (Server)
@@ -207,11 +207,10 @@ the image set) and the legacy **`PATH_IMAGEM`** column on `tbl_pessoa`
   zoom dialog (keyboard-navigable), per-image error fallback to
   `DEFAULT_CUSTOMER_IMAGE_URL`, and an `aria-live` status region for screen
   readers.
-- `customer-images-list.tsx`: read-only viewer. Shows the current `PATH_IMAGEM`
-  value and the Assets API image list side by side, with a manual refresh
-  button. The "Usar no PATH_IMAGEM" action is **disabled** here (pending a
-  dedicated client API method); promotion happens automatically through the
-  gallery actions instead.
+- `customer-images-list.tsx`: viewer and manual synchronization control. Shows
+  the current `PATH_IMAGEM` value and the Assets API image list side by side.
+  The first card's "Atualizar" button copies the primary image's original URL;
+  the gallery card has no per-image PATH action.
 - `image-gallery-skeleton.tsx`: Suspense fallback shared by both nodes.
 - `image-gallery-constants.ts`: `CUSTOMER_GALLERY_ENTITY_TYPE` (`"CUSTOMER"`),
   `CUSTOMER_GALLERY_LIMIT` (7), `CUSTOMER_GALLERY_MAX_FILE_SIZE` (2 MB),
@@ -228,14 +227,15 @@ the image set) and the legacy **`PATH_IMAGEM`** column on `tbl_pessoa`
   reason; valid files are uploaded sequentially.
 - The last remaining image cannot be deleted; the delete action and the client
   button both enforce this.
-- All three mutations (`uploadCustomerImageAction`,
-  `setPrimaryCustomerImageAction`, `deleteCustomerImageAction`) live in
+- All four mutations (`uploadCustomerImageAction`,
+  `setPrimaryCustomerImageAction`, `deleteCustomerImageAction`,
+  `updateCustomerImagePathFromPrimaryAction`) live in
   `_actions/customer-image-gallery-actions.ts`, re-resolve auth and ownership via
   `getAuthorizedCustomerContext()`, and re-read the gallery before mutating.
 
 ### PATH_IMAGEM synchronization
 
-`PATH_IMAGEM` is kept in sync with the Assets API primary image on three flows,
+`PATH_IMAGEM` is kept in sync with the Assets API primary image on four flows,
 using `generalCallServiceApi.updateTableInlineField` on `tbl_pessoa` keyed by
 `ID_TBL_PESSOA` (field `PATH_IMAGEM`, max length 300):
 
@@ -245,6 +245,9 @@ using `generalCallServiceApi.updateTableInlineField` on `tbl_pessoa` keyed by
    If the image was already primary, the action still repairs `PATH_IMAGEM`.
 3. **Primary deletion**: the next candidate (by sort order) is promoted to
    primary and its URL is written to `PATH_IMAGEM`.
+4. **Manual update**: the first-card button re-reads the customer and gallery,
+   copies the current primary image's original URL, and skips the write when it
+   already equals `PATH_IMAGEM`.
 
 If the original URL is empty or exceeds 300 characters, the `PATH_IMAGEM` write
 is skipped and the action returns a `warning`. The asset operation is **not**
@@ -293,18 +296,14 @@ into this folder.
 The detail page deliberately disables flows without a safe API contract:
 
 - **Delete** (`deletionContent`): disabled destructive button in a danger zone.
-- **Manual `PATH_IMAGEM` assignment** (`customer-images-list`): the per-image
-  "Usar no PATH_IMAGEM" button is disabled. Promotion is automatic via gallery
-  mutations only.
-
-Do not present these as functional and do not simulate them. When a safe
-contract arrives, wire the action, enable the control, and remove the
-"Pendente de API" badge together.
 
 ## Conventions for Changes
 
 - Preserve `page.tsx` as a Server Component. Keep `"use client"` limited to the
   interactive components (forms, toggles, gallery, avatars with error state).
+- For manual `PATH_IMAGEM` synchronization, keep the "Atualizar" button in the
+  first card and always derive the URL from the server-read primary image,
+  never from client-supplied image data.
 - Keep section forms independent: each section owns its state and submits to one
   action. Do not introduce a shared editing context or a single save-all action.
 - Status selectors map `RESTRICAO`, `INATIVO`, and `EMAIL_MKT` into boolean UI

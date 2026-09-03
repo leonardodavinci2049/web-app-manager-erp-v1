@@ -55,7 +55,7 @@ customer/
     ├── error.tsx                         # Detail error boundary (Client)
     ├── not-found.tsx                     # Invalid/inaccessible customer UI
     ├── _actions/
-    │   └── customer-image-gallery-actions.ts  # Gallery upload/primary/delete
+    │   └── customer-image-gallery-actions.ts  # Gallery upload/primary/delete/PATH sync
     └── _components/
         ├── customer-detail-layout.tsx    # Detail composition (Server)
         ├── overview/                      # First-fold overview sections
@@ -225,17 +225,20 @@ systems: the Assets API (source of truth for the gallery) and the legacy
   the customer ID stringified.
 - The gallery is capped at `CUSTOMER_GALLERY_LIMIT` (7) images and accepts only
   `CUSTOMER_GALLERY_ACCEPTED_MIME_TYPES` up to `CUSTOMER_GALLERY_MAX_FILE_SIZE`
-  (10 MB).
+  (2 MB).
 - `getCustomerGalleryInitialState()` is wrapped in React `cache()` so the gallery
   server component and the images-list server component share a single read per
   request.
-- `PATH_IMAGEM` synchronization is mandatory and happens on three flows:
+- `PATH_IMAGEM` synchronization is mandatory and happens on four flows:
   1. **First upload**: the first image is marked primary and its original URL is
      written to `PATH_IMAGEM` via `generalCallServiceApi.updateTableInlineField`.
   2. **Primary change** (`setPrimaryCustomerImageAction`): the newly primary
      image URL is written to `PATH_IMAGEM`.
   3. **Primary deletion** (`deleteCustomerImageAction`): the next candidate is
      promoted to primary and its URL is written to `PATH_IMAGEM`.
+  4. **Manual update** (`updateCustomerImagePathFromPrimaryAction`): the current
+     primary image's original URL is copied from a server-side gallery read; an
+     identical `PATH_IMAGEM` value is not written again.
 - If the original URL is empty or exceeds `CUSTOMER_IMAGE_PATH_MAX_LENGTH` (300),
   the `PATH_IMAGEM` write is skipped and the action returns a `warning`. The
   asset operation itself is not rolled back; treat the warning as a partial
@@ -273,7 +276,8 @@ needed.
 - `updateCustomerTypePersonAction()` and `updateCustomerTypeCustomerAction()`:
   change the person/customer type via inline endpoints.
 - `uploadCustomerImageAction()`, `setPrimaryCustomerImageAction()`,
-  `deleteCustomerImageAction()`: gallery mutations described above.
+  `deleteCustomerImageAction()`, `updateCustomerImagePathFromPrimaryAction()`:
+  gallery mutations and manual PATH synchronization described above.
 
 Do not trust client-side gating alone. Direct Server Action calls can bypass
 Client Components, so preserve the re-validation and authorization checks. Never

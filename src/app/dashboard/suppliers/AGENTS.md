@@ -61,7 +61,7 @@ suppliers/
     ├── error.tsx                         # Detail error boundary (Client)
     ├── not-found.tsx                     # Invalid/inaccessible supplier UI
     ├── _actions/
-    │   └── supplier-image-gallery-actions.ts  # Gallery upload/primary/delete
+    │   └── supplier-image-gallery-actions.ts  # Gallery upload/primary/delete/PATH sync
     └── _components/
         ├── supplier-detail-layout.tsx    # Server: three-area detail composition
         ├── overview/                     # One component per first-fold card/section
@@ -192,11 +192,12 @@ and detail UI).
   note the inconsistency with the singular service module name `supplier`).
 - The gallery is capped at `SUPPLIERS_GALLERY_LIMIT` (7) images and accepts only
   `SUPPLIERS_GALLERY_ACCEPTED_MIME_TYPES` up to `SUPPLIERS_GALLERY_MAX_FILE_SIZE`
-  (10 MB).
+  (2 MB).
 - `getSupplierGalleryInitialState()` is wrapped in React `cache()` so the gallery
   node and the images-list node share a single Assets API read per request.
-- `PATH_IMAGEM` synchronization is mandatory on three flows (first upload,
-  primary change, primary deletion) and writes through
+- `PATH_IMAGEM` synchronization is mandatory on four flows (first upload,
+  primary change, primary deletion, and manual update from the first card) and
+  writes through
   `generalCallServiceApi.updateTableInlineField` (table `tbl_fornecedor`, key
   `ID_FORNECEDOR`, field `PATH_IMAGEM`, max 300 chars) via the local
   `updateSupplierImagePath()` helper. If the original URL is empty or exceeds 300
@@ -226,8 +227,9 @@ with the detail, like carriers). Gallery mutations live in `[id]/_actions`.
   guard**; the API validates relations and errors are surfaced via
   `getSafeOperationMessage()`.
 - `uploadSupplierImageAction()`, `setPrimarySupplierImageAction()`,
-  `deleteSupplierImageAction()` (`[id]/_actions/supplier-image-gallery-actions.ts`):
-  gallery mutations described above. They call `revalidatePath` directly inside
+  `deleteSupplierImageAction()`, `updateSupplierImagePathFromPrimaryAction()`
+  (`[id]/_actions/supplier-image-gallery-actions.ts`): gallery mutations and
+  manual PATH synchronization described above. They call `revalidatePath` directly inside
   `updateSupplierImagePath()` and do **not** reuse `revalidateSupplier()`.
 
 `revalidateSupplier(supplierId?)` revalidates both `/dashboard/suppliers` and
@@ -295,6 +297,6 @@ mutations are enabled and wired. Do not mark any flow as pending.
   pagination, empty and error states, create flow, the single edit form, status
   activate/deactivate, delete confirm + redirect to `returnTo`, gallery
   upload/primary/delete (including last-image rejection), zoom navigation, the
-  PATH_IMAGEM viewer refresh, and the `returnTo` back link with valid and invalid
+  first-card PATH_IMAGEM update, and the `returnTo` back link with valid and invalid
   `id`.
 - This project currently has no automated test command; do not invent one.

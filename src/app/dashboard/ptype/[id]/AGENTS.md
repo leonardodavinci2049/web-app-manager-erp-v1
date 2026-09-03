@@ -42,7 +42,7 @@ React `cache()`.
 ├── not-found.tsx                           # Invalid/inaccessible ptype UI
 ├── _actions/
 │   ├── ptype-detail-actions.ts             # updatePtypeAction, setPtypeStatusAction, deletePtypeAction
-│   └── ptype-image-gallery-actions.ts      # Gallery upload/primary/delete
+│   └── ptype-image-gallery-actions.ts      # Gallery upload/primary/delete/PATH sync
 └── _components/
     ├── ptype-detail-layout.tsx             # Top-level detail layout (Server, shared shells)
     ├── overview/
@@ -173,10 +173,10 @@ list and detail UI).
   navigable zoom dialog, per-image error fallback to `DEFAULT_PTYPE_IMAGE_URL`,
   `isRemoteImage()` → `unoptimized` on `next/image`, and an `aria-live` status
   region for screen readers.
-- `ptype-images-list.tsx`: read-only viewer. Shows the current `PATH_IMAGEM`
-  value and the Assets API image list side by side, with a manual refresh button.
-  There is **no** "Usar no PATH_IMAGEM" button; promotion is automatic via the
-  gallery actions.
+- `ptype-images-list.tsx`: viewer and manual synchronization control. Shows the
+  current `PATH_IMAGEM` value and the Assets API image list side by side. The
+  first card's "Atualizar" button copies the primary image's original URL; the
+  gallery card has no per-image PATH action.
 - `image-gallery-skeleton.tsx`: Suspense fallback shared by both nodes.
 - `image-gallery-constants.ts`: `PTYPE_GALLERY_ENTITY_TYPE` (`"PTYPE"`),
   `PTYPE_GALLERY_LIMIT` (7), `PTYPE_GALLERY_MAX_FILE_SIZE` (2 MB), accepted MIME
@@ -191,14 +191,15 @@ list and detail UI).
   reason; valid files are uploaded sequentially.
 - The last remaining image cannot be deleted; the delete action and the client
   button both enforce this.
-- All three mutations (`uploadPtypeImageAction`, `setPrimaryPtypeImageAction`,
-  `deletePtypeImageAction`) live in `_actions/ptype-image-gallery-actions.ts`,
+- All four mutations (`uploadPtypeImageAction`, `setPrimaryPtypeImageAction`,
+  `deletePtypeImageAction`, `updatePtypeImagePathFromPrimaryAction`) live in
+  `_actions/ptype-image-gallery-actions.ts`,
   re-resolve auth and ownership via `getAuthorizedPtypeContext()`, and re-read
   the gallery before mutating.
 
 ### PATH_IMAGEM synchronization
 
-`PATH_IMAGEM` is kept in sync with the Assets API primary image on three flows,
+`PATH_IMAGEM` is kept in sync with the Assets API primary image on four flows,
 writing through `generalCallServiceApi.updateTableInlineField` (table
 `tbl_produto_tipo`, key `ID_TIPO`, field `PATH_IMAGEM`, max 300 chars):
 
@@ -208,6 +209,9 @@ writing through `generalCallServiceApi.updateTableInlineField` (table
    If the image was already primary, the action still repairs `PATH_IMAGEM`.
 3. **Primary deletion**: the next candidate (by sort order) is promoted to
    primary and its URL is written to `PATH_IMAGEM`.
+4. **Manual update**: the first-card button re-reads the product type and
+   gallery, copies the current primary image's original URL, and skips an
+   identical `PATH_IMAGEM` write.
 
 If the original URL is empty or exceeds 300 characters, the `PATH_IMAGEM` write
 is skipped and the action returns a `warning`. The asset operation is **not**
@@ -288,5 +292,5 @@ split; do not move detail actions into the parent or vice versa.
   form (success, validation errors, network failure), status activate/deactivate,
   delete confirm + redirect to `returnTo`, gallery upload (drag-and-drop and
   picker), primary promotion, deletion (including last-image rejection), zoom
-  navigation, and the `PATH_IMAGEM` viewer refresh.
+  navigation, and the first-card `PATH_IMAGEM` update.
 - This project currently has no automated test command; do not invent one.

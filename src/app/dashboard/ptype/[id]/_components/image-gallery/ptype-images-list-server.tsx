@@ -14,6 +14,7 @@ export async function PtypeImagesListServer({
 
   return (
     <PtypeImagesList
+      ptypeId={ptypeId}
       initialPtypeImagePath={initialPtypeImagePath}
       initialGalleryImages={galleryState.images}
     />

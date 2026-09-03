@@ -14,6 +14,7 @@ export async function CarrierImagesListServer({
 
   return (
     <CarrierImagesList
+      carrierId={carrierId}
       initialCarrierImagePath={initialCarrierImagePath}
       initialGalleryImages={galleryState.images}
     />

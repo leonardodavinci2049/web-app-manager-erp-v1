@@ -18,6 +18,7 @@ import {
 import type { ProductGalleryMutationResult } from "../_components/image-gallery/image-gallery-types";
 
 const logger = createLogger("ProductImageGalleryActions");
+const PRODUCT_IMAGE_PATH_MAX_LENGTH = 300;
 
 const ProductIdSchema = z.coerce.number().int().positive();
 const AssetIdSchema = z.string().uuid();
@@ -51,11 +52,26 @@ async function getAuthorizedProductContext(productId: number) {
     pe_type_business: 1,
   });
 
-  return result ? apiContext : null;
+  return result ? { apiContext, product: result.product } : null;
 }
 
 async function authorizeProduct(productId: number): Promise<boolean> {
   return Boolean(await getAuthorizedProductContext(productId));
+}
+
+async function updateProductImagePath(
+  productId: number,
+  imagePath: string,
+  apiContext: Awaited<ReturnType<typeof getAuthContext>>["apiContext"],
+): Promise<void> {
+  await productInlineServiceApi.updateProductImagePathInline({
+    pe_product_id: productId,
+    pe_path_imagem: imagePath,
+    ...apiContext,
+  });
+
+  revalidatePath("/dashboard/product");
+  revalidatePath(`/dashboard/product/${productId}`);
 }
 
 async function readProductGallery(productId: number) {
@@ -107,13 +123,14 @@ export async function uploadProductImageAction(
   }
 
   try {
-    const apiContext = await getAuthorizedProductContext(productId);
-    if (!apiContext) {
+    const authorizedProduct = await getAuthorizedProductContext(productId);
+    if (!authorizedProduct) {
       return {
         success: false,
         error: "Produto não encontrado ou inacessível.",
       };
     }
+    const { apiContext } = authorizedProduct;
 
     const gallery = await readProductGallery(productId);
     if (!gallery) {
@@ -150,7 +167,7 @@ export async function uploadProductImageAction(
 
     if (isFirstImage) {
       const imagePath = result.urls.original.trim();
-      if (!imagePath || imagePath.length > 300) {
+      if (!imagePath || imagePath.length > PRODUCT_IMAGE_PATH_MAX_LENGTH) {
         logger.error("First product image has an invalid original URL", {
           productId,
           assetId: result.id,
@@ -166,13 +183,7 @@ export async function uploadProductImageAction(
       }
 
       try {
-        await productInlineServiceApi.updateProductImagePathInline({
-          pe_product_id: productId,
-          pe_path_imagem: imagePath,
-          ...apiContext,
-        });
-        revalidatePath(`/dashboard/product/${productId}`);
-        revalidatePath("/dashboard/product");
+        await updateProductImagePath(productId, imagePath, apiContext);
       } catch (error) {
         logger.error(
           "First product image uploaded but PATH_IMAGEM update failed",
@@ -266,6 +277,82 @@ export async function setPrimaryProductImageAction(
     return {
       success: false,
       error: "Não foi possível definir a imagem principal.",
+    };
+  }
+}
+
+export async function updateProductImagePathFromPrimaryAction(
+  rawProductId: number | string,
+): Promise<ProductGalleryMutationResult> {
+  const parsedProductId = ProductIdSchema.safeParse(rawProductId);
+  if (!parsedProductId.success) {
+    return { success: false, error: "Produto inválido." };
+  }
+
+  const productId = parsedProductId.data;
+  try {
+    const authorizedProduct = await getAuthorizedProductContext(productId);
+    if (!authorizedProduct) {
+      return {
+        success: false,
+        error: "Produto não encontrado ou inacessível.",
+      };
+    }
+
+    const gallery = await readProductGallery(productId);
+    if (!gallery) {
+      return {
+        success: false,
+        error: "Não foi possível validar a imagem principal.",
+      };
+    }
+
+    const primaryImage = gallery.images.find((image) => image.isPrimary);
+    if (!primaryImage) {
+      return {
+        success: false,
+        error: "A galeria não possui uma imagem principal.",
+      };
+    }
+
+    const imagePath = primaryImage.urls.original.trim();
+    if (!imagePath || imagePath.length > PRODUCT_IMAGE_PATH_MAX_LENGTH) {
+      logger.error("Primary product image has an invalid original URL", {
+        productId,
+        assetId: primaryImage.id,
+        imagePathLength: imagePath.length,
+      });
+      return {
+        success: false,
+        error: "A URL original da imagem principal é inválida.",
+      };
+    }
+
+    if ((authorizedProduct.product.imagePath ?? "").trim() === imagePath) {
+      return {
+        success: true,
+        message: "PATH_IMAGEM já está atualizado com a imagem principal.",
+      };
+    }
+
+    await updateProductImagePath(
+      productId,
+      imagePath,
+      authorizedProduct.apiContext,
+    );
+
+    return {
+      success: true,
+      message: "PATH_IMAGEM atualizado com a imagem principal.",
+    };
+  } catch (error) {
+    logger.error("Unexpected product PATH_IMAGEM synchronization failure", {
+      productId,
+      error,
+    });
+    return {
+      success: false,
+      error: "Não foi possível atualizar PATH_IMAGEM.",
     };
   }
 }

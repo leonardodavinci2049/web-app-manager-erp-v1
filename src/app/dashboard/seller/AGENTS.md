@@ -65,7 +65,7 @@ seller/
     ├── _actions/
     │   ├── seller-actions.ts             # Route-local section update Server Actions
     │   ├── seller-sales-actions.ts       # Authenticated lazy order reads
-    │   └── seller-image-gallery-actions.ts   # Gallery upload/primary/delete
+    │   └── seller-image-gallery-actions.ts   # Gallery upload/primary/delete/PATH_IMAGEM sync
     └── _components/
         ├── seller-detail-layout.tsx      # Detail composition (Server)
         ├── overview/                     # First-fold overview sections
@@ -207,11 +207,12 @@ detail UI).
   seller ID stringified.
 - The gallery is capped at `SELLER_GALLERY_LIMIT` (7) images and accepts only
   `SELLER_GALLERY_ACCEPTED_MIME_TYPES` up to `SELLER_GALLERY_MAX_FILE_SIZE`
-  (10 MB).
+  (2 MB).
 - `getSellerGalleryInitialState()` is wrapped in React `cache()` so the gallery
   node and the images-list node share a single Assets API read per request.
-- `PATH_IMAGEM` synchronization is mandatory on three flows (first upload,
-  primary change, primary deletion) and writes through
+- `PATH_IMAGEM` synchronization is mandatory on four flows (first upload,
+  primary change, primary deletion, manual repair from the first image card)
+  and writes through
   `generalCallServiceApi.updateTableInlineField` (table `tbl_pessoa`, key
   `ID_TBL_PESSOA`, field `PATH_IMAGEM`, max 300 chars) via the local
   `updateSellerImagePath()` helper. If the original URL is empty or exceeds 300
@@ -246,7 +247,8 @@ All seller Server Actions are route-local to `[id]/`:
   always scoped to the selected seller.
 - `[id]/_actions/seller-image-gallery-actions.ts` — `uploadSellerImageAction(formData)`,
   `setPrimarySellerImageAction(rawSellerId, rawAssetId)`,
-  `deleteSellerImageAction(rawSellerId, rawAssetId)`.
+  `deleteSellerImageAction(rawSellerId, rawAssetId)`, and
+  `updateSellerImagePathFromPrimaryAction(rawSellerId)`.
 
 They validate with Zod, re-resolve auth and ownership via
 `getAuthorizedSellerContext()`, re-read the gallery before mutating, and call

@@ -53,9 +53,9 @@ function getSafeApiLogMessage(message: string | string[]): string {
 
 async function getAuthorizedSellerContext(sellerId: number) {
   const { apiContext } = await getAuthContext();
-  const result = await getSellerById(sellerId, apiContext);
+  const seller = await getSellerById(sellerId, apiContext);
 
-  return result ? apiContext : null;
+  return seller ? { apiContext, seller } : null;
 }
 
 async function updateSellerImagePath(
@@ -126,13 +126,14 @@ export async function uploadSellerImageAction(
   }
 
   try {
-    const apiContext = await getAuthorizedSellerContext(sellerId);
-    if (!apiContext) {
+    const authorizedSeller = await getAuthorizedSellerContext(sellerId);
+    if (!authorizedSeller) {
       return {
         success: false,
-        error: "Vendedor não encontrada ou inacessível.",
+        error: "Vendedor não encontrado ou inacessível.",
       };
     }
+    const { apiContext } = authorizedSeller;
 
     const gallery = await readSellerGallery(sellerId);
     if (!gallery) {
@@ -227,13 +228,14 @@ export async function setPrimarySellerImageAction(
 
   const { assetId, sellerId } = parsedInput.data;
   try {
-    const apiContext = await getAuthorizedSellerContext(sellerId);
-    if (!apiContext) {
+    const authorizedSeller = await getAuthorizedSellerContext(sellerId);
+    if (!authorizedSeller) {
       return {
         success: false,
-        error: "Vendedor não encontrada ou inacessível.",
+        error: "Vendedor não encontrado ou inacessível.",
       };
     }
+    const { apiContext } = authorizedSeller;
 
     const gallery = await readSellerGallery(sellerId);
     if (!gallery) {
@@ -345,6 +347,82 @@ export async function setPrimarySellerImageAction(
   }
 }
 
+export async function updateSellerImagePathFromPrimaryAction(
+  rawSellerId: number | string,
+): Promise<SellerGalleryMutationResult> {
+  const parsedSellerId = SellerIdSchema.safeParse(rawSellerId);
+  if (!parsedSellerId.success) {
+    return { success: false, error: "Vendedor inválido." };
+  }
+
+  const sellerId = parsedSellerId.data;
+  try {
+    const authorizedSeller = await getAuthorizedSellerContext(sellerId);
+    if (!authorizedSeller) {
+      return {
+        success: false,
+        error: "Vendedor não encontrado ou inacessível.",
+      };
+    }
+
+    const gallery = await readSellerGallery(sellerId);
+    if (!gallery) {
+      return {
+        success: false,
+        error: "Não foi possível validar a imagem principal.",
+      };
+    }
+
+    const primaryImage = gallery.images.find((image) => image.isPrimary);
+    if (!primaryImage) {
+      return {
+        success: false,
+        error: "A galeria não possui uma imagem principal.",
+      };
+    }
+
+    const imagePath = primaryImage.urls.original.trim();
+    if (!imagePath || imagePath.length > SELLER_IMAGE_PATH_MAX_LENGTH) {
+      logger.error("Primary seller image has an invalid original URL", {
+        sellerId,
+        assetId: primaryImage.id,
+        imagePathLength: imagePath.length,
+      });
+      return {
+        success: false,
+        error: "A URL original da imagem principal é inválida.",
+      };
+    }
+
+    if ((authorizedSeller.seller.imagePath ?? "").trim() === imagePath) {
+      return {
+        success: true,
+        message: "PATH_IMAGEM já está atualizado com a imagem principal.",
+      };
+    }
+
+    await updateSellerImagePath(
+      sellerId,
+      imagePath,
+      authorizedSeller.apiContext,
+    );
+
+    return {
+      success: true,
+      message: "PATH_IMAGEM atualizado com a imagem principal.",
+    };
+  } catch (error) {
+    logger.error("Unexpected seller PATH_IMAGEM synchronization failure", {
+      sellerId,
+      error,
+    });
+    return {
+      success: false,
+      error: "Não foi possível atualizar PATH_IMAGEM.",
+    };
+  }
+}
+
 export async function deleteSellerImageAction(
   rawSellerId: number | string,
   rawAssetId: string,
@@ -358,13 +436,14 @@ export async function deleteSellerImageAction(
 
   const { assetId, sellerId } = parsedInput.data;
   try {
-    const apiContext = await getAuthorizedSellerContext(sellerId);
-    if (!apiContext) {
+    const authorizedSeller = await getAuthorizedSellerContext(sellerId);
+    if (!authorizedSeller) {
       return {
         success: false,
-        error: "Vendedor não encontrada ou inacessível.",
+        error: "Vendedor não encontrado ou inacessível.",
       };
     }
+    const { apiContext } = authorizedSeller;
 
     const gallery = await readSellerGallery(sellerId);
     if (!gallery) {

@@ -3,52 +3,85 @@
 import { ExternalLink, Image as ImageIcon, RefreshCw } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { updateBrandImagePathFromPrimaryAction } from "../../_actions/brand-image-gallery-actions";
 import { DEFAULT_BRAND_IMAGE_URL } from "./image-gallery-constants";
 import type { BrandGalleryImage } from "./image-gallery-types";
 
 interface BrandImagesListProps {
+  brandId: number;
   initialBrandImagePath: string;
   initialGalleryImages: BrandGalleryImage[];
   initialGalleryError: string | null;
 }
 
 export function BrandImagesList({
+  brandId,
   initialBrandImagePath,
   initialGalleryImages,
   initialGalleryError,
 }: BrandImagesListProps) {
   const router = useRouter();
-  const [isRefreshing, startRefreshTransition] = useTransition();
+  const [isUpdating, startUpdateTransition] = useTransition();
   const [galleryImages, setGalleryImages] =
     useState<BrandGalleryImage[]>(initialGalleryImages);
   const [error, setError] = useState<string | null>(initialGalleryError);
   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
   const [hasBrandImageError, setHasBrandImageError] = useState(false);
   const brandImagePath = initialBrandImagePath;
-
-  const refreshGallery = useCallback(() => {
-    setImageErrors(new Set());
-    startRefreshTransition(() => router.refresh());
-  }, [router]);
+  const primaryImage = useMemo(
+    () => galleryImages.find((image) => image.isPrimary),
+    [galleryImages],
+  );
 
   useEffect(() => {
     setGalleryImages(initialGalleryImages);
     setError(initialGalleryError);
   }, [initialGalleryError, initialGalleryImages]);
 
+  const updateImagePath = () => {
+    startUpdateTransition(async () => {
+      const result = await updateBrandImagePathFromPrimaryAction(brandId);
+      if (!result.success) {
+        toast.error(result.error);
+        return;
+      }
+
+      toast.success(result.message);
+      setHasBrandImageError(false);
+      setImageErrors(new Set());
+      router.refresh();
+    });
+  };
+
   return (
     <div className="space-y-4">
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <ImageIcon className="h-5 w-5" />
-            Imagem cadastrada na marca
-          </CardTitle>
+          <div className="flex items-center justify-between gap-3">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <ImageIcon className="h-5 w-5" />
+              Imagem cadastrada na marca
+            </CardTitle>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={updateImagePath}
+              disabled={isUpdating || !primaryImage}
+            >
+              <RefreshCw
+                className={`mr-1 h-4 w-4 ${isUpdating ? "animate-spin" : ""}`}
+                aria-hidden="true"
+              />
+              Atualizar
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {brandImagePath ? (
@@ -97,23 +130,10 @@ export function BrandImagesList({
 
       <Card>
         <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <ImageIcon className="h-5 w-5" />
-              Galeria de Imagens (Assets API)
-            </CardTitle>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={refreshGallery}
-              disabled={isRefreshing}
-            >
-              <RefreshCw
-                className={`h-4 w-4 mr-1 ${isRefreshing ? "animate-spin" : ""}`}
-              />
-              Atualizar
-            </Button>
-          </div>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <ImageIcon className="h-5 w-5" />
+            Galeria de Imagens (Assets API)
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {error ? (

@@ -128,15 +128,19 @@ The Assets API is the source of truth for the image set; `PATH_IMAGEM` on
 - Maximum file size: 2 MB.
 - Accepted types: JPEG, PNG, GIF, and WebP.
 - The last remaining image cannot be deleted.
-- First upload, primary change, and primary deletion must synchronize
+- First upload, primary change, primary deletion, and the first-card manual
+  "Atualizar" action must synchronize
   `PATH_IMAGEM` through `generalCallServiceApi.updateTableInlineField`.
+- The manual action must re-read the carrier and gallery server-side, use the
+  primary image's original URL, and skip an identical `PATH_IMAGEM` write.
 - Preserve the 300-character guard and partial-success warning behavior.
 
 `getCarrierGalleryInitialState()` uses React `cache()` to deduplicate the
 gallery and image-list read within one server render. Do not use this as a
 cross-user or cross-organization cache.
 
-Gallery mutations stay in `_actions/carrier-image-gallery-actions.ts`. They must
+Gallery mutations and manual PATH synchronization stay in
+`_actions/carrier-image-gallery-actions.ts`. They must
 re-resolve authentication and carrier access, repeat file/count/ownership
 validation on the server, and revalidate the list and detail routes.
 

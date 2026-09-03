@@ -62,7 +62,7 @@ ptype/
     ├── not-found.tsx                     # Invalid/inaccessible ptype UI
     ├── _actions/
     │   ├── ptype-detail-actions.ts       # updatePtypeAction, setPtypeStatusAction, deletePtypeAction
-    │   └── ptype-image-gallery-actions.ts# Gallery upload/primary/delete
+    │   └── ptype-image-gallery-actions.ts# Gallery upload/primary/delete/PATH sync
     └── _components/
         ├── ptype-detail-layout.tsx       # Server: detail composition via shared shells
         ├── overview/                     # Heading, read-only details card, single form card
@@ -205,11 +205,12 @@ and detail UI).
   product-type ID stringified.
 - The gallery is capped at `PTYPE_GALLERY_LIMIT` (7) images and accepts only
   `PTYPE_GALLERY_ACCEPTED_MIME_TYPES` up to `PTYPE_GALLERY_MAX_FILE_SIZE`
-  (10 MB).
+  (2 MB).
 - `getPtypeGalleryInitialState()` is wrapped in React `cache()` so the gallery
   node and the images-list node share a single Assets API read per request.
-- `PATH_IMAGEM` synchronization is mandatory on three flows (first upload,
-  primary change, primary deletion) and writes through
+- `PATH_IMAGEM` synchronization is mandatory on four flows (first upload,
+  primary change, primary deletion, and manual update from the first card) and
+  writes through
   `generalCallServiceApi.updateTableInlineField` (table `tbl_produto_tipo`, key
   `ID_TIPO`, field `PATH_IMAGEM`, max 300 chars) via the local
   `updatePtypeImagePath()` helper. If the original URL is empty or exceeds 300
@@ -239,8 +240,9 @@ The action split is **brand-style**. Keep it.
   re-confirms the product type, deletes, and revalidates `/dashboard/ptype` only.
   There is **no client-side referential guard**; the API validates relations.
 - `uploadPtypeImageAction()`, `setPrimaryPtypeImageAction()`,
-  `deletePtypeImageAction()` (`[id]/_actions/ptype-image-gallery-actions.ts`):
-  gallery mutations described above. They revalidate both paths inside
+  `deletePtypeImageAction()`, `updatePtypeImagePathFromPrimaryAction()`
+  (`[id]/_actions/ptype-image-gallery-actions.ts`): gallery mutations and manual
+  PATH synchronization described above. They revalidate both paths inside
   `updatePtypeImagePath()`.
 
 There is **no** `revalidatePtype()` helper — every action calls `revalidatePath`

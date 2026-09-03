@@ -64,7 +64,7 @@ carriers/
     ├── error.tsx                         # Detail error boundary (Client)
     ├── not-found.tsx                     # Invalid/inaccessible carrier UI
     ├── _actions/
-    │   └── carrier-image-gallery-actions.ts  # Gallery upload/primary/delete
+    │   └── carrier-image-gallery-actions.ts  # Gallery upload/primary/delete/PATH sync
     └── _components/
         ├── carrier-detail-layout.tsx     # Server: three-area detail composition
         ├── overview/                     # One component per first-fold card/section
@@ -204,11 +204,12 @@ list and detail UI).
   the carrier ID stringified.
 - The gallery is capped at `CARRIER_GALLERY_LIMIT` (7) images and accepts only
   `CARRIER_GALLERY_ACCEPTED_MIME_TYPES` up to `CARRIER_GALLERY_MAX_FILE_SIZE`
-  (10 MB).
+  (2 MB).
 - `getCarrierGalleryInitialState()` is wrapped in React `cache()` so the gallery
   node and the images-list node share a single Assets API read per request.
-- `PATH_IMAGEM` synchronization is mandatory on three flows (first upload,
-  primary change, primary deletion) and writes through
+- `PATH_IMAGEM` synchronization is mandatory on four flows (first upload,
+  primary change, primary deletion, and manual update from the first card) and
+  writes through
   `generalCallServiceApi.updateTableInlineField` (table `tbl_transportadora`, key
   `ID_TRANSPORTADORA`, field `PATH_IMAGEM`, max 300 chars, `FIELD_TYPE.STRING`).
   If the original URL is empty or exceeds 300 chars, the write is skipped and the
@@ -237,8 +238,9 @@ gallery mutations live in `[id]/_actions`.
   carrier exists, deletes it, and calls `revalidateCarrier()`. This flow is
   **fully wired** (not pending API).
 - `uploadCarrierImageAction()`, `setPrimaryCarrierImageAction()`,
-  `deleteCarrierImageAction()` (`[id]/_actions/carrier-image-gallery-actions.ts`):
-  gallery mutations described above. They call `revalidatePath` directly inside
+  `deleteCarrierImageAction()`, `updateCarrierImagePathFromPrimaryAction()`
+  (`[id]/_actions/carrier-image-gallery-actions.ts`): gallery mutations and
+  manual PATH synchronization described above. They call `revalidatePath` directly inside
   the `PATH_IMAGEM` helper (they do not reuse `revalidateCarrier()`).
 
 `revalidateCarrier(carrierId?)` revalidates both `/dashboard/carriers` and
@@ -318,6 +320,6 @@ Do not present disabled flows as functional and do not simulate them.
   mobile, including search, status filter, sort/order, grid/list switching,
   pagination, empty and error states, create flow (including the notes two-step),
   edit save, delete confirm + redirect to `returnTo`, gallery upload/primary/delete
-  (including last-image rejection), zoom navigation, the PATH_IMAGEM viewer
-  refresh, and the `returnTo` back link with valid and invalid `id`.
+  (including last-image rejection), zoom navigation, the first-card PATH_IMAGEM
+  update, and the `returnTo` back link with valid and invalid `id`.
 - This project currently has no automated test command; do not invent one.

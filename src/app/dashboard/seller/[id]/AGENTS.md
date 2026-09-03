@@ -47,7 +47,7 @@ cached gallery read is shared by both nodes through React `cache()`.
 ├── _actions/
 │   ├── seller-actions.ts                     # Route-local section update actions
 │   ├── seller-sales-actions.ts               # Authenticated lazy order reads
-│   └── seller-image-gallery-actions.ts       # Gallery upload/primary/delete
+│   └── seller-image-gallery-actions.ts       # Gallery upload/primary/delete/PATH_IMAGEM sync
 └── _components/
     ├── seller-detail-layout.tsx              # Top-level detail layout (Server)
     ├── overview/                             # First-fold seller overview
@@ -73,7 +73,7 @@ cached gallery read is shared by both nodes through React `cache()`.
     │   └── seller-sold-products-tab.tsx      # Prepared, unavailable products sub-tab
     ├── types/
     │   └── seller-detail-types.ts            # SellerActionResult
-    └── image-gallery/                        # Gallery subsystem (unchanged)
+    └── image-gallery/                        # Gallery subsystem
 ```
 
 Structural shells (grid/back link, record heading, tab list/triggers, image
@@ -180,7 +180,7 @@ There is no warranties sub-tab for sellers.
 
 ## Image Gallery Subsystem
 
-The gallery is unchanged and integrates two systems: the **Assets API** (source
+The gallery integrates two systems: the **Assets API** (source
 of truth for the image set) and the legacy **`PATH_IMAGEM`** column on
 `tbl_pessoa` (denormalized pointer read by the list and detail UI). Sellers are
 people records in the shared `tbl_pessoa` table.
@@ -203,10 +203,9 @@ people records in the shared `tbl_pessoa` table.
   navigable zoom dialog, per-image error fallback to `DEFAULT_SELLER_IMAGE_URL`,
   `isRemoteImage()` → `unoptimized` on `next/image`, and an `aria-live` status
   region for screen readers.
-- `seller-images-list.tsx`: read-only viewer. Shows the current `PATH_IMAGEM`
-  value and the Assets API image list side by side, with a manual refresh button.
-  There is **no** "Usar no PATH_IMAGEM" button; promotion is automatic via the
-  gallery actions.
+- `seller-images-list.tsx`: shows the current `PATH_IMAGEM` value and the Assets
+  API image list side by side. The first card has an update button that copies
+  the primary image's original URL to `PATH_IMAGEM` when the values differ.
 - `image-gallery-skeleton.tsx`: Suspense fallback shared by both nodes.
 - `image-gallery-constants.ts`: `SELLER_GALLERY_ENTITY_TYPE` (`"SELLER"`),
   `SELLER_GALLERY_LIMIT` (7), `SELLER_GALLERY_MAX_FILE_SIZE` (2 MB), accepted
@@ -221,14 +220,15 @@ people records in the shared `tbl_pessoa` table.
   reason; valid files are uploaded sequentially.
 - The last remaining image cannot be deleted; the delete action and the client
   button both enforce this.
-- All three mutations (`uploadSellerImageAction`, `setPrimarySellerImageAction`,
-  `deleteSellerImageAction`) live in `_actions/seller-image-gallery-actions.ts`,
-  re-resolve auth and ownership via `getAuthorizedSellerContext()`, and re-read
-  the gallery before mutating.
+- All four mutations (`uploadSellerImageAction`,
+  `setPrimarySellerImageAction`, `deleteSellerImageAction`, and
+  `updateSellerImagePathFromPrimaryAction`) live in
+  `_actions/seller-image-gallery-actions.ts`, re-resolve auth and ownership via
+  `getAuthorizedSellerContext()`, and re-read the gallery before mutating.
 
 ### PATH_IMAGEM synchronization
 
-`PATH_IMAGEM` is kept in sync with the Assets API primary image on three flows,
+`PATH_IMAGEM` is kept in sync with the Assets API primary image on four flows,
 writing through `generalCallServiceApi.updateTableInlineField` (table `tbl_pessoa`,
 key `ID_TBL_PESSOA`, field `PATH_IMAGEM`, max 300 chars, `FIELD_TYPE.STRING`):
 
@@ -238,6 +238,9 @@ key `ID_TBL_PESSOA`, field `PATH_IMAGEM`, max 300 chars, `FIELD_TYPE.STRING`):
    If the image was already primary, the action still repairs `PATH_IMAGEM`.
 3. **Primary deletion**: the next candidate (by sort order) is promoted to
    primary and its URL is written to `PATH_IMAGEM`.
+4. **Manual synchronization**: the first card's update button re-reads the
+   seller and gallery, then writes the primary image's `original` URL only when
+   it differs from the current `PATH_IMAGEM` value.
 
 If the original URL is empty or exceeds 300 characters, the `PATH_IMAGEM` write
 is skipped and the action returns a `warning`. The asset operation is **not**
@@ -339,5 +342,6 @@ badges together.
   status confirm flows, the "Vendas" sub-tabs (orders scoped to the seller,
   search, load more, empty/error states; sold products unavailable), gallery
   upload (drag-and-drop and picker), primary promotion, deletion (including
-  last-image rejection), zoom navigation, and the `PATH_IMAGEM` viewer refresh.
+  last-image rejection), zoom navigation, and the manual `PATH_IMAGEM`
+  synchronization.
 - This project currently has no automated test command; do not invent one.
