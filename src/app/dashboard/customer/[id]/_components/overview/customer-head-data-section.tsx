@@ -15,7 +15,7 @@ export function CustomerHeadDataSection({
 }: CustomerHeadDataSectionProps) {
   return (
     <DetailRecordHeading
-      image={
+      mobileImage={
         <CustomerImage
           name={customer.name}
           imagePath={customer.imagePath}

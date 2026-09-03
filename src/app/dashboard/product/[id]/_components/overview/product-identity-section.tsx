@@ -12,7 +12,7 @@ export function ProductIdentitySection({
 }: ProductIdentitySectionProps) {
   return (
     <DetailRecordHeading
-      image={
+      mobileImage={
         <RegistryEntityImage
           name={product.name}
           imagePath={product.imagePath}

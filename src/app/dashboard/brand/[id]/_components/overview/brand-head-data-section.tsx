@@ -10,7 +10,7 @@ interface BrandHeadDataSectionProps {
 export function BrandHeadDataSection({ brand }: BrandHeadDataSectionProps) {
   return (
     <DetailRecordHeading
-      image={
+      mobileImage={
         <BrandImage
           name={brand.name}
           imagePath={brand.imagePath}

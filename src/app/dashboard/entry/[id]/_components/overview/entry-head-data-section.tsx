@@ -1,5 +1,6 @@
 import { DetailRecordHeading } from "@/app/dashboard/_components/detail-page";
 import type { UIEntryDetail } from "@/services/api-main/entry/transformers/transformers";
+import { EntryImage } from "../../../_components/entry-list/entry-image";
 import { EntryStatusBadge } from "../../../_components/entry-list/entry-status-badge";
 
 interface EntryHeadDataSectionProps {
@@ -8,6 +9,7 @@ interface EntryHeadDataSectionProps {
     | "id"
     | "invoiceNumber"
     | "supplier"
+    | "imagePath"
     | "stockStatus"
     | "physicalStatus"
     | "labelStatus"
@@ -21,6 +23,13 @@ export function EntryHeadDataSection({ entry }: EntryHeadDataSectionProps) {
 
   return (
     <DetailRecordHeading
+      mobileImage={
+        <EntryImage
+          name={entry.supplier}
+          imagePath={entry.imagePath}
+          viewMode="list"
+        />
+      }
       title={
         <>
           <h1 className="break-words text-xl font-bold sm:text-2xl">

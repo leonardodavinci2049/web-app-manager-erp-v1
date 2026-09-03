@@ -10,7 +10,7 @@ interface PtypeHeadDataSectionProps {
 export function PtypeHeadDataSection({ item }: PtypeHeadDataSectionProps) {
   return (
     <DetailRecordHeading
-      image={
+      mobileImage={
         <PtypeImage
           name={item.name}
           imagePath={item.imagePath}
