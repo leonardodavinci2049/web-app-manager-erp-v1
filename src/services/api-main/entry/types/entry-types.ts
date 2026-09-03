@@ -130,8 +130,6 @@ export interface EntryListItem {
   TX_FRETE: string;
   VL_TOTAL_NOTA: string;
   VL_TOTAL_PRODUTO: string;
-  IPI: string;
-  ICMS: string;
   VL_ICMS: string;
   VL_IPI: string;
   VL_PIS: string;
@@ -167,8 +165,6 @@ export interface EntryDetail {
   TX_FRETE: string;
   VL_TOTAL_NOTA: string;
   VL_TOTAL_PRODUTO: string;
-  IPI: string;
-  ICMS: string;
   VL_ICMS: string;
   VL_IPI: string;
   VL_PIS: string;
@@ -213,8 +209,6 @@ export interface EntrySearchItem {
   VL_TOTAL_NOTA: string;
   VL_FRETE: string;
   VL_TOTAL_PRODUTO: string;
-  IPI: string;
-  ICMS: string;
   ESTOQUE: number;
   FISICO: number;
   ETIQUETA: number;
