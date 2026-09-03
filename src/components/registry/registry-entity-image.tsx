@@ -6,6 +6,7 @@ import {
   createImageErrorHandler,
   DEFAULT_PRODUCT_IMAGE,
   getValidImageUrl,
+  isLocalAssetsImage,
 } from "@/utils/image-utils";
 import { RegistryImageUploadStub } from "./registry-image-upload-stub";
 import type { RegistryViewMode } from "./use-registry-view-mode";
@@ -64,6 +65,7 @@ export function RegistryEntityImage({
 
   const src = hasRealImage ? resolvedSrc : defaultImage;
   const alt = `Imagem ${entityLabel} ${name}`;
+  const unoptimized = isLocalAssetsImage(src);
 
   const handleImageError = hasRealImage
     ? (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
@@ -95,6 +97,7 @@ export function RegistryEntityImage({
           className="object-cover"
           sizes="56px"
           loading={loading}
+          unoptimized={unoptimized}
           onError={handleImageError}
           onLoad={handleImageLoad}
         />
@@ -117,6 +120,7 @@ export function RegistryEntityImage({
           className="rounded-md object-cover"
           sizes="80px"
           loading={loading}
+          unoptimized={unoptimized}
           onError={handleImageError}
           onLoad={handleImageLoad}
         />
@@ -136,6 +140,7 @@ export function RegistryEntityImage({
         className="object-cover transition-transform duration-200 group-hover:scale-105"
         sizes="(max-width: 640px) 45vw, (max-width: 768px) 30vw, (max-width: 1200px) 25vw, 20vw"
         loading={loading}
+        unoptimized={unoptimized}
         onError={handleImageError}
         onLoad={handleImageLoad}
       />

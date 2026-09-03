@@ -7,7 +7,11 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import type { UIProductManager } from "@/services/api-main/product-manager/transformers/transformers";
-import { createImageErrorHandler, getValidImageUrl } from "@/utils/image-utils";
+import {
+  createImageErrorHandler,
+  getValidImageUrl,
+  isLocalAssetsImage,
+} from "@/utils/image-utils";
 import { ProductImageUpload } from "../product-image-upload";
 
 interface ProductImageSectionProps {
@@ -30,15 +34,6 @@ function wasCreatedWithinLastWeek(createdAt?: string): boolean {
 
   const productAge = Date.now() - createdAtTimestamp;
   return productAge >= 0 && productAge < ONE_WEEK_IN_MS;
-}
-
-function isLocalAssetsImage(url: string): boolean {
-  try {
-    const parsedUrl = new URL(url);
-    return parsedUrl.hostname === "localhost" && parsedUrl.port === "5573";
-  } catch {
-    return false;
-  }
 }
 
 /**
