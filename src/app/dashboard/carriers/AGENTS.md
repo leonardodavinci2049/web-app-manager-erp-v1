@@ -45,7 +45,7 @@ carriers/
 ├── _actions/
 │   └── carrier-actions.ts                # create/update/delete (shared with detail)
 ├── _components/
-│   ├── index.ts                          # Public exports (incl. CarrierDetails + URL helpers)
+│   ├── index.ts                          # Public list exports and URL helpers
 │   ├── carrier-dashboard.tsx             # Server: composes grid/list subtrees -> toolbar
 │   ├── carrier-toolbar.tsx               # Client: URL filters + view mode + create
 │   ├── carrier-collection.tsx            # Server: grid cards + desktop table + empty/error
@@ -53,7 +53,6 @@ carriers/
 │   ├── carrier-image.tsx                 # Client: avatar via shared RegistryEntityImage
 │   ├── carrier-create-sheet.tsx          # Client: new carrier form (uses CarrierFormFields)
 │   ├── carrier-form-fields.tsx           # Shared form fields (create + detail edit)
-│   ├── carrier-details.tsx               # Detail composition (Client, single mega-form)
 │   ├── lib/
 │   │   └── search-params.ts              # Pure URL <-> filters mapping (single source of truth)
 │   └── types/
@@ -67,13 +66,15 @@ carriers/
     ├── _actions/
     │   └── carrier-image-gallery-actions.ts  # Gallery upload/primary/delete
     └── _components/
+        ├── carrier-detail-layout.tsx     # Server: three-area detail composition
+        ├── overview/                     # One component per first-fold card/section
+        ├── tabs/                         # Tab composer + one component per tab
         └── image-gallery/                # Gallery subsystem (see [id]/AGENTS.md)
 ```
 
-There is no `_hooks/` or `_utils/` folder in either segment. The detail
-`[id]/_components/` contains **only** the `image-gallery/` subfolder —
-`carrier-details.tsx` lives in the **parent** `_components/` and is re-exported
-from `_components/index.ts`.
+The `[id]/` segment owns the route-specific layout, overview, tabs, and gallery.
+Only genuinely shared list/detail UI, such as `CarrierFormFields`, remains in
+the parent `_components/` directory.
 
 ## List Page Responsibilities
 
@@ -110,7 +111,7 @@ Keep `[id]/page.tsx` as a Server Component. It should:
 7. Render `SiteHeaderWithBreadcrumb` (breadcrumb "Transportadoras" links to
    `returnTo`; last crumb is `carrier.name`) and a custom `max-w-[1400px]`
    container (this route does **not** use `RegistryPageShell`).
-8. Compose `CarrierDetails` with the carrier DTO, `returnTo`, and two
+8. Compose `CarrierDetailLayout` with the carrier DTO, `returnTo`, and two
    `<Suspense>` nodes built on the **page**: `imageGallery`
    (`CarrierImageGalleryServer`) and `imageContent` (`CarrierImagesListServer`).
 
@@ -186,19 +187,11 @@ instant and never triggers a refetch.
 
 ## Detail UI
 
-`CarrierDetails` is a **Client Component** (unlike customer's `CustomerDetails`,
-which is Server) and lives in the **parent** `_components/`. It is re-exported
-from `_components/index.ts`. The page stays Server and hands it DTOs plus the two
-Suspense nodes. The layout is a sticky left aside with the gallery, a header
-(`CarrierImage` + name + active/inactive `Badge` + ID + `typePerson`), a stack of
-read-only cards ("Conta e identificação", "Contato", "Presença digital",
-"Endereço", "Pessoa jurídica", "Pessoa física"), the edit form card, "Cadastro"
-and "Status do cadastro" cards, and a `<Tabs>` with `Imagem` and `Exclusão` tabs
-(default `"deletion"`).
-
-Editing is a **single mega-form** (`CarrierFormFields`: identity, documents,
-contacts, image path, notes), not sectioned. See `[id]/AGENTS.md` for the full
-editing model.
+`CarrierDetailLayout` is a Server Component in `[id]/_components`. It composes
+the sticky desktop gallery, route-local `overview/` cards, and full-width
+`tabs/`. Client state is limited to the visual person-type coordinator and the
+independent editing, deletion, and gallery components. Editing remains one form
+that reuses the parent `CarrierFormFields`. See `[id]/AGENTS.md`.
 
 ## Image Gallery
 
@@ -288,9 +281,8 @@ Do not present disabled flows as functional and do not simulate them.
 
 ## Conventions for Changes
 
-- Preserve `page.tsx` and `[id]/page.tsx` as Server Components. Keep
-  `"use client"` limited to interactive components. `carrier-details.tsx` is
-  intentionally Client because it owns form/edit state.
+- Preserve `page.tsx`, `[id]/page.tsx`, and `CarrierDetailLayout` as Server
+  Components. Keep `"use client"` limited to focused interactive components.
 - Use the DTOs from `carrier-dashboard-types.ts` and `image-gallery-types.ts`;
   never forward raw API entities or `apiContext`.
 - Keep user-facing text in Brazilian Portuguese and code, comments, and technical
@@ -308,7 +300,7 @@ Do not present disabled flows as functional and do not simulate them.
   shared `CarrierFormFields` UI (both create and detail use it), the
   `formSchema`/`updateSchema` in `carrier-actions.ts`, the `toPayload()` mapping,
   the `UICarrier`/`transformCarrierDetail` field, and (if read-only) the relevant
-  `DetailField` entries in `CarrierDetails`. Because editing is a single
+  detail section component. Because editing is a single
   mega-form, there are no per-section actions to add.
 - Keep `PATH_IMAGEM` synchronization in step with any gallery primary change; a
   new gallery mutation that changes the primary image must call

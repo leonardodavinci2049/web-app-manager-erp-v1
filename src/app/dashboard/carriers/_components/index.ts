@@ -1,5 +1,4 @@
 export { CarrierDashboard } from "./carrier-dashboard";
-export { CarrierDetails } from "./carrier-details";
 export {
   buildCarrierDetailHref,
   buildCarrierUrl,

@@ -1,260 +1,157 @@
 # Supplier Detail Route Agent Guide
 
-This file complements the repository, dashboard, and `suppliers/AGENTS.md` guides
-for `src/app/dashboard/suppliers/[id]`. It governs the `/dashboard/suppliers/[id]`
-detail route: its page composition, the single edit-form model, the status and
-deletion flows, and the supplier image gallery subsystem.
+This guide complements the repository, dashboard, `suppliers/AGENTS.md`, and
+`docs/architectural-patterns/registration-details-page/registration-details-page.md`
+guides for `/dashboard/suppliers/[id]`.
 
-The closest applicable guide specializes broader instructions; repository-level
-rules still prevail in case of conflict. For list behavior, URL state, and the
-shared create/update/status/delete actions, follow `../AGENTS.md`.
+## Composition
 
-## Detail Page Composition
+`page.tsx` is a Server Component and owns request-dependent orchestration:
 
-`page.tsx` is a Server Component that composes the whole detail screen. It stays
-free of client state and delegates all interactions to the parent Client
-Component. See `../AGENTS.md` ("Detail Page Responsibilities") for the full
-numbered sequence; the key points:
+1. Call `connection()` and resolve `params` plus `searchParams`.
+2. Validate the ID as a positive safe integer; use `notFound()` otherwise.
+3. Resolve `returnTo` with `getSafeSupplierReturnTo()`.
+4. Resolve `getAuthContext()` and fetch `getSupplierById()`.
+5. Map `SupplierNotFoundError` to `notFound()` and rethrow unexpected failures.
+6. Build the gallery and image-list nodes under page-owned `Suspense` boundaries.
+7. Pass the `UISupplier` DTO and composed nodes to `SupplierDetailLayout`.
 
-1. `await connection()` then `await Promise.all([params, searchParams])`.
-2. Validate `id` with `/^\d+$/` plus safe-integer/positive checks, calling
-   `notFound()` on invalid input (rendering `not-found.tsx`).
-3. Resolve `returnTo` with `getSafeSupplierReturnTo()` (same-origin, pathname
-   exactly `/dashboard/suppliers`).
-4. `getAuthContext()`, then fetch the single supplier (`getSupplierById`).
-5. Render `SupplierDetails` with the supplier DTO, `returnTo`, and two
-   server-owned `<Suspense>` nodes: `imageGallery`
-   (`SupplierImageGalleryServer`) and `imageContent` (`SupplierImagesListServer`).
-
-The gallery and image nodes are built on the **page** so the Suspense boundaries
-stay server-owned and the cached gallery read is shared by both nodes through
-React `cache()`.
+The page must not own client state. Never pass `apiContext`, raw API entities,
+tokens, or internal errors to components.
 
 ## Folder Structure
 
 ```text
 [id]/
-├── page.tsx                                  # Detail composition (Server)
-├── loading.tsx                               # Detail skeleton
-├── error.tsx                                 # Detail error boundary (Client)
-├── not-found.tsx                             # Invalid/inaccessible supplier UI
+├── page.tsx
+├── loading.tsx
+├── error.tsx
+├── not-found.tsx
 ├── _actions/
-│   └── supplier-image-gallery-actions.ts     # Gallery upload/primary/delete
+│   └── supplier-image-gallery-actions.ts
 └── _components/
+    ├── supplier-detail-layout.tsx
+    ├── supplier-detail-field.tsx
+    ├── supplier-detail-utils.ts
+    ├── overview/
+    │   ├── supplier-head-data-section.tsx
+    │   ├── supplier-general-section.tsx
+    │   ├── supplier-person-overview.tsx
+    │   ├── supplier-person-type-section.tsx
+    │   ├── supplier-personal-section.tsx
+    │   └── supplier-business-section.tsx
+    ├── tabs/
+    │   ├── supplier-detail-tabs.tsx
+    │   ├── supplier-notes-tab.tsx
+    │   ├── supplier-address-tab.tsx
+    │   ├── supplier-status-tab.tsx
+    │   ├── supplier-image-tab.tsx
+    │   ├── supplier-internet-tab.tsx
+    │   ├── supplier-miscellaneous-tab.tsx
+    │   ├── supplier-editing-tab.tsx
+    │   └── supplier-deletion-tab.tsx
     └── image-gallery/
         ├── index.ts
-        ├── image-gallery-constants.ts        # Entity type, limits, MIME, defaults
-        ├── image-gallery-types.ts            # Gallery state + mutation result DTO
-        ├── image-gallery-skeleton.tsx        # Suspense fallback (Server)
-        ├── supplier-image-gallery-server.tsx # Cached gallery read (Server)
-        ├── supplier-image-gallery-refresh.tsx# State holder + router.refresh (Client)
-        ├── supplier-image-gallery.tsx        # Upload + grid + zoom + actions (Client)
-        ├── supplier-images-list-server.tsx   # Server wrapper for the PATH_IMAGEM viewer
-        └── supplier-images-list.tsx          # PATH_IMAGEM viewer + gallery list (Client)
+        ├── image-gallery-constants.ts
+        ├── image-gallery-types.ts
+        ├── image-gallery-skeleton.tsx
+        ├── supplier-image-gallery-server.tsx
+        ├── supplier-image-gallery-refresh.tsx
+        ├── supplier-image-gallery.tsx
+        ├── supplier-images-list-server.tsx
+        └── supplier-images-list.tsx
 ```
 
-The top-level detail composition (`SupplierDetails`) and the create sheet live in
-the **parent** `_components/`, not here. The detail segment owns only the gallery
-subsystem and the gallery actions.
+## Layout and Responsive Behavior
 
-## Detail Data Flow
+`SupplierDetailLayout` is a Server Component. It renders:
 
-```
-[id]/page.tsx (Server)
-  ├── validates id -> notFound() on invalid
-  ├── getAuthContext()
-  ├── getSupplierById() -> UISupplier | undefined   (null -> notFound())
-  └── <SupplierDetails> (Client, from ../_components)
-        ├── header (SupplierImage, name, status Badge)
-        ├── read-only cards (identity, contact, digital, address, PJ, PF)
-        ├── edit form (name + notes) -> updateSupplierAction
-        ├── "Cadastro" + "Status do cadastro" cards (active status buttons)
-        └── <Tabs>
-              ├── Imagem   -> imageContent node (<Suspense>, SupplierImagesList)
-              └── Exclusão -> delete confirm -> deleteSupplierAction
-```
+- A safe back-to-suppliers link.
+- A two-column desktop grid with a sticky gallery on the left and overview on
+  the right.
+- A compact heading with image, name, ID, status, and person type.
+- Independent overview cards.
+- Full-width detail tabs below the grid.
 
-Pass only the `UISupplier` DTO to the components; never forward `apiContext`,
-raw entities, or errors.
+Below `lg`, hide the left gallery and render the same gallery node inside the
+image tab. The tabs scroll horizontally with complete labels on small screens
+and use an eight-column grid on desktop.
 
-## `SupplierDetails` Is a Client Component
+## Overview
 
-`SupplierDetails` is a **Client Component** and lives in the **parent**
-`_components/`, re-exported from `_components/index.ts`. It owns form/edit state
-and drives `router.refresh()` after edits/status changes and
-`router.replace(returnTo)` after deletion. The detail body does **not** use
-`RegistryPageShell`; it uses a custom `max-w-[1400px]` container.
+Every independent card lives in its own file. `SupplierPersonOverview` is the
+only presentation-state coordinator: it selects which of the physical-person or
+legal-entity cards is visible. The selection is intentionally visual only and
+must not persist a person-type change.
 
-## Single Mega-Form Editing
+Resolve the current type from `typePersonId`, then the legacy
+`legalPhysicalType` value (`F` or `J`). Keep this compatibility until the API
+contract removes the legacy fallback.
 
-Editing is a **single mega-form** (name + notes together), not sectioned. There
-are no independent per-section forms and no shared section machinery.
+## Tabs and Editing
 
-- The detail form renders an "Editar dados do fornecedor" card with a single
-  `<form>` submitting name + notes to `updateSupplierAction({ supplierId, name,
-  notes })` and calling `router.refresh()` on success. Notes has a
-  `notes.length/2.000` counter (maxLength 2000).
-- Around the form, read-only cards render: "Conta e identificação" (includes
-  `freightForwarder`, `createdAt`, `lastPurchaseAt`, status), "Contato",
-  "Presença digital", "Endereço", "Pessoa jurídica", "Pessoa física", and a
-  "Cadastro" card.
+`SupplierDetailTabs` composes triggers and panels only. Common sections follow
+the standard order: notes, address, status, images, internet, miscellaneous,
+editing, and deletion.
 
-When adding an editable field, extend `updateSchema`/`createSchema` and the
-single form; do not introduce a sectioned model.
+Editing remains one form for `name` and `notes`, implemented only in
+`SupplierEditingTab`. It calls `updateSupplierAction`, displays field errors,
+and runs `router.refresh()` on success. Do not introduce page-wide form state.
 
-## Status Change (Enabled)
+Supplier status mutation is enabled in `SupplierStatusTab`. Activation and
+deactivation require confirmation and call `setSupplierStatusAction`.
 
-Unlike the carriers route (where status is "Pendente de API"), supplier status
-change is **enabled**. The "Status do cadastro" card renders active "Marcar como
-ativo" / "Marcar como inativo" buttons that submit to
-`setSupplierStatusAction({ supplierId, inactive })` and call `router.refresh()`
-on success.
+Deletion is enabled in `SupplierDeletionTab`. It requires confirmation, calls
+`deleteSupplierAction`, and navigates to the sanitized `returnTo` path after
+success. The API remains responsible for referential validation.
 
-## Deletion (Enabled)
+The shared create/update/status/delete actions stay in
+`../_actions/supplier-actions.ts` because the list and detail features share
+them. Do not duplicate those actions under `[id]/_actions`.
 
-The "Excluir fornecedor" button opens an `AlertDialog` confirm; on success it
-calls `deleteSupplierAction(supplier.id)` and then `router.replace(returnTo)`.
-There is **no client-side referential guard** — the API validates relations and
-rejects the deletion when they exist, surfaced via `getSafeOperationMessage()`.
+## Gallery Invariants
 
-A single `AlertDialog` handles all three confirmations (activate, deactivate,
-delete) via a `Confirmation` union.
+The Assets API is the source of truth for the image set; `PATH_IMAGEM` on
+`tbl_fornecedor` is a denormalized pointer used by registry surfaces.
 
-## Image Gallery Subsystem
+- Entity type: `SUPPLIERS`.
+- Maximum gallery size: 7 images.
+- Maximum file size: 2 MB.
+- Accepted types: JPEG, PNG, GIF, and WebP.
+- The last remaining image cannot be deleted.
+- First upload, primary change, and primary deletion must synchronize
+  `PATH_IMAGEM` through `generalCallServiceApi.updateTableInlineField`.
+- Preserve the 300-character guard and partial-success warning behavior.
 
-The gallery spans Server and Client components and integrates two systems: the
-**Assets API** (source of truth for the image set) and the legacy
-**`PATH_IMAGEM`** column on `tbl_fornecedor` (denormalized pointer read by the
-list and detail UI).
+`getSupplierGalleryInitialState()` uses React `cache()` to deduplicate the
+gallery and image-list read within one server render. Do not use this as a
+cross-user or cross-organization cache.
 
-### Components and responsibilities
+Gallery mutations stay in `_actions/supplier-image-gallery-actions.ts`. They
+must re-resolve authentication and supplier access, repeat file/count/ownership
+validation on the server, and revalidate the list and detail routes.
 
-- `supplier-image-gallery-server.tsx`: exports `getSupplierGalleryInitialState`,
-  wrapped in React `cache()`. Reads the Assets API, classifies the result into
-  `ready` / `empty` (on `isNotFoundApiError`) / `error` (other), sorts (primary
-  first, then `displayOrder`, then `uploadedAt` desc), drops entries without an
-  `original` URL, and fills missing URL variants. Shared by the gallery node and
-  the images-list node so the Assets API is hit once per request.
-- `supplier-image-gallery-refresh.tsx`: Client state holder. Owns `images`,
-  `totalImages`, and a `selectionRequest` (`{ imageId, version }`). Bumps the
-  version on every external change and triggers `router.refresh()` after
-  mutations.
-- `supplier-image-gallery.tsx`: the interactive gallery. Drag-and-drop + file
-  picker upload (validates MIME and size up front, slices to `availableSlots`),
-  thumbnail grid, primary promotion, deletion (with confirmation), keyboard-
-  navigable zoom dialog, per-image error fallback to `DEFAULT_SUPPLIERS_IMAGE_URL`,
-  `isRemoteImage()` → `unoptimized` on `next/image`, and an `aria-live` status
-  region for screen readers.
-- `supplier-images-list.tsx`: read-only viewer. Shows the current `PATH_IMAGEM`
-  value and the Assets API image list side by side, with a manual refresh button.
-  There is **no** "Usar no PATH_IMAGEM" button; promotion is automatic via the
-  gallery actions.
-- `image-gallery-skeleton.tsx`: Suspense fallback shared by both nodes.
-- `image-gallery-constants.ts`: `SUPPLIERS_GALLERY_ENTITY_TYPE` (`"SUPPLIERS"` —
-  plural), `SUPPLIERS_GALLERY_LIMIT` (7), `SUPPLIERS_GALLERY_MAX_FILE_SIZE`
-  (2 MB), accepted MIME types, `SUPPLIERS_GALLERY_ACCEPT`, and
-  `DEFAULT_SUPPLIERS_IMAGE_URL`.
-- `image-gallery-types.ts`: `SupplierGalleryImage`, the discriminated
-  `SupplierGalleryInitialState`, and `SupplierGalleryMutationResult`.
+## Server and Client Boundaries
 
-### Limits, validation, and mutations
+Keep these server-side:
 
-- Upload validates MIME type and size on both client and server. Files beyond
-  `availableSlots` (`LIMIT - totalImages`) are rejected up front with a per-file
-  reason; valid files are uploaded sequentially.
-- The last remaining image cannot be deleted; the delete action and the client
-  button both enforce this.
-- All three mutations (`uploadSupplierImageAction`, `setPrimarySupplierImageAction`,
-  `deleteSupplierImageAction`) live in `_actions/supplier-image-gallery-actions.ts`,
-  re-resolve auth and ownership via `getAuthorizedSupplierContext()`, and re-read
-  the gallery before mutating.
+- `page.tsx`;
+- `SupplierDetailLayout`;
+- heading and overview cards outside an interactive coordinator;
+- gallery server loaders.
 
-### PATH_IMAGEM synchronization
+Keep `"use client"` limited to:
 
-`PATH_IMAGEM` is kept in sync with the Assets API primary image on three flows,
-writing through `generalCallServiceApi.updateTableInlineField` (table
-`tbl_fornecedor`, key `ID_FORNECEDOR`, field `PATH_IMAGEM`, max 300 chars):
-
-1. **First upload**: the first image is marked primary and its `original` URL is
-   written to `PATH_IMAGEM`.
-2. **Primary change**: the newly primary image URL is written to `PATH_IMAGEM`.
-   If the image was already primary, the action still repairs `PATH_IMAGEM`.
-3. **Primary deletion**: the next candidate (by sort order) is promoted to
-   primary and its URL is written to `PATH_IMAGEM`.
-
-If the original URL is empty or exceeds 300 characters, the `PATH_IMAGEM` write
-is skipped and the action returns a `warning`. The asset operation is **not**
-rolled back; the warning is a partial-success signal surfaced as a toast. Keep
-this behavior unless the API gains transactional semantics.
-
-### Remote images and `next/image`
-
-Remote gallery URLs use `unoptimized` on `next/image` because they are served by
-the Assets API. Keep the `isRemoteImage()` check and the per-image error fallback
-(`DEFAULT_SUPPLIERS_IMAGE_URL`) when adding new image surfaces.
-
-## Server Actions
-
-- Gallery actions live in `_actions/supplier-image-gallery-actions.ts` (this
-  folder). They validate with Zod (`SupplierIdSchema`, `AssetIdSchema`,
-  `UploadSchema`), re-read the gallery to validate limits/ownership, and call
-  `revalidatePath` for both `/dashboard/suppliers` and the detail path after
-  `PATH_IMAGEM` writes (inside the `updateSupplierImagePath` helper).
-- Create/update/status/delete actions live in `../_actions/supplier-actions.ts`
-  (shared with the list route). They re-confirm the supplier exists via
-  `getExistingSupplier()` before mutating, then call `revalidateSupplier(id)` to
-  refresh both routes.
-
-Do not trust client-side gating. Direct Server Action calls bypass Client
-Components, so the re-validation, ownership checks, and limit enforcement must
-stay server-side. Use `getSafeOperationMessage()` to surface only safe operation
-messages from stored-procedure errors; never leak raw responses or context.
-
-## Cross-Folder Imports
-
-This segment intentionally depends on the parent supplier feature:
-
-- Actions (create/update/status/delete): imported via the absolute alias
-  `@/app/dashboard/suppliers/_actions/supplier-actions` by `SupplierDetails`. The
-  gallery actions in `_actions/` here are local.
-- URL helpers + composition: `[id]/page.tsx` imports `{ SupplierDetails,
-  getSafeSupplierReturnTo }` from `../_components`.
-- Service: both pages and all actions import from `@/services/api-main/supplier`.
-
-Do not fork these into `[id]/`; keep them pointing at the parent.
-
-## Conventions for Changes
-
-- Preserve `page.tsx` as a Server Component. Keep `"use client"` limited to the
-  interactive components (`SupplierDetails`, `SupplierCreateSheet`,
-  `SupplierImage`, the gallery clients, `SupplierImagesList`).
-- Keep the single mega-form; do not introduce a shared sectioned context or
-  per-section actions.
-- When adding a new editable field, align together: `updateSchema`/`createSchema`
-  in `supplier-actions.ts`, the single `SupplierDetails` form, the
-  `updateSupplier`/`createSupplier` payload, and the `UISupplier`/transformer
-  field.
-- When changing gallery behavior, keep the Assets API as the source of truth for
-  the image set and `PATH_IMAGEM` as a denormalized pointer. Any mutation that
-  changes the primary image must update `PATH_IMAGEM` through
-  `updateSupplierImagePath()` with the 300-char guard.
-- Preserve accessibility: `aria-pressed` on gallery thumbnails, `aria-live`
-  status region in the gallery, keyboard navigation in the zoom dialog, and
-  descriptive labels on icon-only buttons.
-- Use `createLogger()` for relevant errors and return generic, safe Brazilian
-  Portuguese messages to the client.
+- `SupplierPersonOverview` and the cards imported by that interactive subtree;
+- `SupplierDetailTabs` and the tab components it imports;
+- editing, status, and deletion tabs;
+- interactive gallery components.
 
 ## Verification
 
-- Documentation-only changes: review Markdown structure and references.
-- TypeScript or React changes: run `pnpm lint`.
-- Route, Server Action, cache behavior, or integration changes: also run
-  `pnpm build` when viable.
-- Visual or interactive changes: validate `/dashboard/suppliers/[id]` in the
-  development server (port set by the `PORT` env var) on desktop and mobile, including: valid and
-  invalid IDs (`not-found.tsx`), the `returnTo` back link, the single edit form
-  (success, validation errors, network failure), status activate/deactivate,
-  delete confirm + redirect to `returnTo`, gallery upload (drag-and-drop and
-  picker), primary promotion, deletion (including last-image rejection), zoom
-  navigation, and the `PATH_IMAGEM` viewer refresh.
-- This project currently has no automated test command; do not invent one.
+- Run `pnpm lint` after TypeScript or React changes.
+- Run `pnpm build` after route, Server Action, cache, or integration changes.
+- Validate desktop and mobile layouts in the browser.
+- Check valid/invalid IDs, the safe back link, edit errors/success, status
+  confirmation, delete confirmation/redirect, and gallery flows separately.
+- This project has no automated test command; do not invent one.

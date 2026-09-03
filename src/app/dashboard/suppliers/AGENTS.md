@@ -43,14 +43,13 @@ suppliers/
 ├── _actions/
 │   └── supplier-actions.ts               # create/update/status/delete (shared with detail)
 ├── _components/
-│   ├── index.ts                          # Public exports (incl. SupplierDetails + URL helpers)
+│   ├── index.ts                          # Public list exports and URL helpers
 │   ├── supplier-dashboard.tsx            # Server: composes grid/list subtrees -> toolbar
 │   ├── supplier-toolbar.tsx              # Client: URL filters + view mode + create
 │   ├── supplier-collection.tsx           # Server: grid cards + desktop table + empty/error
 │   ├── supplier-pagination.tsx           # Server: thin RegistryPagination wrapper
 │   ├── supplier-image.tsx                # Client: avatar via shared RegistryEntityImage
 │   ├── supplier-create-sheet.tsx         # Client: new supplier sheet + discard dialog (name only)
-│   ├── supplier-details.tsx              # Detail composition (Client, single mega-form)
 │   ├── lib/
 │   │   └── search-params.ts              # Pure URL <-> filters mapping (single source of truth)
 │   └── types/
@@ -64,12 +63,15 @@ suppliers/
     ├── _actions/
     │   └── supplier-image-gallery-actions.ts  # Gallery upload/primary/delete
     └── _components/
+        ├── supplier-detail-layout.tsx    # Server: three-area detail composition
+        ├── overview/                     # One component per first-fold card/section
+        ├── tabs/                         # Tab composer + one component per tab
         └── image-gallery/                # Gallery subsystem (see [id]/AGENTS.md)
 ```
 
-This matches the **carriers** layout: parent `_actions/supplier-actions.ts` holds
-all CRUD (shared with the detail), `SupplierDetails` lives in the **parent**
-`_components/`, and `[id]/` owns only the gallery subsystem + gallery actions.
+This matches the registration-detail pattern used by customers and carriers.
+The parent `_actions/supplier-actions.ts` holds CRUD shared with the list, while
+the `[id]/` segment owns its layout, overview, tabs, gallery, and gallery actions.
 
 ## List Page Responsibilities
 
@@ -106,7 +108,7 @@ Keep `[id]/page.tsx` as a Server Component. It should:
 7. Render `SiteHeaderWithBreadcrumb` (breadcrumb "Fornecedores" links to
    `returnTo`; last crumb is `supplier.name`) and a custom `max-w-[1400px]`
    container (this route does **not** use `RegistryPageShell`).
-8. Compose `SupplierDetails` with the supplier DTO, `returnTo`, and two
+8. Compose `SupplierDetailLayout` with the supplier DTO, `returnTo`, and two
    `<Suspense>` nodes built on the **page**: `imageGallery`
    (`SupplierImageGalleryServer`) and `imageContent` (`SupplierImagesListServer`).
 
@@ -172,16 +174,12 @@ instant and never triggers a refetch.
 
 ## Detail UI
 
-`SupplierDetails` is a **Client Component** and lives in the **parent**
-`_components/`, re-exported from `_components/index.ts`. It owns form/edit state
-and drives `router.refresh()` after edits/status changes and
-`router.replace(returnTo)` after deletion. Editing is a **single mega-form**
-(name + notes). The layout includes read-only cards ("Conta e identificação",
-"Contato", "Presença digital", "Endereço", "Pessoa jurídica", "Pessoa física"),
-a "Cadastro" card, a **"Status do cadastro" card with active "Marcar como ativo"
-/ "Marcar como inativo" buttons**, and a `<Tabs>` with `Imagem` and `Exclusão`
-(default) tabs. Activate/deactivate/delete share a single `AlertDialog` driven by
-a `Confirmation` union. See `[id]/AGENTS.md`.
+`SupplierDetailLayout` is a Server Component in `[id]/_components`. It composes
+the sticky desktop gallery, route-local `overview/` cards, and full-width
+`tabs/`. Client state is limited to the visual person-type coordinator and the
+independent editing, status, deletion, and gallery components. Editing remains
+one name + notes form in `SupplierEditingTab`; status and deletion keep separate
+confirmation flows. See `[id]/AGENTS.md`.
 
 ## Image Gallery
 
@@ -263,9 +261,8 @@ mutations are enabled and wired. Do not mark any flow as pending.
 
 ## Conventions for Changes
 
-- Preserve `page.tsx` and `[id]/page.tsx` as Server Components. Keep
-  `"use client"` limited to interactive components. `supplier-details.tsx` is
-  intentionally Client because it owns form/edit state.
+- Preserve `page.tsx`, `[id]/page.tsx`, and `SupplierDetailLayout` as Server
+  Components. Keep `"use client"` limited to focused interactive components.
 - Use the DTOs from `supplier-dashboard-types.ts` and `image-gallery-types.ts`;
   never forward raw API entities or `apiContext`.
 - Keep user-facing text in Brazilian Portuguese and code, comments, and technical
@@ -278,7 +275,7 @@ mutations are enabled and wired. Do not mark any flow as pending.
   the active-filter chips `useMemo` in `SupplierToolbar`. (There is no
   `countSupplierFilters`.)
 - When adding a new editable field, align together: `updateSchema`/`createSchema`
-  in `supplier-actions.ts`, the single `SupplierDetails` form, the
+  in `supplier-actions.ts`, the single `SupplierEditingTab` form, the
   `updateSupplier`/`createSupplier` payload, and the `UISupplier`/transformer
   field. Keep the single-form model.
 - Keep `PATH_IMAGEM` synchronization in step with any gallery primary change; a
