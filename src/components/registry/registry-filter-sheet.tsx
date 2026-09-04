@@ -17,10 +17,12 @@ interface RegistryFilterSheetProps {
   open: boolean;
   pending: boolean;
   activeCount: number;
-  hasChanges: boolean;
+  /** Only needed for draft-based sheets; when omitted, filters apply immediately. */
+  hasChanges?: boolean;
   children: ReactNode;
   onOpenChange: (open: boolean) => void;
-  onApply: () => void;
+  /** When omitted, the footer keeps only the clear action. */
+  onApply?: () => void;
   onClear: () => void;
 }
 
@@ -28,7 +30,7 @@ export function RegistryFilterSheet({
   open,
   pending,
   activeCount,
-  hasChanges,
+  hasChanges = false,
   children,
   onOpenChange,
   onApply,
@@ -69,26 +71,39 @@ export function RegistryFilterSheet({
           {children}
         </div>
         <SheetFooter className="bg-background/95 border-t">
-          <div className="flex w-full gap-2">
+          {onApply ? (
+            <div className="flex w-full gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                className="flex-1"
+                disabled={pending || activeCount === 0}
+                onClick={onClear}
+              >
+                <RotateCcw className="size-4" aria-hidden="true" />
+                Limpar
+              </Button>
+              <Button
+                type="button"
+                className="flex-1"
+                disabled={pending || !hasChanges}
+                onClick={onApply}
+              >
+                Aplicar filtros
+              </Button>
+            </div>
+          ) : (
             <Button
               type="button"
               variant="outline"
-              className="flex-1"
+              className="w-full"
               disabled={pending || activeCount === 0}
               onClick={onClear}
             >
               <RotateCcw className="size-4" aria-hidden="true" />
-              Limpar
+              Limpar filtros
             </Button>
-            <Button
-              type="button"
-              className="flex-1"
-              disabled={pending || !hasChanges}
-              onClick={onApply}
-            >
-              Aplicar filtros
-            </Button>
-          </div>
+          )}
         </SheetFooter>
       </SheetContent>
     </Sheet>

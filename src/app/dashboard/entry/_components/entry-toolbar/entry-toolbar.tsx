@@ -5,7 +5,6 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   type ReactNode,
   useCallback,
-  useEffect,
   useMemo,
   useState,
   useTransition,
@@ -20,28 +19,42 @@ import {
   RegistryViewModeToggle,
 } from "@/components/registry";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { EntryCreateSheet } from "../entry-create/entry-create-sheet";
 import { buildEntryDetailHref, buildEntryUrl } from "../lib/search-params";
 import {
+  ENTRY_MODEL_OPTIONS,
+  ENTRY_OPERATION_LIST_OPTIONS,
   ENTRY_PAGE_SIZE,
   type EntryCreateOptionDto,
-  type EntryOrder,
-  type EntryPageLimit,
   type EntrySearchParams,
-  type EntrySort,
 } from "../types/entry-dashboard-types";
+import { EntryFilterPanel } from "./entry-filter-panel";
 import { useEntryViewMode } from "./use-entry-view-mode";
 
 const VIEW_MODE_STORAGE_KEY = "dashboard:entry-view-mode";
-const SELECT_CLASS =
-  "border-input bg-background h-10 w-full rounded-md border px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]";
 
-const SORT_LABELS: Record<EntrySort, string> = {
+const SORT_LABELS: Record<EntrySearchParams["sort"], string> = {
   "entry-date": "Data de entrada",
   id: "ID",
   "created-at": "Data de cadastro",
 };
+
+const MODEL_LABELS = new Map(
+  ENTRY_MODEL_OPTIONS.map((option) => [option.value, option.label]),
+);
+const OPERATION_LIST_LABELS = new Map(
+  ENTRY_OPERATION_LIST_OPTIONS.map((option) => [option.value, option.label]),
+);
+
+const PERIOD_RESET: Pick<
+  EntrySearchParams,
+  "operationList" | "startDate" | "endDate"
+> = { operationList: 0, startDate: "", endDate: "" };
+
+function formatIsoDateToBr(value: string): string {
+  const [year, month, day] = value.split("-");
+  return `${day}/${month}/${year}`;
+}
 
 interface EntryToolbarProps {
   searchState: EntrySearchParams;
@@ -60,6 +73,13 @@ function getDefaultFilters(state: EntrySearchParams): EntrySearchParams {
     order: "desc",
     page: 0,
     limit: ENTRY_PAGE_SIZE,
+    supplierId: 0,
+    carrierId: 0,
+    modelId: 0,
+    categoryId: 0,
+    operationList: 0,
+    startDate: "",
+    endDate: "",
   };
 }
 
@@ -77,10 +97,7 @@ export function EntryToolbar({
   const [isPending, startTransition] = useTransition();
   const [filterOpen, setFilterOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
-  const [draft, setDraft] = useState(searchState);
   const { viewMode, updateViewMode } = useEntryViewMode(VIEW_MODE_STORAGE_KEY);
-
-  useEffect(() => setDraft(searchState), [searchState]);
 
   const navigate = useCallback(
     (nextState: EntrySearchParams) => {
@@ -91,8 +108,54 @@ export function EntryToolbar({
     [pathname, router],
   );
 
+  const applyFilters = useCallback(
+    (patch: Partial<EntrySearchParams>) => {
+      navigate({ ...searchState, ...patch, page: 0 });
+    },
+    [navigate, searchState],
+  );
+
   const activeFilters = useMemo<RegistryActiveFilter[]>(() => {
     const filters: RegistryActiveFilter[] = [];
+    if (searchState.supplierId > 0) {
+      filters.push({
+        key: "supplier",
+        label: "Fornecedor",
+        value:
+          supplierOptions.find((option) => option.id === searchState.supplierId)
+            ?.label ?? `ID ${searchState.supplierId}`,
+      });
+    }
+    if (searchState.carrierId > 0) {
+      filters.push({
+        key: "carrier",
+        label: "Transportadora",
+        value:
+          carrierOptions.find((option) => option.id === searchState.carrierId)
+            ?.label ?? `ID ${searchState.carrierId}`,
+      });
+    }
+    if (searchState.modelId !== 0) {
+      filters.push({
+        key: "model",
+        label: "Modelo",
+        value: MODEL_LABELS.get(searchState.modelId) ?? "—",
+      });
+    }
+    if (searchState.categoryId !== 0) {
+      filters.push({
+        key: "category",
+        label: "Categoria",
+        value: "Entrada de Produtos",
+      });
+    }
+    if (searchState.operationList !== 0) {
+      filters.push({
+        key: "operationList",
+        label: "Período",
+        value: `${OPERATION_LIST_LABELS.get(searchState.operationList) ?? "—"} (${formatIsoDateToBr(searchState.startDate)} a ${formatIsoDateToBr(searchState.endDate)})`,
+      });
+    }
     if (searchState.sort !== "entry-date") {
       filters.push({
         key: "sort",
@@ -115,20 +178,29 @@ export function EntryToolbar({
       });
     }
     return filters;
-  }, [searchState]);
-
-  const updateDraft = <Key extends keyof EntrySearchParams>(
-    key: Key,
-    value: EntrySearchParams[Key],
-  ) => setDraft((current) => ({ ...current, [key]: value }));
+  }, [searchState, supplierOptions, carrierOptions]);
 
   const clearFilters = () => {
     navigate(getDefaultFilters(searchState));
-    setFilterOpen(false);
   };
 
   const removeFilter = (key: string) => {
     switch (key) {
+      case "supplier":
+        navigate({ ...searchState, supplierId: 0, page: 0 });
+        break;
+      case "carrier":
+        navigate({ ...searchState, carrierId: 0, page: 0 });
+        break;
+      case "model":
+        navigate({ ...searchState, modelId: 0, page: 0 });
+        break;
+      case "category":
+        navigate({ ...searchState, categoryId: 0, page: 0 });
+        break;
+      case "operationList":
+        navigate({ ...searchState, ...PERIOD_RESET, page: 0 });
+        break;
       case "sort":
         navigate({ ...searchState, sort: "entry-date", page: 0 });
         break;
@@ -166,69 +238,16 @@ export function EntryToolbar({
             open={filterOpen}
             pending={isPending}
             activeCount={activeFilters.length}
-            hasChanges={JSON.stringify(draft) !== JSON.stringify(searchState)}
-            onOpenChange={(open) => {
-              if (open) setDraft(searchState);
-              setFilterOpen(open);
-            }}
+            onOpenChange={setFilterOpen}
             onClear={clearFilters}
-            onApply={() => {
-              navigate({ ...draft, page: 0 });
-              setFilterOpen(false);
-            }}
           >
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label htmlFor="entry-sort">Ordenar por</Label>
-                <select
-                  id="entry-sort"
-                  className={SELECT_CLASS}
-                  value={draft.sort}
-                  disabled={isPending}
-                  onChange={(event) =>
-                    updateDraft("sort", event.target.value as EntrySort)
-                  }
-                >
-                  <option value="entry-date">Data de entrada</option>
-                  <option value="id">ID</option>
-                  <option value="created-at">Data de cadastro</option>
-                </select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="entry-order">Direção</Label>
-                <select
-                  id="entry-order"
-                  className={SELECT_CLASS}
-                  value={draft.order}
-                  disabled={isPending}
-                  onChange={(event) =>
-                    updateDraft("order", event.target.value as EntryOrder)
-                  }
-                >
-                  <option value="desc">Decrescente</option>
-                  <option value="asc">Crescente</option>
-                </select>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="entry-limit">Registros por página</Label>
-              <select
-                id="entry-limit"
-                className={SELECT_CLASS}
-                value={draft.limit}
-                disabled={isPending}
-                onChange={(event) =>
-                  updateDraft(
-                    "limit",
-                    Number(event.target.value) as EntryPageLimit,
-                  )
-                }
-              >
-                <option value={25}>25</option>
-                <option value={50}>50</option>
-                <option value={100}>100</option>
-              </select>
-            </div>
+            <EntryFilterPanel
+              state={searchState}
+              supplierOptions={supplierOptions}
+              carrierOptions={carrierOptions}
+              pending={isPending}
+              onChange={applyFilters}
+            />
           </RegistryFilterSheet>
           <RegistryViewModeToggle
             viewMode={viewMode === "table" ? "list" : "grid"}
@@ -264,10 +283,7 @@ export function EntryToolbar({
         label="entradas"
         filterCount={activeFilters.length}
         filterOpen={filterOpen}
-        onOpenFilters={() => {
-          setDraft(searchState);
-          setFilterOpen(true);
-        }}
+        onOpenFilters={() => setFilterOpen(true)}
         viewMode={viewMode === "grid" ? "grid" : "list"}
         onToggleView={() =>
           updateViewMode(viewMode === "grid" ? "cards" : "grid")

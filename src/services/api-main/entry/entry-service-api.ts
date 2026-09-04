@@ -455,6 +455,13 @@ export interface GetEntriesPageParams {
   pageSize?: number;
   columnId?: 1 | 2 | 3;
   orderId?: 1 | 2;
+  supplierId?: number;
+  carrierId?: number;
+  modelId?: number;
+  categoryId?: number;
+  operationList?: number;
+  startDate?: string;
+  endDate?: string;
   pe_system_client_id?: number;
   pe_organization_id?: string;
   pe_user_id?: string;
@@ -476,12 +483,24 @@ export async function getEntriesPage(
     return { items: [], total: 0 };
   }
 
+  const hasPeriod =
+    (params.operationList ?? 0) > 0 &&
+    typeof params.startDate === "string" &&
+    typeof params.endDate === "string";
+
   const response = await entryServiceApi.findAllEntries({
     pe_search: params.search ?? "",
     pe_qt_records: params.pageSize ?? 50,
     pe_page_id: params.page ?? 0,
     pe_column_id: params.columnId ?? 1,
     pe_order_id: params.orderId ?? 2,
+    pe_supplier_id: params.supplierId ?? 0,
+    pe_carrier_id: params.carrierId ?? 0,
+    pe_modelo_id: params.modelId ?? 0,
+    pe_category_id: params.categoryId ?? 0,
+    pe_flag_operation_list: hasPeriod ? params.operationList : 0,
+    pe_start_date: hasPeriod ? params.startDate : null,
+    pe_end_date: hasPeriod ? params.endDate : null,
     pe_system_client_id: params.pe_system_client_id,
     pe_organization_id: params.pe_organization_id,
     pe_user_id: params.pe_user_id,
