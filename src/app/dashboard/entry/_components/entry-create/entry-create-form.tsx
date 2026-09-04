@@ -202,273 +202,284 @@ export function EntryCreateForm({
     >
       <fieldset
         disabled={isSubmitting}
-        className="grid min-h-0 flex-1 content-start gap-4 overflow-y-auto bg-muted/20 p-3 sm:p-4 md:grid-cols-2 md:gap-5"
+        className="m-0 flex min-h-0 flex-1 flex-col border-0 p-0"
       >
-        {error && (
-          <p
-            className="border-destructive/30 bg-destructive/5 text-destructive rounded-lg border px-3 py-2 text-sm md:col-span-2"
-            role="alert"
-          >
-            {error}
-          </p>
-        )}
-
-        <section
-          aria-labelledby="entry-main-data-title"
-          className="overflow-hidden rounded-xl border bg-card shadow-xs md:col-span-2"
-        >
-          <div className="flex items-center gap-2 border-b bg-muted/40 px-4 py-3">
-            <span className="bg-primary/10 text-primary flex size-7 shrink-0 items-center justify-center rounded-md">
-              <FileText className="size-4" aria-hidden="true" />
-            </span>
-            <div>
-              <h3 id="entry-main-data-title" className="text-sm font-semibold">
-                Dados da entrada
-              </h3>
-              <p className="text-muted-foreground text-xs">
-                Vínculos e identificação da nota
-              </p>
-            </div>
-          </div>
-
-          <div className="grid gap-4 p-4 sm:grid-cols-2 sm:gap-x-5 sm:gap-y-4">
-            <div className="space-y-2 sm:col-span-2">
-              <EntryCreateCombobox
-                id="entry-supplier"
-                label="Fornecedor"
-                required
-                value={supplierId}
-                options={supplierOptions}
-                placeholder="Selecione o fornecedor"
-                searchPlaceholder="Pesquisar fornecedor..."
-                emptyMessage="Nenhum fornecedor encontrado."
-                onValueChange={(value) => {
-                  if (value !== supplierId) onDirtyChange(true);
-                  setSupplierId(value);
-                  setError(undefined);
-                }}
-                onSearch={searchEntryFilterSuppliers}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <EntryCreateCombobox
-                id="entry-carrier"
-                label="Transportadora"
-                required
-                value={carrierId}
-                options={carrierOptions}
-                placeholder="Selecione a transportadora"
-                searchPlaceholder="Pesquisar transportadora..."
-                emptyMessage="Nenhuma transportadora encontrada."
-                onValueChange={(value) => {
-                  if (value !== carrierId) onDirtyChange(true);
-                  setCarrierId(value);
-                  setError(undefined);
-                }}
-                onSearch={searchEntryFilterCarriers}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="entry-category" className="text-xs font-medium">
-                Categoria
-              </Label>
-              <Input
-                id="entry-category"
-                value={ENTRY_CREATE_CATEGORY.label}
-                readOnly
-                aria-readonly="true"
-              />
-              <p className="text-muted-foreground text-xs">
-                Única categoria disponível.
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <Label
-                htmlFor="entry-invoice-number"
-                className="text-xs font-medium"
-              >
-                Número da nota
-                <span className="text-destructive" aria-hidden="true">
-                  *
-                </span>
-                <span className="sr-only"> obrigatório</span>
-              </Label>
-              <Input
-                id="entry-invoice-number"
-                name="invoiceNumber"
-                value={invoiceNumber}
-                onChange={(e) => {
-                  setInvoiceNumber(e.target.value);
-                  if (error) setError(undefined);
-                }}
-                placeholder="Ex.: 7685"
-                maxLength={100}
-                autoComplete="off"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="entry-model" className="text-xs font-medium">
-                Modelo
-                <span className="text-destructive" aria-hidden="true">
-                  *
-                </span>
-                <span className="sr-only"> obrigatório</span>
-              </Label>
-              <Select
-                value={model}
-                onValueChange={(value: EntryCreateModel) => {
-                  setModel(value);
-                  if (error) setError(undefined);
-                }}
-              >
-                <SelectTrigger
-                  id="entry-model"
-                  className={SELECT_TRIGGER_CLASS}
-                >
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
-                <SelectContent>
-                  {ENTRY_CREATE_MODEL_OPTIONS.map((option) => (
-                    <SelectItem key={option} value={option}>
-                      {option}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </section>
-
-        <section
-          aria-labelledby="entry-values-title"
-          className="overflow-hidden rounded-xl border bg-card shadow-xs"
-        >
-          <div className="flex items-center gap-2 border-b bg-muted/40 px-4 py-3">
-            <span className="bg-primary/10 text-primary flex size-7 shrink-0 items-center justify-center rounded-md">
-              <CircleDollarSign className="size-4" aria-hidden="true" />
-            </span>
-            <div>
-              <h3 id="entry-values-title" className="text-sm font-semibold">
-                Valores
-              </h3>
-              <p className="text-muted-foreground text-xs">
-                Totais, frete e câmbio
-              </p>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4 p-4">
-            {DECIMAL_FIELDS.map((field) => (
-              <div key={field.name} className="space-y-2">
-                <Label
-                  htmlFor={`entry-${field.name}`}
-                  className="text-xs font-medium"
-                >
-                  {field.label}
-                </Label>
-                <Input
-                  id={`entry-${field.name}`}
-                  name={field.name}
-                  inputMode="decimal"
-                  value={decimalValues[field.name]}
-                  onChange={(e) => {
-                    setDecimalValues((current) => ({
-                      ...current,
-                      [field.name]: e.target.value,
-                    }));
-                    if (error) setError(undefined);
-                  }}
-                  placeholder="0,00"
-                  autoComplete="off"
-                />
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section
-          aria-labelledby="entry-taxes-title"
-          className="overflow-hidden rounded-xl border bg-card shadow-xs"
-        >
-          <div className="flex items-center gap-2 border-b bg-muted/40 px-4 py-3">
-            <span className="bg-primary/10 text-primary flex size-7 shrink-0 items-center justify-center rounded-md">
-              <Landmark className="size-4" aria-hidden="true" />
-            </span>
-            <div>
-              <h3 id="entry-taxes-title" className="text-sm font-semibold">
-                Tributos
-              </h3>
-              <p className="text-muted-foreground text-xs">
-                Impostos incidentes na nota
-              </p>
-            </div>
-          </div>
-          <div className="grid grid-cols-3 gap-3 p-4 sm:gap-4">
-            {TAX_FIELDS.map((field) => (
-              <div key={field.name} className="space-y-2">
-                <Label
-                  htmlFor={`entry-${field.name}`}
-                  className="text-xs font-medium"
-                >
-                  {field.label}
-                </Label>
-                <Input
-                  id={`entry-${field.name}`}
-                  name={field.name}
-                  inputMode="decimal"
-                  value={taxValues[field.name]}
-                  onChange={(e) => {
-                    setTaxValues((current) => ({
-                      ...current,
-                      [field.name]: e.target.value,
-                    }));
-                    if (error) setError(undefined);
-                  }}
-                  placeholder="0,00"
-                  autoComplete="off"
-                />
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section
-          aria-labelledby="entry-notes-title"
-          className="overflow-hidden rounded-xl border bg-card shadow-xs md:col-span-2"
-        >
-          <div className="flex items-center gap-2 border-b bg-muted/40 px-4 py-3">
-            <span className="bg-primary/10 text-primary flex size-7 shrink-0 items-center justify-center rounded-md">
-              <NotebookPen className="size-4" aria-hidden="true" />
-            </span>
-            <h3 id="entry-notes-title" className="text-sm font-semibold">
-              Anotações
-            </h3>
-          </div>
-          <div className="space-y-1.5 p-4">
-            <Label htmlFor="entry-notes" className="sr-only">
-              Anotações
-            </Label>
-            <Textarea
-              id="entry-notes"
-              name="notes"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Adicione observações relevantes sobre a entrada"
-              maxLength={2000}
-              rows={3}
-              className="min-h-20 resize-none"
-            />
-            <p className="text-muted-foreground text-xs leading-relaxed">
-              Estoque, inventário físico e etiqueta são definidos pela API.
+        <div className="grid min-h-0 flex-1 content-start gap-6 overflow-y-auto bg-muted/20 p-4 sm:p-6 md:grid-cols-2 md:gap-6">
+          {error && (
+            <p
+              className="border-destructive/30 bg-destructive/5 text-destructive rounded-lg border px-3 py-2 text-sm md:col-span-2"
+              role="alert"
+            >
+              {error}
             </p>
-          </div>
-        </section>
+          )}
+
+          <section
+            aria-labelledby="entry-main-data-title"
+            className="overflow-hidden rounded-xl border bg-card shadow-xs md:col-span-2"
+          >
+            <div className="flex items-center gap-2 border-b bg-muted/40 px-4 py-3 sm:px-5">
+              <span className="bg-primary/10 text-primary flex size-7 shrink-0 items-center justify-center rounded-md">
+                <FileText className="size-4" aria-hidden="true" />
+              </span>
+              <div>
+                <h3
+                  id="entry-main-data-title"
+                  className="text-sm font-semibold"
+                >
+                  Dados da entrada
+                </h3>
+                <p className="text-muted-foreground text-xs">
+                  Vínculos e identificação da nota
+                </p>
+              </div>
+            </div>
+
+            <div className="grid gap-5 p-5 sm:grid-cols-2 sm:gap-x-6 sm:gap-y-5 sm:p-6">
+              <div className="space-y-2 sm:col-span-2">
+                <EntryCreateCombobox
+                  id="entry-supplier"
+                  label="Fornecedor"
+                  required
+                  value={supplierId}
+                  options={supplierOptions}
+                  placeholder="Selecione o fornecedor"
+                  searchPlaceholder="Pesquisar fornecedor..."
+                  emptyMessage="Nenhum fornecedor encontrado."
+                  onValueChange={(value) => {
+                    if (value !== supplierId) onDirtyChange(true);
+                    setSupplierId(value);
+                    setError(undefined);
+                  }}
+                  onSearch={searchEntryFilterSuppliers}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <EntryCreateCombobox
+                  id="entry-carrier"
+                  label="Transportadora"
+                  required
+                  value={carrierId}
+                  options={carrierOptions}
+                  placeholder="Selecione a transportadora"
+                  searchPlaceholder="Pesquisar transportadora..."
+                  emptyMessage="Nenhuma transportadora encontrada."
+                  onValueChange={(value) => {
+                    if (value !== carrierId) onDirtyChange(true);
+                    setCarrierId(value);
+                    setError(undefined);
+                  }}
+                  onSearch={searchEntryFilterCarriers}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="entry-category" className="text-xs font-medium">
+                  Categoria
+                </Label>
+                <Input
+                  id="entry-category"
+                  value={ENTRY_CREATE_CATEGORY.label}
+                  readOnly
+                  aria-readonly="true"
+                  className="bg-muted/50 cursor-default text-muted-foreground"
+                />
+                <p className="text-muted-foreground text-xs">
+                  Única categoria disponível.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label
+                  htmlFor="entry-invoice-number"
+                  className="text-xs font-medium"
+                >
+                  Número da nota
+                  <span className="text-destructive" aria-hidden="true">
+                    *
+                  </span>
+                  <span className="sr-only"> obrigatório</span>
+                </Label>
+                <Input
+                  id="entry-invoice-number"
+                  name="invoiceNumber"
+                  value={invoiceNumber}
+                  onChange={(e) => {
+                    setInvoiceNumber(e.target.value);
+                    if (error) setError(undefined);
+                  }}
+                  placeholder="Ex.: 7685"
+                  maxLength={100}
+                  autoComplete="off"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="entry-model" className="text-xs font-medium">
+                  Modelo
+                  <span className="text-destructive" aria-hidden="true">
+                    *
+                  </span>
+                  <span className="sr-only"> obrigatório</span>
+                </Label>
+                <Select
+                  value={model}
+                  onValueChange={(value: EntryCreateModel) => {
+                    setModel(value);
+                    if (error) setError(undefined);
+                  }}
+                >
+                  <SelectTrigger
+                    id="entry-model"
+                    className={SELECT_TRIGGER_CLASS}
+                  >
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ENTRY_CREATE_MODEL_OPTIONS.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {option}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </section>
+
+          <section
+            aria-labelledby="entry-values-title"
+            className="overflow-hidden rounded-xl border bg-card shadow-xs"
+          >
+            <div className="flex items-center gap-2 border-b bg-muted/40 px-4 py-3 sm:px-5">
+              <span className="bg-primary/10 text-primary flex size-7 shrink-0 items-center justify-center rounded-md">
+                <CircleDollarSign className="size-4" aria-hidden="true" />
+              </span>
+              <div>
+                <h3 id="entry-values-title" className="text-sm font-semibold">
+                  Valores
+                </h3>
+                <p className="text-muted-foreground text-xs">
+                  Totais, frete e câmbio
+                </p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4 p-5 sm:p-6">
+              {DECIMAL_FIELDS.map((field) => (
+                <div key={field.name} className="space-y-2">
+                  <Label
+                    htmlFor={`entry-${field.name}`}
+                    className="text-xs font-medium"
+                  >
+                    {field.label}
+                  </Label>
+                  <Input
+                    id={`entry-${field.name}`}
+                    name={field.name}
+                    inputMode="decimal"
+                    value={decimalValues[field.name]}
+                    onChange={(e) => {
+                      setDecimalValues((current) => ({
+                        ...current,
+                        [field.name]: e.target.value,
+                      }));
+                      if (error) setError(undefined);
+                    }}
+                    placeholder="0,00"
+                    autoComplete="off"
+                  />
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section
+            aria-labelledby="entry-taxes-title"
+            className="overflow-hidden rounded-xl border bg-card shadow-xs"
+          >
+            <div className="flex items-center gap-2 border-b bg-muted/40 px-4 py-3 sm:px-5">
+              <span className="bg-primary/10 text-primary flex size-7 shrink-0 items-center justify-center rounded-md">
+                <Landmark className="size-4" aria-hidden="true" />
+              </span>
+              <div>
+                <h3 id="entry-taxes-title" className="text-sm font-semibold">
+                  Tributos
+                </h3>
+                <p className="text-muted-foreground text-xs">
+                  Impostos incidentes na nota
+                </p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4 p-5 sm:grid-cols-3 sm:p-6">
+              {TAX_FIELDS.map((field) => (
+                <div key={field.name} className="space-y-2">
+                  <Label
+                    htmlFor={`entry-${field.name}`}
+                    className="text-xs font-medium"
+                  >
+                    {field.label}
+                  </Label>
+                  <Input
+                    id={`entry-${field.name}`}
+                    name={field.name}
+                    inputMode="decimal"
+                    value={taxValues[field.name]}
+                    onChange={(e) => {
+                      setTaxValues((current) => ({
+                        ...current,
+                        [field.name]: e.target.value,
+                      }));
+                      if (error) setError(undefined);
+                    }}
+                    placeholder="0,00"
+                    autoComplete="off"
+                  />
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section
+            aria-labelledby="entry-notes-title"
+            className="overflow-hidden rounded-xl border bg-card shadow-xs md:col-span-2"
+          >
+            <div className="flex items-center gap-2 border-b bg-muted/40 px-4 py-3 sm:px-5">
+              <span className="bg-primary/10 text-primary flex size-7 shrink-0 items-center justify-center rounded-md">
+                <NotebookPen className="size-4" aria-hidden="true" />
+              </span>
+              <div>
+                <h3 id="entry-notes-title" className="text-sm font-semibold">
+                  Anotações
+                </h3>
+                <p className="text-muted-foreground text-xs">
+                  Observações gerais da nota
+                </p>
+              </div>
+            </div>
+            <div className="space-y-2 p-5 sm:p-6">
+              <Label htmlFor="entry-notes" className="sr-only">
+                Anotações
+              </Label>
+              <Textarea
+                id="entry-notes"
+                name="notes"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Adicione observações relevantes sobre a entrada"
+                maxLength={2000}
+                rows={3}
+                className="min-h-20 resize-none"
+              />
+              <p className="text-muted-foreground text-xs leading-relaxed">
+                Estoque, inventário físico e etiqueta são definidos pela API.
+              </p>
+            </div>
+          </section>
+        </div>
       </fieldset>
 
-      <SheetFooter className="supports-[backdrop-filter]:bg-background/80 shrink-0 border-t bg-background/95 p-4 backdrop-blur sm:flex-row sm:justify-end">
+      <SheetFooter className="supports-backdrop-filter:bg-background/80 shrink-0 border-t bg-background/95 p-4 backdrop-blur sm:flex-row sm:justify-end sm:px-6">
         <Button
           type="button"
           variant="outline"

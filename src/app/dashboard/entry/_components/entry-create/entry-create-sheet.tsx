@@ -74,7 +74,7 @@ export function EntryCreateSheet({
           side="right"
           className="flex w-[96vw] max-w-[96vw] flex-col gap-0 p-0 sm:w-[96vw] sm:max-w-4xl"
         >
-          <SheetHeader className="shrink-0 border-b p-4 pr-12 sm:pr-14">
+          <SheetHeader className="shrink-0 border-b p-4 pr-12 sm:px-6 sm:py-5 sm:pr-14">
             <SheetTitle className="flex items-center gap-2 text-lg">
               <Plus className="text-primary size-5" aria-hidden="true" />
               Nova entrada
