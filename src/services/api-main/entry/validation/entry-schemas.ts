@@ -13,6 +13,10 @@ const EntryRequestContextSchema = z.object({
 });
 
 export const EntryFindAllSchema = EntryRequestContextSchema.extend({
+  pe_supplier_id: z.number().int().min(0).optional(),
+  pe_carrier_id: z.number().int().min(0).optional(),
+  pe_modelo_id: z.number().int().min(0).max(2).optional(),
+  pe_category_id: z.number().int().min(0).optional(),
   pe_search: z.string().max(300).optional(),
   pe_flag_operation_list: z.number().int().min(0).max(3).optional(),
   pe_start_date: z.string().regex(ISO_DATE_REGEX).nullable().optional(),

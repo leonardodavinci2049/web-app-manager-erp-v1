@@ -21,6 +21,10 @@ interface EntryBaseResponse {
 }
 
 export interface EntryFindAllRequest extends EntryBaseRequest {
+  pe_supplier_id?: number;
+  pe_carrier_id?: number;
+  pe_modelo_id?: number;
+  pe_category_id?: number;
   pe_search?: string;
   pe_flag_operation_list?: number;
   pe_start_date?: string | null;
