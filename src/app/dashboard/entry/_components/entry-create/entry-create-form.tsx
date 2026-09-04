@@ -1,5 +1,11 @@
 "use client";
 
+import {
+  CircleDollarSign,
+  FileText,
+  Landmark,
+  NotebookPen,
+} from "lucide-react";
 import { type FormEvent, useState } from "react";
 import { toast } from "sonner";
 import { createEntryAction } from "@/app/dashboard/entry/_actions/entry-actions";
@@ -27,7 +33,7 @@ interface EntryCreateFormProps {
 }
 
 const SELECT_TRIGGER_CLASS =
-  "h-10 w-full rounded-md border border-input bg-background px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]";
+  "h-9 w-full rounded-md border border-input bg-background px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]";
 
 const DECIMAL_FIELDS = [
   { name: "totalInvoiceValue", label: "Valor total da nota" },
@@ -186,252 +192,322 @@ export function EntryCreateForm({
     >
       <fieldset
         disabled={isSubmitting}
-        className="min-h-0 flex-1 space-y-6 overflow-y-auto p-4 sm:p-6"
+        className="grid min-h-0 flex-1 content-start gap-3 overflow-y-auto bg-muted/20 p-3 sm:p-4 md:grid-cols-2"
       >
         {error && (
-          <p className="text-destructive text-sm" role="alert">
+          <p
+            className="border-destructive/30 bg-destructive/5 text-destructive rounded-lg border px-3 py-2 text-sm md:col-span-2"
+            role="alert"
+          >
             {error}
           </p>
         )}
 
-        <div className="space-y-4">
-          <h3 className="text-sm font-semibold">Vínculos</h3>
-          <div className="space-y-2">
-            <Label htmlFor="entry-supplier" className="font-semibold">
-              Fornecedor
-              <span className="text-destructive" aria-hidden="true">
-                *
+        <div className="space-y-3">
+          <section
+            aria-labelledby="entry-main-data-title"
+            className="overflow-hidden rounded-xl border bg-card shadow-xs"
+          >
+            <div className="flex items-center gap-2 border-b bg-muted/40 px-3 py-2.5">
+              <span className="bg-primary/10 text-primary flex size-7 shrink-0 items-center justify-center rounded-md">
+                <FileText className="size-4" aria-hidden="true" />
               </span>
-              <span className="sr-only"> obrigatório</span>
-            </Label>
-            <Select
-              value={supplierId}
-              onValueChange={(value) => {
-                setSupplierId(value);
-                setError(undefined);
-              }}
-            >
-              <SelectTrigger
-                id="entry-supplier"
-                className={SELECT_TRIGGER_CLASS}
-              >
-                <SelectValue placeholder="Selecione o fornecedor" />
-              </SelectTrigger>
-              <SelectContent>
-                {supplierOptions.map((option) => (
-                  <SelectItem key={option.id} value={String(option.id)}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {supplierOptions.length === 0 && (
-              <p className="text-muted-foreground text-xs">
-                Nenhum fornecedor disponível no momento.
-              </p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="entry-carrier" className="font-semibold">
-              Transportadora
-              <span className="text-destructive" aria-hidden="true">
-                *
-              </span>
-              <span className="sr-only"> obrigatório</span>
-            </Label>
-            <Select
-              value={carrierId}
-              onValueChange={(value) => {
-                setCarrierId(value);
-                setError(undefined);
-              }}
-            >
-              <SelectTrigger
-                id="entry-carrier"
-                className={SELECT_TRIGGER_CLASS}
-              >
-                <SelectValue placeholder="Selecione a transportadora" />
-              </SelectTrigger>
-              <SelectContent>
-                {carrierOptions.map((option) => (
-                  <SelectItem key={option.id} value={String(option.id)}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {carrierOptions.length === 0 && (
-              <p className="text-muted-foreground text-xs">
-                Nenhuma transportadora disponível no momento.
-              </p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="entry-category" className="font-semibold">
-              Categoria
-              <span className="text-destructive" aria-hidden="true">
-                *
-              </span>
-              <span className="sr-only"> obrigatório</span>
-            </Label>
-            <Select
-              value={categoryId}
-              onValueChange={(value) => {
-                setCategoryId(value);
-                setError(undefined);
-              }}
-            >
-              <SelectTrigger
-                id="entry-category"
-                className={SELECT_TRIGGER_CLASS}
-              >
-                <SelectValue placeholder="Selecione a categoria" />
-              </SelectTrigger>
-              <SelectContent>
-                {categoryOptions.map((option) => (
-                  <SelectItem key={option.id} value={String(option.id)}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {categoryOptions.length === 0 && (
-              <p className="text-muted-foreground text-xs">
-                Nenhuma categoria disponível no momento.
-              </p>
-            )}
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <h3 className="text-sm font-semibold">Nota</h3>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label htmlFor="entry-invoice-number" className="font-semibold">
-                Número da nota
-                <span className="text-destructive" aria-hidden="true">
-                  *
-                </span>
-                <span className="sr-only"> obrigatório</span>
-              </Label>
-              <Input
-                id="entry-invoice-number"
-                name="invoiceNumber"
-                value={invoiceNumber}
-                onChange={(e) => {
-                  setInvoiceNumber(e.target.value);
-                  if (error) setError(undefined);
-                }}
-                placeholder="Ex.: 7685"
-                maxLength={100}
-                autoComplete="off"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="entry-model" className="font-semibold">
-                Modelo
-                <span className="text-destructive" aria-hidden="true">
-                  *
-                </span>
-                <span className="sr-only"> obrigatório</span>
-              </Label>
-              <Input
-                id="entry-model"
-                name="model"
-                value={model}
-                onChange={(e) => {
-                  setModel(e.target.value);
-                  if (error) setError(undefined);
-                }}
-                placeholder="Ex.: IMPORTADO"
-                maxLength={100}
-                autoComplete="off"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <h3 className="text-sm font-semibold">Valores</h3>
-          <div className="grid grid-cols-2 gap-3">
-            {DECIMAL_FIELDS.map((field) => (
-              <div key={field.name} className="space-y-2">
-                <Label
-                  htmlFor={`entry-${field.name}`}
-                  className="font-semibold"
+              <div>
+                <h3
+                  id="entry-main-data-title"
+                  className="text-sm font-semibold"
                 >
-                  {field.label}
+                  Dados da entrada
+                </h3>
+                <p className="text-muted-foreground text-xs">
+                  Vínculos e identificação da nota
+                </p>
+              </div>
+            </div>
+
+            <div className="grid gap-3 p-3 sm:grid-cols-2">
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label htmlFor="entry-supplier" className="text-xs font-medium">
+                  Fornecedor
+                  <span className="text-destructive" aria-hidden="true">
+                    *
+                  </span>
+                  <span className="sr-only"> obrigatório</span>
+                </Label>
+                <Select
+                  value={supplierId}
+                  onValueChange={(value) => {
+                    setSupplierId(value);
+                    setError(undefined);
+                  }}
+                >
+                  <SelectTrigger
+                    id="entry-supplier"
+                    className={SELECT_TRIGGER_CLASS}
+                  >
+                    <SelectValue placeholder="Selecione o fornecedor" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {supplierOptions.map((option) => (
+                      <SelectItem key={option.id} value={String(option.id)}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {supplierOptions.length === 0 && (
+                  <p className="text-muted-foreground text-xs">
+                    Nenhum fornecedor disponível no momento.
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="entry-carrier" className="text-xs font-medium">
+                  Transportadora
+                  <span className="text-destructive" aria-hidden="true">
+                    *
+                  </span>
+                  <span className="sr-only"> obrigatório</span>
+                </Label>
+                <Select
+                  value={carrierId}
+                  onValueChange={(value) => {
+                    setCarrierId(value);
+                    setError(undefined);
+                  }}
+                >
+                  <SelectTrigger
+                    id="entry-carrier"
+                    className={SELECT_TRIGGER_CLASS}
+                  >
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {carrierOptions.map((option) => (
+                      <SelectItem key={option.id} value={String(option.id)}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {carrierOptions.length === 0 && (
+                  <p className="text-muted-foreground text-xs">
+                    Nenhuma transportadora disponível no momento.
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="entry-category" className="text-xs font-medium">
+                  Categoria
+                  <span className="text-destructive" aria-hidden="true">
+                    *
+                  </span>
+                  <span className="sr-only"> obrigatório</span>
+                </Label>
+                <Select
+                  value={categoryId}
+                  onValueChange={(value) => {
+                    setCategoryId(value);
+                    setError(undefined);
+                  }}
+                >
+                  <SelectTrigger
+                    id="entry-category"
+                    className={SELECT_TRIGGER_CLASS}
+                  >
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categoryOptions.map((option) => (
+                      <SelectItem key={option.id} value={String(option.id)}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {categoryOptions.length === 0 && (
+                  <p className="text-muted-foreground text-xs">
+                    Nenhuma categoria disponível no momento.
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-1.5">
+                <Label
+                  htmlFor="entry-invoice-number"
+                  className="text-xs font-medium"
+                >
+                  Número da nota
+                  <span className="text-destructive" aria-hidden="true">
+                    *
+                  </span>
+                  <span className="sr-only"> obrigatório</span>
                 </Label>
                 <Input
-                  id={`entry-${field.name}`}
-                  name={field.name}
-                  inputMode="decimal"
-                  value={decimalValues[field.name]}
+                  id="entry-invoice-number"
+                  name="invoiceNumber"
+                  value={invoiceNumber}
                   onChange={(e) => {
-                    setDecimalValues((current) => ({
-                      ...current,
-                      [field.name]: e.target.value,
-                    }));
+                    setInvoiceNumber(e.target.value);
                     if (error) setError(undefined);
                   }}
-                  placeholder="0,00"
+                  placeholder="Ex.: 7685"
+                  maxLength={100}
                   autoComplete="off"
                 />
               </div>
-            ))}
-          </div>
-        </div>
 
-        <div className="space-y-4">
-          <h3 className="text-sm font-semibold">Tributos</h3>
-          <div className="grid grid-cols-2 gap-3">
-            {TAX_FIELDS.map((field) => (
-              <div key={field.name} className="space-y-2">
-                <Label
-                  htmlFor={`entry-${field.name}`}
-                  className="font-semibold"
-                >
-                  {field.label}
+              <div className="space-y-1.5">
+                <Label htmlFor="entry-model" className="text-xs font-medium">
+                  Modelo
+                  <span className="text-destructive" aria-hidden="true">
+                    *
+                  </span>
+                  <span className="sr-only"> obrigatório</span>
                 </Label>
                 <Input
-                  id={`entry-${field.name}`}
-                  name={field.name}
-                  inputMode="decimal"
-                  value={taxValues[field.name]}
+                  id="entry-model"
+                  name="model"
+                  value={model}
                   onChange={(e) => {
-                    setTaxValues((current) => ({
-                      ...current,
-                      [field.name]: e.target.value,
-                    }));
+                    setModel(e.target.value);
                     if (error) setError(undefined);
                   }}
-                  placeholder="0,00"
+                  placeholder="Ex.: IMPORTADO"
+                  maxLength={100}
                   autoComplete="off"
                 />
               </div>
-            ))}
-          </div>
+            </div>
+          </section>
+
+          <section
+            aria-labelledby="entry-notes-title"
+            className="overflow-hidden rounded-xl border bg-card shadow-xs"
+          >
+            <div className="flex items-center gap-2 border-b bg-muted/40 px-3 py-2.5">
+              <span className="bg-primary/10 text-primary flex size-7 shrink-0 items-center justify-center rounded-md">
+                <NotebookPen className="size-4" aria-hidden="true" />
+              </span>
+              <h3 id="entry-notes-title" className="text-sm font-semibold">
+                Anotações
+              </h3>
+            </div>
+            <div className="space-y-1.5 p-3">
+              <Label htmlFor="entry-notes" className="sr-only">
+                Anotações
+              </Label>
+              <Textarea
+                id="entry-notes"
+                name="notes"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Adicione observações relevantes sobre a entrada"
+                maxLength={2000}
+                rows={3}
+                className="min-h-20 resize-none"
+              />
+              <p className="text-muted-foreground text-xs leading-relaxed">
+                Estoque, inventário físico e etiqueta são definidos pela API.
+              </p>
+            </div>
+          </section>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="entry-notes" className="font-semibold">
-            Anotações
-          </Label>
-          <Textarea
-            id="entry-notes"
-            name="notes"
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder="Observações da entrada"
-            maxLength={2000}
-            rows={4}
-          />
-          <p className="text-muted-foreground text-xs">
-            As flags de estoque, inventário físico e etiqueta são definidas
-            internamente pela API.
-          </p>
+        <div className="space-y-3">
+          <section
+            aria-labelledby="entry-values-title"
+            className="overflow-hidden rounded-xl border bg-card shadow-xs"
+          >
+            <div className="flex items-center gap-2 border-b bg-muted/40 px-3 py-2.5">
+              <span className="bg-primary/10 text-primary flex size-7 shrink-0 items-center justify-center rounded-md">
+                <CircleDollarSign className="size-4" aria-hidden="true" />
+              </span>
+              <div>
+                <h3 id="entry-values-title" className="text-sm font-semibold">
+                  Valores
+                </h3>
+                <p className="text-muted-foreground text-xs">
+                  Totais, frete e câmbio
+                </p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3 p-3">
+              {DECIMAL_FIELDS.map((field) => (
+                <div key={field.name} className="space-y-1.5">
+                  <Label
+                    htmlFor={`entry-${field.name}`}
+                    className="text-xs font-medium"
+                  >
+                    {field.label}
+                  </Label>
+                  <Input
+                    id={`entry-${field.name}`}
+                    name={field.name}
+                    inputMode="decimal"
+                    value={decimalValues[field.name]}
+                    onChange={(e) => {
+                      setDecimalValues((current) => ({
+                        ...current,
+                        [field.name]: e.target.value,
+                      }));
+                      if (error) setError(undefined);
+                    }}
+                    placeholder="0,00"
+                    autoComplete="off"
+                  />
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section
+            aria-labelledby="entry-taxes-title"
+            className="overflow-hidden rounded-xl border bg-card shadow-xs"
+          >
+            <div className="flex items-center gap-2 border-b bg-muted/40 px-3 py-2.5">
+              <span className="bg-primary/10 text-primary flex size-7 shrink-0 items-center justify-center rounded-md">
+                <Landmark className="size-4" aria-hidden="true" />
+              </span>
+              <div>
+                <h3 id="entry-taxes-title" className="text-sm font-semibold">
+                  Tributos
+                </h3>
+                <p className="text-muted-foreground text-xs">
+                  Impostos incidentes na nota
+                </p>
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-3 p-3">
+              {TAX_FIELDS.map((field) => (
+                <div key={field.name} className="space-y-1.5">
+                  <Label
+                    htmlFor={`entry-${field.name}`}
+                    className="text-xs font-medium"
+                  >
+                    {field.label}
+                  </Label>
+                  <Input
+                    id={`entry-${field.name}`}
+                    name={field.name}
+                    inputMode="decimal"
+                    value={taxValues[field.name]}
+                    onChange={(e) => {
+                      setTaxValues((current) => ({
+                        ...current,
+                        [field.name]: e.target.value,
+                      }));
+                      if (error) setError(undefined);
+                    }}
+                    placeholder="0,00"
+                    autoComplete="off"
+                  />
+                </div>
+              ))}
+            </div>
+          </section>
         </div>
       </fieldset>
 
