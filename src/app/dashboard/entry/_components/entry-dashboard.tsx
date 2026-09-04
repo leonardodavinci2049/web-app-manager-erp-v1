@@ -16,7 +16,6 @@ interface EntryDashboardProps {
   hasLoadError: boolean;
   supplierOptions: EntryCreateOptionDto[];
   carrierOptions: EntryCreateOptionDto[];
-  categoryOptions: EntryCreateOptionDto[];
 }
 
 /**
@@ -34,7 +33,6 @@ export function EntryDashboard({
   hasLoadError,
   supplierOptions,
   carrierOptions,
-  categoryOptions,
 }: EntryDashboardProps) {
   const collectionProps = {
     entries,
@@ -58,7 +56,6 @@ export function EntryDashboard({
         cards={cards}
         supplierOptions={supplierOptions}
         carrierOptions={carrierOptions}
-        categoryOptions={categoryOptions}
       />
     </div>
   );

@@ -29,7 +29,6 @@ interface EntryCreateSheetProps {
   onCreated: (entryId: number) => void;
   supplierOptions: EntryCreateOptionDto[];
   carrierOptions: EntryCreateOptionDto[];
-  categoryOptions: EntryCreateOptionDto[];
 }
 
 export function EntryCreateSheet({
@@ -38,7 +37,6 @@ export function EntryCreateSheet({
   onCreated,
   supplierOptions,
   carrierOptions,
-  categoryOptions,
 }: EntryCreateSheetProps) {
   const [isDirty, setIsDirty] = useState(false);
   const [isDiscardDialogOpen, setIsDiscardDialogOpen] = useState(false);
@@ -90,7 +88,6 @@ export function EntryCreateSheet({
             key={formKey}
             supplierOptions={supplierOptions}
             carrierOptions={carrierOptions}
-            categoryOptions={categoryOptions}
             onCancel={() => requestOpenChange(false)}
             onCreated={handleCreated}
             onDirtyChange={setIsDirty}

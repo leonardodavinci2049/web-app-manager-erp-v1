@@ -63,7 +63,6 @@ interface EntryToolbarProps {
   cards: ReactNode;
   supplierOptions: EntryCreateOptionDto[];
   carrierOptions: EntryCreateOptionDto[];
-  categoryOptions: EntryCreateOptionDto[];
 }
 
 function getDefaultFilters(state: EntrySearchParams): EntrySearchParams {
@@ -90,7 +89,6 @@ export function EntryToolbar({
   cards,
   supplierOptions,
   carrierOptions,
-  categoryOptions,
 }: EntryToolbarProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -299,7 +297,6 @@ export function EntryToolbar({
         onCreated={handleCreated}
         supplierOptions={supplierOptions}
         carrierOptions={carrierOptions}
-        categoryOptions={categoryOptions}
       />
     </div>
   );

@@ -33,11 +33,11 @@ entry/
 ├── error.tsx                             # List error boundary (Client)
 ├── _actions/
 │   ├── entry-actions.ts                  # createEntryAction (list-only mutation)
-│   └── entry-filter-actions.ts           # searchEntryFilterSuppliers/Carriers (filter search)
+│   └── entry-filter-actions.ts           # searchEntryFilterSuppliers/Carriers (filter + create combobox search)
 ├── _components/
 │   ├── index.ts                          # Public exports
 │   ├── entry-dashboard.tsx               # Server: composes toolbar + collection subtrees
-│   ├── entry-create/                     # Client: new entry sheet + form
+│   ├── entry-create/                     # Client: new entry sheet + form + searchable combobox
 │   ├── entry-list/                       # Server: cards, table, collection, pagination
 │   ├── entry-toolbar/
 │   │   ├── entry-toolbar.tsx             # Client orchestrator: URL filters + view + create
@@ -66,8 +66,11 @@ Keep `page.tsx` as a Server Component. It should:
 6. Isolate the entries read with `.catch()`: log with
    `createLogger("EntryDashboardPage")`, set `hasLoadError`, and fall back to
    `{ items: [], total: 0 }` so the toolbar and filters still render.
-7. Load supplier, carrier, and taxonomy options in parallel for the create form
-   and the filter panel fallback labels, each with isolated failure fallbacks.
+7. Load supplier and carrier options in parallel for the create form and the
+   filter panel fallback labels, each with isolated failure fallbacks. The
+   create category is hardcoded (`ENTRY_CREATE_CATEGORY`, id 1) and the model
+   is restricted to `ENTRY_CREATE_MODEL_OPTIONS` (NACIONAL/IMPORTADO), so no
+   taxonomy read is needed.
 8. Render `SiteHeaderWithBreadcrumb` and `RegistryPageShell` with
    `EntryDashboard`, passing only UI DTOs.
 
@@ -136,11 +139,14 @@ triggers a refetch.
 ## Server Actions
 
 - `createEntryAction()` (`_actions/entry-actions.ts`): validates the create
-  payload, derives the new ID, revalidates `/dashboard/entry`.
+  payload (model restricted to `ENTRY_CREATE_MODEL_OPTIONS`; category fixed to
+  `ENTRY_CREATE_CATEGORY` id 1), derives the new ID, revalidates
+  `/dashboard/entry`.
 - `searchEntryFilterSuppliers(search)` / `searchEntryFilterCarriers(search)`
-  (`_actions/entry-filter-actions.ts`): read-only searches for the filter
-  comboboxes. They re-resolve `getAuthContext()`, trim/limit the term (max 300),
-  return minimal `{ id, label }` DTOs, and fall back to `[]` on failure.
+  (`_actions/entry-filter-actions.ts`): read-only searches shared by the filter
+  and create comboboxes. They re-resolve `getAuthContext()`, trim/limit the
+  term (max 300), return minimal `{ id, label }` DTOs, and fall back to `[]` on
+  failure.
 
 ## Services
 
@@ -150,8 +156,8 @@ triggers a refetch.
   only sent when `operationList > 0` and both dates are present; otherwise the
   flag is `0` and the dates are `null`.
 - `supplier` / `carrier`: `searchAllSuppliers` / `searchAllCarriers` power the
-  filter combobox searches; `getSuppliersPage` / `getCarriersPage` /
-  `getTaxonomies` feed the create-form options and filter label fallbacks.
+  filter and create combobox searches; `getSuppliersPage` / `getCarriersPage`
+  feed the create-form options and filter label fallbacks.
 
 Read the local `AGENTS.md` inside each service module before changing it.
 
