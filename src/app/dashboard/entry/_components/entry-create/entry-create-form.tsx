@@ -202,9 +202,9 @@ export function EntryCreateForm({
     >
       <fieldset
         disabled={isSubmitting}
-        className="m-0 flex min-h-0 flex-1 flex-col border-0 p-0"
+        className="m-0 min-h-0 flex-1 overflow-y-auto border-0 bg-muted/20 p-0"
       >
-        <div className="grid min-h-0 flex-1 content-start gap-6 overflow-y-auto bg-muted/20 p-4 sm:p-6 md:grid-cols-2 md:gap-6">
+        <div className="grid content-start gap-6 p-4 sm:p-6 md:grid-cols-2 md:gap-6">
           {error && (
             <p
               className="border-destructive/30 bg-destructive/5 text-destructive rounded-lg border px-3 py-2 text-sm md:col-span-2"
@@ -471,9 +471,7 @@ export function EntryCreateForm({
                 rows={3}
                 className="min-h-20 resize-none"
               />
-              <p className="text-muted-foreground text-xs leading-relaxed">
-                Estoque, inventário físico e etiqueta são definidos pela API.
-              </p>
+
             </div>
           </section>
         </div>
