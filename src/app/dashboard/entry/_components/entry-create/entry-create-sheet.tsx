@@ -16,6 +16,7 @@ import {
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
@@ -73,13 +74,16 @@ export function EntryCreateSheet({
       <Sheet open={open} onOpenChange={requestOpenChange}>
         <SheetContent
           side="right"
-          className="flex w-[90vw] max-w-md flex-col gap-0 p-0 sm:max-w-md"
+          className="flex w-[96vw] max-w-[96vw] flex-col gap-0 p-0 sm:w-[96vw] sm:max-w-4xl"
         >
-          <SheetHeader className="shrink-0 border-b p-4 pr-12 sm:p-6 sm:pr-14">
+          <SheetHeader className="shrink-0 border-b p-4 pr-12 sm:pr-14">
             <SheetTitle className="flex items-center gap-2 text-lg">
               <Plus className="text-primary size-5" aria-hidden="true" />
               Nova entrada
             </SheetTitle>
+            <SheetDescription>
+              Preencha os dados principais, financeiros e fiscais da entrada.
+            </SheetDescription>
           </SheetHeader>
 
           <EntryCreateForm
