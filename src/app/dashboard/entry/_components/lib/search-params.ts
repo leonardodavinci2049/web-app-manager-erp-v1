@@ -1,5 +1,10 @@
 import {
+  ENTRY_MODEL_OPTIONS,
+  ENTRY_OPERATION_LIST_OPTIONS,
   ENTRY_PAGE_SIZE,
+  type EntryCategoryId,
+  type EntryModelId,
+  type EntryOperationList,
   type EntryOrder,
   type EntryPageLimit,
   type EntrySearchParams,
@@ -10,6 +15,14 @@ type SearchParamValue = string | string[] | undefined;
 const VALID_SORTS = new Set<EntrySort>(["entry-date", "id", "created-at"]);
 const VALID_ORDERS = new Set<EntryOrder>(["asc", "desc"]);
 const VALID_LIMITS = new Set<EntryPageLimit>([25, 50, 100]);
+const VALID_MODEL_IDS = new Set<EntryModelId>(
+  ENTRY_MODEL_OPTIONS.map((option) => option.value),
+);
+const VALID_CATEGORY_IDS = new Set<EntryCategoryId>([0, 1]);
+const VALID_OPERATION_LISTS = new Set<EntryOperationList>(
+  ENTRY_OPERATION_LIST_OPTIONS.map((option) => option.value),
+);
+const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
 function normalizeParams(
   sp: URLSearchParams | Record<string, SearchParamValue>,
@@ -37,6 +50,16 @@ function parseNonNegativeInt(
   return Number.isSafeInteger(value) && value >= 0 ? value : defaultValue;
 }
 
+function parseIsoDate(
+  params: URLSearchParams,
+  key: string,
+  operationList: EntryOperationList,
+): string {
+  if (operationList === 0) return "";
+  const raw = params.get(key);
+  return raw && ISO_DATE_PATTERN.test(raw) ? raw : "";
+}
+
 /**
  * Constroi o estado de filtros da central de entradas a partir de searchParams.
  * Fonte unica de verdade para a leitura URL -> objeto.
@@ -48,6 +71,20 @@ export function parseEntrySearchParams(
   const sort = params.get("sort") as EntrySort | null;
   const order = params.get("order") as EntryOrder | null;
   const limit = Number(params.get("limit"));
+  const modelId = parseNonNegativeInt(params, "model", 0) as EntryModelId;
+  const categoryId = parseNonNegativeInt(
+    params,
+    "category",
+    0,
+  ) as EntryCategoryId;
+  const operationList = parseNonNegativeInt(
+    params,
+    "operation-list",
+    0,
+  ) as EntryOperationList;
+  const resolvedOperationList = VALID_OPERATION_LISTS.has(operationList)
+    ? operationList
+    : 0;
   return {
     search: (params.get("search") ?? "").trim().slice(0, 300),
     sort: sort && VALID_SORTS.has(sort) ? sort : "entry-date",
@@ -56,6 +93,13 @@ export function parseEntrySearchParams(
     limit: VALID_LIMITS.has(limit as EntryPageLimit)
       ? (limit as EntryPageLimit)
       : ENTRY_PAGE_SIZE,
+    supplierId: parseNonNegativeInt(params, "supplier", 0),
+    carrierId: parseNonNegativeInt(params, "carrier", 0),
+    modelId: VALID_MODEL_IDS.has(modelId) ? modelId : 0,
+    categoryId: VALID_CATEGORY_IDS.has(categoryId) ? categoryId : 0,
+    operationList: resolvedOperationList,
+    startDate: parseIsoDate(params, "start-date", resolvedOperationList),
+    endDate: parseIsoDate(params, "end-date", resolvedOperationList),
   };
 }
 
@@ -75,6 +119,19 @@ export function buildEntryUrl(
   if (state.page && state.page > 0) params.set("page", String(state.page));
   if (state.limit && state.limit !== ENTRY_PAGE_SIZE)
     params.set("limit", String(state.limit));
+  if (state.supplierId && state.supplierId > 0)
+    params.set("supplier", String(state.supplierId));
+  if (state.carrierId && state.carrierId > 0)
+    params.set("carrier", String(state.carrierId));
+  if (state.modelId && state.modelId > 0)
+    params.set("model", String(state.modelId));
+  if (state.categoryId && state.categoryId > 0)
+    params.set("category", String(state.categoryId));
+  if (state.operationList && state.operationList > 0) {
+    params.set("operation-list", String(state.operationList));
+    if (state.startDate) params.set("start-date", state.startDate);
+    if (state.endDate) params.set("end-date", state.endDate);
+  }
   const qs = params.toString();
   return qs ? `${pathname}?${qs}` : pathname;
 }

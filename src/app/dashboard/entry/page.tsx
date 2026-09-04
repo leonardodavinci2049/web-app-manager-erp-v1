@@ -30,6 +30,13 @@ export default async function EntryPage(props: EntryPageProps) {
     columnId:
       searchState.sort === "id" ? 2 : searchState.sort === "created-at" ? 3 : 1,
     orderId: searchState.order === "asc" ? 1 : 2,
+    supplierId: searchState.supplierId,
+    carrierId: searchState.carrierId,
+    modelId: searchState.modelId,
+    categoryId: searchState.categoryId,
+    operationList: searchState.operationList,
+    startDate: searchState.startDate || undefined,
+    endDate: searchState.endDate || undefined,
     ...apiContext,
   }).catch((error) => {
     hasLoadError = true;
