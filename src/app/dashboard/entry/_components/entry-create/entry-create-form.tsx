@@ -471,7 +471,6 @@ export function EntryCreateForm({
                 rows={3}
                 className="min-h-20 resize-none"
               />
-
             </div>
           </section>
         </div>
