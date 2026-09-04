@@ -54,6 +54,20 @@ export const ENTRY_OPERATION_LIST_OPTIONS: ReadonlyArray<{
   { value: 3, label: "Data de entrada no estoque" },
 ];
 
+/**
+ * Fixed category applied to every entry creation; the registry supports a
+ * single category today.
+ */
+export const ENTRY_CREATE_CATEGORY = {
+  id: 1,
+  label: "Entrada de Produto",
+} as const;
+
+/** Model values accepted when creating an entry (pe_model). */
+export const ENTRY_CREATE_MODEL_OPTIONS = ["NACIONAL", "IMPORTADO"] as const;
+export type EntryCreateModel = (typeof ENTRY_CREATE_MODEL_OPTIONS)[number];
+export const ENTRY_CREATE_MODEL_DEFAULT: EntryCreateModel = "NACIONAL";
+
 export interface EntryCreateOptionDto {
   id: number;
   label: string;

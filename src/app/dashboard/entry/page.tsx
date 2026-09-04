@@ -6,7 +6,6 @@ import { getAuthContext } from "@/server/auth-context";
 import { getCarriersPage } from "@/services/api-main/carrier/carrier-service-api";
 import { getEntriesPage } from "@/services/api-main/entry";
 import { getSuppliersPage } from "@/services/api-main/supplier/supplier-service-api";
-import { getTaxonomies } from "@/services/api-main/taxonomy-base/taxonomy-base-service-api";
 import { EntryDashboard, parseEntrySearchParams } from "./_components";
 
 const logger = createLogger("EntryDashboardPage");
@@ -44,29 +43,24 @@ export default async function EntryPage(props: EntryPageProps) {
     return { items: [], total: 0 };
   });
 
-  const [entriesResult, suppliersResult, carriersResult, categoriesResult] =
-    await Promise.all([
-      entriesResultPromise,
-      getSuppliersPage({ page: 0, pageSize: 100, ...apiContext }).catch(
-        (error) => {
-          logger.error("Erro ao buscar fornecedores para o formulário:", error);
-          return { items: [], total: 0 };
-        },
-      ),
-      getCarriersPage({ page: 0, pageSize: 100, ...apiContext }).catch(
-        (error) => {
-          logger.error(
-            "Erro ao buscar transportadoras para o formulário:",
-            error,
-          );
-          return { items: [], total: 0 };
-        },
-      ),
-      getTaxonomies({ recordsQuantity: 100, ...apiContext }).catch((error) => {
-        logger.error("Erro ao buscar categorias para o formulário:", error);
-        return [];
-      }),
-    ]);
+  const [entriesResult, suppliersResult, carriersResult] = await Promise.all([
+    entriesResultPromise,
+    getSuppliersPage({ page: 0, pageSize: 100, ...apiContext }).catch(
+      (error) => {
+        logger.error("Erro ao buscar fornecedores para o formulário:", error);
+        return { items: [], total: 0 };
+      },
+    ),
+    getCarriersPage({ page: 0, pageSize: 100, ...apiContext }).catch(
+      (error) => {
+        logger.error(
+          "Erro ao buscar transportadoras para o formulário:",
+          error,
+        );
+        return { items: [], total: 0 };
+      },
+    ),
+  ]);
 
   const supplierOptions = suppliersResult.items.map((supplier) => ({
     id: supplier.id,
@@ -75,10 +69,6 @@ export default async function EntryPage(props: EntryPageProps) {
   const carrierOptions = carriersResult.items.map((carrier) => ({
     id: carrier.id,
     label: carrier.name,
-  }));
-  const categoryOptions = categoriesResult.map((category) => ({
-    id: category.id,
-    label: category.name,
   }));
 
   return (
@@ -102,7 +92,6 @@ export default async function EntryPage(props: EntryPageProps) {
           hasLoadError={hasLoadError}
           supplierOptions={supplierOptions}
           carrierOptions={carrierOptions}
-          categoryOptions={categoryOptions}
         />
       </RegistryPageShell>
     </>

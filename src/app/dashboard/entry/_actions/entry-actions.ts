@@ -5,7 +5,10 @@ import { z } from "zod";
 import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
 import { entryServiceApi } from "@/services/api-main/entry";
-import type { EntryActionResult } from "../_components/types/entry-dashboard-types";
+import {
+  ENTRY_CREATE_MODEL_OPTIONS,
+  type EntryActionResult,
+} from "../_components/types/entry-dashboard-types";
 
 const logger = createLogger("EntryDashboardActions");
 const ENTRY_PATH = "/dashboard/entry";
@@ -28,11 +31,9 @@ const createSchema = z.object({
     .trim()
     .min(1, "Informe o número da nota.")
     .max(100, "O número da nota deve ter no máximo 100 caracteres."),
-  model: z
-    .string()
-    .trim()
-    .min(1, "Informe o modelo.")
-    .max(100, "O modelo deve ter no máximo 100 caracteres."),
+  model: z.enum(ENTRY_CREATE_MODEL_OPTIONS, {
+    message: "Selecione o modelo (NACIONAL ou IMPORTADO).",
+  }),
   totalInvoiceValue: z.coerce
     .number({ message: "Informe o valor total da nota." })
     .min(0, "O valor total da nota não pode ser negativo."),
