@@ -9,18 +9,19 @@ import { Tabs, TabsContent } from "@/components/ui/tabs";
 import type { UIEntryDetail } from "@/services/api-main/entry/transformers/transformers";
 import { EntryDeletionTab } from "./entry-deletion-tab";
 import { EntryImageTab } from "./entry-image-tab";
-import { EntryItemsTab } from "./entry-items-tab";
 import { EntryNotesTab } from "./entry-notes-tab";
 import { EntrySummaryTab } from "./entry-summary-tab";
 import { EntryTaxesTab } from "./entry-taxes-tab";
 
 interface EntryDetailTabsProps {
   entry: UIEntryDetail;
+  entryItemsTab: ReactNode;
   mobileImageGallery: ReactNode;
 }
 
 export function EntryDetailTabs({
   entry,
+  entryItemsTab,
   mobileImageGallery,
 }: EntryDetailTabsProps) {
   return (
@@ -49,9 +50,7 @@ export function EntryDetailTabs({
       <TabsContent value="summary">
         <EntrySummaryTab entry={entry} />
       </TabsContent>
-      <TabsContent value="items">
-        <EntryItemsTab />
-      </TabsContent>
+      <TabsContent value="items">{entryItemsTab}</TabsContent>
       <TabsContent value="deletion">
         <EntryDeletionTab />
       </TabsContent>

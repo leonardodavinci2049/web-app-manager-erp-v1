@@ -10,6 +10,7 @@ import { EntryDetailTabs } from "./tabs/entry-detail-tabs";
 
 interface EntryDetailLayoutProps {
   entry: UIEntryDetail;
+  entryItemsTab: ReactNode;
   returnTo: string;
   imageGallery: ReactNode;
 }
@@ -23,6 +24,7 @@ interface EntryDetailLayoutProps {
  */
 export function EntryDetailLayout({
   entry,
+  entryItemsTab,
   returnTo,
   imageGallery,
 }: EntryDetailLayoutProps) {
@@ -43,7 +45,11 @@ export function EntryDetailLayout({
       sectionsTitle="Seções da entrada"
       sectionsDescription="Consulte os dados complementares da entrada."
     >
-      <EntryDetailTabs entry={entry} mobileImageGallery={imageGallery} />
+      <EntryDetailTabs
+        entry={entry}
+        entryItemsTab={entryItemsTab}
+        mobileImageGallery={imageGallery}
+      />
     </DetailPageLayout>
   );
 }

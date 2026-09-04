@@ -11,6 +11,10 @@ import {
   EntryImageGalleryServer,
   EntryImageGallerySkeleton,
 } from "./_components/image-gallery";
+import {
+  EntryItemsTabServer,
+  EntryItemsTabSkeleton,
+} from "./_components/tabs/entry-items-tab-server";
 
 const logger = createLogger("EntryDetailsPage");
 
@@ -62,6 +66,14 @@ export default async function EntryDetailsPage({
             <div className="px-3 sm:px-4 lg:px-6">
               <EntryDetailLayout
                 entry={entry}
+                entryItemsTab={
+                  <Suspense fallback={<EntryItemsTabSkeleton />}>
+                    <EntryItemsTabServer
+                      entryId={entry.id}
+                      apiContext={apiContext}
+                    />
+                  </Suspense>
+                }
                 returnTo={returnTo}
                 imageGallery={
                   <Suspense fallback={<EntryImageGallerySkeleton />}>
