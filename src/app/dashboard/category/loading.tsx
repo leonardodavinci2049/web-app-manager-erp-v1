@@ -1,4 +1,4 @@
-import { SiteHeaderWithBreadcrumb } from "@/components/dashboard/header/site-header-with-breadcrumb";
+import { SiteHeaderWithBreadcrumb } from "@/app/dashboard/_components/header/site-header-with-breadcrumb";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const STAT_SKELETONS = Array.from(

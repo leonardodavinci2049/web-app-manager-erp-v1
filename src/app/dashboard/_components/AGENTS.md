@@ -23,9 +23,8 @@ _components/
 │   ├── sidebar-logo.tsx         # Brand/logo block in the sidebar header
 │   └── team-switcher.tsx        # Team/workspace selector
 ├── header/
-│   ├── site-header-with-breadcrumb.tsx  # Server: header + breadcrumb + session user
-│   ├── header-nav-user.tsx              # Header user chip (real session)
-│   └── logout-button.tsx                # Sign-out action
+│   ├── site-header-with-breadcrumb.tsx  # Header + breadcrumb + ModeToggle + user chip
+│   └── header-nav-user.tsx              # Client: user chip (real session via useUserData)
 ├── registry/                    # Shared registry-listing primitives (all 8 registry routes)
 │   ├── index.ts                 # Public API
 │   ├── registry-active-filters.tsx    # Active-filter chips
@@ -93,13 +92,17 @@ hardcoded/sample `user` object into `data` or pass it to `NavUser`.
 
 ## SiteHeaderWithBreadcrumb
 
-`header/site-header-with-breadcrumb.tsx` is an **async Server Component**. It:
+`header/site-header-with-breadcrumb.tsx` is a **synchronous Server Component**
+(moved from `src/components/dashboard/header`, replacing an older async variant
+that resolved the session and rendered `LogoutButton`/sidebar `NavUser`). It
+renders the `SidebarTrigger`, a `Breadcrumb` built from the `breadcrumbItems`
+prop, a mobile title, `ModeToggle`, and `HeaderNavUser` (which reads the real
+session client-side itself, inside `<Suspense>`).
 
-1. Resolves the session with `auth.api.getSession({ headers: await headers() })`.
-2. Redirects to `/sign-in` when there is no session.
-3. Renders the `SidebarTrigger`, a `Breadcrumb` built from the `breadcrumbItems`
-   prop, a mobile title, `ModeToggle`, `LogoutButton`, and `NavUser` (which reads
-   the real session client-side itself, inside `<Suspense>`).
+It performs **no session resolution and no redirect**. Pages that require an
+authenticated session must gate themselves — registry pages use
+`getAuthContext()` (which redirects), and static pages such as
+`report/*`/`settings` use `auth.api.getSession` + `redirect("/sign-in")`.
 
 Props:
 
@@ -110,8 +113,7 @@ Props:
 
 This header is the standard top bar for most feature routes (catalog, category,
 customer, brand, carriers, etc.). Pass route-appropriate `title` and
-`breadcrumbItems` from each page; do not duplicate session resolution in the
-page.
+`breadcrumbItems` from each page.
 
 ## Detail-Page Shared Shells
 

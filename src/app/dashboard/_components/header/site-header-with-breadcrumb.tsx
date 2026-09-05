@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { HeaderNavUser } from "@/components/dashboard/header/header-nav-user";
+import { HeaderNavUser } from "@/app/dashboard/_components/header/header-nav-user";
 import ModeToggle from "@/components/theme/mode-toggle";
 import {
   Breadcrumb,

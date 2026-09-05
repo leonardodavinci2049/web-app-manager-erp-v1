@@ -10,17 +10,21 @@ and a static "Configurações" title and description. The intended content compo
 (`SettingsPageContent`) is referenced but **commented out** in `page.tsx`.
 
 Do not assume settings is functional. There is no settings form, no Server
-Action, no data fetching, and no `getAuthContext()` call — the page relies on the
-dashboard layout for authentication.
+Action, no data fetching, and no `getAuthContext()` call — the page gates itself
+with a lightweight session check (`auth.api.getSession` +
+`redirect("/sign-in")`).
 
 ## Page Responsibilities
 
 `page.tsx` is a **Server Component**. It:
 
-1. Renders `SiteHeaderWithBreadcrumb` (title "Dashboard", breadcrumb
+1. Resolves the session with `auth.api.getSession({ headers: await headers() })`
+   and redirects to `/sign-in` when unauthenticated (the shared header no longer
+   performs this check).
+2. Renders `SiteHeaderWithBreadcrumb` (title "Dashboard", breadcrumb
    Dashboard → Configurações).
-2. Renders a static `<h1>` "Configurações" and a description paragraph.
-3. Leaves the content area empty (`{/* <SettingsPageContent /> */}`).
+3. Renders a static `<h1>` "Configurações" and a description paragraph.
+4. Leaves the content area empty (`{/* <SettingsPageContent /> */}`).
 
 ## Folder Structure
 
