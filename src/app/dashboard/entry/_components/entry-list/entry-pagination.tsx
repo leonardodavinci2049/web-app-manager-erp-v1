@@ -1,4 +1,4 @@
-import { RegistryPagination } from "@/components/registry";
+import { RegistryPagination } from "@/app/dashboard/_components/registry";
 
 interface EntryPaginationProps {
   currentPage: number;

@@ -26,6 +26,20 @@ _components/
 │   ├── site-header-with-breadcrumb.tsx  # Server: header + breadcrumb + session user
 │   ├── header-nav-user.tsx              # Header user chip (real session)
 │   └── logout-button.tsx                # Sign-out action
+├── registry/                    # Shared registry-listing primitives (all 8 registry routes)
+│   ├── index.ts                 # Public API
+│   ├── registry-active-filters.tsx    # Active-filter chips
+│   ├── registry-entity-image.tsx      # Standardized entity image (grid/list/compact)
+│   ├── registry-filter-sheet.tsx      # Mobile filter sheet
+│   ├── registry-image-upload-stub.tsx # Visual upload stub (replaced by uploadTrigger)
+│   ├── registry-loading.tsx           # Listing segment skeleton
+│   ├── registry-mobile-bottom-bar.tsx # Mobile bottom action bar
+│   ├── registry-page-shell.tsx        # Listing page shell
+│   ├── registry-pagination.tsx        # Cursor pagination controls
+│   ├── registry-results.tsx           # Results section frame
+│   ├── registry-search.tsx            # Debounced search input
+│   ├── registry-view-mode-toggle.tsx  # Grid/list toggle
+│   └── use-registry-view-mode.ts      # View-mode hook + RegistryViewMode type
 └── detail-page/                 # Shared registration detail shells (all 8 detail routes)
     ├── index.ts                 # Public API
     ├── detail-back-link.tsx     # Back-to-list button
@@ -115,9 +129,10 @@ Conventions:
   gallery aside is the single image surface.
 - Tab order in every route: **Anotações** first, **Imagem** after the common
   tabs and before domain-specific ones, **Exclusão** last.
-- `RegistryDetailLoading` lives here (not in `src/components/registry`) because
-  only detail routes consume it; `RegistryEntityImage` and `RegistryPageShell`
-  remain in `src/components/registry` shared with the listings.
+- `RegistryDetailLoading` lives here because only detail routes consume it;
+  `RegistryEntityImage`, `RegistryPageShell`, and the other listing primitives
+  live in `_components/registry` (moved from `src/components/registry`), shared
+  by the registry listing routes.
 - Do not add entity-specific props, permissions, or conditional entity rules to
   these components.
 

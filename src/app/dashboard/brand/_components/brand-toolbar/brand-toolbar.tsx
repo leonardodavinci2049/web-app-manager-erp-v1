@@ -19,7 +19,7 @@ import {
   RegistrySearch,
   RegistryViewModeToggle,
   useRegistryViewMode,
-} from "@/components/registry";
+} from "@/app/dashboard/_components/registry";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { BrandCreateSheet } from "../brand-create/brand-create-sheet";

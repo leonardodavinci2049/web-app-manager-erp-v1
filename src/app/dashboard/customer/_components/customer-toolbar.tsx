@@ -17,7 +17,7 @@ import {
   RegistrySearch,
   RegistryViewModeToggle,
   useRegistryViewMode,
-} from "@/components/registry";
+} from "@/app/dashboard/_components/registry";
 import { Button } from "@/components/ui/button";
 import { CustomerCreateSheet } from "./customer-create-sheet";
 import { CustomerFilterPanel } from "./customer-filter-panel";

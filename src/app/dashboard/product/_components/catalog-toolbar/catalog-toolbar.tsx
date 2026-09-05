@@ -17,7 +17,7 @@ import {
   RegistrySearch,
   RegistryViewModeToggle,
   useRegistryViewMode,
-} from "@/components/registry";
+} from "@/app/dashboard/_components/registry";
 import { Button } from "@/components/ui/button";
 import type { UIBrand } from "@/services/api-main/brand/transformers/transformers";
 import type { UIProductManager } from "@/services/api-main/product-manager/transformers/transformers";

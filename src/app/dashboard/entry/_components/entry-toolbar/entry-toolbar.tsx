@@ -17,7 +17,7 @@ import {
   RegistryResults,
   RegistrySearch,
   RegistryViewModeToggle,
-} from "@/components/registry";
+} from "@/app/dashboard/_components/registry";
 import { Button } from "@/components/ui/button";
 import { EntryCreateSheet } from "../entry-create/entry-create-sheet";
 import { buildEntryDetailHref, buildEntryUrl } from "../lib/search-params";

@@ -1,6 +1,6 @@
 import { connection } from "next/server";
+import { RegistryPageShell } from "@/app/dashboard/_components/registry";
 import { SiteHeaderWithBreadcrumb } from "@/components/dashboard/header/site-header-with-breadcrumb";
-import { RegistryPageShell } from "@/components/registry";
 import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
 import { getPtypesPage } from "@/services/api-main/ptype";
