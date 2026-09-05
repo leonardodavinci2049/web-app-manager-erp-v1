@@ -1,7 +1,7 @@
 import { DetailRecordHeading } from "@/app/dashboard/_components/detail-page";
 import { Badge } from "@/components/ui/badge";
 import type { UICarrier } from "@/services/api-main/carrier";
-import { CarrierImage } from "../../../_components/carrier-image";
+import { CarrierImage } from "../../../_components/carrier-list/carrier-image";
 import { resolveCarrierPersonTypeLabel } from "../carrier-detail-utils";
 
 interface CarrierHeadDataSectionProps {

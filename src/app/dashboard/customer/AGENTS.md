@@ -39,12 +39,9 @@ customer/
 ├── _components/
 │   ├── index.ts                          # Public exports for the list route
 │   ├── customer-dashboard.tsx            # Composes toolbar + grid/list subtrees
-│   ├── customer-toolbar.tsx              # Client: URL filters + view mode + create
-│   ├── customer-collection.tsx           # Grid cards and desktop list table
-│   ├── customer-pagination.tsx           # Registry pagination wrapper
-│   ├── customer-image.tsx                # Client avatar/image with fallback
-│   ├── customer-create-sheet.tsx         # Client: new customer form
-│   ├── customer-filter-panel.tsx         # Client: advanced filters sheet
+│   ├── customer-toolbar/                 # Client toolbar and advanced filters
+│   ├── customer-list/                    # Collection, pagination, image, and upload
+│   ├── customer-create/                  # Client: new customer sheet and form
 │   ├── lib/
 │   │   └── search-params.ts              # URL <-> filters mapping (pure)
 │   └── types/

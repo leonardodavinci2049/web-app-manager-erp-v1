@@ -9,7 +9,7 @@ in case of conflict.
 
 This folder groups **all the components of the product catalog screen**. The
 route page (`../page.tsx`) fetches data on the server and renders
-[`CatalogShell`](./catalog-shell.tsx). The entire UI — toolbar, filters, grid,
+[`ProductDashboard`](./product-dashboard.tsx). The entire UI — toolbar, filters, grid,
 cards, and inline editors — lives here.
 
 The core philosophy is **URL as the single source of truth for data filters** and **Server Components by default, Client Components isolated to the smallest possible scope**. The **view mode** (grid/list) is an exception: it is a display preference stored in `localStorage` (client-side), never in the URL, so toggling it is instant and does not trigger a data refetch.
@@ -19,33 +19,32 @@ The core philosophy is **URL as the single source of truth for data filters** an
 ```
 _components/
 ├── index.ts                          # Public export barrel for the folder
-├── catalog-shell.tsx                 # Shell (Server) that composes toolbar + grid
-├── category-tags.tsx                 # Category tags/badges (Server)
-├── product-image-upload.tsx          # Drag & drop image upload (Client)
-├── add-category-inline-dialog.tsx    # Dialog to link category (Client)
+├── product-dashboard.tsx             # Server composition of toolbar + results
 ├── lib/
 │   ├── search-params.ts             # URL <-> filters mapping (pure)
 │   └── category-helpers.ts          # Taxonomy flattening + level prefix
 ├── types/
-│   └── catalog-types.ts             # CatalogFilters, CategoryOption, etc.
-├── catalog-toolbar/
-│   ├── catalog-toolbar.tsx          # Orchestrator (Client): URL filters + view mode (localStorage)
-│   ├── catalog-search.tsx           # Search input (Client)
-│   ├── view-mode-toggle.tsx         # Grid/list toggle (Client, instant — no URL)
+│   └── product-dashboard-types.ts   # ProductFilters, CategoryOption, etc.
+├── product-toolbar/
+│   ├── product-toolbar.tsx          # Orchestrator (Client): URL filters + view mode
+│   ├── product-search.tsx           # Search input (Client)
+│   ├── product-view-mode-toggle.tsx # Grid/list toggle (Client, instant — no URL)
+│   ├── product-active-filters-panel.tsx
 │   └── filter-panel/
-│       └── filter-panel.tsx         # Advanced filters sheet (Client)
-├── product-grid/
-│   ├── product-grid.tsx             # Grid layout + empty state (Server)
-│   └── product-grid-skeleton.tsx    # Loading skeletons (Server)
-└── product-card/
-    ├── product-card.tsx             # Card (grid/list variants) (Server)
-    ├── product-card-fields.tsx      # SKU/brand/type metadata (Server)
-    ├── product-image-section.tsx    # Image + badges + upload fallback (Client)
-    └── inline-update/
-        ├── inline-name-editor.tsx     # Edit name (Client)
-        ├── inline-price-editor.tsx    # Edit retail/wholesale/corporate prices (Client)
-        ├── inline-stock-editor.tsx    # Edit stock (Client)
-        └── inline-category-editor.tsx # Manage category connections (Client)
+│       ├── product-filter-panel.tsx # Advanced filters sheet (Client)
+│       └── category-menu.tsx
+├── product-list/
+│   ├── product-grid/                # Results composition + skeleton
+│   ├── product-card/                # Cards and inline editors
+│   ├── product-table.tsx
+│   ├── product-image-upload.tsx
+│   ├── product-sales-information.tsx
+│   ├── category-tags.tsx
+│   └── add-category-inline-dialog.tsx
+└── product-create/
+    ├── product-create-sheet.tsx
+    ├── product-create-form.tsx
+    └── product-create-form-fields.tsx
 ```
 
 ## Data Flow
@@ -54,13 +53,13 @@ _components/
 page.tsx (Server)
   ├── reads searchParams + calls services (api-main/*)
   ├── mapSortToApiParams / buildCatalogReturnTo  (lib/)
-  └── <CatalogShell>
+  └── <ProductDashboard>
         ├── renders <ProductGrid> (Server) twice: grid + list variants
-        └── <CatalogToolbar> (Client)
+        └── <ProductToolbar> (Client)
               ├── reads/writes searchParams via router.replace() (data filters only)
-              │     ├── <CatalogSearch>      ─> `search` searchParam
-              │     ├── <FilterPanel>        ─> category / brand / type / stock / sort
-              │     └── <ViewModeToggle>     ─> client state (localStorage) — grid|list, instant
+              │     ├── <RegistrySearch>      ─> `search` searchParam
+              │     ├── <ProductFilterPanel>  ─> category / brand / type / stock / sort
+              │     └── <RegistryViewModeToggle> ─> client state (localStorage)
               └── renders grid OR list variant based on client viewMode (no refetch on toggle)
                     ├── <ProductCard> (Server)
                     │     ├── <ProductImageSection> (Client) ─> upload or display
@@ -80,13 +79,13 @@ reimplement this logic elsewhere.
 
 The `view` preference (`grid` or `list`) is not a search parameter. It remains
 in `localStorage` under `catalog:product-view-mode` and is managed by
-`CatalogToolbar`.
+`ProductToolbar`.
 
 ## Server / Client Boundaries
 
-- **Server Components (default):** `catalog-shell`, `product-grid`, `product-grid-skeleton`, `product-card`, `product-card-fields`, `category-tags`. They only read props and render — no `useState`, no `useRouter`.
+- **Server Components (default):** `product-dashboard`, `product-grid`, `product-grid-skeleton`, `product-card`, `product-card-fields`, `category-tags`. They only read props and render — no `useState`, no `useRouter`.
 - **Client Components (`"use client"`):** reserved for actual interactivity — toolbar (URL/overlay), toggles, inline editors, uploaders. Keep `"use client"` in the **smallest component possible** and receive data via props.
-- Why are the grid and list variants both passed to the toolbar? The toolbar (Client) renders only one based on the client-side `viewMode`, so toggling is instant (no URL navigation, no data refetch). Both variants are Server Component subtrees built by `CatalogShell`.
+- Why are the grid and list variants both passed to the toolbar? The toolbar (Client) renders only one based on the client-side `viewMode`, so toggling is instant (no URL navigation, no data refetch). Both variants are Server Component subtrees built by `ProductDashboard`.
 
 ## Inline Editors (Mutations)
 

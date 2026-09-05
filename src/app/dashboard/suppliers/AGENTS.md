@@ -45,11 +45,10 @@ suppliers/
 ├── _components/
 │   ├── index.ts                          # Public list exports and URL helpers
 │   ├── supplier-dashboard.tsx            # Server: composes grid/list subtrees -> toolbar
-│   ├── supplier-toolbar.tsx              # Client: URL filters + view mode + create
-│   ├── supplier-collection.tsx           # Server: grid cards + desktop table + empty/error
-│   ├── supplier-pagination.tsx           # Server: thin RegistryPagination wrapper
-│   ├── supplier-image.tsx                # Client: avatar via shared RegistryEntityImage
-│   ├── supplier-create-sheet.tsx         # Client: new supplier sheet + discard dialog (name only)
+│   ├── supplier-toolbar/                 # Client: URL filters + view mode + create
+│   ├── supplier-list/                    # Collection, pagination, image, and upload
+│   ├── supplier-create/                  # New supplier sheet + discard dialog (name only)
+│   ├── supplier-form-fields.tsx          # Shared by create and detail editing
 │   ├── lib/
 │   │   └── search-params.ts              # Pure URL <-> filters mapping (single source of truth)
 │   └── types/

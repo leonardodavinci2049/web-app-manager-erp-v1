@@ -1,6 +1,6 @@
 import type { UISupplier } from "@/services/api-main/supplier";
-import { SupplierCollection } from "./supplier-collection";
-import { SupplierToolbar } from "./supplier-toolbar";
+import { SupplierCollection } from "./supplier-list/supplier-collection";
+import { SupplierToolbar } from "./supplier-toolbar/supplier-toolbar";
 import type { SupplierSearchParams } from "./types/supplier-dashboard-types";
 
 interface SupplierDashboardProps {

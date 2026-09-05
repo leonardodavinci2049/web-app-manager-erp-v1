@@ -45,11 +45,9 @@ ptype/
 ├── _components/
 │   ├── index.ts                          # Public exports (URL helpers + types; NOT the detail layout)
 │   ├── ptype-dashboard.tsx               # Server: composes grid/list subtrees -> toolbar
-│   ├── ptype-toolbar.tsx                 # Client: URL filters + view mode + create
-│   ├── ptype-collection.tsx             # Server: grid cards + desktop table + empty/error
-│   ├── ptype-pagination.tsx             # Server: thin RegistryPagination wrapper
-│   ├── ptype-image.tsx                  # Client: avatar via shared RegistryEntityImage
-│   ├── ptype-create-sheet.tsx           # Client: new ptype sheet + discard dialog (name only)
+│   ├── ptype-toolbar/                    # Client: URL filters + view mode + create
+│   ├── ptype-list/                       # Collection, pagination, image, and upload
+│   ├── ptype-create/                     # New ptype sheet + discard dialog (name only)
 │   ├── lib/
 │   │   └── search-params.ts             # Pure URL <-> filters mapping (single source of truth)
 │   └── types/

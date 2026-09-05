@@ -48,10 +48,8 @@ seller/
 ├── _components/
 │   ├── index.ts                          # Public exports (SellerImage + URL helpers)
 │   ├── seller-dashboard.tsx              # Server: composes grid/list subtrees -> toolbar
-│   ├── seller-toolbar.tsx                # Client: URL filters + view mode (NO create button)
-│   ├── seller-collection.tsx             # Server: grid cards + desktop table + empty/error
-│   ├── seller-pagination.tsx             # Server: thin RegistryPagination wrapper
-│   ├── seller-image.tsx                  # Client: avatar via shared RegistryEntityImage
+│   ├── seller-toolbar/                   # Client: URL filters + view mode (NO create button)
+│   ├── seller-list/                      # Collection, pagination, image, and upload
 │   ├── lib/
 │   │   └── search-params.ts              # Pure URL <-> filters mapping (single source of truth)
 │   └── types/

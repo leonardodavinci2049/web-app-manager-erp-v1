@@ -1,6 +1,6 @@
 import type { UICustomerListItem } from "@/services/api-main/customer-general";
-import { CustomerCollection } from "./customer-collection";
-import { CustomerToolbar } from "./customer-toolbar";
+import { CustomerCollection } from "./customer-list/customer-collection";
+import { CustomerToolbar } from "./customer-toolbar/customer-toolbar";
 import type { CustomerSearchParams } from "./types/customer-dashboard-types";
 
 interface CustomerDashboardProps {

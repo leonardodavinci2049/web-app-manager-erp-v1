@@ -32,15 +32,13 @@ product/
 ├── _components/
 │   ├── AGENTS.md                    # Component-level conventions
 │   ├── index.ts                     # Public exports used by the page
-│   ├── catalog-shell.tsx
-│   ├── catalog-loading-products.tsx
-│   ├── catalog-toolbar/
-│   ├── product-grid/
-│   ├── product-card/
+│   ├── product-dashboard.tsx        # Server composition for the list page
+│   ├── product-toolbar/             # Search, filters, view, and create coordination
+│   ├── product-list/                # Collection, cards, table, image, and pagination
+│   ├── product-create/              # Product creation sheet and form
 │   ├── lib/
 │   └── types/
-├── [id]/                            # Product detail route; has its own guide
-└── new-product/                     # Standalone product creation route
+└── [id]/                            # Product detail route; has its own guide
 ```
 
 Most mutations consumed by the catalog remain in the global Server Actions
@@ -63,7 +61,7 @@ Keep `page.tsx` as a Server Component. It should:
 7. Flatten the taxonomy with `flattenCategories()`.
 8. Build detail-page return navigation with
    `buildCatalogReturnTo(searchParams, "/dashboard/product")`.
-9. Render `CatalogShell` with minimal UI DTOs.
+9. Render `ProductDashboard` with minimal UI DTOs.
 
 Do not duplicate filter parsing or URL construction in `page.tsx`.
 

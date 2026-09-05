@@ -1,7 +1,7 @@
 import { DetailRecordHeading } from "@/app/dashboard/_components/detail-page";
 import { Badge } from "@/components/ui/badge";
 import type { UIPtype } from "@/services/api-main/ptype";
-import { PtypeImage } from "../../../_components/ptype-image";
+import { PtypeImage } from "../../../_components/ptype-list/ptype-image";
 
 interface PtypeHeadDataSectionProps {
   item: Pick<UIPtype, "id" | "name" | "imagePath" | "inactive">;
