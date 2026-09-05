@@ -45,22 +45,23 @@ welcome/
 └── page.tsx          # Server: greeting + authWarning + module index
 ```
 
-## Stale Module Links
+## Module Links
 
-The `modules` array is **hardcoded** and currently **out of sync** with the real
-routes. Treat it as a manual index, not a source of truth:
+The `modules` array is **hardcoded**; treat it as a manual index, not a source of
+truth. It is currently in sync with the real routes:
 
-- "Cadastro de Clientes" links to `/dashboard/customer/customer-list` — the real
-  route is `/dashboard/customer`.
-- "Marcas", "Fornecedores", "Transportadoras", "Entradas de Produtos", and
-  "Compras" link to `/dashboard/development` (the maintenance/stub route), even
-  though `brand`, `suppliers`, and `carriers` routes now exist.
-- "Catálogo de Produtos", "Cadastro de Categorias", and "Relatórios" link to
-  real routes (`/dashboard/product`, `/dashboard/category`,
-  `/dashboard/report/panel`).
+- "Catálogo de Produtos" → `/dashboard/product`; "Cadastro de Categorias" →
+  `/dashboard/category`; "Cadastro de Clientes" → `/dashboard/customer`;
+  "Marcas" → `/dashboard/brand`; "Fornecedores" → `/dashboard/suppliers`;
+  "Transportadoras" → `/dashboard/carriers`; "Entradas de Produtos" →
+  `/dashboard/entry`; "Relatórios" → `/dashboard/report/panel`.
+- "Compras" is the only stub: it links to `/dashboard/development` (the
+  maintenance route) because the purchasing flow is not implemented yet — the
+  sidebar points there too.
 
-When wiring a module to its real route, update the `href` here. The authoritative
-primary navigation lives in `src/app/dashboard/_components/app-sidebar/app-sidebar.tsx`
+When a new module becomes real, update the `href` (and its maintenance-themed
+`description`) here. The authoritative primary navigation lives in
+`src/app/dashboard/_components/app-sidebar/app-sidebar.tsx`
 (`data.navMain`); keep both in sync. See
 `src/app/dashboard/_components/AGENTS.md`.
 
