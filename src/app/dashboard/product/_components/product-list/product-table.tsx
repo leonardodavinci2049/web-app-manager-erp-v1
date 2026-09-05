@@ -126,11 +126,17 @@ export function ProductTable({ products, catalogReturnTo }: ProductTableProps) {
                 </TableCell>
                 <TableCell className="whitespace-normal tabular-nums">
                   <div className="space-y-1 text-xs">
-                    <p>Ano: {formatSalesQuantity(product.salesYear)}</p>
                     <p>
-                      Trim.: {formatSalesQuantity(product.salesLastThreeMonths)}
+                      Há 2 meses:{" "}
+                      {formatSalesQuantity(product.salesTwoMonthsAgo)}
                     </p>
-                    <p>Mês: {formatSalesQuantity(product.salesMonth)}</p>
+                    <p>
+                      30 dias: {formatSalesQuantity(product.salesLast30Days)}
+                    </p>
+                    <p>
+                      Mês atual:{" "}
+                      {formatSalesQuantity(product.salesCurrentMonth)}
+                    </p>
                   </div>
                 </TableCell>
                 <TableCell className="tabular-nums">
