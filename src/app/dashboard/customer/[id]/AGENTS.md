@@ -286,7 +286,7 @@ This segment intentionally depends on the parent customer feature:
   `CustomerActionResult` and shared unions.
 - URL helpers: `../_components` (`getSafeCustomerReturnTo`,
   `buildCustomerUrl`, `buildCustomerDetailHref`).
-- List avatar: `../_components/customer-image` is reused on the detail header.
+- List avatar: `../_components/customer-list/customer-image` is reused on the detail header.
 
 Keep these imports pointing at the parent; do not fork shared types or actions
 into this folder.

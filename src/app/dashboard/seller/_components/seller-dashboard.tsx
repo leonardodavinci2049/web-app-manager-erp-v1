@@ -1,6 +1,6 @@
 import type { UISellerListItem } from "@/services/api-main/seller";
-import { SellerCollection } from "./seller-collection";
-import { SellerToolbar } from "./seller-toolbar";
+import { SellerCollection } from "./seller-list/seller-collection";
+import { SellerToolbar } from "./seller-toolbar/seller-toolbar";
 import type { SellerSearchParams } from "./types/seller-dashboard-types";
 
 interface SellerDashboardProps {

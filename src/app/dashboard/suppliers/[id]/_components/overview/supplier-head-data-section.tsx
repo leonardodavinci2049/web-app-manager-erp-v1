@@ -1,7 +1,7 @@
 import { DetailRecordHeading } from "@/app/dashboard/_components/detail-page";
 import { Badge } from "@/components/ui/badge";
 import type { UISupplier } from "@/services/api-main/supplier";
-import { SupplierImage } from "../../../_components/supplier-image";
+import { SupplierImage } from "../../../_components/supplier-list/supplier-image";
 import { resolveSupplierPersonTypeLabel } from "../supplier-detail-utils";
 
 interface SupplierHeadDataSectionProps {

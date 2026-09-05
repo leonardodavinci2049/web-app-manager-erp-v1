@@ -47,11 +47,9 @@ carriers/
 ├── _components/
 │   ├── index.ts                          # Public list exports and URL helpers
 │   ├── carrier-dashboard.tsx             # Server: composes grid/list subtrees -> toolbar
-│   ├── carrier-toolbar.tsx               # Client: URL filters + view mode + create
-│   ├── carrier-collection.tsx            # Server: grid cards + desktop table + empty/error
-│   ├── carrier-pagination.tsx            # Server: thin RegistryPagination wrapper
-│   ├── carrier-image.tsx                 # Client: avatar via shared RegistryEntityImage
-│   ├── carrier-create-sheet.tsx          # Client: new carrier form (uses CarrierFormFields)
+│   ├── carrier-toolbar/                  # Client: URL filters + view mode + create
+│   ├── carrier-list/                     # Collection, pagination, image, and upload
+│   ├── carrier-create/                   # Client: new carrier form
 │   ├── carrier-form-fields.tsx           # Shared form fields (create + detail edit)
 │   ├── lib/
 │   │   └── search-params.ts              # Pure URL <-> filters mapping (single source of truth)

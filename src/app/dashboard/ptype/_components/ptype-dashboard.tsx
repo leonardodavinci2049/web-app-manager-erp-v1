@@ -1,6 +1,6 @@
 import type { UIPtype } from "@/services/api-main/ptype";
-import { PtypeCollection } from "./ptype-collection";
-import { PtypeToolbar } from "./ptype-toolbar";
+import { PtypeCollection } from "./ptype-list/ptype-collection";
+import { PtypeToolbar } from "./ptype-toolbar/ptype-toolbar";
 import type { PtypeSearchParams } from "./types/ptype-dashboard-types";
 
 interface PtypeDashboardProps {

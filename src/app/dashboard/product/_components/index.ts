@@ -1,4 +1,3 @@
-export { CatalogShell } from "./catalog-shell";
 export { flattenCategories, getLevelPrefix } from "./lib/category-helpers";
 export {
   buildCatalogReturnTo,
@@ -10,11 +9,12 @@ export {
   parseCatalogSearchParams,
   SORT_OPTIONS,
 } from "./lib/search-params";
+export { ProductDashboard } from "./product-dashboard";
 export type {
-  CatalogFilters,
   CategoryOption,
-  NewProductTaxonomyOption,
   PanelFilterType,
+  ProductCreateTaxonomyOption,
+  ProductFilters,
   SortOption,
   ViewMode,
-} from "./types/catalog-types";
+} from "./types/product-dashboard-types";

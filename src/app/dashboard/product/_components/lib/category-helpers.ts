@@ -1,5 +1,5 @@
 import type { UITaxonomyMenuItem } from "@/services/api-main/taxonomy-base/transformers/transformers";
-import type { CategoryOption } from "../types/catalog-types";
+import type { CategoryOption } from "../types/product-dashboard-types";
 
 /**
  * Prefixo de indentacao visual baseado no nivel da categoria.

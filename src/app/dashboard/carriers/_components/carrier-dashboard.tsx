@@ -1,6 +1,6 @@
 import type { UICarrier } from "@/services/api-main/carrier";
-import { CarrierCollection } from "./carrier-collection";
-import { CarrierToolbar } from "./carrier-toolbar";
+import { CarrierCollection } from "./carrier-list/carrier-collection";
+import { CarrierToolbar } from "./carrier-toolbar/carrier-toolbar";
 import type { CarrierSearchParams } from "./types/carrier-dashboard-types";
 
 interface CarrierDashboardProps {

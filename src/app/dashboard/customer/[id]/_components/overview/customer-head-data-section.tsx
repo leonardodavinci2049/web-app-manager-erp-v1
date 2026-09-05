@@ -1,7 +1,7 @@
 import { DetailRecordHeading } from "@/app/dashboard/_components/detail-page";
 import { Badge } from "@/components/ui/badge";
 import type { UICustomerDetail } from "@/services/api-main/customer-general";
-import { CustomerImage } from "../../../_components/customer-image";
+import { CustomerImage } from "../../../_components/customer-list/customer-image";
 
 interface CustomerHeadDataSectionProps {
   customer: Pick<

@@ -6,14 +6,14 @@ import {
 } from "@/app/dashboard/_components/registry/registry-page-limits";
 import type {
   AdvancedFilterFlag,
-  CatalogFilters,
   OperationListFlag,
+  ProductFilters,
   SalesListFlag,
   SortOption,
   StockListFlag,
   TernaryFlag,
   VariousListFlag,
-} from "../types/catalog-types";
+} from "../types/product-dashboard-types";
 
 const DEFAULT_SORT: SortOption = "newest";
 const DEFAULT_CATEGORY = "all";
@@ -153,7 +153,7 @@ function parseSort(params: URLSearchParams): SortOption {
  */
 export function parseCatalogSearchParams(
   sp: URLSearchParams | Record<string, SearchParamValue>,
-): CatalogFilters {
+): ProductFilters {
   const params = normalizeParams(sp);
   const defaultPeriod = getDefaultRegistrationPeriod();
   const startDate = parseDate(params, "start-date") || defaultPeriod.startDate;
@@ -218,11 +218,11 @@ export function parseCatalogSearchParams(
   };
 }
 
-function parsePageLimit(params: URLSearchParams): CatalogFilters["pageLimit"] {
+function parsePageLimit(params: URLSearchParams): ProductFilters["pageLimit"] {
   const rawValue = params.get("limit");
   const value = rawValue === null ? Number.NaN : Number(rawValue);
   return (REGISTRY_PAGE_LIMITS as readonly number[]).includes(value)
-    ? (value as CatalogFilters["pageLimit"])
+    ? (value as ProductFilters["pageLimit"])
     : REGISTRY_DEFAULT_PAGE_LIMIT;
 }
 
@@ -232,7 +232,7 @@ export interface CatalogPagingState {
 }
 
 /**
- * Paging-only URL state (`page` and `accum`) kept outside `CatalogFilters` so
+ * Paging-only URL state (`page` and `accum`) kept outside `ProductFilters` so
  * any filter change naturally resets both, matching the list-page pattern.
  */
 export function parseCatalogPagingState(
@@ -257,7 +257,7 @@ export function parseCatalogPagingState(
  * e' uma preferencia de exibicao gerada no cliente (localStorage).
  */
 export function buildCatalogUrl(
-  filters: CatalogFilters,
+  filters: ProductFilters,
   pathname: string,
 ): string {
   const params = new URLSearchParams();

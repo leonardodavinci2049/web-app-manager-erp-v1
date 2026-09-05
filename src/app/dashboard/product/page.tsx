@@ -13,9 +13,9 @@ import {
 } from "@/services/api-main/taxonomy-base/taxonomy-base-service-api";
 import {
   buildCatalogReturnTo,
-  CatalogShell,
   flattenCategories,
   mapSortToApiParams,
+  ProductDashboard,
   parseCatalogPagingState,
   parseCatalogSearchParams,
 } from "./_components";
@@ -142,7 +142,7 @@ export default async function CatalogPage(props: CatalogPageProps) {
         title="Catálogo de produtos"
         description="Consulte, filtre e mantenha os produtos disponíveis no catálogo."
       >
-        <CatalogShell
+        <ProductDashboard
           products={products}
           total={total}
           page={paging.page}

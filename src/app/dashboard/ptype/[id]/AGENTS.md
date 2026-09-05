@@ -252,7 +252,7 @@ This segment depends on the parent ptype feature for:
 - URL helpers: `getSafePtypeReturnTo`, `buildPtypeDetailHref` from
   `../_components` (re-exported via `_components/index.ts`).
 - Types: `PtypeActionResult` from `../_components/types/ptype-dashboard-types`.
-- List avatar: `PtypeImage` from `../../_components/ptype-image`.
+- List avatar: `PtypeImage` from `../../_components/ptype-list/ptype-image`.
 
 Unlike carriers/suppliers (whose mutations are shared in the parent `_actions`),
 ptype keeps its detail mutations **local** to this segment. Only
