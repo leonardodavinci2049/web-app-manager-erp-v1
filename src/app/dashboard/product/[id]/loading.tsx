@@ -1,5 +1,5 @@
+import { SiteHeaderWithBreadcrumb } from "@/app/dashboard/_components/header/site-header-with-breadcrumb";
 import { ProductDetailLayoutSkeleton } from "@/app/dashboard/product/[id]/_components/product-detail-layout-skeleton";
-import { SiteHeaderWithBreadcrumb } from "@/components/dashboard/header/site-header-with-breadcrumb";
 
 export default function ProductDetailsLoading() {
   return (

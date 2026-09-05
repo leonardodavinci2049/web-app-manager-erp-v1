@@ -1,6 +1,6 @@
 import { connection } from "next/server";
-import { SiteHeaderWithBreadcrumb } from "@/components/dashboard/header/site-header-with-breadcrumb";
-import { RegistryPageShell } from "@/components/registry";
+import { SiteHeaderWithBreadcrumb } from "@/app/dashboard/_components/header/site-header-with-breadcrumb";
+import { RegistryPageShell } from "@/app/dashboard/_components/registry";
 import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
 import { getBrands } from "@/services/api-main/brand/brand-service-api";

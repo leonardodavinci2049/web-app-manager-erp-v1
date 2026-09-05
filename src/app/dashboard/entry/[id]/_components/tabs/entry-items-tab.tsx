@@ -1,5 +1,5 @@
 import { Eye, PackageOpen, Plus, Trash2 } from "lucide-react";
-import { RegistryEntityImage } from "@/components/registry";
+import { RegistryEntityImage } from "@/app/dashboard/_components/registry";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

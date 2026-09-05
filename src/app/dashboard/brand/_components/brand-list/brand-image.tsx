@@ -1,6 +1,6 @@
 "use client";
 
-import { RegistryEntityImage } from "@/components/registry";
+import { RegistryEntityImage } from "@/app/dashboard/_components/registry";
 import { BrandImageUpload } from "./brand-image-upload";
 
 const DEFAULT_IMAGE = "/default-images/brand.webp";

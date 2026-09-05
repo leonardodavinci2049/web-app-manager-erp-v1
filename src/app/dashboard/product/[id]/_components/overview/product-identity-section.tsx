@@ -1,5 +1,5 @@
 import { DetailRecordHeading } from "@/app/dashboard/_components/detail-page";
-import { RegistryEntityImage } from "@/components/registry";
+import { RegistryEntityImage } from "@/app/dashboard/_components/registry";
 import type { UIProductManager } from "@/services/api-main/product-manager/transformers/transformers";
 import { ProductNameEditor } from "./product-name-editor";
 
