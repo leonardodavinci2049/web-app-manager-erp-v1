@@ -55,7 +55,7 @@ const modules = [
   {
     title: "Cadastro de Clientes",
     description: "Acesse o cadastro de clientes e acompanhe o relacionamento.",
-    href: "/dashboard/customer/customer-list",
+    href: "/dashboard/customer",
     icon: Users,
     color: "text-amber-500",
     bgColor: "bg-amber-500/10",
@@ -63,8 +63,8 @@ const modules = [
   },
   {
     title: "Marcas",
-    description: "Área de marcas em manutenção e evolução contínua.",
-    href: "/dashboard/development",
+    description: "Cadastre e organize as marcas dos seus produtos.",
+    href: "/dashboard/brand",
     icon: BadgeCheck,
     color: "text-emerald-500",
     bgColor: "bg-emerald-500/10",
@@ -72,8 +72,8 @@ const modules = [
   },
   {
     title: "Fornecedores",
-    description: "Cadastros e integrações de fornecedores em manutenção.",
-    href: "/dashboard/development",
+    description: "Gerencie fornecedores e integrações do seu cadastro.",
+    href: "/dashboard/suppliers",
     icon: Factory,
     color: "text-indigo-500",
     bgColor: "bg-indigo-500/10",
@@ -81,9 +81,8 @@ const modules = [
   },
   {
     title: "Transportadoras",
-    description:
-      "Gerencie transportadoras e entregas quando o módulo estiver disponível.",
-    href: "/dashboard/development",
+    description: "Gerencie transportadoras e opções de entrega.",
+    href: "/dashboard/carriers",
     icon: Truck,
     color: "text-purple-500",
     bgColor: "bg-purple-500/10",
@@ -91,8 +90,8 @@ const modules = [
   },
   {
     title: "Entradas de Produtos",
-    description: "Controle entradas e abastecimento com módulo em manutenção.",
-    href: "/dashboard/development",
+    description: "Registre entradas e abastecimento de produtos.",
+    href: "/dashboard/entry",
     icon: Archive,
     color: "text-rose-500",
     bgColor: "bg-rose-500/10",
@@ -138,7 +137,7 @@ const quickInfoItems = [
   },
   {
     title:
-      "Marcas, fornecedores, transportadoras, entradas e compras seguem apontando para manutenção.",
+      "Somente o fluxo de compras segue em manutenção nesta versão do sistema.",
     icon: Wrench,
     color: "text-teal-500",
   },
