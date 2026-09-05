@@ -1,7 +1,5 @@
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 import { Suspense } from "react";
-
+import { HeaderNavUser } from "@/app/dashboard/_components/header/header-nav-user";
 import ModeToggle from "@/components/theme/mode-toggle";
 import {
   Breadcrumb,
@@ -13,9 +11,6 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { auth } from "@/lib/auth/auth";
-import { NavUser } from "../app-sidebar/nav-user";
-import { LogoutButton } from "./logout-button";
 
 interface SiteHeaderWithBreadcrumbProps {
   title?: string;
@@ -26,23 +21,15 @@ interface SiteHeaderWithBreadcrumbProps {
   }>;
 }
 
-export async function SiteHeaderWithBreadcrumb({
+export function SiteHeaderWithBreadcrumb({
   title = "Dashboard",
   breadcrumbItems = [
     { label: "Dashboard", href: "#" },
     { label: "Analytics", isActive: true },
   ],
 }: SiteHeaderWithBreadcrumbProps) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session?.user) {
-    redirect("/sign-in");
-  }
-
   return (
-    <header className="flex h-(--header-height) w-full shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
+    <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
       <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
         <SidebarTrigger className="-ml-1" />
         <Separator
@@ -77,20 +64,19 @@ export async function SiteHeaderWithBreadcrumb({
           </Breadcrumb>
         </div>
 
-        {/* Title for smaller screens */}
-        <h1 className="text-base font-medium md:hidden">{title}</h1>
+        {/* Compact route identifier. The page content owns the semantic h1. */}
+        <div className="text-base font-medium md:hidden">{title}</div>
         <div className="ml-auto flex items-center gap-2">
           <Suspense>
             <ModeToggle />
           </Suspense>
-          <LogoutButton />
 
           <Suspense
             fallback={
               <div className="bg-muted/30 h-10 w-32 animate-pulse rounded-full" />
             }
           >
-            <NavUser />
+            <HeaderNavUser />
           </Suspense>
         </div>
       </div>

@@ -1,10 +1,18 @@
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { SiteHeaderWithBreadcrumb } from "@/app/dashboard/_components/header/site-header-with-breadcrumb";
+import { auth } from "@/lib/auth/auth";
 import { ChartAreaInteractive } from "./_components/chart-area-interactive";
 import data from "./_components/data.json";
 import { DataTable } from "./_components/data-table";
 import { SectionCards } from "./_components/section-cards";
 
-const Page = () => {
+const Page = async () => {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session?.user) {
+    redirect("/sign-in");
+  }
+
   return (
     <>
       <SiteHeaderWithBreadcrumb

@@ -50,13 +50,15 @@ or `_utils/` anywhere in this tree.
 
 Each is a **Server Component** that:
 
-1. Renders `SiteHeaderWithBreadcrumb` (title "Dashboard", breadcrumb
+1. Resolves the session with `auth.api.getSession({ headers: await headers() })`
+   and redirects to `/sign-in` when unauthenticated (the shared header no longer
+   performs this check).
+2. Renders `SiteHeaderWithBreadcrumb` (title "Dashboard", breadcrumb
    `Dashboard` → active label).
-2. Renders `<DevelopmentPage />`.
+3. Renders `<DevelopmentPage />`.
 
-They do not call `connection()` or `getAuthContext()`; authentication is delegated
-to `src/app/dashboard/layout.tsx`. They import the header via the relative path
-`../../_components/header/site-header-with-breadcrumb`.
+They do not call `connection()` or `getAuthContext()`. They import the header via
+the relative path `../../_components/header/site-header-with-breadcrumb`.
 
 Do not present these as functional reports. To make one real, follow the
 "Conventions for Changes" below.
@@ -65,8 +67,9 @@ Do not present these as functional reports. To make one real, follow the
 
 `panel/page.tsx` is a **Server Component**. It composes, in order, `SectionCards`,
 `ChartAreaInteractive`, and `<DataTable data={data} />` (where `data` is the
-`data.json` import). It does not call `connection()` or `getAuthContext()` and
-has no services or Server Actions. It imports the header via the `@/app/dashboard/...`
+`data.json` import). It resolves the session for the sign-in redirect gate (no
+`connection()` or `getAuthContext()`) and has no services or Server Actions. It
+imports the header via the `@/app/dashboard/...`
 alias (note: the placeholder pages use a relative path — pick one style and don't
 mix within a change).
 
@@ -105,9 +108,9 @@ mix within a change).
 
 ## Authentication and Data Isolation
 
-No report page or component resolves the session or calls `connection()` today;
-auth is handled by the dashboard layout. Because there is no real data, there is
-no organization-scoped isolation concern yet.
+Every report page resolves the session and redirects to `/sign-in` when
+unauthenticated; none calls `connection()` today. Because there is no real data,
+there is no organization-scoped isolation concern yet.
 
 **When real data is wired in**, the customer-route rules apply (see
 `src/app/dashboard/customer/AGENTS.md`): every page reading org-scoped data must
