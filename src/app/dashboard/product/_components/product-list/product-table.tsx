@@ -131,7 +131,8 @@ export function ProductTable({ products, catalogReturnTo }: ProductTableProps) {
                       {formatSalesQuantity(product.salesTwoMonthsAgo)}
                     </p>
                     <p>
-                    Mês anterior:{" "}{formatSalesQuantity(product.salesPreviousMonth)}
+                      Mês anterior:{" "}
+                      {formatSalesQuantity(product.salesPreviousMonth)}
                     </p>
                     <p>
                       Mês atual:{" "}

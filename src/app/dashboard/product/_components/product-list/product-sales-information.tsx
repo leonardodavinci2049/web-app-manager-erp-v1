@@ -40,36 +40,35 @@ interface ProductSalesInformationProps {
 
 /**
  * Resumo compacto de vendas para os cards do catalogo (Server Component).
- * Mantem os periodos de vendas em colunas antes da informacao de estoque.
+ * Mantem cada periodo em uma linha para preservar a legibilidade em cards
+ * estreitos.
  */
 export function ProductSalesInformation({
   product,
 }: ProductSalesInformationProps) {
   return (
     <div className="border-y py-1 text-[10px] leading-tight sm:text-xs">
-      <div className="grid grid-cols-[minmax(2.75rem,auto)_repeat(3,minmax(0,1fr))] items-end gap-x-0.5 text-center">
-        <span className="text-left font-medium">Vendas</span>
-        <span className="whitespace-nowrap text-muted-foreground tracking-tight">
-          Há 2 meses
-        </span>
-        <span className="whitespace-nowrap text-muted-foreground tracking-tight">
-          Mês anterior
-        </span>
-        <span className="whitespace-nowrap text-muted-foreground tracking-tight">
-          Mês atual
-        </span>
-
-        <span className="text-left text-muted-foreground">Total:</span>
-        <span className="font-medium">
-          {formatSalesQuantity(product.salesTwoMonthsAgo)}
-        </span>
-        <span className="font-medium">
-          {formatSalesQuantity(product.salesPreviousMonth)}
-        </span>
-        <span className="font-medium">
-          {formatSalesQuantity(product.salesCurrentMonth)}
-        </span>
-      </div>
+      <p className="font-medium">Vendas</p>
+      <dl className="mt-0.5 space-y-0.5">
+        <div className="flex items-baseline justify-between gap-2">
+          <dt className="min-w-0 text-muted-foreground">Há 2 meses</dt>
+          <dd className="shrink-0 font-medium tabular-nums">
+            {formatSalesQuantity(product.salesTwoMonthsAgo)}
+          </dd>
+        </div>
+        <div className="flex items-baseline justify-between gap-2">
+          <dt className="min-w-0 text-muted-foreground">Mês anterior</dt>
+          <dd className="shrink-0 font-medium tabular-nums">
+            {formatSalesQuantity(product.salesPreviousMonth)}
+          </dd>
+        </div>
+        <div className="flex items-baseline justify-between gap-2">
+          <dt className="min-w-0 text-muted-foreground">Mês atual</dt>
+          <dd className="shrink-0 font-medium tabular-nums">
+            {formatSalesQuantity(product.salesCurrentMonth)}
+          </dd>
+        </div>
+      </dl>
 
       <p className="mt-1 text-muted-foreground">
         Últ. venda:{" "}
