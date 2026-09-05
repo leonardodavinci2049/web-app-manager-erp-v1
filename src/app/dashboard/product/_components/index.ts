@@ -6,6 +6,7 @@ export {
   buildProductDetailsHref,
   getSafeProductReturnTo,
   mapSortToApiParams,
+  parseCatalogPagingState,
   parseCatalogSearchParams,
   SORT_OPTIONS,
 } from "./lib/search-params";

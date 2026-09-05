@@ -58,6 +58,7 @@ function getDefaultFilters(search: string): CustomerSearchParams {
     order: "desc",
     page: 0,
     limit: DEFAULT_CUSTOMER_LIMIT,
+    accum: 0,
   };
 }
 
@@ -179,7 +180,7 @@ export function CustomerToolbar({
 
   const removeFilter = (key: string) => {
     const defaults = getDefaultFilters(searchState.search);
-    const nextState = { ...searchState, page: 0 };
+    const nextState = { ...searchState, page: 0, accum: 0 };
     switch (key) {
       case "categoryId":
         nextState.categoryId = defaults.categoryId;
@@ -242,7 +243,9 @@ export function CustomerToolbar({
             placeholder="Buscar cliente..."
             accessibleLabel="Pesquisar clientes"
             pending={isPending}
-            onSearch={(search) => navigate({ ...searchState, search, page: 0 })}
+            onSearch={(search) =>
+              navigate({ ...searchState, search, page: 0, accum: 0 })
+            }
           />
           <CustomerFilterPanel
             filters={searchState}
@@ -261,10 +264,13 @@ export function CustomerToolbar({
             type="button"
             className="hidden h-11 shrink-0 md:ml-auto md:inline-flex"
             onClick={() => setCreateOpen(true)}
+            aria-label="+ Novo cadastro de cliente"
           >
             <Plus className="size-4" aria-hidden="true" />
-            <span className="hidden lg:inline">Adicionar cliente</span>
-            <span className="sr-only lg:hidden">Adicionar cliente</span>
+            <span className="hidden lg:inline">+ Novo Cadastro</span>
+            <span className="sr-only lg:hidden">
+              + Novo cadastro de cliente
+            </span>
           </Button>
         </div>
       </div>

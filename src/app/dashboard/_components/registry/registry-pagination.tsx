@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
+import { ACCUM_PARAM_NAME } from "./registry-page-limits";
 
 interface RegistryPaginationProps {
   currentPage: number;
@@ -53,6 +54,8 @@ export function RegistryPagination({
 
   const navigate = (page: number) => {
     const params = new URLSearchParams(searchParams.toString());
+    // Selecting another page resets any "load more" accumulation.
+    params.delete(ACCUM_PARAM_NAME);
     if (page <= 0) params.delete(paramName);
     else params.set(paramName, String(page));
     const query = params.toString();

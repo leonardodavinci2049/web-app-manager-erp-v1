@@ -463,6 +463,7 @@ export function CustomerFilterPanel({
                   startDate: draft.operation === 7 ? draft.startDate : "",
                   endDate: draft.operation === 7 ? draft.endDate : "",
                   page: 0,
+                  accum: 0,
                 });
                 onOpenChange(false);
               }}

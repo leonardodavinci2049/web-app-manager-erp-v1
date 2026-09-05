@@ -31,10 +31,13 @@ _components/
 │   ├── registry-entity-image.tsx      # Standardized entity image (grid/list/compact)
 │   ├── registry-filter-sheet.tsx      # Mobile filter sheet
 │   ├── registry-image-upload-stub.tsx # Visual upload stub (replaced by uploadTrigger)
+│   ├── fetch-accumulated-pages.ts     # Server helper: fixed-size batch accumulation for load-more
+│   ├── registry-load-more.tsx         # "Carregar mais" client island (increments `accum` URL param)
 │   ├── registry-loading.tsx           # Listing segment skeleton
 │   ├── registry-mobile-bottom-bar.tsx # Mobile bottom action bar
 │   ├── registry-page-shell.tsx        # Listing page shell
-│   ├── registry-pagination.tsx        # Cursor pagination controls
+│   ├── registry-page-limits.ts        # Shared page-limit values + `accum` cap constant
+│   ├── registry-pagination.tsx        # Numbered pagination (resets `accum` on page change)
 │   ├── registry-results.tsx           # Results section frame
 │   ├── registry-search.tsx            # Debounced search input
 │   ├── registry-view-mode-toggle.tsx  # Grid/list toggle

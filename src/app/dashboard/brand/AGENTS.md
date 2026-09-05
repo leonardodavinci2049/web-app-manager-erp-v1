@@ -172,6 +172,7 @@ and active-filter counting is inlined in `BrandToolbar`.
 | `order` | `asc`, `desc` (default `desc`) | Ordering direction |
 | `page` | non-negative integer (default `0`) | Page index (zero-based) |
 | `limit` | `25`, `50`, `100` (default `50` = `BRAND_PAGE_SIZE`) | Page size |
+| `accum` | non-negative integer (default `0`, capped by `MAX_REGISTRY_EXTRA_BATCHES`) | Extra batches appended by "Carregar mais" on top of `page`; any filter/search/sort/limit change or page selection resets it |
 
 Detail-only parameters:
 

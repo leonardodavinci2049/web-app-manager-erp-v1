@@ -1,3 +1,4 @@
+import { MAX_REGISTRY_EXTRA_BATCHES } from "@/app/dashboard/_components/registry/registry-page-limits";
 import {
   type CustomerOperation,
   type CustomerOrder,
@@ -87,6 +88,10 @@ export function parseCustomerSearchParams(
     limit: VALID_LIMITS.has(limit as CustomerPageLimit)
       ? (limit as CustomerPageLimit)
       : DEFAULT_CUSTOMER_LIMIT,
+    accum: Math.min(
+      parseNonNegativeInteger(params, "accum"),
+      MAX_REGISTRY_EXTRA_BATCHES,
+    ),
   };
 }
 
@@ -115,6 +120,7 @@ export function buildCustomerUrl(
   if (state.page > 0) params.set("page", String(state.page));
   if (state.limit !== DEFAULT_CUSTOMER_LIMIT)
     params.set("limit", String(state.limit));
+  if (state.accum > 0) params.set("accum", String(state.accum));
   const query = params.toString();
   return query ? `${pathname}?${query}` : pathname;
 }

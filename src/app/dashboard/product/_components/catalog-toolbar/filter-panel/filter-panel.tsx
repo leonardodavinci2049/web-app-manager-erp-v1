@@ -9,6 +9,10 @@ import {
   useRef,
   useState,
 } from "react";
+import {
+  REGISTRY_PAGE_LIMITS,
+  type RegistryPageLimit,
+} from "@/app/dashboard/_components/registry";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -625,6 +629,36 @@ export function FilterPanel({
                       {SORT_OPTIONS.map((option) => (
                         <SelectItem key={option.value} value={option.value}>
                           {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-1 pt-1">
+                  <Label className="text-muted-foreground">
+                    Registros por página
+                  </Label>
+                  <Select
+                    value={String(filters.pageLimit)}
+                    onValueChange={(value) =>
+                      onFilterChange(
+                        "pageLimit",
+                        Number(value) as RegistryPageLimit,
+                      )
+                    }
+                    disabled={isLoading}
+                  >
+                    <SelectTrigger
+                      className="w-full"
+                      aria-label="Registros por página"
+                    >
+                      <SelectValue placeholder="Quantidade" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {REGISTRY_PAGE_LIMITS.map((limit) => (
+                        <SelectItem key={limit} value={String(limit)}>
+                          {limit}
                         </SelectItem>
                       ))}
                     </SelectContent>

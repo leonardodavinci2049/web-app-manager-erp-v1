@@ -12,6 +12,7 @@ import {
   useTransition,
 } from "react";
 import {
+  REGISTRY_DEFAULT_PAGE_LIMIT,
   RegistryMobileBottomBar,
   RegistryResults,
   RegistrySearch,
@@ -61,6 +62,7 @@ const PANEL_FILTER_DEFAULTS: Pick<CatalogFilters, PanelFilterType> = {
   inactiveStatus: 2,
   isPremium: false,
   sortBy: "newest",
+  pageLimit: REGISTRY_DEFAULT_PAGE_LIMIT,
 };
 
 const DEFAULT_CATALOG_FILTERS: CatalogFilters = {
@@ -318,6 +320,12 @@ export function CatalogToolbar({
         value: sort?.label ?? filters.sortBy,
       });
     }
+    add(
+      filters.pageLimit !== REGISTRY_DEFAULT_PAGE_LIMIT,
+      "pageLimit",
+      "Por página",
+      String(filters.pageLimit),
+    );
 
     return result;
   }, [filters, categories, brands, ptypes]);
@@ -331,9 +339,13 @@ export function CatalogToolbar({
   const [isNewProductOpen, setIsNewProductOpen] = useState(false);
 
   const handleProductCreated = useCallback(() => {
-    latestFiltersRef.current = DEFAULT_CATALOG_FILTERS;
+    const nextFilters: CatalogFilters = {
+      ...DEFAULT_CATALOG_FILTERS,
+      pageLimit: latestFiltersRef.current.pageLimit,
+    };
+    latestFiltersRef.current = nextFilters;
     startTransition(() => {
-      router.replace(buildCatalogUrl(DEFAULT_CATALOG_FILTERS, pathname));
+      router.replace(buildCatalogUrl(nextFilters, pathname));
       router.refresh();
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -378,9 +390,13 @@ export function CatalogToolbar({
             type="button"
             className="hidden h-11 shrink-0 gap-2 shadow-sm md:ml-auto md:inline-flex"
             onClick={() => setIsNewProductOpen(true)}
+            aria-label="+ Novo cadastro de produto"
           >
             <PackagePlus className="size-4" aria-hidden="true" />
-            <span className="hidden lg:inline">Adicionar produto</span>
+            <span className="hidden lg:inline">+ Novo Cadastro</span>
+            <span className="sr-only lg:hidden">
+              + Novo cadastro de produto
+            </span>
           </Button>
         </div>
       </div>

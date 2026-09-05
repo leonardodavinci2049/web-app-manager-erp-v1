@@ -1,4 +1,5 @@
 import { PackageSearch, SearchX, TriangleAlert } from "lucide-react";
+import { RegistryLoadMore } from "@/app/dashboard/_components/registry";
 import type { UIEntryListItem } from "@/services/api-main/entry/transformers/transformers";
 import { buildEntryDetailHref } from "../lib/search-params";
 import type {
@@ -81,7 +82,7 @@ export function EntryCollection({
   }
 
   const pageStart = total > 0 ? searchState.page * pageSize + 1 : 0;
-  const pageEnd = Math.min((searchState.page + 1) * pageSize, total);
+  const pageEnd = Math.min(searchState.page * pageSize + entries.length, total);
 
   const cardsList = (
     <div className={LIST_CLASS}>
@@ -138,6 +139,11 @@ export function EntryCollection({
           currentPage={searchState.page}
           total={total}
           pageSize={pageSize}
+        />
+        <RegistryLoadMore
+          displayed={entries.length}
+          total={total}
+          label="Carregar mais entradas"
         />
       </div>
     </div>

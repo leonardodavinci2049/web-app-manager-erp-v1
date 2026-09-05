@@ -18,6 +18,8 @@ export interface EntrySearchParams {
   order: EntryOrder;
   page: number;
   limit: EntryPageLimit;
+  /** Extra batches appended by "Carregar mais" on top of `page`. */
+  accum: number;
   supplierId: number;
   carrierId: number;
   modelId: EntryModelId;

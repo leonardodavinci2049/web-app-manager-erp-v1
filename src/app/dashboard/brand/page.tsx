@@ -1,6 +1,7 @@
 import { connection } from "next/server";
 import { SiteHeaderWithBreadcrumb } from "@/app/dashboard/_components/header/site-header-with-breadcrumb";
 import { RegistryPageShell } from "@/app/dashboard/_components/registry";
+import { fetchAccumulatedPages } from "@/app/dashboard/_components/registry/fetch-accumulated-pages";
 import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
 import { getBrandsPage } from "@/services/api-main/brand/brand-service-api";
@@ -20,20 +21,25 @@ export default async function BrandPage(props: BrandPageProps) {
   const searchState = parseBrandSearchParams(searchParams);
 
   let hasLoadError = false;
-  const brandsResultPromise = getBrandsPage({
-    search: searchState.search,
-    page: searchState.page,
-    pageSize: searchState.limit,
-    columnId: searchState.sort === "name" ? 1 : 2,
-    orderId: searchState.order === "asc" ? 1 : 2,
-    ...apiContext,
-  }).catch((error) => {
-    hasLoadError = true;
-    logger.error("Erro ao buscar marcas:", error);
-    return { brands: [], total: 0 };
-  });
-
-  const brandsResult = await brandsResultPromise;
+  const brandsResult = await fetchAccumulatedPages(
+    (page) =>
+      getBrandsPage({
+        search: searchState.search,
+        page,
+        pageSize: searchState.limit,
+        columnId: searchState.sort === "name" ? 1 : 2,
+        orderId: searchState.order === "asc" ? 1 : 2,
+        ...apiContext,
+      }),
+    searchState.page,
+    searchState.accum,
+    (result) => ({ items: result.brands, total: result.total }),
+    (brand) => brand.id,
+    (page, error) => {
+      hasLoadError = page === searchState.page;
+      logger.error(`Erro ao buscar marcas (pagina ${page}):`, error);
+    },
+  );
 
   return (
     <>
@@ -49,7 +55,7 @@ export default async function BrandPage(props: BrandPageProps) {
         description="Crie, edite e gerencie as marcas dos seus produtos."
       >
         <BrandDashboard
-          brands={brandsResult.brands}
+          brands={brandsResult.items}
           total={brandsResult.total}
           pageSize={searchState.limit}
           searchState={searchState}

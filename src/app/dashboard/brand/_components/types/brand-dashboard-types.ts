@@ -14,6 +14,8 @@ export interface BrandSearchParams {
   order: BrandOrder;
   page: number;
   limit: BrandPageLimit;
+  /** Extra batches appended by "Carregar mais" on top of `page`. */
+  accum: number;
 }
 
 export interface BrandProductDto {

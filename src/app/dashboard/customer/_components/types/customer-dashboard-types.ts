@@ -25,6 +25,8 @@ export interface CustomerSearchParams {
   order: CustomerOrder;
   page: number;
   limit: CustomerPageLimit;
+  /** Extra batches appended by "Carregar mais" on top of `page`. */
+  accum: number;
 }
 
 export interface CustomerActionResult {

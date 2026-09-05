@@ -52,6 +52,7 @@ function getDefaultFilters(search: string): SellerSearchParams {
     order: "desc",
     page: 0,
     limit: DEFAULT_SELLER_LIMIT,
+    accum: 0,
   };
 }
 
@@ -136,6 +137,7 @@ export function SellerToolbar({ searchState, grid, list }: SellerToolbarProps) {
       ...searchState,
       [key]: defaults[key as keyof SellerSearchParams],
       page: 0,
+      accum: 0,
     });
   };
 
@@ -148,7 +150,9 @@ export function SellerToolbar({ searchState, grid, list }: SellerToolbarProps) {
             placeholder="Buscar vendedor..."
             accessibleLabel="Pesquisar vendedores"
             pending={isPending}
-            onSearch={(search) => navigate({ ...searchState, search, page: 0 })}
+            onSearch={(search) =>
+              navigate({ ...searchState, search, page: 0, accum: 0 })
+            }
           />
           <RegistryFilterSheet
             open={filterOpen}
@@ -161,7 +165,7 @@ export function SellerToolbar({ searchState, grid, list }: SellerToolbarProps) {
             }}
             onClear={clearFilters}
             onApply={() => {
-              navigate({ ...draft, page: 0 });
+              navigate({ ...draft, page: 0, accum: 0 });
               setFilterOpen(false);
             }}
           >

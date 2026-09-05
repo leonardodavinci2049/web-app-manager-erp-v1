@@ -150,6 +150,7 @@ There is **no** `countPtypeFilters` helper. Active-filter counting is inlined in
 | `order` | `asc`, `desc` | Ordering direction |
 | `page` | non-negative integer (default `0`) | Page index (zero-based) |
 | `limit` | `25`, `50` (default `DEFAULT_PTYPE_LIMIT`), `100` | Page size |
+| `accum` | non-negative integer (default `0`, capped by `MAX_REGISTRY_EXTRA_BATCHES`) | Extra batches appended by "Carregar mais" on top of `page`; any filter/search/sort/limit change or page selection resets it |
 
 Note: ptype's `search` is capped at **100 chars** (shorter than seller/suppliers'
 300), and `sort` has **no `last-purchase`** option.

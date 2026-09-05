@@ -13,6 +13,8 @@ export interface SupplierSearchParams {
   order: SupplierOrder;
   page: number;
   limit: SupplierPageLimit;
+  /** Extra batches appended by "Carregar mais" on top of `page`. */
+  accum: number;
 }
 
 export interface SupplierActionResult {

@@ -13,6 +13,8 @@ export interface PtypeSearchParams {
   order: PtypeOrder;
   page: number;
   limit: PtypePageLimit;
+  /** Extra batches appended by "Carregar mais" on top of `page`. */
+  accum: number;
 }
 
 export interface PtypeActionResult {

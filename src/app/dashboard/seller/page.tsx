@@ -1,6 +1,7 @@
 import { connection } from "next/server";
 import { SiteHeaderWithBreadcrumb } from "@/app/dashboard/_components/header/site-header-with-breadcrumb";
 import { RegistryPageShell } from "@/app/dashboard/_components/registry";
+import { fetchAccumulatedPages } from "@/app/dashboard/_components/registry/fetch-accumulated-pages";
 import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
 import { getSellersPage } from "@/services/api-main/seller";
@@ -24,17 +25,24 @@ export default async function SellerPage({ searchParams }: SellerPageProps) {
   const { apiContext } = await getAuthContext();
 
   let hasLoadError = false;
-  const result = await getSellersPage({
-    search: searchState.search,
-    page: searchState.page,
-    pageSize: searchState.limit,
-    ...apiFilters,
-    ...apiContext,
-  }).catch((error) => {
-    hasLoadError = true;
-    logger.error("Erro ao carregar vendedores", error);
-    return { items: [], total: 0 };
-  });
+  const result = await fetchAccumulatedPages(
+    (page) =>
+      getSellersPage({
+        search: searchState.search,
+        page,
+        pageSize: searchState.limit,
+        ...apiFilters,
+        ...apiContext,
+      }),
+    searchState.page,
+    searchState.accum,
+    (pageResult) => pageResult,
+    (seller) => seller.id,
+    (page, error) => {
+      hasLoadError = page === searchState.page;
+      logger.error(`Erro ao carregar vendedores (pagina ${page})`, error);
+    },
+  );
 
   return (
     <>

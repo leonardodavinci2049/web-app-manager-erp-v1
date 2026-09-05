@@ -1,3 +1,4 @@
+import { MAX_REGISTRY_EXTRA_BATCHES } from "@/app/dashboard/_components/registry/registry-page-limits";
 import {
   DEFAULT_SELLER_LIMIT,
   type SellerCategory,
@@ -60,6 +61,7 @@ export function parseSellerSearchParams(
     limit: VALID_LIMITS.has(limit as SellerPageLimit)
       ? (limit as SellerPageLimit)
       : DEFAULT_SELLER_LIMIT,
+    accum: Math.min(parsePage(params), MAX_REGISTRY_EXTRA_BATCHES),
   };
 }
 
@@ -78,6 +80,7 @@ export function buildSellerUrl(
   if (state.page && state.page > 0) params.set("page", String(state.page));
   if (state.limit && state.limit !== DEFAULT_SELLER_LIMIT)
     params.set("limit", String(state.limit));
+  if (state.accum && state.accum > 0) params.set("accum", String(state.accum));
   const query = params.toString();
   return query ? `${pathname}?${query}` : pathname;
 }

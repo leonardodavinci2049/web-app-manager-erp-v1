@@ -13,6 +13,8 @@ export interface CarrierSearchParams {
   order: CarrierOrder;
   page: number;
   limit: CarrierPageLimit;
+  /** Extra batches appended by "Carregar mais" on top of `page`. */
+  accum: number;
 }
 
 export interface CarrierFormValues {
