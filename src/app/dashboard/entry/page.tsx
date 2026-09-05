@@ -1,6 +1,7 @@
 import { connection } from "next/server";
 import { SiteHeaderWithBreadcrumb } from "@/app/dashboard/_components/header/site-header-with-breadcrumb";
 import { RegistryPageShell } from "@/app/dashboard/_components/registry";
+import { fetchAccumulatedPages } from "@/app/dashboard/_components/registry/fetch-accumulated-pages";
 import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
 import { getCarriersPage } from "@/services/api-main/carrier/carrier-service-api";
@@ -22,26 +23,37 @@ export default async function EntryPage(props: EntryPageProps) {
   const searchState = parseEntrySearchParams(searchParams);
 
   let hasLoadError = false;
-  const entriesResultPromise = getEntriesPage({
-    search: searchState.search,
-    page: searchState.page,
-    pageSize: searchState.limit,
-    columnId:
-      searchState.sort === "id" ? 2 : searchState.sort === "created-at" ? 3 : 1,
-    orderId: searchState.order === "asc" ? 1 : 2,
-    supplierId: searchState.supplierId,
-    carrierId: searchState.carrierId,
-    modelId: searchState.modelId,
-    categoryId: searchState.categoryId,
-    operationList: searchState.operationList,
-    startDate: searchState.startDate || undefined,
-    endDate: searchState.endDate || undefined,
-    ...apiContext,
-  }).catch((error) => {
-    hasLoadError = true;
-    logger.error("Erro ao buscar entradas:", error);
-    return { items: [], total: 0 };
-  });
+  const entriesResultPromise = fetchAccumulatedPages(
+    (page) =>
+      getEntriesPage({
+        search: searchState.search,
+        page,
+        pageSize: searchState.limit,
+        columnId:
+          searchState.sort === "id"
+            ? 2
+            : searchState.sort === "created-at"
+              ? 3
+              : 1,
+        orderId: searchState.order === "asc" ? 1 : 2,
+        supplierId: searchState.supplierId,
+        carrierId: searchState.carrierId,
+        modelId: searchState.modelId,
+        categoryId: searchState.categoryId,
+        operationList: searchState.operationList,
+        startDate: searchState.startDate || undefined,
+        endDate: searchState.endDate || undefined,
+        ...apiContext,
+      }),
+    searchState.page,
+    searchState.accum,
+    (pageResult) => pageResult,
+    (entry) => entry.id,
+    (page, error) => {
+      hasLoadError = page === searchState.page;
+      logger.error(`Erro ao buscar entradas (pagina ${page}):`, error);
+    },
+  );
 
   const [entriesResult, suppliersResult, carriersResult] = await Promise.all([
     entriesResultPromise,

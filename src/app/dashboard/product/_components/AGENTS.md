@@ -36,8 +36,7 @@ _components/
 │       └── filter-panel.tsx         # Advanced filters sheet (Client)
 ├── product-grid/
 │   ├── product-grid.tsx             # Grid layout + empty state (Server)
-│   ├── product-grid-skeleton.tsx    # Loading skeletons (Server)
-│   └── load-more-button.tsx         # Pagination via limit searchParam (Client)
+│   └── product-grid-skeleton.tsx    # Loading skeletons (Server)
 └── product-card/
     ├── product-card.tsx             # Card (grid/list variants) (Server)
     ├── product-card-fields.tsx      # SKU/brand/type metadata (Server)
@@ -69,7 +68,7 @@ page.tsx (Server)
                     │     ├── <InlinePriceEditor>   (Client) ─> action-product-updates
                     │     ├── <InlineStockEditor>   (Client) ─> action-product-updates
                     │     └── <InlineCategoryEditor>(Client) ─> action-taxonomy
-                    └── <LoadMoreButton> (Client)   ─> `limit` searchParam (+50)
+                    └── <RegistryPagination>/<RegistryLoadMore> (Client) ─> `page`/`accum` searchParams
 ```
 
 The complete query-parameter contract is documented in `../AGENTS.md`. Object
@@ -116,7 +115,7 @@ Actions consumed: `action-product-updates` (name, price, stock),
 - **Component comments** use US English and explain the Server/Client role and
   component responsibility.
 - **No global state**: All **data filters** are managed via the URL (`searchParams`). Do not introduce React contexts or state stores for filters. The **view mode** (grid|list) is the only exception: it is a display preference kept in `localStorage`, not a filter, so it stays client-side and never triggers a refetch.
-- **Pagination** is heuristic via `limit` (+50), not via `page`. Although `page` is forwarded to the API, the UI uses the `LoadMoreButton`.
+- **Pagination** combines the shared `RegistryPagination` (`page` searchParam) with `RegistryLoadMore` (`accum` searchParam, fixed-size batches fetched in parallel by `fetchAccumulatedPages`). Page size comes from the filter panel's "Registros por página" select (`limit`, 25/50/100). Any filter change or page selection resets `accum`.
 - **Currency/price** use Brazilian formatting (decimal comma) in inputs; `formatCurrency` handles the display.
 
 ## Post-change Verification

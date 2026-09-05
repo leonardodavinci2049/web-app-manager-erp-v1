@@ -51,6 +51,7 @@ function getDefaultFilters(search: string): PtypeSearchParams {
     order: "desc",
     page: 0,
     limit: DEFAULT_PTYPE_LIMIT,
+    accum: 0,
   };
 }
 
@@ -117,16 +118,21 @@ export function PtypeToolbar({ searchState, grid, list }: PtypeToolbarProps) {
     const defaults = getDefaultFilters(searchState.search);
     switch (key) {
       case "status":
-        navigate({ ...searchState, status: defaults.status, page: 0 });
+        navigate({
+          ...searchState,
+          status: defaults.status,
+          page: 0,
+          accum: 0,
+        });
         break;
       case "sort":
-        navigate({ ...searchState, sort: defaults.sort, page: 0 });
+        navigate({ ...searchState, sort: defaults.sort, page: 0, accum: 0 });
         break;
       case "order":
-        navigate({ ...searchState, order: defaults.order, page: 0 });
+        navigate({ ...searchState, order: defaults.order, page: 0, accum: 0 });
         break;
       case "limit":
-        navigate({ ...searchState, limit: defaults.limit, page: 0 });
+        navigate({ ...searchState, limit: defaults.limit, page: 0, accum: 0 });
         break;
     }
   };
@@ -153,7 +159,9 @@ export function PtypeToolbar({ searchState, grid, list }: PtypeToolbarProps) {
             accessibleLabel="Pesquisar tipos de produtos"
             maxLength={100}
             pending={isPending}
-            onSearch={(search) => navigate({ ...searchState, search, page: 0 })}
+            onSearch={(search) =>
+              navigate({ ...searchState, search, page: 0, accum: 0 })
+            }
           />
           <RegistryFilterSheet
             open={filterOpen}
@@ -166,7 +174,7 @@ export function PtypeToolbar({ searchState, grid, list }: PtypeToolbarProps) {
             }}
             onClear={clearFilters}
             onApply={() => {
-              navigate({ ...draft, page: 0 });
+              navigate({ ...draft, page: 0, accum: 0 });
               setFilterOpen(false);
             }}
           >
@@ -247,9 +255,11 @@ export function PtypeToolbar({ searchState, grid, list }: PtypeToolbarProps) {
             type="button"
             className="hidden h-11 shrink-0 md:ml-auto md:inline-flex"
             onClick={() => setCreateOpen(true)}
+            aria-label="+ Novo cadastro de tipo"
           >
             <Plus className="size-4" aria-hidden="true" />
-            Adicionar tipo
+            <span className="hidden lg:inline">+ Novo Cadastro</span>
+            <span className="sr-only lg:hidden">+ Novo cadastro de tipo</span>
           </Button>
         </div>
       </div>

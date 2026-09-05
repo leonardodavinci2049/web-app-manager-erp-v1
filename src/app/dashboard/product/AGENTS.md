@@ -12,7 +12,7 @@ For changes inside `_components`, also read `_components/AGENTS.md`.
 
 - Product search, sorting, and combined catalog filters.
 - Grid and list presentation, with a desktop table for list mode.
-- Incremental result loading through the `limit` query parameter.
+- Numbered pagination plus "load more" accumulation through the `accum` query parameter.
 - Navigation to product details while preserving the current catalog URL.
 - Inline updates for product name, prices, stock, and categories.
 - Main-image upload when a product has no valid image.
@@ -119,8 +119,10 @@ construction. Use its public helpers instead of rebuilding query strings.
 | `inactive` | `0`, `1`, or `2` | Product activity state |
 | `premium` | `1` | Premium products |
 | `sort` | supported sort identifier | Catalog ordering |
-| `limit` | positive integer | Accumulated result quantity |
-| `page` | integer from zero | API page identifier |
+| `limit` | `25`, `50`, `100` (default `50`) | Page size selected in the filter panel |
+| `page` | non-negative integer | Current page (zero-based) |
+| `accum` | non-negative integer (default `0`, capped by `MAX_REGISTRY_EXTRA_BATCHES`) | Extra batches appended by "Carregar mais" on top of `page`; any filter/search/sort/limit change or page selection resets it |
+
 
 The grid/list view mode is not URL state. It remains a browser preference in
 `localStorage` under `catalog:product-view-mode`.

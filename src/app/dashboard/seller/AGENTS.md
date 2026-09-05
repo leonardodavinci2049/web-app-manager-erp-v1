@@ -158,6 +158,7 @@ There is **no** `countSellerFilters` helper. Active-filter counting is inlined i
 | `order` | `asc`, `desc` | Ordering direction |
 | `page` | non-negative integer (default `0`) | Page index (zero-based) |
 | `limit` | `25`, `50` (default `DEFAULT_SELLER_LIMIT`), `100` | Page size |
+| `accum` | non-negative integer (default `0`, capped by `MAX_REGISTRY_EXTRA_BATCHES`) | Extra batches appended by "Carregar mais" on top of `page`; any filter/search/sort/limit change or page selection resets it |
 
 The grid/list view mode is **not** URL state. It is a browser preference kept in
 `localStorage` under `dashboard:seller-view-mode` and managed by `SellerToolbar`

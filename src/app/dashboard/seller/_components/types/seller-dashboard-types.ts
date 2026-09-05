@@ -16,6 +16,8 @@ export interface SellerSearchParams {
   order: SellerOrder;
   page: number;
   limit: SellerPageLimit;
+  /** Extra batches appended by "Carregar mais" on top of `page`. */
+  accum: number;
 }
 
 export interface SellerListingImageResult {

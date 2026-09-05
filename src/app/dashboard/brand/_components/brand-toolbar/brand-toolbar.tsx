@@ -49,6 +49,7 @@ function getDefaultFilters(state: BrandSearchParams): BrandSearchParams {
     order: "desc",
     page: 0,
     limit: BRAND_PAGE_SIZE,
+    accum: 0,
   };
 }
 
@@ -109,13 +110,18 @@ export function BrandToolbar({ searchState, grid, list }: BrandToolbarProps) {
   const removeFilter = (key: string) => {
     switch (key) {
       case "sort":
-        navigate({ ...searchState, sort: "id", page: 0 });
+        navigate({ ...searchState, sort: "id", page: 0, accum: 0 });
         break;
       case "order":
-        navigate({ ...searchState, order: "desc", page: 0 });
+        navigate({ ...searchState, order: "desc", page: 0, accum: 0 });
         break;
       case "limit":
-        navigate({ ...searchState, limit: BRAND_PAGE_SIZE, page: 0 });
+        navigate({
+          ...searchState,
+          limit: BRAND_PAGE_SIZE,
+          page: 0,
+          accum: 0,
+        });
         break;
     }
   };
@@ -139,7 +145,9 @@ export function BrandToolbar({ searchState, grid, list }: BrandToolbarProps) {
             placeholder="Buscar marca..."
             accessibleLabel="Pesquisar marcas"
             pending={isPending}
-            onSearch={(search) => navigate({ ...searchState, search, page: 0 })}
+            onSearch={(search) =>
+              navigate({ ...searchState, search, page: 0, accum: 0 })
+            }
           />
           <RegistryFilterSheet
             open={filterOpen}
@@ -152,7 +160,7 @@ export function BrandToolbar({ searchState, grid, list }: BrandToolbarProps) {
             }}
             onClear={clearFilters}
             onApply={() => {
-              navigate({ ...draft, page: 0 });
+              navigate({ ...draft, page: 0, accum: 0 });
               setFilterOpen(false);
             }}
           >
@@ -217,10 +225,11 @@ export function BrandToolbar({ searchState, grid, list }: BrandToolbarProps) {
             type="button"
             className="hidden h-11 shrink-0 md:ml-auto md:inline-flex"
             onClick={() => setCreateOpen(true)}
+            aria-label="+ Novo cadastro de marca"
           >
             <Plus className="size-4" aria-hidden="true" />
-            <span className="hidden lg:inline">Adicionar marca</span>
-            <span className="sr-only lg:hidden">Adicionar marca</span>
+            <span className="hidden lg:inline">+ Novo Cadastro</span>
+            <span className="sr-only lg:hidden">+ Novo cadastro de marca</span>
           </Button>
         </div>
       </div>

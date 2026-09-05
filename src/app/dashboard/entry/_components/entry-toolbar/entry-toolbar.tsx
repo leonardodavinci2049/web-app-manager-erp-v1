@@ -72,6 +72,7 @@ function getDefaultFilters(state: EntrySearchParams): EntrySearchParams {
     order: "desc",
     page: 0,
     limit: ENTRY_PAGE_SIZE,
+    accum: 0,
     supplierId: 0,
     carrierId: 0,
     modelId: 0,
@@ -108,7 +109,7 @@ export function EntryToolbar({
 
   const applyFilters = useCallback(
     (patch: Partial<EntrySearchParams>) => {
-      navigate({ ...searchState, ...patch, page: 0 });
+      navigate({ ...searchState, ...patch, page: 0, accum: 0 });
     },
     [navigate, searchState],
   );
@@ -185,28 +186,28 @@ export function EntryToolbar({
   const removeFilter = (key: string) => {
     switch (key) {
       case "supplier":
-        navigate({ ...searchState, supplierId: 0, page: 0 });
+        navigate({ ...searchState, supplierId: 0, page: 0, accum: 0 });
         break;
       case "carrier":
-        navigate({ ...searchState, carrierId: 0, page: 0 });
+        navigate({ ...searchState, carrierId: 0, page: 0, accum: 0 });
         break;
       case "model":
-        navigate({ ...searchState, modelId: 0, page: 0 });
+        navigate({ ...searchState, modelId: 0, page: 0, accum: 0 });
         break;
       case "category":
-        navigate({ ...searchState, categoryId: 0, page: 0 });
+        navigate({ ...searchState, categoryId: 0, page: 0, accum: 0 });
         break;
       case "operationList":
-        navigate({ ...searchState, ...PERIOD_RESET, page: 0 });
+        navigate({ ...searchState, ...PERIOD_RESET, page: 0, accum: 0 });
         break;
       case "sort":
-        navigate({ ...searchState, sort: "entry-date", page: 0 });
+        navigate({ ...searchState, sort: "entry-date", page: 0, accum: 0 });
         break;
       case "order":
-        navigate({ ...searchState, order: "desc", page: 0 });
+        navigate({ ...searchState, order: "desc", page: 0, accum: 0 });
         break;
       case "limit":
-        navigate({ ...searchState, limit: ENTRY_PAGE_SIZE, page: 0 });
+        navigate({ ...searchState, limit: ENTRY_PAGE_SIZE, page: 0, accum: 0 });
         break;
     }
   };
@@ -230,7 +231,9 @@ export function EntryToolbar({
             placeholder="Buscar entrada..."
             accessibleLabel="Pesquisar entradas"
             pending={isPending}
-            onSearch={(search) => navigate({ ...searchState, search, page: 0 })}
+            onSearch={(search) =>
+              navigate({ ...searchState, search, page: 0, accum: 0 })
+            }
           />
           <RegistryFilterSheet
             open={filterOpen}
@@ -258,10 +261,13 @@ export function EntryToolbar({
             type="button"
             className="hidden h-11 shrink-0 md:ml-auto md:inline-flex"
             onClick={() => setCreateOpen(true)}
+            aria-label="+ Novo cadastro de entrada"
           >
             <Plus className="size-4" aria-hidden="true" />
-            <span className="hidden lg:inline">Nova entrada</span>
-            <span className="sr-only lg:hidden">Nova entrada</span>
+            <span className="hidden lg:inline">+ Novo Cadastro</span>
+            <span className="sr-only lg:hidden">
+              + Novo cadastro de entrada
+            </span>
           </Button>
         </div>
       </div>

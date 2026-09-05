@@ -9,6 +9,7 @@ import {
   UserRound,
 } from "lucide-react";
 import Link from "next/link";
+import { RegistryLoadMore } from "@/app/dashboard/_components/registry";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -214,7 +215,10 @@ export function CustomerCollection({
 
   const detailHref = (id: number) => buildCustomerDetailHref(id, searchState);
   const pageStart = searchState.page * searchState.limit + 1;
-  const pageEnd = Math.min((searchState.page + 1) * searchState.limit, total);
+  const pageEnd = Math.min(
+    searchState.page * searchState.limit + items.length,
+    total,
+  );
 
   return (
     <div className="space-y-4">
@@ -329,6 +333,11 @@ export function CustomerCollection({
           currentPage={searchState.page}
           total={total}
           pageSize={searchState.limit}
+        />
+        <RegistryLoadMore
+          displayed={items.length}
+          total={total}
+          label="Carregar mais clientes"
         />
       </div>
     </div>

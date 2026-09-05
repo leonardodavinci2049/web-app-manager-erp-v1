@@ -1,3 +1,4 @@
+import { MAX_REGISTRY_EXTRA_BATCHES } from "@/app/dashboard/_components/registry/registry-page-limits";
 import {
   type CarrierOrder,
   type CarrierPageLimit,
@@ -53,6 +54,7 @@ export function parseCarrierSearchParams(
     limit: VALID_LIMITS.has(limit as CarrierPageLimit)
       ? (limit as CarrierPageLimit)
       : DEFAULT_CARRIER_LIMIT,
+    accum: Math.min(parsePage(params), MAX_REGISTRY_EXTRA_BATCHES),
   };
 }
 
@@ -69,6 +71,7 @@ export function buildCarrierUrl(
   if (state.page && state.page > 0) params.set("page", String(state.page));
   if (state.limit && state.limit !== DEFAULT_CARRIER_LIMIT)
     params.set("limit", String(state.limit));
+  if (state.accum && state.accum > 0) params.set("accum", String(state.accum));
   const query = params.toString();
   return query ? `${pathname}?${query}` : pathname;
 }

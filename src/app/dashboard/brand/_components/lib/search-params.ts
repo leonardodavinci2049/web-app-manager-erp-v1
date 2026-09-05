@@ -1,3 +1,4 @@
+import { MAX_REGISTRY_EXTRA_BATCHES } from "@/app/dashboard/_components/registry/registry-page-limits";
 import {
   BRAND_PAGE_SIZE,
   type BrandOrder,
@@ -56,6 +57,10 @@ export function parseBrandSearchParams(
     limit: VALID_LIMITS.has(limit as BrandPageLimit)
       ? (limit as BrandPageLimit)
       : BRAND_PAGE_SIZE,
+    accum: Math.min(
+      parseNonNegativeInt(params, "accum", 0),
+      MAX_REGISTRY_EXTRA_BATCHES,
+    ),
   };
 }
 
@@ -75,6 +80,7 @@ export function buildBrandUrl(
   if (state.page && state.page > 0) params.set("page", String(state.page));
   if (state.limit && state.limit !== BRAND_PAGE_SIZE)
     params.set("limit", String(state.limit));
+  if (state.accum && state.accum > 0) params.set("accum", String(state.accum));
   const qs = params.toString();
   return qs ? `${pathname}?${qs}` : pathname;
 }

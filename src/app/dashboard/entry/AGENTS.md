@@ -88,6 +88,7 @@ query strings.
 | `order` | `asc`, `desc` (default `desc`) | Ordering direction (`pe_order_id` 1/2) |
 | `page` | non-negative integer (default `0`) | Page index, zero-based (`pe_page_id`) |
 | `limit` | `25`, `50`, `100` (default `50` = `ENTRY_PAGE_SIZE`) | Page size (`pe_qt_records`) |
+| `accum` | non-negative integer (default `0`, capped by `MAX_REGISTRY_EXTRA_BATCHES`) | Extra batches appended by "Carregar mais" on top of `page`; any filter/search/sort/limit change or page selection resets it |
 | `supplier` | positive integer (default `0` = all) | Supplier filter (`pe_supplier_id`) |
 | `carrier` | positive integer (default `0` = all) | Carrier filter (`pe_carrier_id`) |
 | `model` | `0` (default, all), `1` Nacional, `2` Importado | Model filter (`pe_modelo_id`) |

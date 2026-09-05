@@ -1,17 +1,22 @@
 import { Package, TriangleAlert } from "lucide-react";
 import Link from "next/link";
+import {
+  RegistryLoadMore,
+  RegistryPagination,
+} from "@/app/dashboard/_components/registry";
 import { Button } from "@/components/ui/button";
 import type { UIProductManager } from "@/services/api-main/product-manager/transformers/transformers";
 import { ProductCard } from "../product-card/product-card";
 import { ProductTable } from "../product-table";
 import type { ViewMode } from "../types/catalog-types";
-import { LoadMoreButton } from "./load-more-button";
 
 interface ProductGridProps {
   products: UIProductManager[];
   viewMode: ViewMode;
   catalogReturnTo: string;
   total: number;
+  page: number;
+  pageSize: number;
   hasLoadError: boolean;
 }
 
@@ -25,13 +30,16 @@ const EAGER_GRID_IMAGE_COUNT = 12;
 
 /**
  * Grid de produtos (Server Component). Apenas layout + .map() + empty state.
- * A interatividade (carregar mais) vive na ilha client <LoadMoreButton/>.
+ * A paginacao numerada e o "carregar mais" sao ilhas client compartilhadas
+ * (RegistryPagination / RegistryLoadMore) e trabalham sobre a URL.
  */
 export function ProductGrid({
   products,
   viewMode,
   catalogReturnTo,
   total,
+  page,
+  pageSize,
   hasLoadError,
 }: ProductGridProps) {
   if (hasLoadError) {
@@ -67,7 +75,8 @@ export function ProductGrid({
     );
   }
 
-  const hasMore = products.length < total;
+  const pageStart = total > 0 ? page * pageSize + 1 : 0;
+  const pageEnd = Math.min(page * pageSize + products.length, total);
 
   return (
     <div className="space-y-4">
@@ -105,20 +114,23 @@ export function ProductGrid({
         </>
       )}
 
-      {hasMore ? (
-        <div className="flex flex-col items-center gap-2 pt-4">
-          <p className="text-muted-foreground text-xs tabular-nums">
-            Exibindo {products.length} de {total} produtos
-          </p>
-          <LoadMoreButton />
-        </div>
-      ) : (
-        <div className="py-4 text-center">
-          <p className="text-muted-foreground text-sm">
-            Exibindo todos os {total} produtos
-          </p>
-        </div>
-      )}
+      <div className="flex flex-col items-center gap-3 pt-2">
+        <p className="text-muted-foreground text-xs tabular-nums">
+          Exibindo {pageStart}–{pageEnd} de {total}{" "}
+          {total === 1 ? "produto" : "produtos"}
+        </p>
+        <RegistryPagination
+          currentPage={page}
+          total={total}
+          pageSize={pageSize}
+          ariaLabel="Paginação dos produtos"
+        />
+        <RegistryLoadMore
+          displayed={products.length}
+          total={total}
+          label="Carregar mais produtos"
+        />
+      </div>
     </div>
   );
 }

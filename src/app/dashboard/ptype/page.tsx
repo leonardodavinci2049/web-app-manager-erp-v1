@@ -1,6 +1,7 @@
 import { connection } from "next/server";
 import { SiteHeaderWithBreadcrumb } from "@/app/dashboard/_components/header/site-header-with-breadcrumb";
 import { RegistryPageShell } from "@/app/dashboard/_components/registry";
+import { fetchAccumulatedPages } from "@/app/dashboard/_components/registry/fetch-accumulated-pages";
 import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
 import { getPtypesPage } from "@/services/api-main/ptype";
@@ -24,21 +25,29 @@ export default async function PtypePage({ searchParams }: PtypePageProps) {
   const { apiContext } = await getAuthContext();
 
   let hasLoadError = false;
-  const listPromise = getPtypesPage({
-    search: searchState.search,
-    statusId: apiFilters.statusId,
-    page: searchState.page,
-    pageSize: searchState.limit,
-    columnId: apiFilters.columnId,
-    orderId: apiFilters.orderId,
-    ...apiContext,
-  }).catch((error) => {
-    hasLoadError = true;
-    logger.error("Erro ao carregar tipos de produtos", error);
-    return { items: [], total: 0 };
-  });
-
-  const list = await listPromise;
+  const list = await fetchAccumulatedPages(
+    (page) =>
+      getPtypesPage({
+        search: searchState.search,
+        statusId: apiFilters.statusId,
+        page,
+        pageSize: searchState.limit,
+        columnId: apiFilters.columnId,
+        orderId: apiFilters.orderId,
+        ...apiContext,
+      }),
+    searchState.page,
+    searchState.accum,
+    (pageResult) => pageResult,
+    (ptype) => ptype.id,
+    (page, error) => {
+      hasLoadError = page === searchState.page;
+      logger.error(
+        `Erro ao carregar tipos de produtos (pagina ${page})`,
+        error,
+      );
+    },
+  );
 
   return (
     <>

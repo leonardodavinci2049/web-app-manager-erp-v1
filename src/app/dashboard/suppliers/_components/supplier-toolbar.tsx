@@ -51,6 +51,7 @@ function getDefaultFilters(search: string): SupplierSearchParams {
     order: "desc",
     page: 0,
     limit: DEFAULT_SUPPLIER_LIMIT,
+    accum: 0,
   };
 }
 
@@ -126,19 +127,20 @@ export function SupplierToolbar({
   const removeFilter = (key: string) => {
     switch (key) {
       case "status":
-        navigate({ ...searchState, status: "all", page: 0 });
+        navigate({ ...searchState, status: "all", page: 0, accum: 0 });
         break;
       case "sort":
-        navigate({ ...searchState, sort: "id", page: 0 });
+        navigate({ ...searchState, sort: "id", page: 0, accum: 0 });
         break;
       case "order":
-        navigate({ ...searchState, order: "desc", page: 0 });
+        navigate({ ...searchState, order: "desc", page: 0, accum: 0 });
         break;
       case "limit":
         navigate({
           ...searchState,
           limit: DEFAULT_SUPPLIER_LIMIT,
           page: 0,
+          accum: 0,
         });
         break;
     }
@@ -164,7 +166,9 @@ export function SupplierToolbar({
             placeholder="Buscar fornecedor..."
             accessibleLabel="Pesquisar fornecedores"
             pending={isPending}
-            onSearch={(search) => navigate({ ...searchState, search, page: 0 })}
+            onSearch={(search) =>
+              navigate({ ...searchState, search, page: 0, accum: 0 })
+            }
           />
           <RegistryFilterSheet
             open={filterOpen}
@@ -177,7 +181,7 @@ export function SupplierToolbar({
             }}
             onClear={clearFilters}
             onApply={() => {
-              navigate({ ...draft, page: 0 });
+              navigate({ ...draft, page: 0, accum: 0 });
               setFilterOpen(false);
             }}
           >
@@ -259,10 +263,13 @@ export function SupplierToolbar({
             type="button"
             className="hidden h-11 shrink-0 md:ml-auto md:inline-flex"
             onClick={() => setCreateOpen(true)}
+            aria-label="+ Novo cadastro de fornecedor"
           >
             <Plus className="size-4" aria-hidden="true" />
-            <span className="hidden lg:inline">Adicionar fornecedor</span>
-            <span className="sr-only lg:hidden">Adicionar fornecedor</span>
+            <span className="hidden lg:inline">+ Novo Cadastro</span>
+            <span className="sr-only lg:hidden">
+              + Novo cadastro de fornecedor
+            </span>
           </Button>
         </div>
       </div>

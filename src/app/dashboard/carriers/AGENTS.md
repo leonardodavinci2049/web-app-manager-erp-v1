@@ -152,6 +152,7 @@ counting is inlined in `CarrierToolbar`.
 | `order` | `asc`, `desc` | Ordering direction |
 | `page` | non-negative integer (`/^\d+$/`) | Page index (zero-based) |
 | `limit` | `25`, `50`, `100` (default `50` = `DEFAULT_CARRIER_LIMIT`) | Page size |
+| `accum` | non-negative integer (default `0`, capped by `MAX_REGISTRY_EXTRA_BATCHES`) | Extra batches appended by "Carregar mais" on top of `page`; any filter/search/sort/limit change or page selection resets it |
 
 `mapCarrierFiltersToApi()` mapping: `status` `active`→`2`, `inactive`→`1`,
 `all`/other→`0`; `sort` `name`→`1`, `id`/other→`2`; `order` `asc`→`1`,

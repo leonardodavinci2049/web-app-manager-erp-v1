@@ -1,4 +1,5 @@
 import { PackageSearch, SearchX, TriangleAlert } from "lucide-react";
+import { RegistryLoadMore } from "@/app/dashboard/_components/registry";
 import type { UIBrand } from "@/services/api-main/brand/transformers/transformers";
 import { buildBrandDetailHref } from "../lib/search-params";
 import type {
@@ -77,7 +78,7 @@ export function BrandCollection({
   }
 
   const pageStart = total > 0 ? searchState.page * pageSize + 1 : 0;
-  const pageEnd = Math.min((searchState.page + 1) * pageSize, total);
+  const pageEnd = Math.min(searchState.page * pageSize + brands.length, total);
 
   return (
     <div className="space-y-4">
@@ -125,6 +126,11 @@ export function BrandCollection({
           currentPage={searchState.page}
           total={total}
           pageSize={pageSize}
+        />
+        <RegistryLoadMore
+          displayed={brands.length}
+          total={total}
+          label="Carregar mais marcas"
         />
       </div>
     </div>

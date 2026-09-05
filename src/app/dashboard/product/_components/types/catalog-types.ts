@@ -1,3 +1,4 @@
+import type { RegistryPageLimit } from "@/app/dashboard/_components/registry/registry-page-limits";
 import type { SortOption, ViewMode } from "@/types/types";
 
 export type { SortOption, ViewMode };
@@ -60,6 +61,8 @@ export interface CatalogFilters {
   inactiveStatus: TernaryFlag;
   isPremium: boolean;
   sortBy: SortOption;
+  /** Records per page chosen in the filter panel (URL `limit`). */
+  pageLimit: RegistryPageLimit;
 }
 
 /** Filtros pertencentes ao painel lateral, excluindo a busca principal. */

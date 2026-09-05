@@ -1,3 +1,4 @@
+import { MAX_REGISTRY_EXTRA_BATCHES } from "@/app/dashboard/_components/registry/registry-page-limits";
 import {
   ENTRY_MODEL_OPTIONS,
   ENTRY_OPERATION_LIST_OPTIONS,
@@ -100,6 +101,10 @@ export function parseEntrySearchParams(
     operationList: resolvedOperationList,
     startDate: parseIsoDate(params, "start-date", resolvedOperationList),
     endDate: parseIsoDate(params, "end-date", resolvedOperationList),
+    accum: Math.min(
+      parseNonNegativeInt(params, "accum", 0),
+      MAX_REGISTRY_EXTRA_BATCHES,
+    ),
   };
 }
 
@@ -119,6 +124,7 @@ export function buildEntryUrl(
   if (state.page && state.page > 0) params.set("page", String(state.page));
   if (state.limit && state.limit !== ENTRY_PAGE_SIZE)
     params.set("limit", String(state.limit));
+  if (state.accum && state.accum > 0) params.set("accum", String(state.accum));
   if (state.supplierId && state.supplierId > 0)
     params.set("supplier", String(state.supplierId));
   if (state.carrierId && state.carrierId > 0)

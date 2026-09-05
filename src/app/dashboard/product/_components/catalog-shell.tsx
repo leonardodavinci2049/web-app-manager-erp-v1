@@ -11,6 +11,8 @@ import type {
 interface CatalogShellProps {
   products: UIProductManager[];
   total: number;
+  page: number;
+  pageSize: number;
   brands: UIBrand[];
   categories: CategoryOption[];
   ptypes: UIPtype[];
@@ -29,6 +31,8 @@ interface CatalogShellProps {
 export function CatalogShell({
   products,
   total,
+  page,
+  pageSize,
   brands,
   categories,
   ptypes,
@@ -52,6 +56,8 @@ export function CatalogShell({
           viewMode="grid"
           catalogReturnTo={catalogReturnTo}
           total={total}
+          page={page}
+          pageSize={pageSize}
           hasLoadError={hasProductsLoadError}
         />
       }
@@ -61,6 +67,8 @@ export function CatalogShell({
           viewMode="list"
           catalogReturnTo={catalogReturnTo}
           total={total}
+          page={page}
+          pageSize={pageSize}
           hasLoadError={hasProductsLoadError}
         />
       }

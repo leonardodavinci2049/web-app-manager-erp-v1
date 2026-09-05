@@ -1,6 +1,7 @@
 import { connection } from "next/server";
 import { SiteHeaderWithBreadcrumb } from "@/app/dashboard/_components/header/site-header-with-breadcrumb";
 import { RegistryPageShell } from "@/app/dashboard/_components/registry";
+import { fetchAccumulatedPages } from "@/app/dashboard/_components/registry/fetch-accumulated-pages";
 import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
 import { getCarriersPage } from "@/services/api-main/carrier";
@@ -26,19 +27,26 @@ export default async function CarriersPage({
   const { apiContext } = await getAuthContext();
 
   let hasLoadError = false;
-  const result = await getCarriersPage({
-    search: searchState.search,
-    statusId: apiFilters.statusId,
-    page: searchState.page,
-    pageSize: searchState.limit,
-    columnId: apiFilters.columnId,
-    orderId: apiFilters.orderId,
-    ...apiContext,
-  }).catch((error) => {
-    hasLoadError = true;
-    logger.error("Erro ao carregar transportadoras", error);
-    return { items: [], total: 0 };
-  });
+  const result = await fetchAccumulatedPages(
+    (page) =>
+      getCarriersPage({
+        search: searchState.search,
+        statusId: apiFilters.statusId,
+        page,
+        pageSize: searchState.limit,
+        columnId: apiFilters.columnId,
+        orderId: apiFilters.orderId,
+        ...apiContext,
+      }),
+    searchState.page,
+    searchState.accum,
+    (pageResult) => pageResult,
+    (carrier) => carrier.id,
+    (page, error) => {
+      hasLoadError = page === searchState.page;
+      logger.error(`Erro ao carregar transportadoras (pagina ${page})`, error);
+    },
+  );
 
   return (
     <>

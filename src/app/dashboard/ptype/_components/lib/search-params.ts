@@ -1,3 +1,4 @@
+import { MAX_REGISTRY_EXTRA_BATCHES } from "@/app/dashboard/_components/registry/registry-page-limits";
 import {
   DEFAULT_PTYPE_LIMIT,
   type PtypeOrder,
@@ -59,6 +60,10 @@ export function parsePtypeSearchParams(
     limit: VALID_LIMITS.has(rawLimit as PtypePageLimit)
       ? (rawLimit as PtypePageLimit)
       : DEFAULT_PTYPE_LIMIT,
+    accum: Math.min(
+      parseNonNegativeInt(params, "accum", 0),
+      MAX_REGISTRY_EXTRA_BATCHES,
+    ),
   };
 }
 
@@ -76,6 +81,7 @@ export function buildPtypeUrl(
   if (state.page && state.page > 0) params.set("page", String(state.page));
   if (state.limit && state.limit !== DEFAULT_PTYPE_LIMIT)
     params.set("limit", String(state.limit));
+  if (state.accum && state.accum > 0) params.set("accum", String(state.accum));
   const query = params.toString();
   return query ? `${pathname}?${query}` : pathname;
 }

@@ -1,4 +1,9 @@
 import { addDays, format, subMonths } from "date-fns";
+import {
+  MAX_REGISTRY_EXTRA_BATCHES,
+  REGISTRY_DEFAULT_PAGE_LIMIT,
+  REGISTRY_PAGE_LIMITS,
+} from "@/app/dashboard/_components/registry/registry-page-limits";
 import type {
   AdvancedFilterFlag,
   CatalogFilters,
@@ -209,6 +214,40 @@ export function parseCatalogSearchParams(
     inactiveStatus: parseTernaryFlag(params, "inactive", 2),
     isPremium: parseFlag(params, "premium"),
     sortBy: parseSort(params),
+    pageLimit: parsePageLimit(params),
+  };
+}
+
+function parsePageLimit(params: URLSearchParams): CatalogFilters["pageLimit"] {
+  const rawValue = params.get("limit");
+  const value = rawValue === null ? Number.NaN : Number(rawValue);
+  return (REGISTRY_PAGE_LIMITS as readonly number[]).includes(value)
+    ? (value as CatalogFilters["pageLimit"])
+    : REGISTRY_DEFAULT_PAGE_LIMIT;
+}
+
+export interface CatalogPagingState {
+  page: number;
+  accum: number;
+}
+
+/**
+ * Paging-only URL state (`page` and `accum`) kept outside `CatalogFilters` so
+ * any filter change naturally resets both, matching the list-page pattern.
+ */
+export function parseCatalogPagingState(
+  sp: URLSearchParams | Record<string, SearchParamValue>,
+): CatalogPagingState {
+  const params = normalizeParams(sp);
+  const rawPage = params.get("page");
+  const pageValue = rawPage && /^\d+$/.test(rawPage) ? Number(rawPage) : 0;
+  const rawAccum = params.get("accum");
+  const accumValue = rawAccum && /^\d+$/.test(rawAccum) ? Number(rawAccum) : 0;
+  return {
+    page: Number.isSafeInteger(pageValue) && pageValue > 0 ? pageValue : 0,
+    accum: Number.isSafeInteger(accumValue)
+      ? Math.min(Math.max(accumValue, 0), MAX_REGISTRY_EXTRA_BATCHES)
+      : 0,
   };
 }
 
@@ -259,6 +298,8 @@ export function buildCatalogUrl(
   if (filters.isPremium) params.set("premium", "1");
   if (filters.sortBy && filters.sortBy !== DEFAULT_SORT)
     params.set("sort", filters.sortBy);
+  if (filters.pageLimit && filters.pageLimit !== REGISTRY_DEFAULT_PAGE_LIMIT)
+    params.set("limit", String(filters.pageLimit));
 
   const qs = params.toString();
   return qs ? `${pathname}?${qs}` : pathname;

@@ -168,6 +168,7 @@ query strings.
 | `order` | `asc`, `desc` | Ordering direction |
 | `page` | non-negative integer | Page index (zero-based) |
 | `limit` | `25`, `50`, `100` | Page size (default `50`) |
+| `accum` | non-negative integer (default `0`, capped by `MAX_REGISTRY_EXTRA_BATCHES`) | Extra batches appended by "Carregar mais" on top of `page`; any filter/search/sort/limit change or page selection resets it |
 
 Tri-state filters use `0` for "all", `1` for the first option, and `2` for the
 second option; the labels are resolved in `CustomerToolbar`. When `operation` is
