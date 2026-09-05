@@ -2,7 +2,10 @@ import type { UIProductManager } from "@/services/api-main/product-manager/trans
 
 type ProductSales = Pick<
   UIProductManager,
-  "salesTwoMonthsAgo" | "salesLast30Days" | "salesCurrentMonth" | "lastSaleAt"
+  | "salesTwoMonthsAgo"
+  | "salesPreviousMonth"
+  | "salesCurrentMonth"
+  | "lastSaleAt"
 >;
 
 const SALES_QUANTITY_FORMATTER = new Intl.NumberFormat("pt-BR", {
@@ -50,7 +53,7 @@ export function ProductSalesInformation({
           Há 2 meses
         </span>
         <span className="whitespace-nowrap text-muted-foreground tracking-tight">
-          30 dias
+          Mês anterior
         </span>
         <span className="whitespace-nowrap text-muted-foreground tracking-tight">
           Mês atual
@@ -61,7 +64,7 @@ export function ProductSalesInformation({
           {formatSalesQuantity(product.salesTwoMonthsAgo)}
         </span>
         <span className="font-medium">
-          {formatSalesQuantity(product.salesLast30Days)}
+          {formatSalesQuantity(product.salesPreviousMonth)}
         </span>
         <span className="font-medium">
           {formatSalesQuantity(product.salesCurrentMonth)}
