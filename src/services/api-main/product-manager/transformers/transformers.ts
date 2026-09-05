@@ -25,10 +25,11 @@ export interface UIProductManager {
   pagePath?: string;
   slug?: string;
   storeStock: number;
-  salesMonth?: number;
-  salesLastThreeMonths?: number;
-  salesYear?: number;
-  salesAllTime?: number;
+  salesTwoMonthsAgo?: number;
+  salesPreviousMonth?: number;
+  salesCurrentMonth?: number;
+  salesLast30Days?: number;
+  salesToday?: number;
   lastSaleAt?: string;
   valueType?: string;
   productValue?: string;
@@ -89,10 +90,11 @@ export function transformProductManagerListItem(
     pagePath: entity.PATH_PAGE || undefined,
     slug: entity.SLUG || undefined,
     storeStock: entity.ESTOQUE_LOJA,
-    salesMonth: entity.QT_VENDAS_MES,
-    salesLastThreeMonths: entity.QT_VENDAS_3MESES,
-    salesYear: entity.QT_VENDAS_ANO,
-    salesAllTime: entity.QT_VENDAS_ALL,
+    salesTwoMonthsAgo: entity.QT_VENDAS_HA_DOIS_MESES,
+    salesPreviousMonth: entity.QT_VENDAS_MES_ANTERIOR,
+    salesCurrentMonth: entity.QT_VENDAS_MES_ATUAL,
+    salesLast30Days: entity.QT_VENDAS_30_DIAS,
+    salesToday: entity.QT_VENDAS_HOJE,
     lastSaleAt: entity.DATA_ULT_VENDA ?? undefined,
     wholesalePrice: entity.VL_ATACADO,
     corporatePrice: entity.VL_CORPORATIVO,
@@ -186,10 +188,11 @@ export function transformProductManagerDetail(
     pagePath: entity.PATH_PAGE || undefined,
     slug: entity.SLUG || undefined,
     storeStock: entity.ESTOQUE_LOJA,
-    salesMonth: entity.QT_VENDAS_MES,
-    salesLastThreeMonths: entity.QT_VENDAS_3MESES,
-    salesYear: entity.QT_VENDAS_ANO,
-    salesAllTime: entity.QT_VENDAS_ALL,
+    salesTwoMonthsAgo: entity.QT_VENDAS_HA_DOIS_MESES,
+    salesPreviousMonth: entity.QT_VENDAS_MES_ANTERIOR,
+    salesCurrentMonth: entity.QT_VENDAS_MES_ATUAL,
+    salesLast30Days: entity.QT_VENDAS_30_DIAS,
+    salesToday: entity.QT_VENDAS_HOJE,
     wholesalePrice: entity.VL_ATACADO,
     corporatePrice: entity.VL_CORPORATIVO,
     retailPrice: entity.VL_VAREJO,

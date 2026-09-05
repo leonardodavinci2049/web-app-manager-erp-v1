@@ -2,7 +2,7 @@ import type { UIProductManager } from "@/services/api-main/product-manager/trans
 
 type ProductSales = Pick<
   UIProductManager,
-  "salesMonth" | "salesLastThreeMonths" | "salesYear" | "lastSaleAt"
+  "salesTwoMonthsAgo" | "salesLast30Days" | "salesCurrentMonth" | "lastSaleAt"
 >;
 
 const SALES_QUANTITY_FORMATTER = new Intl.NumberFormat("pt-BR", {
@@ -46,21 +46,25 @@ export function ProductSalesInformation({
     <div className="border-y py-1 text-[10px] leading-tight sm:text-xs">
       <div className="grid grid-cols-[minmax(2.75rem,auto)_repeat(3,minmax(0,1fr))] items-end gap-x-0.5 text-center">
         <span className="text-left font-medium">Vendas</span>
-        <span className="text-muted-foreground">Ano</span>
         <span className="whitespace-nowrap text-muted-foreground tracking-tight">
-          3 meses
+          Há 2 meses
         </span>
-        <span className="text-muted-foreground">Mês</span>
+        <span className="whitespace-nowrap text-muted-foreground tracking-tight">
+          30 dias
+        </span>
+        <span className="whitespace-nowrap text-muted-foreground tracking-tight">
+          Mês atual
+        </span>
 
         <span className="text-left text-muted-foreground">Total:</span>
         <span className="font-medium">
-          {formatSalesQuantity(product.salesYear)}
+          {formatSalesQuantity(product.salesTwoMonthsAgo)}
         </span>
         <span className="font-medium">
-          {formatSalesQuantity(product.salesLastThreeMonths)}
+          {formatSalesQuantity(product.salesLast30Days)}
         </span>
         <span className="font-medium">
-          {formatSalesQuantity(product.salesMonth)}
+          {formatSalesQuantity(product.salesCurrentMonth)}
         </span>
       </div>
 
