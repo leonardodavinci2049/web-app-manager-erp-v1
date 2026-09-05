@@ -35,14 +35,25 @@ This project does not currently use automated tests. Do not invent or suggest te
 
 - `src/app`: App Router routes, layouts, pages, route handlers, and special files.
 - `src/app/actions`: global Server Actions.
-- `src/app/**/_actions`: feature/route Server Actions.
-- `src/app/**/_components`: feature/route colocated UI; follow the existing local pattern.
-- `src/components`: shared components; `src/components/ui` for base/design system components.
+- `src/app/**/_actions`: new route-specific or route-group-shared Server Actions.
+- `src/app/**/_components`: route-specific or route-group-shared UI, following the placement rules below.
+- `src/components`: installed components or components shared across the entire application; `src/components/ui` for installed base/design system components.
 - `src/services/api-main/*`: main API integration by module. Read the local `AGENTS.md` before changing anything.
 - `src/services/api-assets` and `src/services/api-cep`: specific external integrations.
 - `src/services/db/*`: DB/server-only access with mysql2.
 - `src/core` and `src/lib`: shared config, logger, auth, helpers, cache, and utilities.
 - `src/types` or module-level `types/`: shared types.
+
+## Placement of New Components and Server Actions
+
+Keep route-specific files close to the routes that use them so a route can be copied to another project with its local components and Server Actions.
+
+- Create a component used by only one route inside that route's `_components` folder, alongside its `page.tsx` or `layout.tsx`.
+- Create a component shared by two or more routes inside an `_components` folder at the nearest common ancestor directory of those routes. Keep it within the smallest route scope that includes all its consumers.
+- Use `src/components` only for installed components or components shared across the entire application. Sharing a component between a few routes alone does not justify placing it there.
+- Apply the same scope rules to Server Actions: create actions used by one route in its `_actions` folder, alongside its `page.tsx` or `layout.tsx`; create actions shared by multiple routes in an `_actions` folder at their nearest common ancestor directory. Reserve `src/app/actions` for application-wide Server Actions.
+- Use the exact folder names `_components` and `_actions` (plural) for new files; migrate existing files only when explicitly requested.
+- Avoid importing route-specific components or Server Actions from a sibling route. When sharing becomes necessary, place the shared files at the nearest common ancestor of the consuming routes.
 
 ## Cross-Repository Work
 
