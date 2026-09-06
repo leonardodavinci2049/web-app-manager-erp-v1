@@ -1,9 +1,5 @@
-
-
 const PurchasingDetailsPage = () => {
-  return (
-    <div>PurchasingDetailsPage</div>
-  )
-}
+  return <div>PurchasingDetailsPage</div>;
+};
 
-export default PurchasingDetailsPage
+export default PurchasingDetailsPage;

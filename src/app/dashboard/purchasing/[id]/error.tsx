@@ -3,7 +3,11 @@
 import { TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export default function PurchasingDetailsError({ reset }: { reset: () => void }) {
+export default function PurchasingDetailsError({
+  reset,
+}: {
+  reset: () => void;
+}) {
   return (
     <div className="flex flex-1 flex-col items-center justify-center px-6 py-16 text-center">
       <TriangleAlert className="text-destructive mb-4 size-14" />
