@@ -167,3 +167,19 @@ export function buildPurchasingReturnTo(
 export function buildPurchasingDetailsHref(id: number, returnTo: string) {
   return `${PURCHASING_PATH}/${id}?returnTo=${encodeURIComponent(returnTo)}`;
 }
+
+export function getSafePurchasingReturnTo(value?: string): string {
+  if (!value) return PURCHASING_PATH;
+  try {
+    const url = new URL(value, "http://manager.local");
+    if (
+      url.origin === "http://manager.local" &&
+      url.pathname === PURCHASING_PATH
+    ) {
+      return `${url.pathname}${url.search}${url.hash}`;
+    }
+  } catch {
+    return PURCHASING_PATH;
+  }
+  return PURCHASING_PATH;
+}

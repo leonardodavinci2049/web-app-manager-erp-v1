@@ -10,12 +10,15 @@ export default function PurchasingDetailsError({
 }) {
   return (
     <div className="flex flex-1 flex-col items-center justify-center px-6 py-16 text-center">
-      <TriangleAlert className="text-destructive mb-4 size-14" />
+      <TriangleAlert
+        className="text-destructive mb-4 size-14"
+        aria-hidden="true"
+      />
       <h1 className="text-xl font-semibold">
-        Não foi possível carregar a compra
+        Não foi possível carregar o produto
       </h1>
       <p className="text-muted-foreground mt-2 max-w-md text-sm">
-        Ocorreu uma falha inesperada ao consultar este registro.
+        Ocorreu uma falha inesperada ao consultar a necessidade de compra.
       </p>
       <Button type="button" className="mt-5" onClick={reset}>
         Tentar novamente
