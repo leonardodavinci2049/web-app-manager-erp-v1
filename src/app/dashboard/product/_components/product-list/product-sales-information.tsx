@@ -1,4 +1,5 @@
 import type { UIProductManager } from "@/services/api-main/product-manager/transformers/transformers";
+import { getMonthName } from "@/utils/common-utils";
 
 type ProductSales = Pick<
   UIProductManager,
@@ -46,36 +47,36 @@ interface ProductSalesInformationProps {
 export function ProductSalesInformation({
   product,
 }: ProductSalesInformationProps) {
+  const twoMonthsAgoName = getMonthName(-2);
+  const previousMonthName = getMonthName(-1);
+  const currentMonthName = getMonthName();
+
   return (
     <div className="border-y py-1 text-[10px] leading-tight sm:text-xs">
-      <p className="font-medium">Vendas</p>
+      <p className="font-semibold text-primary">Vendas</p>
       <dl className="mt-0.5 space-y-0.5">
         <div className="flex items-baseline justify-between gap-2">
-          <dt className="min-w-0 text-muted-foreground">Há 2 meses</dt>
+          <dt className="min-w-0 text-muted-foreground">{twoMonthsAgoName}</dt>
           <dd className="shrink-0 font-medium tabular-nums">
             {formatSalesQuantity(product.salesTwoMonthsAgo)}
           </dd>
         </div>
         <div className="flex items-baseline justify-between gap-2">
-          <dt className="min-w-0 text-muted-foreground">Mês anterior</dt>
+          <dt className="min-w-0 text-muted-foreground">{previousMonthName}</dt>
           <dd className="shrink-0 font-medium tabular-nums">
             {formatSalesQuantity(product.salesPreviousMonth)}
           </dd>
         </div>
         <div className="flex items-baseline justify-between gap-2">
-          <dt className="min-w-0 text-muted-foreground">Mês atual</dt>
+          <dt className="min-w-0 text-muted-foreground">
+            {currentMonthName} (Atual)
+          </dt>
           <dd className="shrink-0 font-medium tabular-nums">
-            {formatSalesQuantity(product.salesCurrentMonth)}
+            {" "}
+            {formatSalesQuantity(product.salesCurrentMonth)}{" "}
           </dd>
         </div>
       </dl>
-
-      <p className="mt-1 text-muted-foreground">
-        Últ. venda:{" "}
-        <span className="font-medium text-foreground">
-          {formatLastSaleDate(product.lastSaleAt)}
-        </span>
-      </p>
     </div>
   );
 }

@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/table";
 import type { UIProductManager } from "@/services/api-main/product-manager/transformers/transformers";
 import type { ProductCategory } from "@/types/types";
-import { formatPriceValue } from "@/utils/common-utils";
+import { formatPriceValue, getMonthName } from "@/utils/common-utils";
 import { buildProductDetailsHref } from "../lib/search-params";
 import { CategoryTags } from "./category-tags";
 import { InlineCategoryEditor } from "./product-card/inline-update/inline-category-editor";
@@ -45,6 +45,10 @@ function parseCategories(raw?: string): ProductCategory[] {
  * Mantem os mesmos dados e editores inline usados pelos cards do catalogo.
  */
 export function ProductTable({ products, catalogReturnTo }: ProductTableProps) {
+  const twoMonthsAgoName = getMonthName(-2);
+  const previousMonthName = getMonthName(-1);
+  const currentMonthName = getMonthName();
+
   return (
     <div className="min-w-0 max-w-full rounded-lg border">
       <Table aria-label="Lista de produtos">
@@ -127,15 +131,15 @@ export function ProductTable({ products, catalogReturnTo }: ProductTableProps) {
                 <TableCell className="whitespace-normal tabular-nums">
                   <div className="space-y-1 text-xs">
                     <p>
-                      Há 2 meses:{" "}
+                      {twoMonthsAgoName}:{" "}
                       {formatSalesQuantity(product.salesTwoMonthsAgo)}
                     </p>
                     <p>
-                      Mês anterior:{" "}
+                      {previousMonthName}:{" "}
                       {formatSalesQuantity(product.salesPreviousMonth)}
                     </p>
                     <p>
-                      Mês atual:{" "}
+                      {currentMonthName} (Atual):{" "}
                       {formatSalesQuantity(product.salesCurrentMonth)}
                     </p>
                   </div>
