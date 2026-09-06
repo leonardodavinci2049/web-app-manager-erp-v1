@@ -19,6 +19,24 @@ export function formatPriceValue(value: number | null | undefined): string {
   }).format(numericValue);
 }
 
+const MONTH_NAME_FORMATTER = new Intl.DateTimeFormat("pt-BR", {
+  month: "long",
+});
+
+export function getMonthName(
+  monthOffset = 0,
+  referenceDate = new Date(),
+): string {
+  const targetDate = new Date(
+    referenceDate.getFullYear(),
+    referenceDate.getMonth() + monthOffset,
+    1,
+  );
+  const monthName = MONTH_NAME_FORMATTER.format(targetDate);
+
+  return `${monthName.charAt(0).toUpperCase()}${monthName.slice(1)}`;
+}
+
 export function debounce<T extends (...args: never[]) => unknown>(
   func: T,
   wait: number,
