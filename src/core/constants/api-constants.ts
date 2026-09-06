@@ -432,6 +432,12 @@ export const ENTRY_ITEM_ENDPOINTS = {
   UPD_TAX_RATES: "/entry-item/v2/entry-item-upd-tax-rates",
 } as const;
 
+// Endpoints de Purchasing (Gestor de Compras)
+export const PURCHASING_ENDPOINTS = {
+  FIND_ALL: "/purchasing/v2/purchasing-find-manager-all",
+  FIND_BY_ID: "/purchasing/v2/purchasing-find-manager-id",
+} as const;
+
 // Configurações padrão do sistema
 export const SYSTEM_CONFIG = {
   ID_SYSTEM: 1,
