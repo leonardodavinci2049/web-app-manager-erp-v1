@@ -1,6 +1,7 @@
 export { flattenPurchasingCategories } from "./lib/category-helpers";
 export {
   buildPurchasingReturnTo,
+  getSafePurchasingReturnTo,
   mapPurchasingSort,
   parsePurchasingFilters,
   parsePurchasingPaging,
