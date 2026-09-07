@@ -23,9 +23,9 @@ interface OrdersManagerBaseResponse {
 // --- Request Interfaces ---
 
 export interface OrdersManagerFindAllRequest extends OrdersManagerBaseRequest {
-  pe_order_id?: number;
   pe_customer_id?: number;
   pe_seller_id?: number;
+  pe_search?: string;
   pe_order_status_id?: number;
   pe_financial_status_id?: number;
   pe_delivery_status_id?: number;
