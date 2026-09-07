@@ -69,9 +69,9 @@ export class OrderManagerServiceApi extends BaseApiService {
         pe_user_name: validatedParams.pe_user_name,
         pe_user_role: validatedParams.pe_user_role,
         pe_person_id: validatedParams.pe_person_id,
-        pe_order_id: validatedParams.pe_order_id ?? 0,
         pe_customer_id: validatedParams.pe_customer_id ?? 0,
         pe_seller_id: validatedParams.pe_seller_id ?? 0,
+        pe_search: validatedParams.pe_search ?? "",
         pe_order_status_id: validatedParams.pe_order_status_id ?? 0,
         pe_financial_status_id: validatedParams.pe_financial_status_id ?? 0,
         pe_delivery_status_id: validatedParams.pe_delivery_status_id ?? 0,
@@ -209,7 +209,7 @@ export const orderManagerServiceApi = new OrderManagerServiceApi();
 export interface GetOrdersManagerOrdersParams {
   startDate: string;
   endDate: string;
-  orderId?: number;
+  search?: string;
   customerId?: number;
   sellerId?: number;
   orderStatusId?: number;
@@ -236,7 +236,7 @@ export async function getOrdersManagerOrders(
   }
 
   const response = await orderManagerServiceApi.findAllOrdersManager({
-    pe_order_id: params.orderId,
+    pe_search: params.search,
     pe_customer_id: params.customerId,
     pe_seller_id: params.sellerId,
     pe_order_status_id: params.orderStatusId,
