@@ -438,6 +438,12 @@ export const PURCHASING_ENDPOINTS = {
   FIND_BY_ID: "/purchasing/v2/purchasing-find-manager-id",
 } as const;
 
+// Endpoints de Order Manager (Gestor de Pedidos)
+export const ORDER_MANAGER_ENDPOINTS = {
+  FIND_ALL: "/order-manager/v2/orders-manager-find-all",
+  FIND_BY_ID: "/order-manager/v2/orders-manager-find-id",
+} as const;
+
 // Configurações padrão do sistema
 export const SYSTEM_CONFIG = {
   ID_SYSTEM: 1,
