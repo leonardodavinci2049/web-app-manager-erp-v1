@@ -11,10 +11,10 @@ export default function OrderNotFound() {
       />
       <h1 className="text-xl font-semibold">Pedido não encontrado</h1>
       <p className="text-muted-foreground mt-2 max-w-md text-sm">
-        O registro não existe ou não está acessível para a organização atual.
+        O pedido não existe ou não está acessível para a organização atual.
       </p>
       <Button asChild variant="outline" className="mt-5">
-        <Link href="/dashboard/order">Voltar à necessidade de compra</Link>
+        <Link href="/dashboard/order">Voltar aos pedidos</Link>
       </Button>
     </div>
   );

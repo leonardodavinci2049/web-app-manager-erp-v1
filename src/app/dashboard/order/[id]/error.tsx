@@ -3,11 +3,7 @@
 import { TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export default function PurchasingDetailsError({
-  reset,
-}: {
-  reset: () => void;
-}) {
+export default function OrderDetailsError({ retry }: { retry: () => void }) {
   return (
     <div className="flex flex-1 flex-col items-center justify-center px-6 py-16 text-center">
       <TriangleAlert
@@ -15,12 +11,13 @@ export default function PurchasingDetailsError({
         aria-hidden="true"
       />
       <h1 className="text-xl font-semibold">
-        Não foi possível carregar o produto
+        Não foi possível carregar o pedido
       </h1>
       <p className="text-muted-foreground mt-2 max-w-md text-sm">
-        Ocorreu uma falha inesperada ao consultar a necessidade de compra.
+        Ocorreu uma falha inesperada ao consultar os detalhes do pedido de
+        venda. Tente novamente.
       </p>
-      <Button type="button" className="mt-5" onClick={reset}>
+      <Button type="button" className="mt-5" onClick={retry}>
         Tentar novamente
       </Button>
     </div>
