@@ -124,79 +124,85 @@ function OrderCard({
   const horizontal = viewMode === "list";
 
   return (
-    <Link
-      href={href}
-      className="group block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      aria-label={`Ver detalhes do pedido ${order.id}`}
-    >
-      <Card className="h-full gap-0 py-0 transition-shadow group-hover:shadow-md">
-        <CardContent
-          className={horizontal ? "flex gap-3 p-3" : "flex h-full flex-col p-3"}
+    <Card className="group h-full gap-0 py-0 transition-shadow hover:shadow-md">
+      <CardContent
+        className={horizontal ? "flex gap-3 p-3" : "flex h-full flex-col p-3"}
+      >
+        <div className={horizontal ? "shrink-0" : ""}>
+          <SellerImage
+            order={order}
+            viewMode={viewMode}
+            compact
+            eager={eager}
+          />
+        </div>
+        <div
+          className={
+            horizontal
+              ? "flex min-w-0 flex-1 flex-col gap-3"
+              : "mt-3 flex min-w-0 flex-1 flex-col gap-3"
+          }
         >
-          <div className={horizontal ? "shrink-0" : ""}>
-            <SellerImage
-              order={order}
-              viewMode={viewMode}
-              compact
-              eager={eager}
-            />
+          <div className="space-y-1 border-b pb-2">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="font-semibold">Pedido #{order.id}</h2>
+              <span className="text-muted-foreground text-xs">
+                {formatOrderDate(order.quoteAt)}
+              </span>
+            </div>
+            <p className="truncate text-sm font-medium">{order.customerName}</p>
+            <p className="text-muted-foreground truncate text-xs">
+              Vendedor: {order.sellerName}
+            </p>
           </div>
-          <div
+
+          <div className="flex flex-wrap gap-1.5">
+            <OrderStatusBadge value={order.orderStatus} />
+            <FinancialStatusBadge value={order.financialStatus} />
+            <DeliveryStatusBadge value={order.deliveryStatus} />
+          </div>
+
+          <dl className="grid grid-cols-2 gap-x-3 gap-y-2 text-xs">
+            <div>
+              <dt className="text-muted-foreground">Itens</dt>
+              <dd className="font-medium tabular-nums">{order.itemsCount}</dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground">Pagamento</dt>
+              <dd className="truncate font-medium">
+                {order.paymentMethod || "—"}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground">Subtotal</dt>
+              <dd className="font-medium tabular-nums">
+                {formatCurrency(Number(order.subtotal))}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground">Total</dt>
+              <dd className="font-semibold tabular-nums">
+                {formatCurrency(Number(order.total))}
+              </dd>
+            </div>
+          </dl>
+
+          <Button
+            asChild
+            size="sm"
+            variant={horizontal ? "ghost" : "default"}
             className={
-              horizontal
-                ? "min-w-0 flex-1 space-y-3"
-                : "mt-3 flex min-w-0 flex-1 flex-col gap-3"
+              horizontal ? "ml-auto gap-1 px-2" : "mt-auto w-full gap-1"
             }
           >
-            <div className="space-y-1 border-b pb-2">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <h2 className="font-semibold">Pedido #{order.id}</h2>
-                <span className="text-muted-foreground text-xs">
-                  {formatOrderDate(order.quoteAt)}
-                </span>
-              </div>
-              <p className="truncate text-sm font-medium">
-                {order.customerName}
-              </p>
-              <p className="text-muted-foreground truncate text-xs">
-                Vendedor: {order.sellerName}
-              </p>
-            </div>
-
-            <div className="flex flex-wrap gap-1.5">
-              <OrderStatusBadge value={order.orderStatus} />
-              <FinancialStatusBadge value={order.financialStatus} />
-              <DeliveryStatusBadge value={order.deliveryStatus} />
-            </div>
-
-            <dl className="grid grid-cols-2 gap-x-3 gap-y-2 text-xs">
-              <div>
-                <dt className="text-muted-foreground">Itens</dt>
-                <dd className="font-medium tabular-nums">{order.itemsCount}</dd>
-              </div>
-              <div>
-                <dt className="text-muted-foreground">Pagamento</dt>
-                <dd className="truncate font-medium">
-                  {order.paymentMethod || "—"}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-muted-foreground">Subtotal</dt>
-                <dd className="font-medium tabular-nums">
-                  {formatCurrency(Number(order.subtotal))}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-muted-foreground">Total</dt>
-                <dd className="font-semibold tabular-nums">
-                  {formatCurrency(Number(order.total))}
-                </dd>
-              </div>
-            </dl>
-          </div>
-        </CardContent>
-      </Card>
-    </Link>
+            <Link href={href} aria-label={`Ver detalhes do pedido ${order.id}`}>
+              <Eye className="size-4" aria-hidden="true" />
+              Ver detalhes
+            </Link>
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
