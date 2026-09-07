@@ -90,7 +90,7 @@ const data = {
     },
     {
       title: "Saída",
-      url: "/dashboard/development",
+      url: "/dashboard/order",
       icon: Truck,
     },
     {
