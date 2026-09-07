@@ -89,7 +89,16 @@ export class OrderManagerServiceApi extends BaseApiService {
         requestBody,
       );
 
-      return this.normalizeEmptyFindAllResponse(response);
+      const normalizedResponse = this.normalizeEmptyFindAllResponse(response);
+      if (isApiError(normalizedResponse.statusCode)) {
+        throw new OrderManagerError(
+          normalizedResponse.message || "Erro ao buscar pedidos do gestor",
+          "ORDER_MANAGER_FIND_ALL_ERROR",
+          normalizedResponse.statusCode,
+        );
+      }
+
+      return normalizedResponse;
     } catch (error) {
       logger.error(
         "Erro ao buscar todos os pedidos do gestor de pedidos",
@@ -134,10 +143,7 @@ export class OrderManagerServiceApi extends BaseApiService {
   private normalizeEmptyFindAllResponse(
     response: OrdersManagerFindAllResponse,
   ): OrdersManagerFindAllResponse {
-    if (
-      response.statusCode === API_STATUS_CODES.NOT_FOUND ||
-      response.statusCode === API_STATUS_CODES.EMPTY_RESULT
-    ) {
+    if (response.statusCode === API_STATUS_CODES.EMPTY_RESULT) {
       return {
         ...response,
         statusCode: API_STATUS_CODES.SUCCESS,
