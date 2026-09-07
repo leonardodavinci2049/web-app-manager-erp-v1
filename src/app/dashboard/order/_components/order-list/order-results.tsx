@@ -354,7 +354,7 @@ export function OrderResults({
   return (
     <div className="space-y-4">
       {viewMode === "grid" ? (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-[repeat(auto-fill,minmax(210px,1fr))] sm:gap-3 lg:gap-4">
           {orders.map((order, index) => (
             <OrderCard
               key={order.id}
