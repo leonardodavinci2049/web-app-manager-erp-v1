@@ -3,11 +3,7 @@
 import { AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export default function OrderError({
-  reset,
-}: {
-  reset: () => void;
-}) {
+export default function OrderError({ reset }: { reset: () => void }) {
   return (
     <div className="flex flex-1 items-center justify-center p-8 text-center">
       <div>
