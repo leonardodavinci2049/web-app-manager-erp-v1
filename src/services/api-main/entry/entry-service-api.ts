@@ -33,6 +33,7 @@ import {
   type EntrySearchItem,
   type EntrySummary,
   type EntryUpdateCarrierRequest,
+  type EntryUpdateDollarValueRequest,
   type EntryUpdateGeneralFieldRequest,
   type EntryUpdateMainRequest,
   type EntryUpdateNotesRequest,
@@ -48,6 +49,7 @@ import {
   EntryProcessInventorySchema,
   EntrySearchAllSchema,
   EntryUpdateCarrierSchema,
+  EntryUpdateDollarValueSchema,
   EntryUpdateGeneralFieldSchema,
   EntryUpdateMainSchema,
   EntryUpdateNotesSchema,
@@ -269,6 +271,26 @@ export class EntryServiceApi extends BaseApiService {
         "Erro ao atualizar campo genérico do item de entrada",
         error,
       );
+      throw error;
+    }
+  }
+
+  async updateEntryDollarValue(
+    params: EntryUpdateDollarValueRequest,
+  ): Promise<EntryMutationResponse> {
+    try {
+      const validatedParams = EntryUpdateDollarValueSchema.parse(params);
+      const requestBody = this.buildBasePayload(validatedParams);
+
+      const response = await this.post<EntryMutationResponse>(
+        ENTRY_ENDPOINTS.UPD_DOLLAR_VALUE,
+        requestBody,
+      );
+
+      this.checkStoredProcedureError(response);
+      return response;
+    } catch (error) {
+      logger.error("Erro ao atualizar valor do dólar da entrada", error);
       throw error;
     }
   }

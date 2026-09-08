@@ -88,13 +88,20 @@ export interface EntryUpdateGeneralFieldRequest extends EntryBaseRequest {
   pe_value_date?: string | null;
 }
 
+export interface EntryUpdateDollarValueRequest extends EntryBaseRequest {
+  pe_entry_id: number;
+  pe_dollar_exchange_rate: number;
+}
+
 export interface EntryUpdateMainRequest extends EntryBaseRequest {
   pe_entry_id: number;
   pe_invoice_number: string;
   pe_model: string;
   pe_freight_value: number;
   pe_freight_rate: number;
-  pe_exchange_rate: number;
+  pe_invoice_total: number;
+  pe_product_total: number;
+  pe_description: string;
 }
 
 export interface EntryUpdateNotesRequest extends EntryBaseRequest {

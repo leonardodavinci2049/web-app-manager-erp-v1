@@ -80,13 +80,20 @@ export const EntryUpdateGeneralFieldSchema = EntryRequestContextSchema.extend({
   pe_value_date: z.string().regex(ISO_DATE_REGEX).nullable().optional(),
 });
 
+export const EntryUpdateDollarValueSchema = EntryRequestContextSchema.extend({
+  pe_entry_id: z.number().int().positive(),
+  pe_dollar_exchange_rate: z.number().positive(),
+});
+
 export const EntryUpdateMainSchema = EntryRequestContextSchema.extend({
   pe_entry_id: z.number().int().positive(),
   pe_invoice_number: z.string().max(100),
   pe_model: z.string().max(255),
   pe_freight_value: z.number(),
   pe_freight_rate: z.number(),
-  pe_exchange_rate: z.number(),
+  pe_invoice_total: z.number(),
+  pe_product_total: z.number(),
+  pe_description: z.string().max(300),
 });
 
 export const EntryUpdateNotesSchema = EntryRequestContextSchema.extend({
@@ -120,6 +127,9 @@ export type EntryProcessInventoryInput = z.infer<
 export type EntryUpdateCarrierInput = z.infer<typeof EntryUpdateCarrierSchema>;
 export type EntryUpdateGeneralFieldInput = z.infer<
   typeof EntryUpdateGeneralFieldSchema
+>;
+export type EntryUpdateDollarValueInput = z.infer<
+  typeof EntryUpdateDollarValueSchema
 >;
 export type EntryUpdateMainInput = z.infer<typeof EntryUpdateMainSchema>;
 export type EntryUpdateNotesInput = z.infer<typeof EntryUpdateNotesSchema>;
