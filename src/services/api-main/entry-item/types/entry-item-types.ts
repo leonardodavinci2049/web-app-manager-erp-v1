@@ -149,9 +149,10 @@ export interface EntryItemListItem {
   QT_RECEBIDA: number;
   VL_UNIT_REAL: string;
   VL_FRETE_REAL: string;
-  VL_NOTA: string;
-  VL_UNIT_DOLAR: string;
-  CAMBIO: string;
+  VL_NOTA: number;
+  CAMBIO: number;
+  VL_UNIT_DOLAR: number;
+  VL_FRETE_DOLAR: number;
   VL_ICMS: string;
   VL_IPI: string;
   VL_ST: string;
