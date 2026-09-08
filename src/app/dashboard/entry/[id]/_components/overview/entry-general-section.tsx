@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Edit2, Loader2, ReceiptText, X } from "lucide-react";
+import { Check, Loader2, ReceiptText, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import { toast } from "sonner";
@@ -21,6 +21,10 @@ import {
   toEntryDecimalInput,
 } from "../entry-decimal-input";
 import { EntryDetailField } from "../entry-detail-field";
+import {
+  ENTRY_CLOSED_EDIT_MESSAGE,
+  EntryEditAction,
+} from "../entry-edit-action";
 import { EntrySectionCard } from "../entry-section-card";
 import { EntryModelCombobox } from "./entry-model-combobox";
 
@@ -36,6 +40,7 @@ interface EntryGeneralSectionProps {
     | "freightRate"
     | "description"
     | "updatedAt"
+    | "isStockClosed"
   >;
 }
 
@@ -110,6 +115,12 @@ export function EntryGeneralSection({ entry }: EntryGeneralSectionProps) {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (entry.isStockClosed) {
+      toast.error(ENTRY_CLOSED_EDIT_MESSAGE);
+      setIsEditing(false);
+      return;
+    }
 
     const parsedNumbers = {
       totalInvoice: parseEntryDecimalInput(values.totalInvoice),
@@ -194,19 +205,11 @@ export function EntryGeneralSection({ entry }: EntryGeneralSectionProps) {
       title="Informações da Nota"
       action={
         !isEditing ? (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="h-8 gap-2"
-            onClick={handleEdit}
-          >
-            <Edit2 className="size-4" aria-hidden="true" />
-            <span className="hidden sm:inline">Editar</span>
-            <span className="sr-only sm:hidden">
-              Editar informações da nota
-            </span>
-          </Button>
+          <EntryEditAction
+            isStockClosed={entry.isStockClosed}
+            label="informações da nota"
+            onEdit={handleEdit}
+          />
         ) : null
       }
     >

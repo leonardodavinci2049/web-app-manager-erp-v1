@@ -52,6 +52,7 @@ export interface UIEntryDetail {
   cofinsValue: string;
   ibsValue: string;
   cbsValue: string;
+  isStockClosed: boolean;
   stockStatus: string;
   physicalStatus: string;
   labelStatus: string;
@@ -128,6 +129,7 @@ export function transformEntryDetail(
     cofinsValue: entity.VL_CONFINS,
     ibsValue: entity.VL_IBS,
     cbsValue: entity.VL_CBS,
+    isStockClosed: entity.ESTOQUE === 1,
     stockStatus: entity.STATUS_ESTOQUE,
     physicalStatus: entity.STATUS_FISICO,
     labelStatus: entity.STATUS_ETIQUETA,

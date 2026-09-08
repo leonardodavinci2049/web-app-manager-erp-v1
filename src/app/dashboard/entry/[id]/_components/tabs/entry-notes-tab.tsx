@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Edit2, Loader2, StickyNote, X } from "lucide-react";
+import { Check, Loader2, StickyNote, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import { toast } from "sonner";
@@ -9,10 +9,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import type { UIEntryDetail } from "@/services/api-main/entry/transformers/transformers";
 import { updateEntryNotesAction } from "../../_actions/entry-detail-actions";
+import {
+  ENTRY_CLOSED_EDIT_MESSAGE,
+  EntryEditAction,
+} from "../entry-edit-action";
 import { EntrySectionCard } from "../entry-section-card";
 
 interface EntryNotesTabProps {
-  entry: Pick<UIEntryDetail, "id" | "notes">;
+  entry: Pick<UIEntryDetail, "id" | "notes" | "isStockClosed">;
 }
 
 export function EntryNotesTab({ entry }: EntryNotesTabProps) {
@@ -29,6 +33,12 @@ export function EntryNotesTab({ entry }: EntryNotesTabProps) {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (entry.isStockClosed) {
+      toast.error(ENTRY_CLOSED_EDIT_MESSAGE);
+      setIsEditing(false);
+      return;
+    }
 
     if (notes.length > 2000) {
       const message = "As anotações devem ter no máximo 2000 caracteres.";
@@ -73,20 +83,14 @@ export function EntryNotesTab({ entry }: EntryNotesTabProps) {
       title="Anotações"
       action={
         !isEditing ? (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="h-8 gap-2"
-            onClick={() => {
+          <EntryEditAction
+            isStockClosed={entry.isStockClosed}
+            label="anotações"
+            onEdit={() => {
               resetForm();
               setIsEditing(true);
             }}
-          >
-            <Edit2 className="size-4" aria-hidden="true" />
-            <span className="hidden sm:inline">Editar</span>
-            <span className="sr-only sm:hidden">Editar anotações</span>
-          </Button>
+          />
         ) : null
       }
     >

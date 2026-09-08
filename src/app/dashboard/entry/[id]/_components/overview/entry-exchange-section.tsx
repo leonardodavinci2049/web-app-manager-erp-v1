@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, DollarSign, Edit2, Loader2, X } from "lucide-react";
+import { Check, DollarSign, Loader2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import { toast } from "sonner";
@@ -16,10 +16,14 @@ import {
   toEntryDecimalInput,
 } from "../entry-decimal-input";
 import { EntryDetailField } from "../entry-detail-field";
+import {
+  ENTRY_CLOSED_EDIT_MESSAGE,
+  EntryEditAction,
+} from "../entry-edit-action";
 import { EntrySectionCard } from "../entry-section-card";
 
 interface EntryExchangeSectionProps {
-  entry: Pick<UIEntryDetail, "id" | "exchangeRate">;
+  entry: Pick<UIEntryDetail, "id" | "exchangeRate" | "isStockClosed">;
 }
 
 export function EntryExchangeSection({ entry }: EntryExchangeSectionProps) {
@@ -38,6 +42,13 @@ export function EntryExchangeSection({ entry }: EntryExchangeSectionProps) {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (entry.isStockClosed) {
+      toast.error(ENTRY_CLOSED_EDIT_MESSAGE);
+      setIsEditing(false);
+      return;
+    }
+
     const parsedExchangeRate = parseEntryDecimalInput(exchangeRate);
 
     if (!Number.isFinite(parsedExchangeRate) || parsedExchangeRate <= 0) {
@@ -83,20 +94,14 @@ export function EntryExchangeSection({ entry }: EntryExchangeSectionProps) {
       title="Câmbio dólar"
       action={
         !isEditing ? (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="h-8 gap-2"
-            onClick={() => {
+          <EntryEditAction
+            isStockClosed={entry.isStockClosed}
+            label="câmbio do dólar"
+            onEdit={() => {
               resetForm();
               setIsEditing(true);
             }}
-          >
-            <Edit2 className="size-4" aria-hidden="true" />
-            <span className="hidden sm:inline">Editar</span>
-            <span className="sr-only sm:hidden">Editar câmbio do dólar</span>
-          </Button>
+          />
         ) : null
       }
     >
