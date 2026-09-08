@@ -406,6 +406,7 @@ export const ENTRY_ENDPOINTS = {
   DELETE: "/entry/v2/entry-delete",
   PROCESS_INVENTORY: "/entry/v2/entry-process-inventory",
   UPD_CARRIER_ID: "/entry/v2/entry-upd-carrier-id",
+  UPD_DOLLAR_VALUE: "/entry/v2/entry-upd-dollar-value",
   UPD_GENERAL_FIELD: "/entry/v2/entry-upd-general-field",
   UPD_MAIN: "/entry/v2/entry-upd-main",
   UPD_NOTES: "/entry/v2/entry-upd-notes",

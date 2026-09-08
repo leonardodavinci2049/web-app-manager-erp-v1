@@ -27,6 +27,7 @@ export type {
   EntrySearchItem,
   EntrySummary,
   EntryUpdateCarrierRequest,
+  EntryUpdateDollarValueRequest,
   EntryUpdateGeneralFieldRequest,
   EntryUpdateMainRequest,
   EntryUpdateNotesRequest,
