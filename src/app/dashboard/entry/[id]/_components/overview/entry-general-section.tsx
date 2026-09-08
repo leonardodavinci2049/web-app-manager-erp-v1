@@ -15,6 +15,11 @@ import {
   formatEntryNumber,
 } from "../../../_components/lib/format";
 import { updateEntryMainAction } from "../../_actions/entry-main-actions";
+import {
+  parseEntryDecimalInput,
+  sanitizeEntryDecimalInput,
+  toEntryDecimalInput,
+} from "../entry-decimal-input";
 import { EntryDetailField } from "../entry-detail-field";
 import { EntrySectionCard } from "../entry-section-card";
 import { EntryModelCombobox } from "./entry-model-combobox";
@@ -53,46 +58,16 @@ const NUMERIC_FIELDS = [
 
 type NumericField = (typeof NUMERIC_FIELDS)[number];
 
-function toDecimalInput(value: string): string {
-  const parsed = Number(value);
-  return Number.isFinite(parsed)
-    ? parsed.toString().replace(".", ",")
-    : value.replace(".", ",");
-}
-
-function parseDecimalInput(value: string): number {
-  const normalized = value.trim().replace(/\./g, "").replace(",", ".");
-  if (!normalized) return Number.NaN;
-  return Number(normalized);
-}
-
-function sanitizeDecimalInput(value: string): string {
-  const isNegative = value.trimStart().startsWith("-");
-  let cleaned = value.replace(/[^\d,]/g, "");
-  const commaIndex = cleaned.indexOf(",");
-
-  if (commaIndex >= 0) {
-    const integerPart = cleaned.slice(0, commaIndex);
-    const decimalPart = cleaned
-      .slice(commaIndex + 1)
-      .replace(/,/g, "")
-      .slice(0, 4);
-    cleaned = `${integerPart},${decimalPart}`;
-  }
-
-  return isNegative ? `-${cleaned}` : cleaned;
-}
-
 function toFormValues(
   entry: EntryGeneralSectionProps["entry"],
 ): EntryGeneralFormValues {
   return {
     invoiceNumber: entry.invoiceNumber,
     model: entry.model,
-    totalInvoice: toDecimalInput(entry.totalInvoice),
-    totalProducts: toDecimalInput(entry.totalProducts),
-    freightValue: toDecimalInput(entry.freightValue),
-    freightRate: toDecimalInput(entry.freightRate),
+    totalInvoice: toEntryDecimalInput(entry.totalInvoice),
+    totalProducts: toEntryDecimalInput(entry.totalProducts),
+    freightValue: toEntryDecimalInput(entry.freightValue),
+    freightRate: toEntryDecimalInput(entry.freightRate),
     description: entry.description,
   };
 }
@@ -130,17 +105,17 @@ export function EntryGeneralSection({ entry }: EntryGeneralSectionProps) {
   };
 
   const handleNumericChange = (field: NumericField, value: string) => {
-    setField(field, sanitizeDecimalInput(value));
+    setField(field, sanitizeEntryDecimalInput(value));
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const parsedNumbers = {
-      totalInvoice: parseDecimalInput(values.totalInvoice),
-      totalProducts: parseDecimalInput(values.totalProducts),
-      freightValue: parseDecimalInput(values.freightValue),
-      freightRate: parseDecimalInput(values.freightRate),
+      totalInvoice: parseEntryDecimalInput(values.totalInvoice),
+      totalProducts: parseEntryDecimalInput(values.totalProducts),
+      freightValue: parseEntryDecimalInput(values.freightValue),
+      freightRate: parseEntryDecimalInput(values.freightRate),
     };
 
     if (values.model !== "NACIONAL" && values.model !== "IMPORTADO") {

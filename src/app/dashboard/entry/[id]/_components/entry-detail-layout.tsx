@@ -18,10 +18,11 @@ interface EntryDetailLayoutProps {
  * Detalhe da entrada (Server Component). O cabeçalho reúne fornecedor,
  * transportadora, usuário, data da entrada e status; os cards Geral, Câmbio
  * dólar e Fornecedor e transportadora ficam na coluna de visão geral. O card
- * Informações da Nota permite editar os dados principais; as ações de câmbio e
- * parceiros permanecem desabilitadas. Tributos, status, resumo, itens e
- * anotações ficam nas abas. A galeria somente leitura do fornecedor é injetada
- * pela página via `imageGallery` (nó `<Suspense>`).
+ * Informações da Nota, Câmbio dólar e Fornecedor e transportadora permitem
+ * editar seus respectivos dados. Tributos, status, resumo, itens e anotações
+ * ficam nas abas; tributos e anotações também permitem edição. A galeria
+ * somente leitura do fornecedor é injetada pela página via `imageGallery`
+ * (nó `<Suspense>`).
  */
 export function EntryDetailLayout({
   entry,
