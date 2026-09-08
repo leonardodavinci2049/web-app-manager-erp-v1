@@ -20,17 +20,13 @@ interface EntryTableProps {
 }
 
 /**
- * Tabela de entradas para o modo tabela em telas desktop (Server Component).
- * Colunas: imagem do fornecedor, ID + status de estoque, fornecedor,
- * transportadora, nota + valor total, itens/totais real/dolar, status
- * fisico/etiqueta, data de entrada, modelo e acoes. A acao abre a pagina de
- * detalhes.
+ * Desktop table for entry records. The action opens the entry detail page.
  */
 export function EntryTable({ entries, buildDetailHref }: EntryTableProps) {
   return (
-    <div className="min-w-0 max-w-full overflow-x-auto rounded-lg border">
+    <div className="border-border/60 min-w-0 max-w-full overflow-x-auto rounded-lg border">
       <Table aria-label="Lista de entradas">
-        <TableHeader className="bg-muted/50">
+        <TableHeader className="bg-muted/35 [&_tr]:border-border/60">
           <TableRow>
             <TableHead className="w-20">Imagem</TableHead>
             <TableHead className="min-w-40">ID</TableHead>
@@ -48,7 +44,7 @@ export function EntryTable({ entries, buildDetailHref }: EntryTableProps) {
             </TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody className="[&_tr:nth-child(even)]:bg-muted/30">
+        <TableBody className="[&_tr]:border-border/60 [&_tr:nth-child(even)]:bg-muted/20">
           {entries.map((entry) => (
             <TableRow key={entry.id}>
               <TableCell>
@@ -75,7 +71,7 @@ export function EntryTable({ entries, buildDetailHref }: EntryTableProps) {
                   {entry.supplier}
                 </Link>
               </TableCell>
-              <TableCell className="whitespace-normal break-words">
+              <TableCell className="text-muted-foreground whitespace-normal break-words">
                 {entry.carrier}
               </TableCell>
               <TableCell className="whitespace-nowrap">
