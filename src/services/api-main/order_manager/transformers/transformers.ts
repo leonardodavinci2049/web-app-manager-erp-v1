@@ -26,6 +26,7 @@ export interface UIOrdersManagerOrder {
   hasCommission: boolean;
   wholesaleSaleFlag: number;
   itemsCount: number;
+  soldProductsCount: number;
   subtotal: string;
   insurance: string;
   addition: string;
@@ -66,6 +67,7 @@ export function transformOrdersManagerListItem(
     hasCommission: entity.FLAG_COMISSAO === 1,
     wholesaleSaleFlag: entity.FLAG_VENDA_ATACADO,
     itemsCount: entity.QT_ITENS,
+    soldProductsCount: entity.QT_PRODUTOS_VENDIDOS,
     subtotal: entity.VL_SUBTOTAL,
     insurance: entity.VL_SEGURO,
     addition: entity.VL_ACRESCIMO,

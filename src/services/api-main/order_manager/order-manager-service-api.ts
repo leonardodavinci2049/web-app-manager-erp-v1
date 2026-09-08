@@ -76,6 +76,7 @@ export class OrderManagerServiceApi extends BaseApiService {
         pe_financial_status_id: validatedParams.pe_financial_status_id ?? 0,
         pe_delivery_status_id: validatedParams.pe_delivery_status_id ?? 0,
         pe_location_id: validatedParams.pe_location_id ?? 0,
+        pe_flag_operation_date: validatedParams.pe_flag_operation_date ?? 0,
         pe_start_date: validatedParams.pe_start_date,
         pe_end_date: validatedParams.pe_end_date,
         pe_records_per_page: validatedParams.pe_records_per_page ?? 100,

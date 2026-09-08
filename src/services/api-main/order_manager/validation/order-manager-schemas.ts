@@ -19,6 +19,7 @@ export const OrdersManagerFindAllSchema = z.object({
   pe_financial_status_id: z.number().int().min(0).optional(),
   pe_delivery_status_id: z.number().int().min(0).optional(),
   pe_location_id: z.number().int().min(0).optional(),
+  pe_flag_operation_date: z.number().int().optional(),
   pe_start_date: dateStringSchema,
   pe_end_date: dateStringSchema,
   pe_records_per_page: z.number().int().min(1).max(1000).optional(),

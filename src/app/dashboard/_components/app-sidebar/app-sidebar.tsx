@@ -95,26 +95,8 @@ const data = {
     },
     {
       title: "Relatórios",
-      url: "#",
-      icon: ChartColumn,
-      items: [
-        {
-          title: "Painel geral",
-          url: "/dashboard/report/panel",
-        },
-        {
-          title: "Vendas",
-          url: "/dashboard/report/sales",
-        },
-        {
-          title: "Clientes",
-          url: "/dashboard/report/customers",
-        },
-        {
-          title: "Produtos",
-          url: "/dashboard/report/products",
-        },
-      ],
+      url: "/dashboard/report/panel",
+      icon: ChartColumn
     },
   ],
   projects: [
