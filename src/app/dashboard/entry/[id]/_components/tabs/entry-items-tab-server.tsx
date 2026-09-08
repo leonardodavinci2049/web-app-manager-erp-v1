@@ -31,7 +31,7 @@ function toEntryItemViewModel(
     receivedQuantity: item.QT_RECEBIDA,
     unitValue: item.VL_UNIT_REAL,
     freightValue: item.VL_FRETE_REAL,
-    invoiceValue: item.VL_NOTA,
+    invoiceValue: String(item.VL_NOTA),
     entryDate: item.DT_ENTRADA,
   };
 }
