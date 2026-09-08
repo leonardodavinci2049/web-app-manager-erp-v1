@@ -36,7 +36,7 @@ export function EntryDetailTabs({
       </DetailTabsList>
 
       <TabsContent value="notes">
-        <EntryNotesTab notes={entry.notes} />
+        <EntryNotesTab entry={entry} />
       </TabsContent>
       <TabsContent value="image">
         <EntryImageTab
