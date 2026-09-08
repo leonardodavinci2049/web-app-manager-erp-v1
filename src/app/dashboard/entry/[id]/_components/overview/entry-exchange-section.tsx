@@ -10,6 +10,7 @@ interface EntryExchangeSectionProps {
   entry: Pick<UIEntryDetail, "exchangeRate">;
 }
 
+
 export function EntryExchangeSection({ entry }: EntryExchangeSectionProps) {
   return (
     <EntrySectionCard

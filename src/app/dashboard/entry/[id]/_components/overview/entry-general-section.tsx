@@ -367,11 +367,11 @@ export function EntryGeneralSection({ entry }: EntryGeneralSectionProps) {
             value={formatEntryMoney(entry.totalProducts)}
           />
           <EntryDetailField
-            label="Frete"
+            label="Valor Frete (R$)"
             value={formatEntryMoney(entry.freightValue)}
           />
           <EntryDetailField
-            label="Taxa do frete"
+            label="Taxa do frete (%)"
             value={formatEntryNumber(entry.freightRate)}
           />
           <div className="col-span-2 min-w-0">
