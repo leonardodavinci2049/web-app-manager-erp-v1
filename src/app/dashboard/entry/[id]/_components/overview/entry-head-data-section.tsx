@@ -2,6 +2,7 @@ import { DetailRecordHeading } from "@/app/dashboard/_components/detail-page";
 import type { UIEntryDetail } from "@/services/api-main/entry/transformers/transformers";
 import { EntryImage } from "../../../_components/entry-list/entry-image";
 import { EntryStatusBadge } from "../../../_components/entry-list/entry-status-badge";
+import { formatEntryDate } from "../../../_components/lib/format";
 
 interface EntryHeadDataSectionProps {
   entry: Pick<
@@ -9,6 +10,9 @@ interface EntryHeadDataSectionProps {
     | "id"
     | "invoiceNumber"
     | "supplier"
+    | "carrier"
+    | "userName"
+    | "entryDate"
     | "imagePath"
     | "stockStatus"
     | "physicalStatus"
@@ -20,6 +24,8 @@ export function EntryHeadDataSection({ entry }: EntryHeadDataSectionProps) {
   const displayTitle = entry.invoiceNumber?.trim()
     ? `Entrada nº ${entry.invoiceNumber}`
     : `Entrada ${entry.id}`;
+  const carrierName = entry.carrier?.trim() || "Não informado";
+  const userName = entry.userName?.trim() || "Não informado";
 
   return (
     <DetailRecordHeading
@@ -35,14 +41,16 @@ export function EntryHeadDataSection({ entry }: EntryHeadDataSectionProps) {
           <h1 className="break-words text-xl font-bold sm:text-2xl">
             {displayTitle}
           </h1>
-          <p className="text-muted-foreground mt-1 text-sm tabular-nums">
-            Entrada ID {entry.id}
+          <p className="mt-1 text-sm font-medium">{entry.supplier}</p>
+          <p className="text-muted-foreground text-sm">
+            {`Transportadora: ${carrierName}`}
           </p>
-          <p className="text-muted-foreground text-sm">{entry.supplier}</p>
+          <p className="text-muted-foreground text-sm">{`Usuário: ${userName}`}</p>
         </>
       }
       metadata={
         <>
+          <span className="tabular-nums">{`Data: ${formatEntryDate(entry.entryDate)}`}</span>
           <EntryStatusBadge label="Estoque" value={entry.stockStatus} />
           <EntryStatusBadge label="Físico" value={entry.physicalStatus} />
           <EntryStatusBadge label="Etiqueta" value={entry.labelStatus} />
