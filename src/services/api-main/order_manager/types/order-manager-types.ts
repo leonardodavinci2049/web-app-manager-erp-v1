@@ -30,6 +30,7 @@ export interface OrdersManagerFindAllRequest extends OrdersManagerBaseRequest {
   pe_financial_status_id?: number;
   pe_delivery_status_id?: number;
   pe_location_id?: number;
+  pe_flag_operation_date?: number;
   pe_start_date: string;
   pe_end_date: string;
   pe_records_per_page?: number;
@@ -61,6 +62,7 @@ export interface OrdersManagerListItem {
   FLAG_COMISSAO: number;
   FLAG_VENDA_ATACADO: number;
   QT_ITENS: number;
+  QT_PRODUTOS_VENDIDOS: number;
   VL_SUBTOTAL: string;
   VL_SEGURO: string;
   VL_ACRESCIMO: string;
