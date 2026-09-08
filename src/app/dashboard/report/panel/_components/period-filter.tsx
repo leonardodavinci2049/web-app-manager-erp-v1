@@ -52,7 +52,7 @@ export function PeriodFilter({
     maximum = undefined;
   }
   return (
-    <div className="min-w-0 space-y-6" aria-busy={pending}>
+    <div className="min-w-0 space-y-3 sm:space-y-6" aria-busy={pending}>
       <div className="flex items-center justify-between gap-1 sm:gap-3">
         <div className="flex min-w-0 items-center gap-1 sm:gap-2">
           {presets.map((preset) => (
@@ -178,7 +178,7 @@ export function PeriodFilter({
         </p>
       ) : (
         <>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs text-muted-foreground sm:text-sm">
             Período solicitado: {displayDate(period.start)} a{" "}
             {displayDate(period.end)} · Pedidos com status Venda (14)
           </p>

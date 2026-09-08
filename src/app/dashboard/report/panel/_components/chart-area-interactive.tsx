@@ -24,15 +24,15 @@ export function ChartAreaInteractive({
     value: point.value / 100,
   }));
   return (
-    <Card className="min-w-0">
-      <CardHeader>
+    <Card className="min-w-0 gap-3 py-3 sm:gap-6 sm:py-6">
+      <CardHeader className="gap-1 px-3 sm:gap-2 sm:px-6">
         <CardTitle>Histórico de vendas</CardTitle>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-xs text-muted-foreground sm:text-sm">
           Agrupamento {granularity.toLocaleLowerCase("pt-BR")} · Valor total por
           data do pedido
         </p>
       </CardHeader>
-      <CardContent className="min-w-0">
+      <CardContent className="min-w-0 px-3 sm:px-6">
         <ChartContainer
           config={{ value: { label: "Vendas", color: "var(--chart-1)" } }}
           className="h-64 w-full"

@@ -69,7 +69,7 @@ async function ReportContent({ searchParams }: Props) {
       ) : (
         <>
           <SectionCards summary={report.summary} />
-          <div className="flex flex-wrap gap-x-6 gap-y-2 rounded-lg bg-muted p-4 text-sm">
+          <div className="flex flex-wrap gap-x-6 gap-y-1 rounded-lg bg-muted px-3 py-2 text-xs sm:gap-y-2 sm:p-4 sm:text-sm">
             <p>
               <strong>
                 {report.summary.customers.toLocaleString("pt-BR")}
@@ -123,7 +123,7 @@ export default function Page(props: Props) {
           { label: "Relatório Geral", isActive: true },
         ]}
       />
-      <main className="w-full min-w-0 flex-1 space-y-6 p-4 lg:p-6">
+      <main className="w-full min-w-0 flex-1 space-y-3 p-4 sm:space-y-6 lg:p-6">
         <div>
           <h1 className="text-2xl font-semibold">Resumo de vendas</h1>
           <p className="text-sm text-muted-foreground">

@@ -26,19 +26,24 @@ export function SectionCards({ summary }: { summary: ReportSummary }) {
     },
   ];
   return (
-    <div className="grid min-w-0 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="grid min-w-0 grid-cols-2 gap-2 sm:gap-4 xl:grid-cols-4">
       {cards.map((card) => (
-        <Card key={card.title} className="min-w-0 gap-3">
-          <CardHeader>
-            <CardTitle className="text-sm text-muted-foreground">
+        <Card
+          key={card.title}
+          className="min-w-0 gap-1.5 py-3 sm:gap-3 sm:py-6"
+        >
+          <CardHeader className="px-3 sm:px-6">
+            <CardTitle className="text-xs leading-snug text-muted-foreground sm:text-sm">
               {card.title}
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="break-words text-2xl font-semibold tabular-nums">
+          <CardContent className="px-3 sm:px-6">
+            <p className="break-words text-lg font-semibold tabular-nums sm:text-2xl">
               {card.value}
             </p>
-            <p className="mt-2 text-sm font-medium">{card.detail}</p>
+            <p className="mt-1 text-xs font-medium sm:mt-2 sm:text-sm">
+              {card.detail}
+            </p>
           </CardContent>
         </Card>
       ))}
