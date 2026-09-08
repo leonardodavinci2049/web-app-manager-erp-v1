@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Edit2, ExternalLink, Loader2, Truck, X } from "lucide-react";
+import { Check, ExternalLink, Loader2, Truck, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useMemo, useState } from "react";
@@ -13,13 +13,17 @@ import { Button } from "@/components/ui/button";
 import type { UIEntryDetail } from "@/services/api-main/entry/transformers/transformers";
 import { updateEntryPartnersAction } from "../../_actions/entry-detail-actions";
 import { EntryDetailField } from "../entry-detail-field";
+import {
+  ENTRY_CLOSED_EDIT_MESSAGE,
+  EntryEditAction,
+} from "../entry-edit-action";
 import { EntrySectionCard } from "../entry-section-card";
 import { EntryPartnerCombobox } from "./entry-partner-combobox";
 
 interface EntryPartnersSectionProps {
   entry: Pick<
     UIEntryDetail,
-    "id" | "supplierId" | "supplier" | "carrierId" | "carrier"
+    "id" | "supplierId" | "supplier" | "carrierId" | "carrier" | "isStockClosed"
   >;
 }
 
@@ -48,6 +52,12 @@ export function EntryPartnersSection({ entry }: EntryPartnersSectionProps) {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (entry.isStockClosed) {
+      toast.error(ENTRY_CLOSED_EDIT_MESSAGE);
+      setIsEditing(false);
+      return;
+    }
 
     if (supplierId <= 0 || carrierId <= 0) {
       const message = "Selecione fornecedor e transportadora.";
@@ -92,22 +102,14 @@ export function EntryPartnersSection({ entry }: EntryPartnersSectionProps) {
       title="Fornecedor e transportadora"
       action={
         !isEditing ? (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="h-8 gap-2"
-            onClick={() => {
+          <EntryEditAction
+            isStockClosed={entry.isStockClosed}
+            label="fornecedor e transportadora"
+            onEdit={() => {
               resetForm();
               setIsEditing(true);
             }}
-          >
-            <Edit2 className="size-4" aria-hidden="true" />
-            <span className="hidden sm:inline">Editar</span>
-            <span className="sr-only sm:hidden">
-              Editar fornecedor e transportadora
-            </span>
-          </Button>
+          />
         ) : null
       }
     >

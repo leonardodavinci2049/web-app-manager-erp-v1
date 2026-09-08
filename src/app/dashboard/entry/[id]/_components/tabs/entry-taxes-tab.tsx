@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Edit2, Loader2, Percent, X } from "lucide-react";
+import { Check, Loader2, Percent, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import { toast } from "sonner";
@@ -16,6 +16,10 @@ import {
   toEntryDecimalInput,
 } from "../entry-decimal-input";
 import { EntryDetailField } from "../entry-detail-field";
+import {
+  ENTRY_CLOSED_EDIT_MESSAGE,
+  EntryEditAction,
+} from "../entry-edit-action";
 import { EntrySectionCard } from "../entry-section-card";
 
 interface EntryTaxesTabProps {
@@ -70,6 +74,12 @@ export function EntryTaxesTab({ entry }: EntryTaxesTabProps) {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (entry.isStockClosed) {
+      toast.error(ENTRY_CLOSED_EDIT_MESSAGE);
+      setIsEditing(false);
+      return;
+    }
 
     const parsedValues: ParsedTaxValues = {
       icmsValue: parseEntryDecimalInput(values.icmsValue),
@@ -134,20 +144,14 @@ export function EntryTaxesTab({ entry }: EntryTaxesTabProps) {
       title="Tributos"
       action={
         !isEditing ? (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="h-8 gap-2"
-            onClick={() => {
+          <EntryEditAction
+            isStockClosed={entry.isStockClosed}
+            label="tributos"
+            onEdit={() => {
               resetForm();
               setIsEditing(true);
             }}
-          >
-            <Edit2 className="size-4" aria-hidden="true" />
-            <span className="hidden sm:inline">Editar</span>
-            <span className="sr-only sm:hidden">Editar tributos</span>
-          </Button>
+          />
         ) : null
       }
     >

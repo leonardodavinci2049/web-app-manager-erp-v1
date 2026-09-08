@@ -84,6 +84,13 @@ export async function updateEntryMainAction(
       };
     }
 
+    if (entry.isStockClosed) {
+      return {
+        success: false,
+        message: "Esta nota já foi fechada e não pode ser editada.",
+      };
+    }
+
     await entryServiceApi.updateEntryMain({
       pe_entry_id: data.entryId,
       pe_invoice_number: data.invoiceNumber,

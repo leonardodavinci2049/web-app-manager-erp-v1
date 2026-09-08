@@ -13,6 +13,7 @@ import {
 
 const logger = createLogger("EntryDetailActions");
 const ENTRY_LIST_PATH = "/dashboard/entry";
+const ENTRY_CLOSED_MESSAGE = "Esta nota já foi fechada e não pode ser editada.";
 
 const entryIdSchema = z.number().int().positive("ID da entrada inválido.");
 
@@ -84,6 +85,10 @@ function notFoundFailure(error?: unknown): EntryActionResult {
   return failure("Entrada não encontrada.");
 }
 
+function closedEntryFailure(): EntryActionResult {
+  return failure(ENTRY_CLOSED_MESSAGE);
+}
+
 export async function updateEntryDollarValueAction(
   input: z.input<typeof updateDollarValueSchema>,
 ): Promise<EntryActionResult> {
@@ -101,6 +106,7 @@ export async function updateEntryDollarValueAction(
   try {
     const context = await getEntryUpdateContext(data.entryId);
     if (!context) return notFoundFailure();
+    if (context.entry.isStockClosed) return closedEntryFailure();
 
     await entryServiceApi.updateEntryDollarValue({
       pe_entry_id: data.entryId,
@@ -133,6 +139,7 @@ export async function updateEntryPartnersAction(
   try {
     const context = await getEntryUpdateContext(data.entryId);
     if (!context) return notFoundFailure();
+    if (context.entry.isStockClosed) return closedEntryFailure();
 
     if (context.entry.supplierId !== data.supplierId) {
       await entryServiceApi.updateEntrySupplier({
@@ -181,6 +188,7 @@ export async function updateEntryNotesAction(
   try {
     const context = await getEntryUpdateContext(data.entryId);
     if (!context) return notFoundFailure();
+    if (context.entry.isStockClosed) return closedEntryFailure();
 
     await entryServiceApi.updateEntryNotes({
       pe_entry_id: data.entryId,
@@ -213,6 +221,7 @@ export async function updateEntryTaxRatesAction(
   try {
     const context = await getEntryUpdateContext(data.entryId);
     if (!context) return notFoundFailure();
+    if (context.entry.isStockClosed) return closedEntryFailure();
 
     await entryServiceApi.updateEntryTaxRates({
       pe_entry_id: data.entryId,
