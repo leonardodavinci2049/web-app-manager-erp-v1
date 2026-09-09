@@ -190,7 +190,7 @@ export function mapOrderSort(sort: OrderSort): {
     case "total-desc":
       return { columnId: 3, orderId: 2 };
     default:
-      return { columnId: 1, orderId: 2 };
+      return { columnId: 2, orderId: 2 };
   }
 }
 
