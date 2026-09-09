@@ -1,5 +1,6 @@
 "use client";
 
+import { Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   type ReactNode,
@@ -9,6 +10,7 @@ import {
   useState,
   useTransition,
 } from "react";
+import { toast } from "sonner";
 import {
   REGISTRY_DEFAULT_PAGE_LIMIT,
   RegistryActiveFilters,
@@ -18,6 +20,7 @@ import {
   RegistryViewModeToggle,
   useRegistryViewMode,
 } from "@/app/dashboard/_components/registry";
+import { Button } from "@/components/ui/button";
 import type { UIBrand } from "@/services/api-main/brand/transformers/transformers";
 import type { UIPtype } from "@/services/api-main/ptype/transformers/transformers";
 import {
@@ -27,6 +30,7 @@ import {
   PURCHASING_SORT_OPTIONS,
   parsePurchasingFilters,
 } from "./lib/search-params";
+import { PurchasingExcelIcon } from "./purchasing-excel-icon";
 import { PurchasingFilterPanel } from "./purchasing-filter-panel";
 import type {
   PurchasingCategoryOption,
@@ -36,6 +40,8 @@ import type {
 } from "./types/purchasing-dashboard-types";
 
 const VIEW_MODE_STORAGE_KEY = "purchasing:product-view-mode";
+const EXPORT_ROUTE_PATH = "/dashboard/purchasing/export";
+const EXPORT_FALLBACK_FILENAME = "necessidade-de-compra.xlsx";
 
 const PANEL_DEFAULTS: Pick<PurchasingFilters, PurchasingPanelFilter> = {
   categoryId: undefined,
@@ -80,6 +86,8 @@ export function PurchasingToolbar({
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [filterOpen, setFilterOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const exportInFlightRef = useRef(false);
   const filters = useMemo(
     () => parsePurchasingFilters(searchParams),
     [searchParams],
@@ -100,6 +108,61 @@ export function PurchasingToolbar({
       updateFilters({ ...latestFilters.current, searchTerm }),
     [updateFilters],
   );
+
+  const handleExport = useCallback(async () => {
+    if (exportInFlightRef.current) return;
+    exportInFlightRef.current = true;
+    setIsExporting(true);
+    try {
+      const exportParams = new URLSearchParams(searchParams.toString());
+      exportParams.delete("page");
+      exportParams.delete("accum");
+      const query = exportParams.toString();
+      const response = await fetch(
+        `${EXPORT_ROUTE_PATH}${query ? `?${query}` : ""}`,
+      );
+      const contentType = response.headers.get("content-type") ?? "";
+      if (!response.ok || !contentType.includes("spreadsheetml")) {
+        let message =
+          "Não foi possível gerar o arquivo. Tente novamente em instantes.";
+        try {
+          const data: unknown = await response.json();
+          if (
+            data &&
+            typeof data === "object" &&
+            "error" in data &&
+            typeof data.error === "string"
+          ) {
+            message = data.error;
+          }
+        } catch {
+          // Mantém a mensagem padrão quando a resposta não é JSON válido.
+        }
+        toast.error(message);
+        return;
+      }
+      const blob = await response.blob();
+      const disposition = response.headers.get("content-disposition") ?? "";
+      const filename =
+        /filename="([^"]+)"/.exec(disposition)?.[1] ?? EXPORT_FALLBACK_FILENAME;
+      const objectUrl = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = objectUrl;
+      anchor.download = filename;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(objectUrl);
+      toast.success("Download do arquivo Excel iniciado.");
+    } catch {
+      toast.error(
+        "Falha ao baixar a exportação. Verifique sua conexão e tente novamente.",
+      );
+    } finally {
+      exportInFlightRef.current = false;
+      setIsExporting(false);
+    }
+  }, [searchParams]);
 
   const activeFilters = useMemo(() => {
     const result: Array<{ key: string; label: string; value: string }> = [];
@@ -227,6 +290,23 @@ export function PurchasingToolbar({
               })
             }
           />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="hidden shrink-0 md:inline-flex"
+            onClick={handleExport}
+            disabled={isExporting}
+            aria-label="Exportar necessidade de compra para Excel"
+            title="Exportar para Excel"
+          >
+            {isExporting ? (
+              <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <PurchasingExcelIcon className="size-4" />
+            )}
+            Exportar
+          </Button>
           <RegistryViewModeToggle
             viewMode={viewMode}
             onToggle={toggleViewMode}
@@ -245,6 +325,11 @@ export function PurchasingToolbar({
       <p className="sr-only" aria-live="polite">
         {pending ? "Atualizando consulta" : "Consulta atualizada"}
       </p>
+      {isExporting && (
+        <p className="sr-only" aria-live="polite">
+          Gerando o arquivo Excel da necessidade de compra.
+        </p>
+      )}
       <RegistryResults pending={pending}>
         {viewMode === "grid" ? grid : list}
       </RegistryResults>
@@ -256,6 +341,12 @@ export function PurchasingToolbar({
         onOpenFilters={() => setFilterOpen(true)}
         viewMode={viewMode}
         onToggleView={toggleViewMode}
+        extraAction={{
+          label: isExporting ? "Exportando" : "Excel",
+          icon: PurchasingExcelIcon,
+          onClick: handleExport,
+          disabled: isExporting,
+        }}
       />
     </div>
   );

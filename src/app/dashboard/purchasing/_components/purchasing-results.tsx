@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/table";
 import type { UIPurchasingProduct } from "@/services/api-main/purchasing/transformers/transformers";
 import { formatCurrency, getMonthName } from "@/utils/common-utils";
+import { parsePurchasingCategoryNames } from "./lib/category-helpers";
 import { buildPurchasingDetailsHref } from "./lib/search-params";
 
 const DEFAULT_PRODUCT_IMAGE = "/images/product/no-image.jpeg";
@@ -32,23 +33,6 @@ interface PurchasingResultsProps {
   returnTo: string;
   hasLoadError: boolean;
   hasActiveQuery: boolean;
-}
-
-function parseCategoryNames(raw?: string): string[] {
-  if (!raw) return [];
-  try {
-    const parsed: unknown = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed.flatMap((item) => {
-      if (typeof item === "string") return [item];
-      if (!item || typeof item !== "object") return [];
-      const record = item as Record<string, unknown>;
-      const name = record.TAXONOMIA ?? record.name ?? record.NOME;
-      return typeof name === "string" && name.trim() ? [name] : [];
-    });
-  } catch {
-    return [];
-  }
 }
 
 function formatQuantity(value?: number): string {
@@ -88,7 +72,7 @@ function CriticalityBadge({ id, value }: { id?: number; value?: string }) {
 }
 
 function CategoryBadges({ raw }: { raw?: string }) {
-  const categories = parseCategoryNames(raw);
+  const categories = parsePurchasingCategoryNames(raw);
   if (categories.length === 0)
     return <span className="text-muted-foreground text-xs">—</span>;
 
