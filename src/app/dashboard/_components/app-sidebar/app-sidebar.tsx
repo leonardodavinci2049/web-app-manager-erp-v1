@@ -96,7 +96,7 @@ const data = {
     {
       title: "Relatórios",
       url: "/dashboard/report/panel",
-      icon: ChartColumn
+      icon: ChartColumn,
     },
   ],
   projects: [
