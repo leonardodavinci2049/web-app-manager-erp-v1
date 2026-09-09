@@ -63,15 +63,22 @@ function formatLastSale(value?: string): string {
     : new Intl.DateTimeFormat("pt-BR").format(date);
 }
 
-function CriticalityBadge({ value }: { value?: string }) {
+function CriticalityBadge({ id, value }: { id?: number; value?: string }) {
   const normalized = value?.trim() || "Não informada";
-  const lower = normalized.toLocaleLowerCase("pt-BR");
-  const className =
-    lower.includes("crít") || lower.includes("critic")
-      ? "border-red-300 bg-red-50 text-red-800 dark:border-red-900 dark:bg-red-950/40 dark:text-red-200"
-      : lower.includes("alta")
-        ? "border-orange-300 bg-orange-50 text-orange-800 dark:border-orange-900 dark:bg-orange-950/40 dark:text-orange-200"
-        : "";
+  const className = (() => {
+    switch (id) {
+      case 1:
+        return "border-red-300 bg-red-50 text-red-800 dark:border-red-900 dark:bg-red-950/40 dark:text-red-200";
+      case 2:
+        return "border-orange-300 bg-orange-50 text-orange-800 dark:border-orange-900 dark:bg-orange-950/40 dark:text-orange-200";
+      case 3:
+        return "border-yellow-300 bg-yellow-50 text-yellow-800 dark:border-yellow-900 dark:bg-yellow-950/40 dark:text-yellow-200";
+      case 4:
+        return "border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200";
+      default:
+        return undefined;
+    }
+  })();
 
   return (
     <Badge variant="outline" className={className}>
@@ -180,7 +187,10 @@ function PurchasingCard({
               {product.name}
             </Link>
             <div className="flex flex-wrap items-center gap-1.5">
-              <CriticalityBadge value={product.criticalityLevel} />
+              <CriticalityBadge
+                id={product.criticalityId}
+                value={product.criticalityLevel}
+              />
               <span className="text-muted-foreground text-xs">
                 SKU {product.sku}
               </span>
@@ -344,7 +354,10 @@ function PurchasingTable({
                   </div>
                 </TableCell>
                 <TableCell>
-                  <CriticalityBadge value={product.criticalityLevel} />
+                  <CriticalityBadge
+                    id={product.criticalityId}
+                    value={product.criticalityLevel}
+                  />
                 </TableCell>
                 <TableCell className="max-w-44 whitespace-normal">
                   {product.supplier || "—"}
