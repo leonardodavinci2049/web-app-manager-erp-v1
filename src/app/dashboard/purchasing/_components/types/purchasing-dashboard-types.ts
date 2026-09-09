@@ -6,11 +6,11 @@ export type PurchasingAdvancedFilter = 0 | 1 | 2;
 export type PurchasingOrigin = 0 | 1 | 2;
 export type PurchasingCriticality = 0 | 1 | 2 | 3 | 4;
 export type PurchasingSort =
+  | "criticality-asc"
+  | "sales-desc"
   | "name-asc"
   | "name-desc"
-  | "newest"
-  | "price-asc"
-  | "price-desc";
+  | "newest";
 
 export interface PurchasingCategoryOption {
   id: number;

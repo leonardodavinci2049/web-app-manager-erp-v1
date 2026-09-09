@@ -33,11 +33,11 @@ export interface PurchasingFindAllRequest extends PurchasingBaseRequest {
   pe_flag_advanced?: 0 | 1 | 2;
   pe_flag_imported?: 0 | 1 | 2;
   pe_flag_premium?: 0 | 1;
-  pe_criticality_level?: 0 | 1 | 2 | 3 | 4;
+  pe_criticality_level?: number;
   pe_flag_various_lists?: number;
   pe_qt_records?: number;
   pe_page_id?: number;
-  pe_column_id?: 1 | 2 | 3;
+  pe_column_id?: 1 | 2 | 3 | 4;
   pe_order_id?: 1 | 2;
 }
 
@@ -75,6 +75,7 @@ export interface PurchasingListItem {
   QT_VENDAS_30_DIAS: number;
   QT_VENDAS_HOJE: number;
   DATA_ULT_VENDA: string | null;
+  CRITICALITY_ID: number;
   CRITICALITY_LEVEL: string | null;
   ESTOQUE_LOJA: number;
   VL_ATACADO: string;
@@ -128,6 +129,7 @@ export interface PurchasingDetail {
   QT_VENDAS_30_DIAS: number;
   QT_VENDAS_HOJE: number;
   DATA_ULT_VENDA: string | null;
+  CRITICALITY_ID: number;
   CRITICALITY_LEVEL: string | null;
   TEMPODEGARANTIA_DIA: number;
   PESO_GR: number;

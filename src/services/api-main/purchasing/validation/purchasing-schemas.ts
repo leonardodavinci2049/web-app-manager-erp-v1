@@ -20,11 +20,11 @@ export const PurchasingFindAllSchema = z.object({
   pe_flag_advanced: ternaryFlagSchema,
   pe_flag_imported: ternaryFlagSchema,
   pe_flag_premium: binaryFlagSchema,
-  pe_criticality_level: z.number().int().min(0).max(4).optional(),
+  pe_criticality_level: z.number().int().optional(),
   pe_flag_various_lists: z.number().int().min(0).optional(),
   pe_qt_records: z.number().int().min(1).max(1000).optional(),
   pe_page_id: z.number().int().min(0).optional(),
-  pe_column_id: z.number().int().min(1).max(3).optional(),
+  pe_column_id: z.number().int().min(1).max(4).optional(),
   pe_order_id: z.number().int().min(1).max(2).optional(),
 });
 

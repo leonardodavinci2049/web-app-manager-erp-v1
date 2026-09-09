@@ -33,6 +33,7 @@ export interface UIPurchasingProduct {
   salesLast30Days?: number;
   salesToday?: number;
   lastSaleAt?: string;
+  criticalityId: number;
   criticalityLevel?: string;
   wholesalePrice: string;
   corporatePrice: string;
@@ -101,6 +102,7 @@ export function transformPurchasingListItem(
     salesLast30Days: entity.QT_VENDAS_30_DIAS,
     salesToday: entity.QT_VENDAS_HOJE,
     lastSaleAt: entity.DATA_ULT_VENDA ?? undefined,
+    criticalityId: entity.CRITICALITY_ID,
     criticalityLevel: entity.CRITICALITY_LEVEL ?? undefined,
     wholesalePrice: entity.VL_ATACADO,
     corporatePrice: entity.VL_CORPORATIVO,
@@ -157,6 +159,7 @@ export function transformPurchasingDetail(
     salesLast30Days: entity.QT_VENDAS_30_DIAS,
     salesToday: entity.QT_VENDAS_HOJE,
     lastSaleAt: entity.DATA_ULT_VENDA ?? undefined,
+    criticalityId: entity.CRITICALITY_ID,
     criticalityLevel: entity.CRITICALITY_LEVEL ?? undefined,
     wholesalePrice: entity.VL_ATACADO,
     corporatePrice: entity.VL_CORPORATIVO,

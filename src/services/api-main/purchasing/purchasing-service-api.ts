@@ -201,11 +201,11 @@ export interface GetPurchasingProductsParams {
   flagAdvanced?: 0 | 1 | 2;
   flagImported?: 0 | 1 | 2;
   flagPremium?: 0 | 1;
-  criticalityLevel?: 0 | 1 | 2 | 3 | 4;
+  criticalityLevel?: number;
   flagVariousLists?: number;
   qtRecords?: number;
   pageId?: number;
-  columnId?: 1 | 2 | 3;
+  columnId?: 1 | 2 | 3 | 4;
   orderId?: 1 | 2;
   pe_system_client_id?: number;
   pe_organization_id?: string;
