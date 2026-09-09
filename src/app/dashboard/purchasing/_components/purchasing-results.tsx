@@ -72,7 +72,7 @@ function CriticalityBadge({ id, value }: { id?: number; value?: string }) {
 }
 
 function CategoryBadges({ raw }: { raw?: string }) {
-  const categories = parsePurchasingCategoryNames(raw);
+  const categories = [...new Set(parsePurchasingCategoryNames(raw))];
   if (categories.length === 0)
     return <span className="text-muted-foreground text-xs">—</span>;
 
