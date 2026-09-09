@@ -2,16 +2,23 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { isApiSuccess } from "@/core/constants/api-constants";
 import { createLogger } from "@/core/logger";
 import type { AuthContext } from "@/server/auth-context";
+import { getBrands } from "@/services/api-main/brand/brand-service-api";
 import {
   type EntryItemEntryListItem,
   entryItemServiceApi,
 } from "@/services/api-main/entry-item";
+import { getPtypes } from "@/services/api-main/ptype/ptype-service-api";
+import { getTaxonomyMenuManager } from "@/services/api-main/taxonomy-base/taxonomy-base-service-api";
+import type { EntryItemProductFormOptions } from "./entry-item-product-create-sheet";
 import { EntryItemsTab, type EntryItemViewModel } from "./entry-items-tab";
 
 const logger = createLogger("EntryItemsTabServer");
+const CATEGORY_MENU_LIMIT = 10_000;
+const OPTIONS_LIMIT = 100;
 
 interface EntryItemsTabServerProps {
   entryId: number;
+  isStockClosed: boolean;
   apiContext: AuthContext["apiContext"];
 }
 
@@ -36,16 +43,77 @@ function toEntryItemViewModel(
   };
 }
 
+async function loadProductFormOptions(
+  apiContext: AuthContext["apiContext"],
+): Promise<EntryItemProductFormOptions> {
+  const [brands, ptypes, taxonomy] = await Promise.all([
+    getBrands({ limit: OPTIONS_LIMIT, ...apiContext }).catch((error) => {
+      logger.error("Erro ao buscar marcas para o cadastro de produto", error);
+      return [] as Awaited<ReturnType<typeof getBrands>>;
+    }),
+    getPtypes({ limit: OPTIONS_LIMIT, ...apiContext }).catch((error) => {
+      logger.error("Erro ao buscar tipos para o cadastro de produto", error);
+      return [] as Awaited<ReturnType<typeof getPtypes>>;
+    }),
+    getTaxonomyMenuManager({
+      limit: CATEGORY_MENU_LIMIT,
+      ...apiContext,
+    })
+      .then(({ items }) => ({
+        available: true as const,
+        options: items
+          .filter(
+            (item) => !item.inactive && item.level >= 1 && item.level <= 3,
+          )
+          .sort(
+            (left, right) =>
+              left.order - right.order || left.name.localeCompare(right.name),
+          )
+          .map((item) => ({
+            id: item.id,
+            parentId: item.parentId,
+            name: item.name,
+            level: item.level,
+          })),
+      }))
+      .catch((error) => {
+        logger.error(
+          "Erro ao buscar hierarquia de categorias para o cadastro de produto",
+          error,
+        );
+        return { available: false as const, options: [] };
+      }),
+  ]);
+
+  return {
+    brands: brands.map((brand) => ({
+      id: brand.id,
+      name: brand.name,
+      inactive: brand.inactive,
+    })),
+    ptypes: ptypes.map((ptype) => ({
+      id: ptype.id,
+      name: ptype.name,
+    })),
+    taxonomyOptions: taxonomy.options,
+    isTaxonomyAvailable: taxonomy.available,
+  };
+}
+
 export async function EntryItemsTabServer({
   entryId,
+  isStockClosed,
   apiContext,
 }: EntryItemsTabServerProps) {
   try {
-    const response = await entryItemServiceApi.findEntryItemsByEntryId({
-      ...apiContext,
-      pe_entry_id: entryId,
-      pe_limit: 1000,
-    });
+    const [response, productFormOptions] = await Promise.all([
+      entryItemServiceApi.findEntryItemsByEntryId({
+        ...apiContext,
+        pe_entry_id: entryId,
+        pe_limit: 1000,
+      }),
+      loadProductFormOptions(apiContext),
+    ]);
 
     if (!isApiSuccess(response.statusCode)) {
       throw new Error(response.message || "Entry items API returned an error");
@@ -56,10 +124,30 @@ export async function EntryItemsTabServer({
       .filter((item) => item.ID_ENTRADA === entryId)
       .map(toEntryItemViewModel);
 
-    return <EntryItemsTab items={items} />;
+    return (
+      <EntryItemsTab
+        entryId={entryId}
+        isStockClosed={isStockClosed}
+        items={items}
+        productFormOptions={productFormOptions}
+      />
+    );
   } catch (error) {
     logger.error(`Erro ao carregar itens da entrada ${entryId}`, error);
-    return <EntryItemsTab items={[]} hasLoadError />;
+    return (
+      <EntryItemsTab
+        entryId={entryId}
+        isStockClosed={isStockClosed}
+        items={[]}
+        productFormOptions={{
+          brands: [],
+          ptypes: [],
+          taxonomyOptions: [],
+          isTaxonomyAvailable: false,
+        }}
+        hasLoadError
+      />
+    );
   }
 }
 

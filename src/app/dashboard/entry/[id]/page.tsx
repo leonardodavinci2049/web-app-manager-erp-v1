@@ -70,6 +70,7 @@ export default async function EntryDetailsPage({
                   <Suspense fallback={<EntryItemsTabSkeleton />}>
                     <EntryItemsTabServer
                       entryId={entry.id}
+                      isStockClosed={entry.isStockClosed}
                       apiContext={apiContext}
                     />
                   </Suspense>
