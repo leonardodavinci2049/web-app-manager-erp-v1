@@ -173,7 +173,7 @@ export function PurchasingFilterPanel({
 
       <FilterSelect
         id="purchasing-criticality"
-        label="Criticidade"
+        label="Criticidadexxx"
         value={String(draft.criticality)}
         disabled={pending}
         onChange={(value) => setNumber("criticality", value)}
