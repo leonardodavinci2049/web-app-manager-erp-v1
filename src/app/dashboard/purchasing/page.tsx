@@ -12,6 +12,7 @@ import {
   buildPurchasingReturnTo,
   flattenPurchasingCategories,
   mapPurchasingSort,
+  PURCHASING_DEFAULT_SORT,
   PurchasingDashboard,
   parsePurchasingFilters,
   parsePurchasingPaging,
@@ -45,7 +46,7 @@ export default async function PurchasingPage({
       filters.origin ||
       filters.premium ||
       filters.criticality ||
-      filters.sort !== "name-desc",
+      filters.sort !== PURCHASING_DEFAULT_SORT,
   );
 
   const [productsResult, brands, categories, ptypes] = await Promise.all([

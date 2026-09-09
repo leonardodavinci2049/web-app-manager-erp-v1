@@ -17,16 +17,17 @@ type SearchParamValue = string | string[] | undefined;
 type SearchParams = URLSearchParams | Record<string, SearchParamValue>;
 
 export const PURCHASING_PATH = "/dashboard/purchasing";
+export const PURCHASING_DEFAULT_SORT = "criticality-asc" as const;
 
 export const PURCHASING_SORT_OPTIONS: ReadonlyArray<{
   value: PurchasingSort;
   label: string;
 }> = [
+  { value: "criticality-asc", label: "Maior criticidade" },
+  { value: "sales-desc", label: "Mais vendidos em 30 dias" },
   { value: "name-asc", label: "Nome A-Z" },
   { value: "name-desc", label: "Nome Z-A" },
   { value: "newest", label: "Mais recentes" },
-  { value: "price-asc", label: "Menor preço" },
-  { value: "price-desc", label: "Maior preço" },
 ];
 
 const VALID_SORTS = new Set(PURCHASING_SORT_OPTIONS.map(({ value }) => value));
@@ -98,7 +99,7 @@ export function parsePurchasingFilters(value: SearchParams): PurchasingFilters {
     sort:
       requestedSort && VALID_SORTS.has(requestedSort)
         ? requestedSort
-        : "name-desc",
+        : PURCHASING_DEFAULT_SORT,
     pageLimit,
   };
 }
@@ -117,20 +118,20 @@ export function parsePurchasingPaging(value: SearchParams) {
 }
 
 export function mapPurchasingSort(sort: PurchasingSort): {
-  columnId: 1 | 2 | 3;
+  columnId: 1 | 2 | 3 | 4;
   orderId: 1 | 2;
 } {
   switch (sort) {
-    case "name-asc":
-      return { columnId: 1, orderId: 1 };
-    case "newest":
+    case "sales-desc":
       return { columnId: 2, orderId: 2 };
-    case "price-asc":
-      return { columnId: 3, orderId: 1 };
-    case "price-desc":
+    case "name-asc":
+      return { columnId: 4, orderId: 1 };
+    case "name-desc":
+      return { columnId: 4, orderId: 2 };
+    case "newest":
       return { columnId: 3, orderId: 2 };
     default:
-      return { columnId: 1, orderId: 2 };
+      return { columnId: 1, orderId: 1 };
   }
 }
 
@@ -149,7 +150,8 @@ export function buildPurchasingUrl(filters: PurchasingFilters): string {
   if (filters.premium) params.set("premium", "1");
   if (filters.criticality)
     params.set("criticality", String(filters.criticality));
-  if (filters.sort !== "name-desc") params.set("sort", filters.sort);
+  if (filters.sort !== PURCHASING_DEFAULT_SORT)
+    params.set("sort", filters.sort);
   if (filters.pageLimit !== REGISTRY_DEFAULT_PAGE_LIMIT)
     params.set("limit", String(filters.pageLimit));
   const query = params.toString();

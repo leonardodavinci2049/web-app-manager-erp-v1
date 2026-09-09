@@ -22,6 +22,7 @@ import type { UIBrand } from "@/services/api-main/brand/transformers/transformer
 import type { UIPtype } from "@/services/api-main/ptype/transformers/transformers";
 import {
   buildPurchasingUrl,
+  PURCHASING_DEFAULT_SORT,
   PURCHASING_SORT_OPTIONS,
   parsePurchasingFilters,
 } from "./lib/search-params";
@@ -45,7 +46,7 @@ const PANEL_DEFAULTS: Pick<PurchasingFilters, PurchasingPanelFilter> = {
   origin: 0,
   premium: false,
   criticality: 0,
-  sort: "name-desc",
+  sort: PURCHASING_DEFAULT_SORT,
   pageLimit: REGISTRY_DEFAULT_PAGE_LIMIT,
 };
 
@@ -184,7 +185,7 @@ export function PurchasingToolbar({
       `Nível ${filters.criticality}`,
     );
     add(
-      filters.sort !== "name-desc",
+      filters.sort !== PURCHASING_DEFAULT_SORT,
       "sort",
       "Ordenação",
       PURCHASING_SORT_OPTIONS.find((item) => item.value === filters.sort)
