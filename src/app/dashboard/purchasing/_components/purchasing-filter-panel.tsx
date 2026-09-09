@@ -8,13 +8,26 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import type { UIBrand } from "@/services/api-main/brand/transformers/transformers";
 import type { UIPtype } from "@/services/api-main/ptype/transformers/transformers";
 import { PURCHASING_SORT_OPTIONS } from "./lib/search-params";
 import type {
   PurchasingCategoryOption,
+  PurchasingCriticality,
   PurchasingFilters,
 } from "./types/purchasing-dashboard-types";
+
+const PURCHASING_CRITICALITY_OPTIONS = [
+  { value: 0, label: "Todos" },
+  { value: 1, label: "Crítico" },
+  { value: 2, label: "Alto" },
+  { value: 3, label: "Médio" },
+  { value: 4, label: "Baixo" },
+] as const satisfies ReadonlyArray<{
+  value: PurchasingCriticality;
+  label: string;
+}>;
 
 interface PurchasingFilterPanelProps {
   filters: PurchasingFilters;
@@ -109,6 +122,41 @@ export function PurchasingFilterPanel({
         onOpenChange(false);
       }}
     >
+      <div className="space-y-1.5">
+        <Label id="purchasing-criticality-label">Criticidade</Label>
+        <ToggleGroup
+          type="single"
+          variant="outline"
+          size="sm"
+          value={String(draft.criticality)}
+          disabled={pending}
+          aria-labelledby="purchasing-criticality-label"
+          className="w-full"
+          onValueChange={(value) => {
+            const option = PURCHASING_CRITICALITY_OPTIONS.find(
+              (item) => String(item.value) === value,
+            );
+
+            if (option) {
+              setDraft((current) => ({
+                ...current,
+                criticality: option.value,
+              }));
+            }
+          }}
+        >
+          {PURCHASING_CRITICALITY_OPTIONS.map((option) => (
+            <ToggleGroupItem
+              key={option.value}
+              value={String(option.value)}
+              className="flex-1 px-1"
+            >
+              {option.label}
+            </ToggleGroupItem>
+          ))}
+        </ToggleGroup>
+      </div>
+
       <FilterSelect
         id="purchasing-category"
         label="Categoria"
@@ -170,20 +218,6 @@ export function PurchasingFilterPanel({
           }}
         />
       </div>
-
-      <FilterSelect
-        id="purchasing-criticality"
-        label="Criticidade"
-        value={String(draft.criticality)}
-        disabled={pending}
-        onChange={(value) => setNumber("criticality", value)}
-      >
-        <option value="0">Todos os níveis</option>
-        <option value="1">Nível 1</option>
-        <option value="2">Nível 2</option>
-        <option value="3">Nível 3</option>
-        <option value="4">Nível 4</option>
-      </FilterSelect>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <FilterSelect
