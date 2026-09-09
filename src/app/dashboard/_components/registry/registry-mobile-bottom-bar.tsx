@@ -9,7 +9,7 @@ import {
   Plus,
 } from "lucide-react";
 import Link from "next/link";
-import type { ReactNode } from "react";
+import type { ComponentType, ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
 import { useSidebar } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
@@ -59,6 +59,19 @@ function ActionButton({
   );
 }
 
+type RegistryExtraAction =
+  | {
+      label: string;
+      href: string;
+      icon: LucideIcon;
+    }
+  | {
+      label: string;
+      icon: ComponentType<{ className?: string }>;
+      onClick: () => void;
+      disabled?: boolean;
+    };
+
 interface RegistryMobileBottomBarProps {
   label: string;
   filterCount?: number;
@@ -69,11 +82,7 @@ interface RegistryMobileBottomBarProps {
   addLabel?: string;
   addOpen?: boolean;
   onAdd?: () => void;
-  extraAction?: {
-    label: string;
-    href: string;
-    icon: LucideIcon;
-  };
+  extraAction?: RegistryExtraAction;
 }
 
 export function RegistryMobileBottomBar({
@@ -125,7 +134,7 @@ export function RegistryMobileBottomBar({
           active={viewMode === "list"}
           onClick={onToggleView}
         />
-        {extraAction && ExtraIcon && (
+        {extraAction && ExtraIcon && "href" in extraAction && (
           <li className="flex flex-1">
             <Link
               href={extraAction.href}
@@ -135,6 +144,25 @@ export function RegistryMobileBottomBar({
               <ExtraIcon className="size-5" aria-hidden="true" />
               <span>{extraAction.label}</span>
             </Link>
+          </li>
+        )}
+        {extraAction && ExtraIcon && !("href" in extraAction) && (
+          <li className="flex flex-1">
+            <button
+              type="button"
+              className={cn(
+                ITEM_CLASS,
+                "disabled:pointer-events-none disabled:opacity-50",
+              )}
+              aria-label={extraAction.label}
+              onClick={extraAction.onClick}
+              disabled={extraAction.disabled}
+            >
+              <span className="relative flex size-6 items-center justify-center">
+                <ExtraIcon className="size-5" aria-hidden="true" />
+              </span>
+              <span>{extraAction.label}</span>
+            </button>
           </li>
         )}
         {onAdd && addLabel && (
