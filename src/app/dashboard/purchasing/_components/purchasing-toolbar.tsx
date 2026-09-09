@@ -22,6 +22,7 @@ import type { UIBrand } from "@/services/api-main/brand/transformers/transformer
 import type { UIPtype } from "@/services/api-main/ptype/transformers/transformers";
 import {
   buildPurchasingUrl,
+  PURCHASING_CRITICALITY_OPTIONS,
   PURCHASING_DEFAULT_SORT,
   PURCHASING_SORT_OPTIONS,
   parsePurchasingFilters,
@@ -65,19 +66,6 @@ interface PurchasingToolbarProps {
   list: ReactNode;
 }
 
-const SALES_LABELS = [
-  "",
-  "Mais vendidos",
-  "Menos vendidos",
-  "Produtos encalhados",
-];
-const STOCK_LABELS = [
-  "",
-  "Com estoque",
-  "Estoque até 2",
-  "Últimos cadastrados",
-];
-const ADVANCED_LABELS = ["", "Atacado menor que 1", "Produtos de serviço"];
 const ORIGIN_LABELS = ["", "Importados", "Nacionais"];
 
 export function PurchasingToolbar({
@@ -158,24 +146,6 @@ export function PurchasingToolbar({
         ?.label ?? `ID ${filters.supplierId}`,
     );
     add(
-      filters.salesList !== 0,
-      "salesList",
-      "Lista de vendas",
-      SALES_LABELS[filters.salesList],
-    );
-    add(
-      filters.stockList !== 0,
-      "stockList",
-      "Lista de estoque",
-      STOCK_LABELS[filters.stockList],
-    );
-    add(
-      filters.advancedFilter !== 0,
-      "advancedFilter",
-      "Filtro avançado",
-      ADVANCED_LABELS[filters.advancedFilter],
-    );
-    add(
       filters.origin !== 0,
       "origin",
       "Origem",
@@ -186,7 +156,9 @@ export function PurchasingToolbar({
       filters.criticality !== 0,
       "criticality",
       "Criticidade",
-      `Nível ${filters.criticality}`,
+      PURCHASING_CRITICALITY_OPTIONS.find(
+        (option) => option.value === filters.criticality,
+      )?.label ?? String(filters.criticality),
     );
     add(
       filters.sort !== PURCHASING_DEFAULT_SORT,
