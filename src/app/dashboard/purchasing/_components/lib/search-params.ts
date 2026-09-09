@@ -4,13 +4,10 @@ import {
   REGISTRY_PAGE_LIMITS,
 } from "@/app/dashboard/_components/registry";
 import type {
-  PurchasingAdvancedFilter,
   PurchasingCriticality,
   PurchasingFilters,
   PurchasingOrigin,
-  PurchasingSalesList,
   PurchasingSort,
-  PurchasingStockList,
 } from "../types/purchasing-dashboard-types";
 
 type SearchParamValue = string | string[] | undefined;
@@ -18,6 +15,17 @@ type SearchParams = URLSearchParams | Record<string, SearchParamValue>;
 
 export const PURCHASING_PATH = "/dashboard/purchasing";
 export const PURCHASING_DEFAULT_SORT = "criticality-asc" as const;
+
+export const PURCHASING_CRITICALITY_OPTIONS = [
+  { value: 0, label: "Todos" },
+  { value: 1, label: "Crítico" },
+  { value: 2, label: "Alto" },
+  { value: 3, label: "Médio" },
+  { value: 4, label: "Baixo" },
+] as const satisfies ReadonlyArray<{
+  value: PurchasingCriticality;
+  label: string;
+}>;
 
 export const PURCHASING_SORT_OPTIONS: ReadonlyArray<{
   value: PurchasingSort;
@@ -78,15 +86,9 @@ export function parsePurchasingFilters(value: SearchParams): PurchasingFilters {
     brandId: parsePositiveInteger(params, "brand"),
     typeId: parsePositiveInteger(params, "type"),
     supplierId: parsePositiveInteger(params, "supplier"),
-    salesList: parseRange<PurchasingSalesList>(params, "sales-list", 0, 3, 0),
-    stockList: parseRange<PurchasingStockList>(params, "stock-list", 0, 3, 0),
-    advancedFilter: parseRange<PurchasingAdvancedFilter>(
-      params,
-      "advanced",
-      0,
-      2,
-      0,
-    ),
+    salesList: 0,
+    stockList: 0,
+    advancedFilter: 0,
     origin: parseRange<PurchasingOrigin>(params, "origin", 0, 2, 0),
     premium: params.get("premium") === "1",
     criticality: parseRange<PurchasingCriticality>(
@@ -142,10 +144,6 @@ export function buildPurchasingUrl(filters: PurchasingFilters): string {
   if (filters.brandId) params.set("brand", String(filters.brandId));
   if (filters.typeId) params.set("type", String(filters.typeId));
   if (filters.supplierId) params.set("supplier", String(filters.supplierId));
-  if (filters.salesList) params.set("sales-list", String(filters.salesList));
-  if (filters.stockList) params.set("stock-list", String(filters.stockList));
-  if (filters.advancedFilter)
-    params.set("advanced", String(filters.advancedFilter));
   if (filters.origin) params.set("origin", String(filters.origin));
   if (filters.premium) params.set("premium", "1");
   if (filters.criticality)

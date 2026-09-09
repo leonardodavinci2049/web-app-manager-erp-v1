@@ -11,25 +11,16 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import type { UIBrand } from "@/services/api-main/brand/transformers/transformers";
 import type { UIPtype } from "@/services/api-main/ptype/transformers/transformers";
 import { searchPurchasingFilterSuppliers } from "../_actions/purchasing-filter-actions";
-import { PURCHASING_SORT_OPTIONS } from "./lib/search-params";
+import {
+  PURCHASING_CRITICALITY_OPTIONS,
+  PURCHASING_SORT_OPTIONS,
+} from "./lib/search-params";
 import { PurchasingFilterCombobox } from "./purchasing-filter-combobox";
 import type {
   PurchasingCategoryOption,
-  PurchasingCriticality,
   PurchasingFilters,
   PurchasingSupplierOption,
 } from "./types/purchasing-dashboard-types";
-
-const PURCHASING_CRITICALITY_OPTIONS = [
-  { value: 0, label: "Todos" },
-  { value: 1, label: "Crítico" },
-  { value: 2, label: "Alto" },
-  { value: 3, label: "Médio" },
-  { value: 4, label: "Baixo" },
-] as const satisfies ReadonlyArray<{
-  value: PurchasingCriticality;
-  label: string;
-}>;
 
 interface PurchasingFilterPanelProps {
   filters: PurchasingFilters;
@@ -161,6 +152,24 @@ export function PurchasingFilterPanel({
         </ToggleGroup>
       </div>
 
+      <PurchasingFilterCombobox
+        id="purchasing-supplier"
+        label="Fornecedor"
+        value={draft.supplierId ?? 0}
+        options={supplierOptions}
+        placeholder="Todos"
+        searchPlaceholder="Pesquisar fornecedor..."
+        emptyMessage="Nenhum fornecedor encontrado."
+        disabled={pending}
+        onValueChange={(supplierId) =>
+          setDraft((current) => ({
+            ...current,
+            supplierId: supplierId === 0 ? undefined : supplierId,
+          }))
+        }
+        onSearch={searchPurchasingFilterSuppliers}
+      />
+
       <FilterSelect
         id="purchasing-category"
         label="Categoria"
@@ -207,75 +216,17 @@ export function PurchasingFilterPanel({
         </FilterSelect>
       </div>
 
-      <PurchasingFilterCombobox
-        id="purchasing-supplier"
-        label="Fornecedor"
-        value={draft.supplierId ?? 0}
-        options={supplierOptions}
-        placeholder="Todos"
-        searchPlaceholder="Pesquisar fornecedor..."
-        emptyMessage="Nenhum fornecedor encontrado."
+      <FilterSelect
+        id="purchasing-origin"
+        label="Origem"
+        value={String(draft.origin)}
         disabled={pending}
-        onValueChange={(supplierId) =>
-          setDraft((current) => ({
-            ...current,
-            supplierId: supplierId === 0 ? undefined : supplierId,
-          }))
-        }
-        onSearch={searchPurchasingFilterSuppliers}
-      />
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <FilterSelect
-          id="purchasing-sales-list"
-          label="Lista de vendas"
-          value={String(draft.salesList)}
-          disabled={pending}
-          onChange={(value) => setNumber("salesList", value)}
-        >
-          <option value="0">Todos</option>
-          <option value="1">Mais vendidos</option>
-          <option value="2">Menos vendidos</option>
-          <option value="3">Produtos encalhados</option>
-        </FilterSelect>
-        <FilterSelect
-          id="purchasing-stock-list"
-          label="Lista de estoque"
-          value={String(draft.stockList)}
-          disabled={pending}
-          onChange={(value) => setNumber("stockList", value)}
-        >
-          <option value="0">Todos</option>
-          <option value="1">Com estoque</option>
-          <option value="2">Estoque até 2</option>
-          <option value="3">Últimos cadastrados</option>
-        </FilterSelect>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <FilterSelect
-          id="purchasing-advanced"
-          label="Filtro avançado"
-          value={String(draft.advancedFilter)}
-          disabled={pending}
-          onChange={(value) => setNumber("advancedFilter", value)}
-        >
-          <option value="0">Todos</option>
-          <option value="1">Atacado menor que 1</option>
-          <option value="2">Produtos de serviço</option>
-        </FilterSelect>
-        <FilterSelect
-          id="purchasing-origin"
-          label="Origem"
-          value={String(draft.origin)}
-          disabled={pending}
-          onChange={(value) => setNumber("origin", value)}
-        >
-          <option value="0">Todas</option>
-          <option value="1">Importados</option>
-          <option value="2">Nacionais</option>
-        </FilterSelect>
-      </div>
+        onChange={(value) => setNumber("origin", value)}
+      >
+        <option value="0">Todas</option>
+        <option value="1">Importados</option>
+        <option value="2">Nacionais</option>
+      </FilterSelect>
 
       <div className="flex items-center gap-2 rounded-md border p-3">
         <Checkbox

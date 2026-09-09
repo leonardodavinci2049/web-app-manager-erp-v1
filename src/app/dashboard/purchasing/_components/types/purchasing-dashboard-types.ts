@@ -1,8 +1,5 @@
 import type { RegistryPageLimit } from "@/app/dashboard/_components/registry";
 
-export type PurchasingSalesList = 0 | 1 | 2 | 3;
-export type PurchasingStockList = 0 | 1 | 2 | 3;
-export type PurchasingAdvancedFilter = 0 | 1 | 2;
 export type PurchasingOrigin = 0 | 1 | 2;
 export type PurchasingCriticality = 0 | 1 | 2 | 3 | 4;
 export type PurchasingSort =
@@ -29,9 +26,9 @@ export interface PurchasingFilters {
   brandId?: number;
   typeId?: number;
   supplierId?: number;
-  salesList: PurchasingSalesList;
-  stockList: PurchasingStockList;
-  advancedFilter: PurchasingAdvancedFilter;
+  salesList: 0;
+  stockList: 0;
+  advancedFilter: 0;
   origin: PurchasingOrigin;
   premium: boolean;
   criticality: PurchasingCriticality;

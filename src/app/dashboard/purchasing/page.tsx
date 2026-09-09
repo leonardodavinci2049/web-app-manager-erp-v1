@@ -41,9 +41,6 @@ export default async function PurchasingPage({
       filters.brandId ||
       filters.typeId ||
       filters.supplierId ||
-      filters.salesList ||
-      filters.stockList ||
-      filters.advancedFilter ||
       filters.origin ||
       filters.premium ||
       filters.criticality ||
