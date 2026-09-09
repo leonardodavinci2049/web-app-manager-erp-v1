@@ -31,6 +31,7 @@ import type {
   PurchasingCategoryOption,
   PurchasingFilters,
   PurchasingPanelFilter,
+  PurchasingSupplierOption,
 } from "./types/purchasing-dashboard-types";
 
 const VIEW_MODE_STORAGE_KEY = "purchasing:product-view-mode";
@@ -59,6 +60,7 @@ interface PurchasingToolbarProps {
   brands: UIBrand[];
   categories: PurchasingCategoryOption[];
   ptypes: UIPtype[];
+  supplierOptions: PurchasingSupplierOption[];
   grid: ReactNode;
   list: ReactNode;
 }
@@ -82,6 +84,7 @@ export function PurchasingToolbar({
   brands,
   categories,
   ptypes,
+  supplierOptions,
   grid,
   list,
 }: PurchasingToolbarProps) {
@@ -151,7 +154,8 @@ export function PurchasingToolbar({
       Boolean(filters.supplierId),
       "supplierId",
       "Fornecedor",
-      String(filters.supplierId ?? ""),
+      supplierOptions.find((option) => option.id === filters.supplierId)
+        ?.label ?? `ID ${filters.supplierId}`,
     );
     add(
       filters.salesList !== 0,
@@ -198,7 +202,7 @@ export function PurchasingToolbar({
       String(filters.pageLimit),
     );
     return result;
-  }, [brands, categories, filters, ptypes]);
+  }, [brands, categories, filters, ptypes, supplierOptions]);
 
   const removeFilter = useCallback(
     (key: string) => {
@@ -238,6 +242,7 @@ export function PurchasingToolbar({
             brands={brands}
             categories={categories}
             ptypes={ptypes}
+            supplierOptions={supplierOptions}
             open={filterOpen}
             pending={pending}
             activeCount={panelActiveCount}

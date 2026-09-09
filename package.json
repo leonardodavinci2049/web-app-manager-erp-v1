@@ -1,6 +1,6 @@
 {
   "name": "web-app-manager-erp-v1",
-  "version": "1.1.76",
+  "version": "1.1.77",
   "private": true,
   "scripts": {
     "dev": "dotenv -e .env -- next dev",

@@ -18,6 +18,11 @@ export interface PurchasingCategoryOption {
   displayName: string;
 }
 
+export interface PurchasingSupplierOption {
+  id: number;
+  label: string;
+}
+
 export interface PurchasingFilters {
   searchTerm: string;
   categoryId?: number;
