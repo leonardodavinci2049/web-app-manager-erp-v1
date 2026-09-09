@@ -1,4 +1,7 @@
-import { Eye, PackageOpen, Plus, Trash2 } from "lucide-react";
+"use client";
+
+import { Eye, LockKeyhole, PackageOpen, Plus, Trash2 } from "lucide-react";
+import { useMemo, useState } from "react";
 import { RegistryEntityImage } from "@/app/dashboard/_components/registry";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,6 +18,11 @@ import {
   formatEntryDate,
   formatEntryMoney,
 } from "../../../_components/lib/format";
+import { ENTRY_CLOSED_EDIT_MESSAGE } from "../entry-edit-action";
+import { EntryItemAddDialog } from "./entry-item-add-dialog";
+import { EntryItemDeleteDialog } from "./entry-item-delete-dialog";
+import { EntryItemDetailSheet } from "./entry-item-detail-sheet";
+import type { EntryItemProductFormOptions } from "./entry-item-product-create-sheet";
 
 const DEFAULT_PRODUCT_IMAGE = "/images/product/no-image.jpeg";
 
@@ -36,7 +44,10 @@ export interface EntryItemViewModel {
 }
 
 interface EntryItemsTabProps {
+  entryId: number;
+  isStockClosed: boolean;
   items: EntryItemViewModel[];
+  productFormOptions: EntryItemProductFormOptions;
   hasLoadError?: boolean;
 }
 
@@ -53,24 +64,75 @@ function EntryItemImage({ item }: { item: EntryItemViewModel }) {
   );
 }
 
-function EntryItemActions({ item }: { item: EntryItemViewModel }) {
+function ClosedEntryIndicator({ compact = false }: { compact?: boolean }) {
+  return (
+    <span
+      className={
+        compact
+          ? "text-muted-foreground flex items-center justify-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium"
+          : "text-muted-foreground flex items-center gap-1.5 text-xs"
+      }
+      title={ENTRY_CLOSED_EDIT_MESSAGE}
+    >
+      <LockKeyhole className="size-3.5" aria-hidden="true" />
+      Nota fechada
+    </span>
+  );
+}
+
+interface EntryItemActionsProps {
+  item: EntryItemViewModel;
+  isStockClosed: boolean;
+  onView: (item: EntryItemViewModel) => void;
+  onDelete: (item: EntryItemViewModel) => void;
+}
+
+function EntryItemActions({
+  item,
+  isStockClosed,
+  onView,
+  onDelete,
+}: EntryItemActionsProps) {
   return (
     <div className="grid grid-cols-2 gap-2 md:flex md:justify-end">
-      <Button type="button" size="sm" variant="outline" disabled>
+      <Button
+        type="button"
+        size="sm"
+        variant="outline"
+        onClick={() => onView(item)}
+      >
         <Eye className="size-4" aria-hidden="true" />
         Visualizar
         <span className="sr-only"> o item {item.id}</span>
       </Button>
-      <Button type="button" size="sm" variant="destructive" disabled>
-        <Trash2 className="size-4" aria-hidden="true" />
-        Excluir
-        <span className="sr-only"> o item {item.id}</span>
-      </Button>
+      {isStockClosed ? (
+        <ClosedEntryIndicator compact />
+      ) : (
+        <Button
+          type="button"
+          size="sm"
+          variant="destructive"
+          onClick={() => onDelete(item)}
+        >
+          <Trash2 className="size-4" aria-hidden="true" />
+          Excluir
+          <span className="sr-only"> o item {item.id}</span>
+        </Button>
+      )}
     </div>
   );
 }
 
-function EntryItemCard({ item }: { item: EntryItemViewModel }) {
+interface EntryItemCardProps extends EntryItemActionsProps {
+  item: EntryItemViewModel;
+}
+
+function EntryItemCard({
+  item,
+  isStockClosed,
+  onView,
+  onDelete,
+}: EntryItemCardProps) {
   return (
     <article className="space-y-4 rounded-lg border p-3">
       <div className="flex min-w-0 items-start gap-3">
@@ -130,7 +192,12 @@ function EntryItemCard({ item }: { item: EntryItemViewModel }) {
         </div>
       </dl>
 
-      <EntryItemActions item={item} />
+      <EntryItemActions
+        item={item}
+        isStockClosed={isStockClosed}
+        onView={onView}
+        onDelete={onDelete}
+      />
     </article>
   );
 }
@@ -165,9 +232,23 @@ function EntryItemsErrorState() {
 }
 
 export function EntryItemsTab({
+  entryId,
+  isStockClosed,
   items,
+  productFormOptions,
   hasLoadError = false,
 }: EntryItemsTabProps) {
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [detailItem, setDetailItem] = useState<EntryItemViewModel | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<EntryItemViewModel | null>(
+    null,
+  );
+
+  const existingProductIds = useMemo(
+    () => items.map((item) => item.productId),
+    [items],
+  );
+
   return (
     <Card className="gap-4 py-4 sm:gap-6 sm:py-6">
       <CardHeader className="px-4 sm:px-6">
@@ -180,10 +261,18 @@ export function EntryItemsTab({
                 : `${items.length} ${items.length === 1 ? "item" : "itens"}`}
             </p>
           </div>
-          <Button type="button" size="sm" disabled>
-            <Plus className="size-4" aria-hidden="true" />
-            Adicionar Item
-          </Button>
+          {isStockClosed ? (
+            <ClosedEntryIndicator />
+          ) : (
+            <Button
+              type="button"
+              size="sm"
+              onClick={() => setIsAddDialogOpen(true)}
+            >
+              <Plus className="size-4" aria-hidden="true" />
+              Adicionar Item
+            </Button>
+          )}
         </div>
       </CardHeader>
 
@@ -258,7 +347,12 @@ export function EntryItemsTab({
                         {formatEntryDate(item.entryDate)}
                       </TableCell>
                       <TableCell className="text-right">
-                        <EntryItemActions item={item} />
+                        <EntryItemActions
+                          item={item}
+                          isStockClosed={isStockClosed}
+                          onView={setDetailItem}
+                          onDelete={setDeleteTarget}
+                        />
                       </TableCell>
                     </TableRow>
                   ))}
@@ -268,12 +362,40 @@ export function EntryItemsTab({
 
             <div className="space-y-3 md:hidden">
               {items.map((item) => (
-                <EntryItemCard key={item.id} item={item} />
+                <EntryItemCard
+                  key={item.id}
+                  item={item}
+                  isStockClosed={isStockClosed}
+                  onView={setDetailItem}
+                  onDelete={setDeleteTarget}
+                />
               ))}
             </div>
           </>
         )}
       </CardContent>
+
+      <EntryItemAddDialog
+        entryId={entryId}
+        open={isAddDialogOpen}
+        onOpenChange={setIsAddDialogOpen}
+        existingProductIds={existingProductIds}
+        productFormOptions={productFormOptions}
+      />
+      <EntryItemDetailSheet
+        entryId={entryId}
+        item={detailItem}
+        onOpenChange={(open) => {
+          if (!open) setDetailItem(null);
+        }}
+      />
+      <EntryItemDeleteDialog
+        entryId={entryId}
+        item={deleteTarget}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null);
+        }}
+      />
     </Card>
   );
 }

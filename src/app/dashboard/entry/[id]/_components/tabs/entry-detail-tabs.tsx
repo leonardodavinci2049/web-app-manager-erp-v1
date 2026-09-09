@@ -28,15 +28,22 @@ export function EntryDetailTabs({
     <Tabs defaultValue="notes" className="w-full gap-3 sm:gap-4">
       <DetailTabsList columns={6} ariaLabel="Seções do detalhe da entrada">
         <DetailTabTrigger value="notes">Anotações</DetailTabTrigger>
-        <DetailTabTrigger value="image">Imagem</DetailTabTrigger>
+        <DetailTabTrigger value="items">Itens da Entrada</DetailTabTrigger>
         <DetailTabTrigger value="taxes">Tributos</DetailTabTrigger>
         <DetailTabTrigger value="summary">Resumo</DetailTabTrigger>
-        <DetailTabTrigger value="items">Itens da Entrada</DetailTabTrigger>
+        <DetailTabTrigger value="image">Imagem</DetailTabTrigger>
         <DetailTabTrigger value="deletion">Exclusão</DetailTabTrigger>
       </DetailTabsList>
 
       <TabsContent value="notes">
         <EntryNotesTab entry={entry} />
+      </TabsContent>
+      <TabsContent value="items">{entryItemsTab}</TabsContent>
+      <TabsContent value="taxes">
+        <EntryTaxesTab entry={entry} />
+      </TabsContent>
+      <TabsContent value="summary">
+        <EntrySummaryTab entry={entry} />
       </TabsContent>
       <TabsContent value="image">
         <EntryImageTab
@@ -44,13 +51,6 @@ export function EntryDetailTabs({
           supplierName={entry.supplier}
         />
       </TabsContent>
-      <TabsContent value="taxes">
-        <EntryTaxesTab entry={entry} />
-      </TabsContent>
-      <TabsContent value="summary">
-        <EntrySummaryTab entry={entry} />
-      </TabsContent>
-      <TabsContent value="items">{entryItemsTab}</TabsContent>
       <TabsContent value="deletion">
         <EntryDeletionTab />
       </TabsContent>
