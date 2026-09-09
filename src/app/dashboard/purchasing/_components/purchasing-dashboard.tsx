@@ -3,7 +3,10 @@ import type { UIPtype } from "@/services/api-main/ptype/transformers/transformer
 import type { UIPurchasingProduct } from "@/services/api-main/purchasing/transformers/transformers";
 import { PurchasingResults } from "./purchasing-results";
 import { PurchasingToolbar } from "./purchasing-toolbar";
-import type { PurchasingCategoryOption } from "./types/purchasing-dashboard-types";
+import type {
+  PurchasingCategoryOption,
+  PurchasingSupplierOption,
+} from "./types/purchasing-dashboard-types";
 
 interface PurchasingDashboardProps {
   products: UIPurchasingProduct[];
@@ -16,6 +19,7 @@ interface PurchasingDashboardProps {
   brands: UIBrand[];
   categories: PurchasingCategoryOption[];
   ptypes: UIPtype[];
+  supplierOptions: PurchasingSupplierOption[];
 }
 
 export function PurchasingDashboard({
@@ -29,6 +33,7 @@ export function PurchasingDashboard({
   brands,
   categories,
   ptypes,
+  supplierOptions,
 }: PurchasingDashboardProps) {
   const commonProps = {
     products,
@@ -45,6 +50,7 @@ export function PurchasingDashboard({
       brands={brands}
       categories={categories}
       ptypes={ptypes}
+      supplierOptions={supplierOptions}
       grid={<PurchasingResults {...commonProps} viewMode="grid" />}
       list={<PurchasingResults {...commonProps} viewMode="list" />}
     />

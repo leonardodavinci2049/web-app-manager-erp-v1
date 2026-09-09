@@ -6,16 +6,18 @@ import {
   RegistryFilterSheet,
 } from "@/app/dashboard/_components/registry";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import type { UIBrand } from "@/services/api-main/brand/transformers/transformers";
 import type { UIPtype } from "@/services/api-main/ptype/transformers/transformers";
+import { searchPurchasingFilterSuppliers } from "../_actions/purchasing-filter-actions";
 import { PURCHASING_SORT_OPTIONS } from "./lib/search-params";
+import { PurchasingFilterCombobox } from "./purchasing-filter-combobox";
 import type {
   PurchasingCategoryOption,
   PurchasingCriticality,
   PurchasingFilters,
+  PurchasingSupplierOption,
 } from "./types/purchasing-dashboard-types";
 
 const PURCHASING_CRITICALITY_OPTIONS = [
@@ -34,6 +36,7 @@ interface PurchasingFilterPanelProps {
   brands: UIBrand[];
   categories: PurchasingCategoryOption[];
   ptypes: UIPtype[];
+  supplierOptions: PurchasingSupplierOption[];
   open: boolean;
   pending: boolean;
   activeCount: number;
@@ -80,6 +83,7 @@ export function PurchasingFilterPanel({
   brands,
   categories,
   ptypes,
+  supplierOptions,
   open,
   pending,
   activeCount,
@@ -203,21 +207,23 @@ export function PurchasingFilterPanel({
         </FilterSelect>
       </div>
 
-      <div className="space-y-1.5">
-        <Label htmlFor="purchasing-supplier">ID do fornecedor</Label>
-        <Input
-          id="purchasing-supplier"
-          inputMode="numeric"
-          pattern="[0-9]*"
-          value={draft.supplierId?.toString() ?? ""}
-          disabled={pending}
-          placeholder="Ex.: 123"
-          onChange={(event) => {
-            if (/^\d*$/.test(event.target.value))
-              setNumber("supplierId", event.target.value);
-          }}
-        />
-      </div>
+      <PurchasingFilterCombobox
+        id="purchasing-supplier"
+        label="Fornecedor"
+        value={draft.supplierId ?? 0}
+        options={supplierOptions}
+        placeholder="Todos"
+        searchPlaceholder="Pesquisar fornecedor..."
+        emptyMessage="Nenhum fornecedor encontrado."
+        disabled={pending}
+        onValueChange={(supplierId) =>
+          setDraft((current) => ({
+            ...current,
+            supplierId: supplierId === 0 ? undefined : supplierId,
+          }))
+        }
+        onSearch={searchPurchasingFilterSuppliers}
+      />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <FilterSelect
