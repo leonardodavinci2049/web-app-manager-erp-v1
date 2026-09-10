@@ -21,9 +21,6 @@ interface EntryHeadDataSectionProps {
 }
 
 export function EntryHeadDataSection({ entry }: EntryHeadDataSectionProps) {
-  const displayTitle = entry.invoiceNumber?.trim()
-    ? `Entrada nº ${entry.invoiceNumber}`
-    : `Entrada ${entry.id}`;
   const carrierName = entry.carrier?.trim() || "Não informado";
   const userName = entry.userName?.trim() || "Não informado";
 
@@ -39,9 +36,13 @@ export function EntryHeadDataSection({ entry }: EntryHeadDataSectionProps) {
       title={
         <>
           <h1 className="break-words text-xl font-bold sm:text-2xl">
-            {displayTitle}
+            {`Entrada ID: ${entry.id}`}
           </h1>
-          <p className="mt-1 text-sm font-medium">{entry.supplier}</p>
+          <p className="mt-1 text-muted-foreground text-sm">
+            {`Nota Nº: ${entry.invoiceNumber}`}
+          </p>
+          <p className="mt-1 text-sm font-medium">
+            Fornecedor: {entry.supplier}</p>
           <p className="text-muted-foreground text-sm">
             {`Transportadora: ${carrierName}`}
           </p>
