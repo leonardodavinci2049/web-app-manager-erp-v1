@@ -2,17 +2,14 @@
 
 import {
   CircleDollarSign,
-  ClipboardList,
   Eye,
-  FileText,
   Package,
-  Percent,
   RotateCcw,
-  StickyNote,
-  Tags,
   TriangleAlert,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import {
   Sheet,
   SheetContent,
@@ -31,12 +28,18 @@ import {
 } from "../../_actions/entry-item-actions";
 import { EntryDetailField } from "../entry-detail-field";
 import { EntrySectionCard } from "../entry-section-card";
+import { EntryItemMainSection } from "./entry-item-main-section";
+import { EntryItemNotesSection } from "./entry-item-notes-section";
+import { EntryItemPricesSection } from "./entry-item-prices-section";
+import { EntryItemTaxCodesSection } from "./entry-item-tax-codes-section";
+import { EntryItemTaxRatesSection } from "./entry-item-tax-rates-section";
 import type { EntryItemViewModel } from "./entry-items-tab";
 
 type DetailStatus = "loading" | "error" | "notFound" | "success";
 
 interface EntryItemDetailSheetProps {
   entryId: number;
+  isStockClosed: boolean;
   item: EntryItemViewModel | null;
   onOpenChange: (open: boolean) => void;
 }
@@ -51,34 +54,53 @@ function toNumber(value: number): string {
 
 export function EntryItemDetailSheet({
   entryId,
+  isStockClosed,
   item,
   onOpenChange,
 }: EntryItemDetailSheetProps) {
+  const router = useRouter();
   const [status, setStatus] = useState<DetailStatus>("loading");
   const [detail, setDetail] = useState<EntryItemDetailDto | null>(null);
+  const [postSaveReloadFailed, setPostSaveReloadFailed] = useState(false);
   const detailRequestRef = useRef(0);
   const isOpen = item !== null;
 
   const loadDetail = useCallback(
-    async (itemId: number) => {
+    async (itemId: number): Promise<boolean> => {
       const requestId = detailRequestRef.current + 1;
       detailRequestRef.current = requestId;
       setStatus("loading");
       setDetail(null);
+      setPostSaveReloadFailed(false);
       try {
         const result = await findEntryItemAction({ entryId, itemId });
-        if (detailRequestRef.current !== requestId) return;
+        if (detailRequestRef.current !== requestId) return false;
         if (result.success && result.item) {
           setDetail(result.item);
           setStatus("success");
-          return;
+          return true;
         }
         setStatus(result.notFound ? "notFound" : "error");
+        return false;
       } catch {
         if (detailRequestRef.current === requestId) setStatus("error");
+        return false;
       }
     },
     [entryId],
+  );
+
+  const reloadAfterSave = useCallback(
+    async (itemId: number) => {
+      const loaded = await loadDetail(itemId);
+      if (!loaded) {
+        setPostSaveReloadFailed(true);
+        toast.warning(
+          "Alteração salva, mas não foi possível recarregar os dados atualizados do item.",
+        );
+      }
+    },
+    [loadDetail],
   );
 
   useEffect(() => {
@@ -90,6 +112,15 @@ export function EntryItemDetailSheet({
       detailRequestRef.current += 1;
     };
   }, [isOpen, item, loadDetail]);
+
+  const handleSaved = useCallback(() => {
+    router.refresh();
+    if (item) void reloadAfterSave(item.id);
+  }, [item, reloadAfterSave, router]);
+
+  const handleEntryClosed = useCallback(() => {
+    router.refresh();
+  }, [router]);
 
   return (
     <Sheet
@@ -159,8 +190,22 @@ export function EntryItemDetailSheet({
                   className="text-destructive size-5"
                   aria-hidden="true"
                 />
-                <p className="font-medium">Não foi possível carregar o item.</p>
+                {postSaveReloadFailed ? (
+                  <p className="font-medium">
+                    Alteração salva, mas a recarga dos dados falhou.
+                  </p>
+                ) : (
+                  <p className="font-medium">
+                    Não foi possível carregar o item.
+                  </p>
+                )}
               </div>
+              {postSaveReloadFailed ? (
+                <p className="text-muted-foreground text-sm">
+                  A gravação foi concluída; não foi possível recarregar os dados
+                  atualizados do item.
+                </p>
+              ) : null}
               <ButtonRetry onRetry={() => item && void loadDetail(item.id)} />
             </div>
           )}
@@ -201,38 +246,13 @@ export function EntryItemDetailSheet({
                 </dl>
               </EntrySectionCard>
 
-              <EntrySectionCard
-                icon={
-                  <ClipboardList
-                    className="text-primary size-4"
-                    aria-hidden="true"
-                  />
-                }
-                title="Informações do item"
-              >
-                <dl className="grid gap-x-4 gap-y-4 sm:grid-cols-2">
-                  <EntryDetailField
-                    label="Quantidade comprada"
-                    value={toNumber(detail.purchasedQuantity)}
-                  />
-                  <EntryDetailField
-                    label="Quantidade recebida"
-                    value={toNumber(detail.receivedQuantity)}
-                  />
-                  <EntryDetailField
-                    label="Valor unitário"
-                    value={toMoney(detail.unitValue)}
-                  />
-                  <EntryDetailField
-                    label="Frete"
-                    value={toMoney(detail.freightValue)}
-                  />
-                  <EntryDetailField
-                    label="Valor da nota"
-                    value={toMoney(detail.invoiceValue)}
-                  />
-                </dl>
-              </EntrySectionCard>
+              <EntryItemMainSection
+                entryId={entryId}
+                isStockClosed={isStockClosed}
+                detail={detail}
+                onSaved={handleSaved}
+                onEntryClosed={handleEntryClosed}
+              />
 
               <EntrySectionCard
                 icon={
@@ -259,87 +279,37 @@ export function EntryItemDetailSheet({
                 </dl>
               </EntrySectionCard>
 
-              <EntrySectionCard
-                icon={
-                  <Tags className="text-primary size-4" aria-hidden="true" />
-                }
-                title="Preços de venda"
-              >
-                <dl className="grid gap-x-4 gap-y-4 sm:grid-cols-3">
-                  <EntryDetailField
-                    label="Atacado"
-                    value={toMoney(detail.wholesalePrice)}
-                  />
-                  <EntryDetailField
-                    label="Varejo"
-                    value={toMoney(detail.retailPrice)}
-                  />
-                  <EntryDetailField
-                    label="Corporativo"
-                    value={toMoney(detail.corporatePrice)}
-                  />
-                </dl>
-              </EntrySectionCard>
+              <EntryItemPricesSection
+                entryId={entryId}
+                isStockClosed={isStockClosed}
+                detail={detail}
+                onSaved={handleSaved}
+                onEntryClosed={handleEntryClosed}
+              />
 
-              <EntrySectionCard
-                icon={
-                  <FileText
-                    className="text-primary size-4"
-                    aria-hidden="true"
-                  />
-                }
-                title="Códigos fiscais"
-              >
-                <dl className="grid gap-x-4 gap-y-4 sm:grid-cols-3">
-                  <EntryDetailField label="CFOP" value={detail.cfop} />
-                  <EntryDetailField label="NCM" value={detail.ncm} />
-                  <EntryDetailField label="CST" value={detail.cst} />
-                </dl>
-              </EntrySectionCard>
+              <EntryItemTaxCodesSection
+                entryId={entryId}
+                isStockClosed={isStockClosed}
+                detail={detail}
+                onSaved={handleSaved}
+                onEntryClosed={handleEntryClosed}
+              />
 
-              <EntrySectionCard
-                icon={
-                  <Percent className="text-primary size-4" aria-hidden="true" />
-                }
-                title="Impostos"
-              >
-                <dl className="grid gap-x-4 gap-y-4 sm:grid-cols-2">
-                  <EntryDetailField
-                    label="Base / valor ICMS"
-                    value={`${toMoney(detail.baseIcms)} / ${toMoney(detail.valueIcms)}`}
-                  />
-                  <EntryDetailField
-                    label="Base / valor IPI"
-                    value={`${toMoney(detail.baseIpi)} / ${toMoney(detail.valueIpi)}`}
-                  />
-                  <EntryDetailField
-                    label="Base / valor IBS"
-                    value={`${toMoney(detail.baseIbs)} / ${toMoney(detail.valueIbs)}`}
-                  />
-                  <EntryDetailField
-                    label="Base / valor CBS"
-                    value={`${toMoney(detail.baseCbs)} / ${toMoney(detail.valueCbs)}`}
-                  />
-                  <EntryDetailField
-                    label="Base / valor ST"
-                    value={`${toMoney(detail.baseSt)} / ${toMoney(detail.valueSt)}`}
-                  />
-                </dl>
-              </EntrySectionCard>
+              <EntryItemTaxRatesSection
+                entryId={entryId}
+                isStockClosed={isStockClosed}
+                detail={detail}
+                onSaved={handleSaved}
+                onEntryClosed={handleEntryClosed}
+              />
 
-              <EntrySectionCard
-                icon={
-                  <StickyNote
-                    className="text-primary size-4"
-                    aria-hidden="true"
-                  />
-                }
-                title="Anotações"
-              >
-                <dl>
-                  <EntryDetailField label="Anotações" value={detail.notes} />
-                </dl>
-              </EntrySectionCard>
+              <EntryItemNotesSection
+                entryId={entryId}
+                isStockClosed={isStockClosed}
+                detail={detail}
+                onSaved={handleSaved}
+                onEntryClosed={handleEntryClosed}
+              />
             </div>
           )}
         </div>

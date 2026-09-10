@@ -384,6 +384,7 @@ export function EntryItemsTab({
       />
       <EntryItemDetailSheet
         entryId={entryId}
+        isStockClosed={isStockClosed}
         item={detailItem}
         onOpenChange={(open) => {
           if (!open) setDetailItem(null);
