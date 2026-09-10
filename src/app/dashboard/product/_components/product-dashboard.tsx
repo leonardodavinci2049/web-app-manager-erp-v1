@@ -3,10 +3,7 @@ import type { UIProductManager } from "@/services/api-main/product-manager/trans
 import type { UIPtype } from "@/services/api-main/ptype/transformers/transformers";
 import { ProductGrid } from "./product-list/product-grid/product-grid";
 import { ProductToolbar } from "./product-toolbar/product-toolbar";
-import type {
-  CategoryOption,
-  ProductCreateTaxonomyOption,
-} from "./types/product-dashboard-types";
+import type { CategoryOption } from "./types/product-dashboard-types";
 
 interface ProductDashboardProps {
   products: UIProductManager[];
@@ -16,8 +13,6 @@ interface ProductDashboardProps {
   brands: UIBrand[];
   categories: CategoryOption[];
   ptypes: UIPtype[];
-  newProductTaxonomy: ProductCreateTaxonomyOption[];
-  isNewProductTaxonomyAvailable: boolean;
   catalogReturnTo: string;
   hasProductsLoadError: boolean;
 }
@@ -36,8 +31,6 @@ export function ProductDashboard({
   brands,
   categories,
   ptypes,
-  newProductTaxonomy,
-  isNewProductTaxonomyAvailable,
   catalogReturnTo,
   hasProductsLoadError,
 }: ProductDashboardProps) {
@@ -48,8 +41,6 @@ export function ProductDashboard({
       brands={brands}
       categories={categories}
       ptypes={ptypes}
-      newProductTaxonomy={newProductTaxonomy}
-      isNewProductTaxonomyAvailable={isNewProductTaxonomyAvailable}
       grid={
         <ProductGrid
           products={products}

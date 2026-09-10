@@ -26,13 +26,6 @@ export interface CategoryOption {
   displayName: string;
 }
 
-export interface ProductCreateTaxonomyOption {
-  id: number;
-  parentId: number;
-  name: string;
-  level: number;
-}
-
 /**
  * Tipos de filtro manipulados pelo painel lateral (Sheet).
  */

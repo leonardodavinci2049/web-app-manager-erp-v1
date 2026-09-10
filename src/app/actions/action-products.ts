@@ -7,11 +7,9 @@ import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
 import { productBaseServiceApi } from "@/services/api-main/product-base";
 import { productUpdateServiceApi } from "@/services/api-main/product-update";
-import { getTaxonomyMenuManager } from "@/services/api-main/taxonomy-base/taxonomy-base-service-api";
 import { generateSlugFromName } from "@/utils/slug-utils";
 
 const logger = createLogger("ProductActions");
-const CATEGORY_MENU_LIMIT = 10_000;
 
 const createProductFormSchema = z
   .object({
@@ -25,9 +23,6 @@ const createProductFormSchema = z
     stock: z.number().int().min(0).max(1000000).default(0),
     brandId: z.number().int().nonnegative().default(0),
     typeId: z.number().int().nonnegative().default(0),
-    familyId: z.number().int().nonnegative(),
-    groupId: z.number().int().nonnegative(),
-    subgroupId: z.number().int().nonnegative(),
     additionalInfo: z.string().trim().max(5000),
   })
   .refine((data) => data.wholesalePrice <= data.retailPrice, {
@@ -74,9 +69,6 @@ export interface CreateProductData {
   corporatePrice?: number; // Preço Corporativo
   stock?: number;
   businessType?: number;
-  familyId?: number;
-  groupId?: number;
-  subgroupId?: number;
   additionalInfo?: string;
 }
 
@@ -102,9 +94,6 @@ export async function createProductFromForm(formData: FormData): Promise<{
       stock: readFormNumberOrDefault(formData, "stock"),
       brandId: readFormNumberOrDefault(formData, "brandId"),
       typeId: readFormNumberOrDefault(formData, "typeId"),
-      familyId: readFormNumberOrDefault(formData, "familyId"),
-      groupId: readFormNumberOrDefault(formData, "groupId"),
-      subgroupId: readFormNumberOrDefault(formData, "subgroupId"),
       additionalInfo: readFormString(formData, "additionalInfo"),
     });
 
@@ -126,64 +115,6 @@ export async function createProductFromForm(formData: FormData): Promise<{
       };
     }
 
-    if (
-      (data.familyId === 0 && (data.groupId !== 0 || data.subgroupId !== 0)) ||
-      (data.groupId === 0 && data.subgroupId !== 0)
-    ) {
-      return {
-        success: false,
-        error: "A hierarquia de categorias informada é inválida.",
-      };
-    }
-
-    if (data.familyId !== 0) {
-      let taxonomyItems: Awaited<
-        ReturnType<typeof getTaxonomyMenuManager>
-      >["items"];
-
-      try {
-        const taxonomyMenu = await getTaxonomyMenuManager({
-          limit: CATEGORY_MENU_LIMIT,
-          ...apiContext,
-        });
-        taxonomyItems = taxonomyMenu.items;
-      } catch (error) {
-        logger.error("Failed to validate product taxonomy hierarchy", error);
-        return {
-          success: false,
-          error:
-            "Não foi possível validar as categorias. Tente novamente em instantes.",
-        };
-      }
-
-      const activeItemsById = new Map(
-        taxonomyItems
-          .filter((item) => !item.inactive)
-          .map((item) => [item.id, item]),
-      );
-      const family = activeItemsById.get(data.familyId);
-      const group =
-        data.groupId === 0 ? undefined : activeItemsById.get(data.groupId);
-      const subgroup =
-        data.subgroupId === 0
-          ? undefined
-          : activeItemsById.get(data.subgroupId);
-      const isValidFamily = family?.level === 1 && family.parentId === 0;
-      const isValidGroup =
-        data.groupId === 0 ||
-        (group?.level === 2 && group.parentId === data.familyId);
-      const isValidSubgroup =
-        data.subgroupId === 0 ||
-        (subgroup?.level === 3 && subgroup.parentId === data.groupId);
-
-      if (!isValidFamily || !isValidGroup || !isValidSubgroup) {
-        return {
-          success: false,
-          error: "A hierarquia de categorias informada é inválida.",
-        };
-      }
-    }
-
     // Prepare API request data — novos nomes de parâmetros
     const apiData = {
       pe_product_name: data.name,
@@ -194,9 +125,6 @@ export async function createProductFromForm(formData: FormData): Promise<{
       pe_product_type_id: data.typeId,
       pe_brand_id: data.brandId,
       pe_supplier_id: 0,
-      pe_family_id: data.familyId,
-      pe_group_id: data.groupId,
-      pe_subgroup_id: data.subgroupId,
       pe_weight_gr: 0,
       pe_length_mm: 0,
       pe_width_mm: 0,
@@ -287,9 +215,6 @@ export async function createProduct(data: CreateProductData): Promise<{
       pe_model: data.model || "",
       pe_product_type_id: data.typeId || 0,
       pe_brand_id: data.brandId || 0,
-      pe_family_id: data.familyId || 0,
-      pe_group_id: data.groupId || 0,
-      pe_subgroup_id: data.subgroupId || 0,
       pe_weight_gr: 0,
       pe_length_mm: 0,
       pe_width_mm: 0,

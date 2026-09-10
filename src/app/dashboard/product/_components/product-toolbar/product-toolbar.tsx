@@ -33,7 +33,6 @@ import { ProductCreateSheet } from "../product-create/product-create-sheet";
 import type {
   CategoryOption,
   PanelFilterType,
-  ProductCreateTaxonomyOption,
   ProductFilters,
 } from "../types/product-dashboard-types";
 import { ProductFilterPanel } from "./filter-panel/product-filter-panel";
@@ -84,8 +83,6 @@ interface ProductToolbarProps {
   brands: UIBrand[];
   categories: CategoryOption[];
   ptypes: UIPtype[];
-  newProductTaxonomy: ProductCreateTaxonomyOption[];
-  isNewProductTaxonomyAvailable: boolean;
   grid: ReactNode;
   list: ReactNode;
 }
@@ -100,8 +97,6 @@ export function ProductToolbar({
   brands,
   categories,
   ptypes,
-  newProductTaxonomy,
-  isNewProductTaxonomyAvailable,
   grid,
   list,
 }: ProductToolbarProps) {
@@ -441,8 +436,6 @@ export function ProductToolbar({
         open={isNewProductOpen}
         brands={brands}
         ptypes={ptypes}
-        taxonomyOptions={newProductTaxonomy}
-        isTaxonomyAvailable={isNewProductTaxonomyAvailable}
         onOpenChange={setIsNewProductOpen}
         onCreated={handleProductCreated}
       />

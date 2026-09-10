@@ -1,30 +1,20 @@
 "use client";
 
-import {
-  CircleDollarSign,
-  FolderTree,
-  Package,
-  Tags,
-  Warehouse,
-} from "lucide-react";
-import { useRouter } from "next/navigation";
+import { CircleDollarSign, Package, Tags, Warehouse } from "lucide-react";
 import { type FormEvent, useState } from "react";
 import { toast } from "sonner";
 import { createProductFromForm } from "@/app/actions/action-products";
-import { createCategoryAction } from "@/app/dashboard/category/_actions/category-actions";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { SheetFooter } from "@/components/ui/sheet";
 import type { UIBrand } from "@/services/api-main/brand/transformers/transformers";
 import type { UIPtype } from "@/services/api-main/ptype/transformers/transformers";
-import type { ProductCreateTaxonomyOption } from "../types/product-dashboard-types";
 import {
   ProductCreateCurrencyInput,
   ProductCreateFormInput,
   ProductCreateFormSelect,
   ProductCreateFormTextarea,
   ProductCreateIntegerInput,
-  ProductCreateSearchableSelect,
   ProductCreateSubmitButton,
 } from "./product-create-form-fields";
 
@@ -44,8 +34,6 @@ type ValidationErrors = Partial<
 interface ProductCreateFormProps {
   brands: UIBrand[];
   ptypes: UIPtype[];
-  taxonomyOptions: ProductCreateTaxonomyOption[];
-  isTaxonomyAvailable: boolean;
   onCancel: () => void;
   onCreated: (productId: number) => void;
   onDirtyChange: (isDirty: boolean) => void;
@@ -126,107 +114,19 @@ function FieldError({ id, message }: { id: string; message?: string }) {
   );
 }
 
-function normalizeCategoryName(value: string): string {
-  return value
-    .trim()
-    .replace(/\s+/g, " ")
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "")
-    .toLocaleLowerCase("pt-BR");
-}
-
 export function ProductCreateForm({
   brands,
   ptypes,
-  taxonomyOptions,
-  isTaxonomyAvailable,
   onCancel,
   onCreated,
   onDirtyChange,
 }: ProductCreateFormProps) {
-  const router = useRouter();
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>(
     {},
   );
-  const [localTaxonomyOptions, setLocalTaxonomyOptions] =
-    useState(taxonomyOptions);
   const [brandId, setBrandId] = useState("0");
   const [typeId, setTypeId] = useState("0");
-  const [familyId, setFamilyId] = useState("0");
-  const [groupId, setGroupId] = useState("0");
-  const [subgroupId, setSubgroupId] = useState("0");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleCreateCategory = async ({
-    name,
-    parentId,
-    level,
-  }: {
-    name: string;
-    parentId: number;
-    level: 1 | 2 | 3;
-  }): Promise<boolean> => {
-    const normalizedName = normalizeCategoryName(name);
-    const duplicate = localTaxonomyOptions.find(
-      (category) =>
-        category.parentId === parentId &&
-        normalizeCategoryName(category.name) === normalizedName,
-    );
-
-    if (duplicate) {
-      toast.error("Já existe uma categoria com este nome neste nível.");
-      return false;
-    }
-
-    try {
-      const result = await createCategoryAction({ name, parentId });
-      if (!result.success) {
-        toast.error(result.message);
-        return false;
-      }
-
-      if (!result.categoryId || result.categoryId <= 0) {
-        toast.error(
-          "A categoria foi criada, mas não pôde ser selecionada automaticamente.",
-        );
-        router.refresh();
-        return false;
-      }
-
-      const createdCategoryId = result.categoryId;
-      const categoryId = createdCategoryId.toString();
-      setLocalTaxonomyOptions((current) => [
-        ...current,
-        {
-          id: createdCategoryId,
-          parentId,
-          name: name.trim(),
-          level,
-        },
-      ]);
-
-      if (level === 1) {
-        setFamilyId(categoryId);
-        setGroupId("0");
-        setSubgroupId("0");
-      } else if (level === 2) {
-        setGroupId(categoryId);
-        setSubgroupId("0");
-      } else {
-        setSubgroupId(categoryId);
-      }
-
-      onDirtyChange(true);
-      toast.success(result.message);
-      router.refresh();
-      return true;
-    } catch {
-      toast.error(
-        "Não foi possível concluir a comunicação com o servidor. Tente novamente.",
-      );
-      return false;
-    }
-  };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -280,30 +180,6 @@ export function ProductCreateForm({
       label: ptype.name,
     })),
   ];
-  const familyOptions = localTaxonomyOptions
-    .filter((category) => category.level === 1 && category.parentId === 0)
-    .map((category) => ({
-      value: category.id.toString(),
-      label: category.name,
-    }));
-  const groupOptions = localTaxonomyOptions
-    .filter(
-      (category) =>
-        category.level === 2 && category.parentId === Number(familyId),
-    )
-    .map((category) => ({
-      value: category.id.toString(),
-      label: category.name,
-    }));
-  const subgroupOptions = localTaxonomyOptions
-    .filter(
-      (category) =>
-        category.level === 3 && category.parentId === Number(groupId),
-    )
-    .map((category) => ({
-      value: category.id.toString(),
-      label: category.name,
-    }));
 
   return (
     <form
@@ -485,124 +361,6 @@ export function ProductCreateForm({
                 }
               />
               <FieldError id="stock-error" message={validationErrors.stock} />
-            </div>
-          </div>
-        </section>
-
-        <section className="space-y-3 rounded-lg border p-3">
-          <div className="flex items-center gap-2">
-            <FolderTree className="text-primary size-4" aria-hidden="true" />
-            <div>
-              <h3 className="font-medium">Categorias</h3>
-              <p className="text-muted-foreground text-xs">
-                Seleção opcional em ordem hierárquica
-              </p>
-            </div>
-          </div>
-
-          {!isTaxonomyAvailable && (
-            <p className="text-muted-foreground text-sm">
-              A hierarquia não pôde ser carregada. O produto pode ser criado sem
-              categorias.
-            </p>
-          )}
-
-          <div className="grid gap-3 sm:grid-cols-3">
-            <div className="min-w-0 space-y-1.5">
-              <Label htmlFor="familyId">Família</Label>
-              <ProductCreateSearchableSelect
-                id="familyId"
-                name="familyId"
-                value={familyId}
-                placeholder="Sem família"
-                searchPlaceholder="Pesquisar família"
-                emptyMessage="Nenhuma família encontrada."
-                options={familyOptions}
-                ariaLabel="Família"
-                disabled={isSubmitting || !isTaxonomyAvailable}
-                createLabel="Criar nova família"
-                createDialogTitle="Nova família"
-                createDialogDescription="Será criada no primeiro nível da hierarquia."
-                createSubmitLabel="Criar família"
-                onCreate={(name) =>
-                  handleCreateCategory({ name, parentId: 0, level: 1 })
-                }
-                onValueChange={(value) => {
-                  setFamilyId(value);
-                  setGroupId("0");
-                  setSubgroupId("0");
-                  onDirtyChange(true);
-                }}
-              />
-            </div>
-
-            <div className="min-w-0 space-y-1.5">
-              <Label htmlFor="groupId">Grupo</Label>
-              <ProductCreateSearchableSelect
-                id="groupId"
-                name="groupId"
-                value={groupId}
-                placeholder={
-                  familyId === "0" ? "Selecione a família" : "Sem grupo"
-                }
-                searchPlaceholder="Pesquisar grupo"
-                emptyMessage="Nenhum grupo encontrado."
-                options={groupOptions}
-                ariaLabel="Grupo"
-                disabled={
-                  isSubmitting || !isTaxonomyAvailable || familyId === "0"
-                }
-                createLabel="Criar novo grupo"
-                createDialogTitle="Novo grupo"
-                createDialogDescription="Será criado dentro da família selecionada."
-                createSubmitLabel="Criar grupo"
-                onCreate={(name) =>
-                  handleCreateCategory({
-                    name,
-                    parentId: Number(familyId),
-                    level: 2,
-                  })
-                }
-                onValueChange={(value) => {
-                  setGroupId(value);
-                  setSubgroupId("0");
-                  onDirtyChange(true);
-                }}
-              />
-            </div>
-
-            <div className="min-w-0 space-y-1.5">
-              <Label htmlFor="subgroupId">Subgrupo</Label>
-              <ProductCreateSearchableSelect
-                id="subgroupId"
-                name="subgroupId"
-                value={subgroupId}
-                placeholder={
-                  groupId === "0" ? "Selecione o grupo" : "Sem subgrupo"
-                }
-                searchPlaceholder="Pesquisar subgrupo"
-                emptyMessage="Nenhum subgrupo encontrado."
-                options={subgroupOptions}
-                ariaLabel="Subgrupo"
-                disabled={
-                  isSubmitting || !isTaxonomyAvailable || groupId === "0"
-                }
-                createLabel="Criar novo subgrupo"
-                createDialogTitle="Novo subgrupo"
-                createDialogDescription="Será criado dentro do grupo selecionado."
-                createSubmitLabel="Criar subgrupo"
-                onCreate={(name) =>
-                  handleCreateCategory({
-                    name,
-                    parentId: Number(groupId),
-                    level: 3,
-                  })
-                }
-                onValueChange={(value) => {
-                  setSubgroupId(value);
-                  onDirtyChange(true);
-                }}
-              />
             </div>
           </div>
         </section>

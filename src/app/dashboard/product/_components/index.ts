@@ -13,7 +13,6 @@ export { ProductDashboard } from "./product-dashboard";
 export type {
   CategoryOption,
   PanelFilterType,
-  ProductCreateTaxonomyOption,
   ProductFilters,
   SortOption,
   ViewMode,
