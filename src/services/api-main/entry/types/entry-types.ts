@@ -147,6 +147,7 @@ export interface EntryListItem {
   VL_CONFINS: string;
   VL_IBS: string;
   VL_CBS: string;
+  VL_TOTAL_IMPOSTOS: string;
   QT_MOVIMENTO: number;
   VL_TOTAL_REAL: string;
   VL_TOTAL_DOLAR: string;
@@ -182,6 +183,7 @@ export interface EntryDetail {
   VL_CONFINS: string;
   VL_IBS: string;
   VL_CBS: string;
+  VL_TOTAL_IMPOSTOS: string;
   ESTOQUE: number;
   STATUS_ESTOQUE: string;
   FISICO: number;
@@ -200,8 +202,9 @@ export interface EntryDetail {
 export interface EntrySummary {
   ID_ENTRADA: number;
   QT_MOVIMENTO: number;
-  VL_TOTAL_REAL: string;
-  VL_TOTAL_DOLAR: string;
+  VL_TOTAL_PRODUTO_REAL: string;
+  VL_TOTAL_PRODUTO_DOLAR: string;
+  VL_TOTAL_PRODUTO_IMPOSTOS: string;
 }
 
 export interface EntrySearchItem {
