@@ -21,15 +21,12 @@ import {
 } from "@/components/ui/sheet";
 import type { UIBrand } from "@/services/api-main/brand/transformers/transformers";
 import type { UIPtype } from "@/services/api-main/ptype/transformers/transformers";
-import type { ProductCreateTaxonomyOption } from "../types/product-dashboard-types";
 import { ProductCreateForm } from "./product-create-form";
 
 interface ProductCreateSheetProps {
   open: boolean;
   brands: UIBrand[];
   ptypes: UIPtype[];
-  taxonomyOptions: ProductCreateTaxonomyOption[];
-  isTaxonomyAvailable: boolean;
   onOpenChange: (open: boolean) => void;
   onCreated: (productId: number) => void;
 }
@@ -38,8 +35,6 @@ export function ProductCreateSheet({
   open,
   brands,
   ptypes,
-  taxonomyOptions,
-  isTaxonomyAvailable,
   onOpenChange,
   onCreated,
 }: ProductCreateSheetProps) {
@@ -90,8 +85,6 @@ export function ProductCreateSheet({
             key={formKey}
             brands={brands}
             ptypes={ptypes}
-            taxonomyOptions={taxonomyOptions}
-            isTaxonomyAvailable={isTaxonomyAvailable}
             onCancel={() => requestOpenChange(false)}
             onCreated={handleCreated}
             onDirtyChange={setIsDirty}

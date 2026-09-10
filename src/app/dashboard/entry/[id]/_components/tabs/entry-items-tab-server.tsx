@@ -8,12 +8,10 @@ import {
   entryItemServiceApi,
 } from "@/services/api-main/entry-item";
 import { getPtypes } from "@/services/api-main/ptype/ptype-service-api";
-import { getTaxonomyMenuManager } from "@/services/api-main/taxonomy-base/taxonomy-base-service-api";
 import type { EntryItemProductFormOptions } from "./entry-item-product-create-sheet";
 import { EntryItemsTab, type EntryItemViewModel } from "./entry-items-tab";
 
 const logger = createLogger("EntryItemsTabServer");
-const CATEGORY_MENU_LIMIT = 10_000;
 const OPTIONS_LIMIT = 100;
 
 interface EntryItemsTabServerProps {
@@ -46,7 +44,7 @@ function toEntryItemViewModel(
 async function loadProductFormOptions(
   apiContext: AuthContext["apiContext"],
 ): Promise<EntryItemProductFormOptions> {
-  const [brands, ptypes, taxonomy] = await Promise.all([
+  const [brands, ptypes] = await Promise.all([
     getBrands({ limit: OPTIONS_LIMIT, ...apiContext }).catch((error) => {
       logger.error("Erro ao buscar marcas para o cadastro de produto", error);
       return [] as Awaited<ReturnType<typeof getBrands>>;
@@ -55,34 +53,6 @@ async function loadProductFormOptions(
       logger.error("Erro ao buscar tipos para o cadastro de produto", error);
       return [] as Awaited<ReturnType<typeof getPtypes>>;
     }),
-    getTaxonomyMenuManager({
-      limit: CATEGORY_MENU_LIMIT,
-      ...apiContext,
-    })
-      .then(({ items }) => ({
-        available: true as const,
-        options: items
-          .filter(
-            (item) => !item.inactive && item.level >= 1 && item.level <= 3,
-          )
-          .sort(
-            (left, right) =>
-              left.order - right.order || left.name.localeCompare(right.name),
-          )
-          .map((item) => ({
-            id: item.id,
-            parentId: item.parentId,
-            name: item.name,
-            level: item.level,
-          })),
-      }))
-      .catch((error) => {
-        logger.error(
-          "Erro ao buscar hierarquia de categorias para o cadastro de produto",
-          error,
-        );
-        return { available: false as const, options: [] };
-      }),
   ]);
 
   return {
@@ -95,8 +65,6 @@ async function loadProductFormOptions(
       id: ptype.id,
       name: ptype.name,
     })),
-    taxonomyOptions: taxonomy.options,
-    isTaxonomyAvailable: taxonomy.available,
   };
 }
 
@@ -142,8 +110,6 @@ export async function EntryItemsTabServer({
         productFormOptions={{
           brands: [],
           ptypes: [],
-          taxonomyOptions: [],
-          isTaxonomyAvailable: false,
         }}
         hasLoadError
       />

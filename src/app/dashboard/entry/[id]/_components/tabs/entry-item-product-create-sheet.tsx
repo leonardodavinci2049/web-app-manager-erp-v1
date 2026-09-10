@@ -1,16 +1,12 @@
 "use client";
 
 import {
-  Check,
-  ChevronsUpDown,
   CircleDollarSign,
-  FolderTree,
   Package,
   PackagePlus,
   Tags,
   TriangleAlert,
   Warehouse,
-  X,
 } from "lucide-react";
 import { type ComponentProps, type FormEvent, useState } from "react";
 import { toast } from "sonner";
@@ -29,11 +25,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -61,18 +52,9 @@ export interface EntryItemTypeOption {
   name: string;
 }
 
-export interface EntryItemTaxonomyOption {
-  id: number;
-  parentId: number;
-  name: string;
-  level: number;
-}
-
 export interface EntryItemProductFormOptions {
   brands: EntryItemBrandOption[];
   ptypes: EntryItemTypeOption[];
-  taxonomyOptions: EntryItemTaxonomyOption[];
-  isTaxonomyAvailable: boolean;
 }
 
 interface SelectOption {
@@ -98,13 +80,6 @@ interface EntryItemProductCreateSheetProps {
   onOpenChange: (open: boolean) => void;
   productFormOptions: EntryItemProductFormOptions;
   onCreated: (productId: number) => void;
-}
-
-function normalizeSearch(value: string): string {
-  return value
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "")
-    .toLocaleLowerCase("pt-BR");
 }
 
 function readNumber(formData: FormData, key: string): number {
@@ -328,138 +303,6 @@ function FormSelect({
   );
 }
 
-function SearchableSelect({
-  id,
-  name,
-  value,
-  placeholder,
-  searchPlaceholder,
-  emptyMessage,
-  options,
-  ariaLabel,
-  disabled,
-  onValueChange,
-}: {
-  id: string;
-  name: string;
-  value: string;
-  placeholder: string;
-  searchPlaceholder: string;
-  emptyMessage: string;
-  options: SelectOption[];
-  ariaLabel: string;
-  disabled?: boolean;
-  onValueChange: (value: string) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const [search, setSearch] = useState("");
-  const selectedOption = options.find((option) => option.value === value);
-  const normalizedQuery = normalizeSearch(search.trim());
-  const filteredOptions = normalizedQuery
-    ? options.filter((option) =>
-        normalizeSearch(option.label).includes(normalizedQuery),
-      )
-    : options;
-  const isDisabled = disabled || options.length === 0;
-
-  return (
-    <>
-      <Popover
-        open={open}
-        onOpenChange={(nextOpen) => {
-          setOpen(nextOpen);
-          if (!nextOpen) setSearch("");
-        }}
-      >
-        <PopoverTrigger asChild>
-          <Button
-            id={id}
-            type="button"
-            variant="outline"
-            role="combobox"
-            aria-label={ariaLabel}
-            aria-expanded={open}
-            disabled={isDisabled}
-            className="w-full justify-between font-normal"
-          >
-            <span className="truncate">
-              {selectedOption?.label ?? placeholder}
-            </span>
-            <ChevronsUpDown
-              className="ml-2 size-4 shrink-0 opacity-50"
-              aria-hidden="true"
-            />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent
-          align="start"
-          className="w-(--radix-popover-trigger-width) p-1"
-        >
-          <div className="relative border-b p-1">
-            <Input
-              type="search"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder={searchPlaceholder}
-              aria-label={searchPlaceholder}
-              className="border-0 pl-8 shadow-none focus-visible:ring-0"
-            />
-          </div>
-          <div
-            className="max-h-56 overflow-y-auto p-1"
-            role="listbox"
-            aria-label={ariaLabel}
-          >
-            {value !== "0" && (
-              <Button
-                type="button"
-                variant="ghost"
-                className="text-muted-foreground w-full justify-start"
-                onClick={() => {
-                  onValueChange("0");
-                  setOpen(false);
-                }}
-              >
-                <X className="size-4" aria-hidden="true" />
-                Limpar seleção
-              </Button>
-            )}
-            {filteredOptions.length === 0 ? (
-              <p className="text-muted-foreground px-2 py-6 text-center text-sm">
-                {emptyMessage}
-              </p>
-            ) : (
-              filteredOptions.map((option) => (
-                <Button
-                  key={option.value}
-                  type="button"
-                  variant="ghost"
-                  role="option"
-                  aria-selected={option.value === value}
-                  className="w-full justify-start"
-                  onClick={() => {
-                    onValueChange(option.value);
-                    setOpen(false);
-                  }}
-                >
-                  <Check
-                    className={
-                      option.value === value ? "size-4" : "size-4 opacity-0"
-                    }
-                    aria-hidden="true"
-                  />
-                  <span className="truncate">{option.label}</span>
-                </Button>
-              ))
-            )}
-          </div>
-        </PopoverContent>
-      </Popover>
-      <input type="hidden" name={name} value={value} />
-    </>
-  );
-}
-
 export function EntryItemProductCreateSheet({
   open,
   onOpenChange,
@@ -474,9 +317,6 @@ export function EntryItemProductCreateSheet({
   );
   const [brandId, setBrandId] = useState("0");
   const [typeId, setTypeId] = useState("0");
-  const [familyId, setFamilyId] = useState("0");
-  const [groupId, setGroupId] = useState("0");
-  const [subgroupId, setSubgroupId] = useState("0");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const resetAndClose = () => {
@@ -484,9 +324,6 @@ export function EntryItemProductCreateSheet({
     setValidationErrors({});
     setBrandId("0");
     setTypeId("0");
-    setFamilyId("0");
-    setGroupId("0");
-    setSubgroupId("0");
     setFormKey((current) => current + 1);
     onOpenChange(false);
   };
@@ -541,8 +378,7 @@ export function EntryItemProductCreateSheet({
     }
   };
 
-  const { brands, ptypes, taxonomyOptions, isTaxonomyAvailable } =
-    productFormOptions;
+  const { brands, ptypes } = productFormOptions;
   const brandOptions: SelectOption[] = [
     { value: "0", label: "Sem marca" },
     ...brands.map((brand) => ({
@@ -557,30 +393,6 @@ export function EntryItemProductCreateSheet({
       label: ptype.name,
     })),
   ];
-  const familyOptions = taxonomyOptions
-    .filter((category) => category.level === 1 && category.parentId === 0)
-    .map((category) => ({
-      value: category.id.toString(),
-      label: category.name,
-    }));
-  const groupOptions = taxonomyOptions
-    .filter(
-      (category) =>
-        category.level === 2 && category.parentId === Number(familyId),
-    )
-    .map((category) => ({
-      value: category.id.toString(),
-      label: category.name,
-    }));
-  const subgroupOptions = taxonomyOptions
-    .filter(
-      (category) =>
-        category.level === 3 && category.parentId === Number(groupId),
-    )
-    .map((category) => ({
-      value: category.id.toString(),
-      label: category.name,
-    }));
 
   return (
     <>
@@ -802,100 +614,6 @@ export function EntryItemProductCreateSheet({
                     <FieldError
                       id="entry-item-product-stock-error"
                       message={validationErrors.stock}
-                    />
-                  </div>
-                </div>
-              </section>
-
-              <section className="space-y-3 rounded-lg border p-3">
-                <div className="flex items-center gap-2">
-                  <FolderTree
-                    className="text-primary size-4"
-                    aria-hidden="true"
-                  />
-                  <div>
-                    <h3 className="font-medium">Categorias</h3>
-                    <p className="text-muted-foreground text-xs">
-                      Seleção opcional em ordem hierárquica
-                    </p>
-                  </div>
-                </div>
-
-                {!isTaxonomyAvailable && (
-                  <p className="text-muted-foreground text-sm">
-                    A hierarquia não pôde ser carregada. O produto pode ser
-                    criado sem categorias.
-                  </p>
-                )}
-
-                <div className="grid gap-3 sm:grid-cols-3">
-                  <div className="min-w-0 space-y-1.5">
-                    <Label htmlFor="entry-item-product-family">Família</Label>
-                    <SearchableSelect
-                      id="entry-item-product-family"
-                      name="familyId"
-                      value={familyId}
-                      placeholder="Sem família"
-                      searchPlaceholder="Pesquisar família"
-                      emptyMessage="Nenhuma família encontrada."
-                      options={familyOptions}
-                      ariaLabel="Família"
-                      disabled={isSubmitting || !isTaxonomyAvailable}
-                      onValueChange={(value) => {
-                        setFamilyId(value);
-                        setGroupId("0");
-                        setSubgroupId("0");
-                        setIsDirty(true);
-                      }}
-                    />
-                  </div>
-
-                  <div className="min-w-0 space-y-1.5">
-                    <Label htmlFor="entry-item-product-group">Grupo</Label>
-                    <SearchableSelect
-                      id="entry-item-product-group"
-                      name="groupId"
-                      value={groupId}
-                      placeholder={
-                        familyId === "0" ? "Selecione a família" : "Sem grupo"
-                      }
-                      searchPlaceholder="Pesquisar grupo"
-                      emptyMessage="Nenhum grupo encontrado."
-                      options={groupOptions}
-                      ariaLabel="Grupo"
-                      disabled={
-                        isSubmitting || !isTaxonomyAvailable || familyId === "0"
-                      }
-                      onValueChange={(value) => {
-                        setGroupId(value);
-                        setSubgroupId("0");
-                        setIsDirty(true);
-                      }}
-                    />
-                  </div>
-
-                  <div className="min-w-0 space-y-1.5">
-                    <Label htmlFor="entry-item-product-subgroup">
-                      Subgrupo
-                    </Label>
-                    <SearchableSelect
-                      id="entry-item-product-subgroup"
-                      name="subgroupId"
-                      value={subgroupId}
-                      placeholder={
-                        groupId === "0" ? "Selecione o grupo" : "Sem subgrupo"
-                      }
-                      searchPlaceholder="Pesquisar subgrupo"
-                      emptyMessage="Nenhum subgrupo encontrado."
-                      options={subgroupOptions}
-                      ariaLabel="Subgrupo"
-                      disabled={
-                        isSubmitting || !isTaxonomyAvailable || groupId === "0"
-                      }
-                      onValueChange={(value) => {
-                        setSubgroupId(value);
-                        setIsDirty(true);
-                      }}
                     />
                   </div>
                 </div>

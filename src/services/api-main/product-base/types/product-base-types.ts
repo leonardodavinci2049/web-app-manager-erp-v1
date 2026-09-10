@@ -53,9 +53,6 @@ export interface ProductCreateRequest extends ProductBaseRequest {
   pe_product_type_id?: number;
   pe_brand_id?: number;
   pe_supplier_id?: number;
-  pe_family_id?: number;
-  pe_group_id?: number;
-  pe_subgroup_id?: number;
   pe_weight_gr?: number;
   pe_length_mm?: number;
   pe_width_mm?: number;
@@ -66,10 +63,6 @@ export interface ProductCreateRequest extends ProductBaseRequest {
   pe_retail_price: number;
   pe_corporate_price: number;
   pe_stock_quantity?: number;
-  pe_service_flag?: number;
-  pe_physical_control_flag?: number;
-  pe_stock_control_flag?: number;
-  pe_consigned_flag?: number;
   pe_website_off_flag?: number;
   pe_imported_flag?: number;
   pe_additional_info?: string;
