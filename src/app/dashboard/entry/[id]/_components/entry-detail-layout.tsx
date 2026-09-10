@@ -1,10 +1,12 @@
 import type { ReactNode } from "react";
 import { DetailPageLayout } from "@/app/dashboard/_components/detail-page";
 import type { UIEntryDetail } from "@/services/api-main/entry/transformers/transformers";
+import { EntryClosingSection } from "./overview/entry-closing-section";
 import { EntryExchangeSection } from "./overview/entry-exchange-section";
 import { EntryGeneralSection } from "./overview/entry-general-section";
 import { EntryHeadDataSection } from "./overview/entry-head-data-section";
 import { EntryPartnersSection } from "./overview/entry-partners-section";
+import { EntrySummarySection } from "./overview/entry-summary-section";
 import { EntryDetailTabs } from "./tabs/entry-detail-tabs";
 
 interface EntryDetailLayoutProps {
@@ -15,14 +17,9 @@ interface EntryDetailLayoutProps {
 }
 
 /**
- * Detalhe da entrada (Server Component). O cabeçalho reúne fornecedor,
- * transportadora, usuário, data da entrada e status; os cards Geral, Câmbio
- * dólar e Fornecedor e transportadora ficam na coluna de visão geral. O card
- * Informações da Nota, Câmbio dólar e Fornecedor e transportadora permitem
- * editar seus respectivos dados. Tributos, status, resumo, itens e anotações
- * ficam nas abas; tributos e anotações também permitem edição. A galeria
- * somente leitura do fornecedor é injetada pela página via `imageGallery`
- * (nó `<Suspense>`).
+ * Entry detail Server Component. It composes the editable overview, the
+ * read-only invoice summary, closing controls, detail tabs, and supplier image
+ * gallery provided by the page through a Suspense boundary.
  */
 export function EntryDetailLayout({
   entry,
@@ -41,6 +38,8 @@ export function EntryDetailLayout({
           <EntryGeneralSection entry={entry} />
           <EntryExchangeSection entry={entry} />
           <EntryPartnersSection entry={entry} />
+          <EntrySummarySection entry={entry} />
+          <EntryClosingSection entry={entry} />
         </div>
       }
       sectionsTitle="Seções da entrada"

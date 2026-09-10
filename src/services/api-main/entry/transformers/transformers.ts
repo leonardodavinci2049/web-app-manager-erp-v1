@@ -46,6 +46,7 @@ export interface UIEntryDetail {
   freightRate: string;
   totalInvoice: string;
   totalProducts: string;
+  totalTaxes: string;
   icmsValue: string;
   ipiValue: string;
   pisValue: string;
@@ -123,6 +124,7 @@ export function transformEntryDetail(
     freightRate: entity.TX_FRETE,
     totalInvoice: entity.VL_TOTAL_NOTA,
     totalProducts: entity.VL_TOTAL_PRODUTO,
+    totalTaxes: entity.VL_TOTAL_IMPOSTOS,
     icmsValue: entity.VL_ICMS,
     ipiValue: entity.VL_IPI,
     pisValue: entity.VL_PIS,
