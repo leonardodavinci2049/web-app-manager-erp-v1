@@ -17,12 +17,14 @@ interface EntryDetailTabsProps {
   entry: UIEntryDetail;
   entryItemsTab: ReactNode;
   mobileImageGallery: ReactNode;
+  returnTo: string;
 }
 
 export function EntryDetailTabs({
   entry,
   entryItemsTab,
   mobileImageGallery,
+  returnTo,
 }: EntryDetailTabsProps) {
   return (
     <Tabs defaultValue="notes" className="w-full gap-3 sm:gap-4">
@@ -52,7 +54,7 @@ export function EntryDetailTabs({
         />
       </TabsContent>
       <TabsContent value="deletion">
-        <EntryDeletionTab />
+        <EntryDeletionTab entry={entry} returnTo={returnTo} />
       </TabsContent>
     </Tabs>
   );

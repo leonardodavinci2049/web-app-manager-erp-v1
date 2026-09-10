@@ -49,6 +49,7 @@ export function EntryDetailLayout({
         entry={entry}
         entryItemsTab={entryItemsTab}
         mobileImageGallery={imageGallery}
+        returnTo={returnTo}
       />
     </DetailPageLayout>
   );

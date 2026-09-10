@@ -11,12 +11,14 @@ import {
   getEntryById,
 } from "@/services/api-main/entry";
 import { getEntryClosingBlockers } from "../_components/entry-closing-requirements";
+import { getEntryDeletionBlocker } from "../_components/entry-deletion-requirements";
 
 const logger = createLogger("EntryDetailActions");
 const ENTRY_LIST_PATH = "/dashboard/entry";
 const ENTRY_CLOSED_MESSAGE = "Esta nota já foi fechada e não pode ser editada.";
 
 const entryIdSchema = z.number().int().positive("ID da entrada inválido.");
+const deleteEntrySchema = z.object({ entryId: entryIdSchema });
 const processEntryInventorySchema = z.object({ entryId: entryIdSchema });
 
 const updateDollarValueSchema = z.object({
@@ -89,6 +91,36 @@ function notFoundFailure(error?: unknown): EntryActionResult {
 
 function closedEntryFailure(): EntryActionResult {
   return failure(ENTRY_CLOSED_MESSAGE);
+}
+
+export async function deleteEntryAction(
+  input: z.input<typeof deleteEntrySchema>,
+): Promise<EntryActionResult> {
+  const parsed = deleteEntrySchema.safeParse(input);
+  if (!parsed.success) {
+    return failure("ID da entrada inválido.");
+  }
+
+  const { entryId } = parsed.data;
+
+  try {
+    const context = await getEntryUpdateContext(entryId);
+    if (!context) return notFoundFailure();
+
+    const blocker = getEntryDeletionBlocker(context.entry);
+    if (blocker) return failure(blocker);
+
+    await entryServiceApi.deleteEntry({
+      pe_entry_id: entryId,
+      ...context.apiContext,
+    });
+
+    revalidatePath(ENTRY_LIST_PATH);
+    return { success: true, message: "Entrada excluída com sucesso." };
+  } catch (error) {
+    if (error instanceof EntryNotFoundError) return notFoundFailure(error);
+    return failure("Não foi possível excluir a entrada.", error);
+  }
 }
 
 export async function processEntryInventoryAction(
