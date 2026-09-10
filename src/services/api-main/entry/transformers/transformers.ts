@@ -97,8 +97,8 @@ function transformEntrySummary(
   if (!entity) return undefined;
   return {
     movementQuantity: entity.QT_MOVIMENTO,
-    totalReal: entity.VL_TOTAL_REAL,
-    totalDollar: entity.VL_TOTAL_DOLAR,
+    totalReal: entity.VL_TOTAL_PRODUTO_REAL,
+    totalDollar: entity.VL_TOTAL_PRODUTO_DOLAR,
   };
 }
 
