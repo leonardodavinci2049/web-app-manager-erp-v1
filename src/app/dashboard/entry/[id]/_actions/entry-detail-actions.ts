@@ -10,12 +10,14 @@ import {
   entryServiceApi,
   getEntryById,
 } from "@/services/api-main/entry";
+import { getEntryClosingBlockers } from "../_components/entry-closing-requirements";
 
 const logger = createLogger("EntryDetailActions");
 const ENTRY_LIST_PATH = "/dashboard/entry";
 const ENTRY_CLOSED_MESSAGE = "Esta nota já foi fechada e não pode ser editada.";
 
 const entryIdSchema = z.number().int().positive("ID da entrada inválido.");
+const processEntryInventorySchema = z.object({ entryId: entryIdSchema });
 
 const updateDollarValueSchema = z.object({
   entryId: entryIdSchema,
@@ -87,6 +89,45 @@ function notFoundFailure(error?: unknown): EntryActionResult {
 
 function closedEntryFailure(): EntryActionResult {
   return failure(ENTRY_CLOSED_MESSAGE);
+}
+
+export async function processEntryInventoryAction(
+  input: z.input<typeof processEntryInventorySchema>,
+): Promise<EntryActionResult> {
+  const parsed = processEntryInventorySchema.safeParse(input);
+  if (!parsed.success) {
+    return failure("ID da entrada inválido.");
+  }
+
+  const { entryId } = parsed.data;
+
+  try {
+    const context = await getEntryUpdateContext(entryId);
+    if (!context) return notFoundFailure();
+    if (context.entry.isStockClosed) {
+      return failure("Esta nota já foi fechada.");
+    }
+
+    const blockers = getEntryClosingBlockers(context.entry);
+    if (blockers.length > 0) {
+      return failure(
+        "Corrija as pendências antes de finalizar a entrada.",
+        undefined,
+        { closing: blockers },
+      );
+    }
+
+    await entryServiceApi.processEntryInventory({
+      pe_entry_id: entryId,
+      ...context.apiContext,
+    });
+
+    revalidateEntry(entryId);
+    return { success: true, message: "Entrada finalizada com sucesso." };
+  } catch (error) {
+    if (error instanceof EntryNotFoundError) return notFoundFailure(error);
+    return failure("Não foi possível finalizar a entrada.", error);
+  }
 }
 
 export async function updateEntryDollarValueAction(
