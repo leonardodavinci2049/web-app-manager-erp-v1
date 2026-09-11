@@ -3,7 +3,7 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { z } from "zod";
 import { SiteHeaderWithBreadcrumb } from "@/app/dashboard/_components/header/site-header-with-breadcrumb";
-import { getSafePurchasingReturnTo } from "@/app/dashboard/purchasing/_components";
+import { getSafePurchasingReturnTo } from "@/app/dashboard/replenishment/_components";
 import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
 import { getPurchasingProductById } from "@/services/api-main/purchasing/purchasing-service-api";

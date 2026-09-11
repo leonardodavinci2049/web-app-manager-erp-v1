@@ -14,7 +14,9 @@ export default function PurchasingNotFound() {
         O registro não existe ou não está acessível para a organização atual.
       </p>
       <Button asChild variant="outline" className="mt-5">
-        <Link href="/dashboard/purchasing">Voltar à necessidade de compra</Link>
+        <Link href="/dashboard/replenishment">
+          Voltar à necessidade de compra
+        </Link>
       </Button>
     </div>
   );

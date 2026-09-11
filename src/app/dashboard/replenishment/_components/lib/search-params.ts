@@ -13,7 +13,7 @@ import type {
 type SearchParamValue = string | string[] | undefined;
 type SearchParams = URLSearchParams | Record<string, SearchParamValue>;
 
-export const PURCHASING_PATH = "/dashboard/purchasing";
+export const REPLENISHMENT_PATH = "/dashboard/replenishment";
 export const PURCHASING_DEFAULT_SORT = "criticality-asc" as const;
 
 export const PURCHASING_CRITICALITY_OPTIONS = [
@@ -153,7 +153,7 @@ export function buildPurchasingUrl(filters: PurchasingFilters): string {
   if (filters.pageLimit !== REGISTRY_DEFAULT_PAGE_LIMIT)
     params.set("limit", String(filters.pageLimit));
   const query = params.toString();
-  return query ? `${PURCHASING_PATH}?${query}` : PURCHASING_PATH;
+  return query ? `${REPLENISHMENT_PATH}?${query}` : REPLENISHMENT_PATH;
 }
 
 export function buildPurchasingReturnTo(
@@ -161,25 +161,25 @@ export function buildPurchasingReturnTo(
 ) {
   const params = normalizeParams(value);
   const query = params.toString();
-  return query ? `${PURCHASING_PATH}?${query}` : PURCHASING_PATH;
+  return query ? `${REPLENISHMENT_PATH}?${query}` : REPLENISHMENT_PATH;
 }
 
 export function buildPurchasingDetailsHref(id: number, returnTo: string) {
-  return `${PURCHASING_PATH}/${id}?returnTo=${encodeURIComponent(returnTo)}`;
+  return `${REPLENISHMENT_PATH}/${id}?returnTo=${encodeURIComponent(returnTo)}`;
 }
 
 export function getSafePurchasingReturnTo(value?: string): string {
-  if (!value) return PURCHASING_PATH;
+  if (!value) return REPLENISHMENT_PATH;
   try {
     const url = new URL(value, "http://manager.local");
     if (
       url.origin === "http://manager.local" &&
-      url.pathname === PURCHASING_PATH
+      url.pathname === REPLENISHMENT_PATH
     ) {
       return `${url.pathname}${url.search}${url.hash}`;
     }
   } catch {
-    return PURCHASING_PATH;
+    return REPLENISHMENT_PATH;
   }
-  return PURCHASING_PATH;
+  return REPLENISHMENT_PATH;
 }

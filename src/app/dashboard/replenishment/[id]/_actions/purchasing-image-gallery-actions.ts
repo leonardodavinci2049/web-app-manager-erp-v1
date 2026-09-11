@@ -28,8 +28,8 @@ function safeApiMessage(message: string | string[]): string {
 }
 
 function revalidateProductImages(productId: number): void {
-  revalidatePath("/dashboard/purchasing");
-  revalidatePath(`/dashboard/purchasing/${productId}`);
+  revalidatePath("/dashboard/replenishment");
+  revalidatePath(`/dashboard/replenishment/${productId}`);
   revalidatePath("/dashboard/product");
   revalidatePath(`/dashboard/product/${productId}`);
 }
