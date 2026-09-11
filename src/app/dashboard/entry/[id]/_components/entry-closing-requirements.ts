@@ -1,4 +1,8 @@
 import type { UIEntryDetail } from "@/services/api-main/entry";
+import type { EntryItemEntryListItem } from "@/services/api-main/entry-item";
+
+export const ENTRY_ITEM_QUANTITY_CLOSING_MESSAGE =
+  "Essa nota de entrada não pode ser processada, existem item sem informação de quantidade";
 
 type EntryClosingData = Pick<
   UIEntryDetail,
@@ -32,4 +36,12 @@ export function getEntryClosingBlockers(entry: EntryClosingData): string[] {
   }
 
   return blockers;
+}
+
+export function getEntryItemsClosingBlocker(
+  items: readonly Pick<EntryItemEntryListItem, "QT_RECEBIDA">[],
+): string | null {
+  return items.some((item) => item.QT_RECEBIDA < 1)
+    ? ENTRY_ITEM_QUANTITY_CLOSING_MESSAGE
+    : null;
 }
