@@ -40,7 +40,7 @@ import type {
 } from "./types/purchasing-dashboard-types";
 
 const VIEW_MODE_STORAGE_KEY = "purchasing:product-view-mode";
-const EXPORT_ROUTE_PATH = "/dashboard/purchasing/export";
+const EXPORT_ROUTE_PATH = "/dashboard/replenishment/export";
 const EXPORT_FALLBACK_FILENAME = "necessidade-de-compra.xlsx";
 
 const PANEL_DEFAULTS: Pick<PurchasingFilters, PurchasingPanelFilter> = {

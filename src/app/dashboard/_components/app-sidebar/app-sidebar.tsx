@@ -85,29 +85,28 @@ const data = {
       items: [
         {
           title: "Reposição",
-          url: "/dashboard/purchasing",
+          url: "/dashboard/replenishment",
           icon: ShoppingCart,
         },
         {
           title: "Cotações",
-          url: "/dashboard/purchasing",
+          url: "/dashboard/replenishment",
           icon: ShoppingCart,
         },
 
         {
           title: "Ordem de Compra",
-          url: "/dashboard/purchasing",
+          url: "/dashboard/replenishment",
           icon: ShoppingCart,
-        },     
+        },
         {
           title: "Entrada",
           url: "/dashboard/entry",
           icon: Truck,
-        },  
+        },
       ],
-    },  
+    },
 
- 
     {
       title: "Saída",
       url: "/dashboard/order",
