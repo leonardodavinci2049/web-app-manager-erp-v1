@@ -6,6 +6,7 @@ import {
   GalleryVerticalEnd,
   House,
   LayoutDashboard,
+  PackagePlus,
   PieChart,
   Settings,
   ShoppingCart,
@@ -80,14 +81,24 @@ const data = {
     {
       title: "Compras",
       url: "#",
-      icon: BookOpen,
+      icon: PackagePlus,
       items: [
         {
-          title: "Compras",
+          title: "Reposição",
+          url: "/dashboard/purchasing",
+          icon: ShoppingCart,
+        },
+        {
+          title: "Cotações",
           url: "/dashboard/purchasing",
           icon: ShoppingCart,
         },
 
+        {
+          title: "Ordem de Compra",
+          url: "/dashboard/purchasing",
+          icon: ShoppingCart,
+        },     
         {
           title: "Entrada",
           url: "/dashboard/entry",
