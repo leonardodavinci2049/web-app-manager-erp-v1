@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { EntryActionResult } from "@/app/dashboard/entry/_components/types/entry-dashboard-types";
+import { isApiSuccess } from "@/core/constants/api-constants";
 import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
 import {
@@ -10,7 +11,11 @@ import {
   entryServiceApi,
   getEntryById,
 } from "@/services/api-main/entry";
-import { getEntryClosingBlockers } from "../_components/entry-closing-requirements";
+import { entryItemServiceApi } from "@/services/api-main/entry-item";
+import {
+  getEntryClosingBlockers,
+  getEntryItemsClosingBlocker,
+} from "../_components/entry-closing-requirements";
 import { getEntryDeletionBlocker } from "../_components/entry-deletion-requirements";
 
 const logger = createLogger("EntryDetailActions");
@@ -141,9 +146,24 @@ export async function processEntryInventoryAction(
     }
 
     const blockers = getEntryClosingBlockers(context.entry);
+    const itemsResponse = await entryItemServiceApi.findEntryItemsByEntryId({
+      pe_entry_id: entryId,
+      pe_limit: 1000,
+      ...context.apiContext,
+    });
+    if (!isApiSuccess(itemsResponse.statusCode)) {
+      throw new Error("Entry items API returned an error");
+    }
+
+    const entryItems = entryItemServiceApi
+      .extractEntryItemsByEntryId(itemsResponse)
+      .filter((item) => item.ID_ENTRADA === entryId);
+    const itemsBlocker = getEntryItemsClosingBlocker(entryItems);
+    if (itemsBlocker) blockers.push(itemsBlocker);
+
     if (blockers.length > 0) {
       return failure(
-        "Corrija as pendências antes de finalizar a entrada.",
+        itemsBlocker ?? "Corrija as pendências antes de finalizar a entrada.",
         undefined,
         { closing: blockers },
       );
