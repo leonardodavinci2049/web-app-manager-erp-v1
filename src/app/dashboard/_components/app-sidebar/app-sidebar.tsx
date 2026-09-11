@@ -90,13 +90,13 @@ const data = {
         },
         {
           title: "Cotações",
-          url: "/dashboard/replenishment",
+          url: "/dashboard/quotations",
           icon: ShoppingCart,
         },
 
         {
           title: "Ordem de Compra",
-          url: "/dashboard/replenishment",
+          url: "/dashboard/purchase-orders",
           icon: ShoppingCart,
         },
         {
@@ -123,6 +123,12 @@ const data = {
       name: "Home",
       url: "/dashboard/welcome",
       icon: House,
+    },
+
+    {
+      name: "Importar Produtos",
+      url: "/dashboard/import-products",
+      icon: Truck,
     },
     {
       name: "Agenda",
