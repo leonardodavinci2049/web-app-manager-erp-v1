@@ -1,14 +1,14 @@
 import DevelopmentPage from "@/components/common/DevelopmentPage";
-import { SiteHeaderWithBreadcrumb } from "../../_components/header/site-header-with-breadcrumb";
+import { SiteHeaderWithBreadcrumb } from "../_components/header/site-header-with-breadcrumb";
 
-const PremiumCustomersPage = () => {
+const QuotationsPage = () => {
   return (
     <>
       <SiteHeaderWithBreadcrumb
-        title="Relatório de Clientes Premium"
+        title="Cotações"
         breadcrumbItems={[
           { label: "Dashboard", href: "#" },
-          { label: "Relatório de Clientes Premium", isActive: true },
+          { label: "Cotações", isActive: true },
         ]}
       />
       <DevelopmentPage />
@@ -16,4 +16,4 @@ const PremiumCustomersPage = () => {
   );
 };
 
-export default PremiumCustomersPage;
+export default QuotationsPage;
