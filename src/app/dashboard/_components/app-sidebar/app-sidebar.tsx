@@ -79,15 +79,24 @@ const data = {
 
     {
       title: "Compras",
-      url: "/dashboard/purchasing",
-      icon: ShoppingCart,
-    },
+      url: "#",
+      icon: BookOpen,
+      items: [
+        {
+          title: "Compras",
+          url: "/dashboard/purchasing",
+          icon: ShoppingCart,
+        },
 
-    {
-      title: "Entrada",
-      url: "/dashboard/entry",
-      icon: Truck,
-    },
+        {
+          title: "Entrada",
+          url: "/dashboard/entry",
+          icon: Truck,
+        },  
+      ],
+    },  
+
+ 
     {
       title: "Saída",
       url: "/dashboard/order",
@@ -102,7 +111,7 @@ const data = {
   projects: [
     {
       name: "Home",
-      url: "/dashboard",
+      url: "/dashboard/welcome",
       icon: House,
     },
     {
@@ -115,12 +124,6 @@ const data = {
       url: "/dashboard/development",
       icon: PieChart,
     },
-    {
-      name: "Welcome",
-      url: "/dashboard/welcome",
-      icon: House,
-    },
-
     {
       name: "Configurações",
       url: "/dashboard/settings/",
