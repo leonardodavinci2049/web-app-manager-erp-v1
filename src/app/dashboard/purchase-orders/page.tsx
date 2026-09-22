@@ -1,7 +1,7 @@
 import DevelopmentPage from "@/components/common/DevelopmentPage";
 import { SiteHeaderWithBreadcrumb } from "../_components/header/site-header-with-breadcrumb";
 
-const  PurchaseOrdersPage = () => {
+const PurchaseOrdersPage = () => {
   return (
     <>
       <SiteHeaderWithBreadcrumb
