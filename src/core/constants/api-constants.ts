@@ -433,6 +433,14 @@ export const ENTRY_ITEM_ENDPOINTS = {
   UPD_TAX_RATES: "/entry-item/v2/entry-item-upd-tax-rates",
 } as const;
 
+// Endpoints de App Config (Configuração do Aplicativo)
+export const APP_CONFIG_ENDPOINTS = {
+  FIND_ALL: "/app-config/v2/app-config-find-all",
+  FIND_BY_ID: "/app-config/v2/app-config-find-id",
+  UPD_GENERAL_FIELD: "/app-config/v2/app-config-upd-general-field",
+  MENU_FIND_TYPE: "/app-config/v2/app-menu-find-type",
+} as const;
+
 // Endpoints de Purchasing (Gestor de Compras)
 export const PURCHASING_ENDPOINTS = {
   FIND_ALL: "/purchasing/v2/purchasing-find-manager-all",

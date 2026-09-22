@@ -42,7 +42,8 @@ export function EntryHeadDataSection({ entry }: EntryHeadDataSectionProps) {
             {`Nota Nº: ${entry.invoiceNumber}`}
           </p>
           <p className="mt-1 text-sm font-medium">
-            Fornecedor: {entry.supplier}</p>
+            Fornecedor: {entry.supplier}
+          </p>
           <p className="text-muted-foreground text-sm">
             {`Transportadora: ${carrierName}`}
           </p>
