@@ -42,6 +42,7 @@ export type PropertyDefinition =
 export type SettingDefinition = {
   field: SettingsField;
   title: string;
+  description: string;
   properties?: readonly PropertyDefinition[];
 };
 
@@ -51,10 +52,15 @@ const boolean = (key: string): ScalarDefinition => ({ key, type: "boolean" });
 
 // The shapes follow the 14 app-config reference files. API values remain the source of data.
 export const SETTINGS_DEFINITIONS: readonly SettingDefinition[] = [
-  { field: "GENERAL_CONFIG_JSON", title: "Configuração geral" },
+  {
+    field: "GENERAL_CONFIG_JSON",
+    title: "Configuração geral",
+    description: "Parâmetros gerais do aplicativo.",
+  },
   {
     field: "COMPANY_INFO_JSON",
     title: "Informações da empresa",
+    description: "Identificação, contato e horário de funcionamento.",
     properties: [
       text("name"),
       text("legalName"),
@@ -71,10 +77,15 @@ export const SETTINGS_DEFINITIONS: readonly SettingDefinition[] = [
       text("openingSunday"),
     ],
   },
-  { field: "COMPANY_ABOUT_JSON", title: "Sobre a empresa" },
+  {
+    field: "COMPANY_ABOUT_JSON",
+    title: "Sobre a empresa",
+    description: "Texto institucional exibido no aplicativo.",
+  },
   {
     field: "COMPANY_ADDRESS_JSON",
     title: "Endereço da empresa",
+    description: "Endereço, coordenadas e links do mapa.",
     properties: [
       text("AddressFull"),
       text("addressLocation"),
@@ -91,6 +102,7 @@ export const SETTINGS_DEFINITIONS: readonly SettingDefinition[] = [
   {
     field: "COMPANY_SEO_JSON",
     title: "SEO da empresa",
+    description: "Títulos, descrição e palavras-chave para buscas.",
     properties: [
       text("titleMain"),
       text("title"),
@@ -102,6 +114,7 @@ export const SETTINGS_DEFINITIONS: readonly SettingDefinition[] = [
   {
     field: "COMPANY_FAQ_JSON",
     title: "Perguntas frequentes",
+    description: "Dúvidas comuns e respostas do atendimento.",
     properties: [
       {
         key: "questions",
@@ -119,6 +132,7 @@ export const SETTINGS_DEFINITIONS: readonly SettingDefinition[] = [
   {
     field: "COMPANY_LINKS_JSON",
     title: "Links da empresa",
+    description: "WhatsApp e redes sociais da empresa.",
     properties: [
       text("whatsappUrl"),
       text("facebookUrl"),
@@ -130,6 +144,7 @@ export const SETTINGS_DEFINITIONS: readonly SettingDefinition[] = [
   {
     field: "PAYMENT_METHOD_JSON",
     title: "Formas de pagamento",
+    description: "Meios de pagamento aceitos na loja.",
     properties: [
       {
         key: "paymentMethods",
@@ -145,10 +160,15 @@ export const SETTINGS_DEFINITIONS: readonly SettingDefinition[] = [
       },
     ],
   },
-  { field: "HOME_INFO_JSON", title: "Informações da página inicial" },
+  {
+    field: "HOME_INFO_JSON",
+    title: "Informações da página inicial",
+    description: "Blocos de apresentação da página inicial.",
+  },
   {
     field: "HOME_BRAND_JSON",
     title: "Marcas em destaque",
+    description: "Marcas exibidas na vitrine inicial.",
     properties: [
       {
         key: "brandsTop",
@@ -161,6 +181,7 @@ export const SETTINGS_DEFINITIONS: readonly SettingDefinition[] = [
   {
     field: "HOME_CATEGORY_JSON",
     title: "Categorias da página inicial",
+    description: "Categorias exibidas na página inicial.",
     properties: [
       {
         key: "categories",
@@ -180,6 +201,7 @@ export const SETTINGS_DEFINITIONS: readonly SettingDefinition[] = [
   {
     field: "HOME_SECTION_JSON",
     title: "Seções da página inicial",
+    description: "Vitrines e seções de produtos da página inicial.",
     properties: [
       {
         key: "categories",
@@ -201,9 +223,14 @@ export const SETTINGS_DEFINITIONS: readonly SettingDefinition[] = [
   {
     field: "HOME_MENU_JSON",
     title: "Menu da página inicial",
+    description: "Itens de navegação do menu principal.",
     properties: [{ key: "menu", type: "list", itemType: "string" }],
   },
-  { field: "HOME_HERO_JSON", title: "Destaque da página inicial" },
+  {
+    field: "HOME_HERO_JSON",
+    title: "Destaque da página inicial",
+    description: "Banners e chamadas principais da página inicial.",
+  },
 ];
 
 export type SettingCardData = {
