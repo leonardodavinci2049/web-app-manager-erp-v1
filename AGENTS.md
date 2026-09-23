@@ -1,3 +1,15 @@
+# Repository Guidelines
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
+
 # Agent Guidelines for Manager ERP
 
 Operational guide for agents working in `web-app-manager-erp-v1`. Be concise, follow existing patterns, and prefer editing only what is necessary.
@@ -5,7 +17,7 @@ Operational guide for agents working in `web-app-manager-erp-v1`. Be concise, fo
 ## Product and Stack
 
 - Manager ERP: admin dashboard for catalog, products, brands, categories, customers, orders, reports, CRM, authentication, and multi-organization support.
-- Main stack: Next.js 16.2, React 19.2, App Router, React Compiler, Cache Components, strict TypeScript, Biome, Better Auth, mysql2, and HTTP integrations.
+- Main stack: Next.js 16.3, React 19.2, App Router, React Compiler, Cache Components, strict TypeScript, Biome, Better Auth, mysql2, and HTTP integrations.
 - Sources of truth: `package.json`, `next.config.ts`, `tsconfig.json`, `biome.json`, `README.md`, `src/lib/cache-config.ts`, and local Next.js docs.
 - If there is an `AGENTS.md` closer to the file being edited, it complements or specializes this guide.
 
@@ -15,7 +27,7 @@ Operational guide for agents working in `web-app-manager-erp-v1`. Be concise, fo
 pnpm dev      # dotenv -e .env -- next dev; dev server on the port set by the `PORT` env var (see `.env`)
 pnpm lint     # biome check
 pnpm format   # biome format --write
-pnpm build    # production build
+pnpm build    # production build (plain `next build`, no dotenv wrapper)
 pnpm start    # production start with dotenv
 ```
 
@@ -33,16 +45,20 @@ This project does not currently use automated tests. Do not invent or suggest te
 
 ## Architecture
 
-- `src/app`: App Router routes, layouts, pages, route handlers, and special files.
+- `src/app`: App Router routes, layouts, pages, route handlers, and special files. Includes the `(home)` landing page, `(auth)` pages, `dashboard/*` feature routes, and `admin/`.
 - `src/app/actions`: global Server Actions.
 - `src/app/**/_actions`: new route-specific or route-group-shared Server Actions.
 - `src/app/**/_components`: route-specific or route-group-shared UI, following the placement rules below.
 - `src/components`: installed components or components shared across the entire application; `src/components/ui` for installed base/design system components.
-- `src/services/api-main/*`: main API integration by module. Read the local `AGENTS.md` before changing anything.
-- `src/services/api-assets` and `src/services/api-cep`: specific external integrations.
-- `src/services/db/*`: DB/server-only access with mysql2.
+- `src/services/api-main/*`: main external API integration by module (29 modules). Read the local `AGENTS.md` before changing anything (only some modules have one).
+- `src/services/api-assets`, `src/services/api-cep`, `src/services/api-voice`: specific external integrations (assets/images, ViaCEP lookup, voice).
+- `src/services/db/*`: DB/server-only access with mysql2 (`auth`, `log`, `organization-meta`, `user-meta`).
+- `src/server/*`: server-only domain helpers (auth context, members, organizations, permissions, subscription, users).
+- `src/database/*`: singleton `DatabaseService` (`dbConnection.ts`) wrapping `mysql2/promise`, plus `schema.ts` types.
 - `src/core` and `src/lib`: shared config, logger, auth, helpers, cache, and utilities.
 - `src/types` or module-level `types/`: shared types.
+- No `middleware.ts` in this project.
+- Path alias: `@/*` maps to `./src/*`.
 
 ## Placement of New Components and Server Actions
 
@@ -63,17 +79,19 @@ Keep route-specific files close to the routes that use them so a route can be co
 
 ## Next.js and React
 
-- Server Components by default. `page.tsx` and `layout.tsx` should remain server-side unless there is a real framework exception.
+- Server Components by default. `page.tsx` and `layout.tsx` should remain server-side unless there is a real framework exception. Keep the `"use client"` boundary as low as possible.
 - Use Client Components only for interactive state, events, browser APIs, providers, and client-only libraries. Isolate `"use client"` in the smallest possible component.
 - `error.tsx` and `global-error.tsx` are Client Components by App Router convention.
 - Data reads belong in Server Components, services, or cached services. Mutations belong in Server Actions.
 - Create Route Handlers only when there is a real need for an HTTP endpoint.
 - Use absolute imports with `@/` for files inside `src`.
 - Default exports are required in App Router special files; otherwise, prefer named exports when they make sense.
+- When `pnpm dev` is already running, reuse it via the port in `PORT` and `.next/dev/lock`; do not start a duplicate server.
 
 ## Data, Services, and Mutations
 
-- In `src/services/api-main/*`, preserve the local separation between `*-service-api.ts`, `*-cached-service.ts`, `types`, `validation`, and `transformers`.
+- In `src/services/api-main/*`, preserve the local separation between `*-service-api.ts`, `types`, `validation`, and `transformers`. These admin modules read real-time data (no `"use cache"`); check the module's local `AGENTS.md` where one exists.
+- `*-cached-service.ts` wrappers exist only under `src/services/db/*`, not under `src/services/api-main/*`.
 - In server-only services, use `import "server-only"` when accessing secrets, the DB, internal APIs, or user context.
 - Validate inputs with Zod or an existing schema. Avoid `any`; use `unknown` or specific types.
 - Return minimal DTOs to UI and Client Components. Do not expose raw entities, secrets, tokens, or internal errors.
@@ -84,7 +102,7 @@ Keep route-specific files close to the routes that use them so a route can be co
 
 - `cacheComponents: true` and `reactCompiler: true` are enabled in `next.config.ts`.
 - Use `"use cache"` only in deterministic functions/components that are safe to cache.
-- Use `cacheLife` with the profiles defined in `next.config.ts`.
+- Use `cacheLife` with the profiles defined in `next.config.ts` (`frequent`, `quarter`, `hours`, `seconds`, `daily`).
 - Use `cacheTag` with `CACHE_TAGS` from `src/lib/cache-config.ts`.
 - After mutations, invalidate with `updateTag`, `revalidateTag`, or `revalidatePath`, depending on the expected effect.
 - Do not cache private data without an appropriate key by user, organization, or resource.
@@ -92,7 +110,7 @@ Keep route-specific files close to the routes that use them so a route can be co
 
 ## Security and Env
 
-- Never read private variables in Client Components; on the client, use only `NEXT_PUBLIC_*`.
+- Never read private variables in Client Components; on the client, use only `NEXT_PUBLIC_*`. Server envs live in `src/core/config/envs.server.ts` (`import "server-only"`); client envs in `src/core/config/envs.client.ts`.
 - `.env` and `.env.local` are secrets. Do not log, copy, or expose values.
 - Authentication does not replace authorization. Verify ownership, organization, and permissions in actions/services that mutate or return sensitive data.
 - Do not import server-only modules in Client Components.
@@ -100,6 +118,7 @@ Keep route-specific files close to the routes that use them so a route can be co
 
 ## Styling & Components
 
+- Build mobile-first and support both light and dark themes in every interface change.
 - **Tailwind CSS 4** via `@tailwindcss/postcss` (no tailwind.config.js)
 - **shadcn/ui** components configured in `components.json`:
   - Style: "new-york"
@@ -140,13 +159,3 @@ Keep route-specific files close to the routes that use them so a route can be co
 ## Communication and Delivery
 
 - After completing a task, suggest one to three related follow-up tasks that represent the natural next steps. Do not execute these additional tasks without my authorization.
-
-<!-- BEGIN:nextjs-agent-rules -->
-
-# This is NOT the Next.js you know
-
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
-
-This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
-
-<!-- END:nextjs-agent-rules -->
