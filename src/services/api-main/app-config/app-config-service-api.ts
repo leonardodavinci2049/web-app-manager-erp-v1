@@ -76,7 +76,11 @@ export class AppConfigServiceApi extends BaseApiService {
   ): Promise<AppConfigFindByIdResponse> {
     try {
       const validatedParams = AppConfigFindByIdSchema.parse(params);
-      const requestBody = this.buildBasePayload(validatedParams);
+      const configId = serverEnvs.CONFIG_ID;
+      const requestBody = this.buildBasePayload({
+        ...validatedParams,
+        pe_config_id: configId,
+      });
 
       const response = await this.post<AppConfigFindByIdResponse>(
         APP_CONFIG_ENDPOINTS.FIND_BY_ID,
@@ -88,7 +92,7 @@ export class AppConfigServiceApi extends BaseApiService {
         response.statusCode === API_STATUS_CODES.UNPROCESSABLE
       ) {
         throw new AppConfigNotFoundError({
-          pe_config_id: validatedParams.pe_config_id,
+          pe_config_id: configId,
         });
       }
 
