@@ -1,9 +1,11 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
+import { Spinner } from "@/components/ui/spinner";
 import { auth } from "@/lib/auth/auth";
 import { SiteHeaderWithBreadcrumb } from "../_components/header/site-header-with-breadcrumb";
 
-const SettingsPage = async () => {
+async function SettingsPageContent() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) {
     redirect("/sign-in");
@@ -40,6 +42,27 @@ const SettingsPage = async () => {
       </div>
     </>
   );
-};
+}
+
+function SettingsPageFallback() {
+  return (
+    <div
+      className="flex min-h-64 items-center justify-center gap-2 text-muted-foreground"
+      role="status"
+      aria-live="polite"
+    >
+      <Spinner aria-hidden="true" />
+      <span className="text-sm">Carregando configurações...</span>
+    </div>
+  );
+}
+
+function SettingsPage() {
+  return (
+    <Suspense fallback={<SettingsPageFallback />}>
+      <SettingsPageContent />
+    </Suspense>
+  );
+}
 
 export default SettingsPage;
