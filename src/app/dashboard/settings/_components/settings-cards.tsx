@@ -1,18 +1,40 @@
 "use client";
 
+import {
+  Award,
+  Building2,
+  Check,
+  CircleHelp,
+  CreditCard,
+  FileText,
+  Home,
+  Layers,
+  LayoutGrid,
+  Link2,
+  type LucideIcon,
+  MapPin,
+  Menu,
+  Pencil,
+  Search,
+  Settings2,
+  Sparkles,
+  X,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState, useTransition } from "react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 import { updateSettingsFieldAction } from "../_actions/settings-actions";
 import {
   type JsonObject,
@@ -22,11 +44,71 @@ import {
   SETTINGS_DEFINITIONS,
   type SettingCardData,
   type SettingDefinition,
+  type SettingsField,
 } from "./settings-field-definitions";
 
 type JsonPath = (string | number)[];
 type TextOverride = { path: JsonPath; text: string };
 type OverrideMap = Record<string, TextOverride>;
+
+const FIELD_ICONS: Record<SettingsField, LucideIcon> = {
+  GENERAL_CONFIG_JSON: Settings2,
+  COMPANY_INFO_JSON: Building2,
+  COMPANY_ABOUT_JSON: FileText,
+  COMPANY_ADDRESS_JSON: MapPin,
+  COMPANY_SEO_JSON: Search,
+  COMPANY_FAQ_JSON: CircleHelp,
+  COMPANY_LINKS_JSON: Link2,
+  PAYMENT_METHOD_JSON: CreditCard,
+  HOME_INFO_JSON: Home,
+  HOME_BRAND_JSON: Award,
+  HOME_CATEGORY_JSON: LayoutGrid,
+  HOME_SECTION_JSON: Layers,
+  HOME_MENU_JSON: Menu,
+  HOME_HERO_JSON: Sparkles,
+};
+
+const TOP_FIELDS: readonly SettingsField[] = [
+  "COMPANY_INFO_JSON",
+  "COMPANY_ADDRESS_JSON",
+  "COMPANY_LINKS_JSON",
+  "GENERAL_CONFIG_JSON",
+];
+
+const TAB_GROUPS: readonly {
+  id: string;
+  label: string;
+  description: string;
+  fields: readonly SettingsField[];
+}[] = [
+  {
+    id: "institucional",
+    label: "Institucional",
+    description: "Conteúdo institucional, SEO e ajuda.",
+    fields: ["COMPANY_ABOUT_JSON", "COMPANY_SEO_JSON", "COMPANY_FAQ_JSON"],
+  },
+  {
+    id: "vendas",
+    label: "Vendas",
+    description: "Formas de pagamento aceitas na loja.",
+    fields: ["PAYMENT_METHOD_JSON"],
+  },
+  {
+    id: "vitrine",
+    label: "Página inicial",
+    description: "Vitrines, marcas, categorias e navegação.",
+    fields: [
+      "HOME_INFO_JSON",
+      "HOME_BRAND_JSON",
+      "HOME_CATEGORY_JSON",
+      "HOME_SECTION_JSON",
+      "HOME_MENU_JSON",
+      "HOME_HERO_JSON",
+    ],
+  },
+];
+
+const SUMMARY_LIMIT = 6;
 
 const PROPERTY_LABELS: Record<string, string> = {
   name: "Nome",
@@ -104,6 +186,100 @@ function defaultValue(type: ScalarDefinition["type"]): JsonValue {
   if (type === "number") return 0;
   if (type === "boolean") return false;
   return "";
+}
+
+function truncate(text: string, max = 80): string {
+  const normalized = text.replace(/\s+/g, " ").trim();
+  if (normalized.length <= max) return normalized;
+  return `${normalized.slice(0, max - 1).trimEnd()}…`;
+}
+
+function previewScalar(value: JsonValue): string {
+  if (value === null) return "—";
+  if (typeof value === "boolean") return value ? "Sim" : "Não";
+  if (typeof value === "number")
+    return Number.isFinite(value) ? String(value) : "—";
+  if (typeof value === "string") {
+    return value.trim() === "" ? "—" : truncate(value, 80);
+  }
+  if (Array.isArray(value)) {
+    return value.length === 0
+      ? "Nenhum item"
+      : `${value.length} ${value.length === 1 ? "item" : "itens"}`;
+  }
+  const keys = Object.keys(value);
+  return keys.length === 0
+    ? "—"
+    : `${keys.length} ${keys.length === 1 ? "campo" : "campos"}`;
+}
+
+function listPreview(
+  value: JsonValue[],
+  itemFields?: readonly ScalarDefinition[],
+): string {
+  if (value.length === 0) return "Nenhum item";
+  const samples = value.slice(0, 2).map((item) => {
+    if (typeof item === "string") return truncate(item, 32);
+    if (isJsonObject(item)) {
+      const labelKeys = ["brandName", "title", "label", "name", "Question"];
+      for (const key of labelKeys) {
+        const entry = item[key];
+        if (typeof entry === "string" && entry.trim() !== "") {
+          return truncate(entry, 32);
+        }
+        if (typeof entry === "number") return String(entry);
+      }
+      const firstField = itemFields?.[0]?.key;
+      if (firstField) {
+        const entry = item[firstField];
+        if (typeof entry === "string" && entry.trim() !== "") {
+          return truncate(entry, 32);
+        }
+        if (typeof entry === "number") return String(entry);
+      }
+      return "Item";
+    }
+    return "Item";
+  });
+  const count = `${value.length} ${value.length === 1 ? "item" : "itens"}`;
+  return `${count} • ${samples.join(" • ")}`;
+}
+
+type SummaryEntry = { key: string; label: string; preview: string };
+
+function buildSummary(
+  value: JsonObject,
+  definition: SettingDefinition,
+): SummaryEntry[] {
+  const entries: SummaryEntry[] = [];
+  const orderedKeys = [
+    ...(definition.properties?.map((property) => property.key) ?? []),
+    ...Object.keys(value).filter(
+      (key) => !definition.properties?.some((property) => property.key === key),
+    ),
+  ];
+  const seen = new Set<string>();
+  for (const key of orderedKeys) {
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const entry = value[key];
+    if (entry === undefined) continue;
+    const property = definition.properties?.find((item) => item.key === key);
+    if (property?.type === "list" && Array.isArray(entry)) {
+      entries.push({
+        key,
+        label: propertyLabel(key),
+        preview: listPreview(entry, property.itemFields),
+      });
+    } else {
+      entries.push({
+        key,
+        label: propertyLabel(key),
+        preview: previewScalar(entry),
+      });
+    }
+  }
+  return entries;
 }
 
 function structureError(
@@ -252,6 +428,7 @@ function SettingsCard({
   const malformed = saved.invalid || structureError(saved.value, definition);
   const freeMode = !definition.properties || malformed;
   const displayed = editing ? draft : (saved.value ?? {});
+  const Icon = FIELD_ICONS[definition.field] ?? Settings2;
 
   function beginEdit() {
     setDraft(prepareDraft(saved.value ?? {}, definition));
@@ -260,6 +437,13 @@ function SettingsCard({
     setJsonTexts({});
     setFeedback(null);
     setEditing(true);
+  }
+
+  function cancelEdit() {
+    setEditing(false);
+    setFeedback(null);
+    setNumberTexts({});
+    setJsonTexts({});
   }
 
   function save() {
@@ -321,7 +505,7 @@ function SettingsCard({
         <label
           key={pathKey}
           htmlFor={inputId}
-          className="flex items-center gap-3 rounded-md border p-3 text-sm"
+          className="flex items-center gap-2.5 rounded-md border px-2.5 py-2 text-sm"
         >
           <input
             id={inputId}
@@ -360,11 +544,8 @@ function SettingsCard({
     };
 
     return (
-      <div key={pathKey} className="min-w-0 space-y-2">
-        <label
-          htmlFor={inputId}
-          className="block break-all text-sm font-medium"
-        >
+      <div key={pathKey} className="min-w-0 space-y-1.5">
+        <label htmlFor={inputId} className="block truncate text-xs font-medium">
           {label}
         </label>
         {isLong ? (
@@ -373,7 +554,7 @@ function SettingsCard({
             value={text}
             readOnly={!editing || pending}
             onChange={(event) => updateText(event.target.value)}
-            rows={type === "json" ? 6 : 3}
+            rows={type === "json" ? 4 : 2}
             className="font-mono text-sm"
           />
         ) : (
@@ -383,6 +564,7 @@ function SettingsCard({
             readOnly={!editing || pending}
             inputMode={type === "number" ? "decimal" : undefined}
             onChange={(event) => updateText(event.target.value)}
+            className="h-9 text-sm"
           />
         )}
       </div>
@@ -396,7 +578,7 @@ function SettingsCard({
   ) {
     const known = new Set(fields.map((field) => field.key));
     return (
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-2">
         {fields
           .filter((field) => value[field.key] !== undefined)
           .map((field) =>
@@ -434,8 +616,8 @@ function SettingsCard({
     }
     if (!Array.isArray(value)) return null;
     return (
-      <section key={property.key} className="space-y-3 sm:col-span-2">
-        <h3 className="text-sm font-semibold break-all">
+      <section key={property.key} className="space-y-2 sm:col-span-2">
+        <h3 className="text-xs font-semibold break-all">
           {propertyLabel(property.key)} ({value.length})
         </h3>
         {value.length === 0 && (
@@ -443,15 +625,15 @@ function SettingsCard({
             Nenhum item cadastrado.
           </p>
         )}
-        <div className="space-y-4">
+        <div className="space-y-2.5">
           {value.map((item, index) => {
             const rowKey = `${property.key}-${index}`;
             return (
               <div
                 key={rowKey}
-                className="min-w-0 rounded-lg border bg-muted/20 p-4"
+                className="min-w-0 rounded-lg border bg-muted/30 p-3"
               >
-                <p className="mb-3 text-sm font-medium">Item {index + 1}</p>
+                <p className="mb-2 text-xs font-medium">Item {index + 1}</p>
                 {property.itemType === "string" && typeof item === "string"
                   ? renderScalar("Valor", item, [property.key, index], "string")
                   : isJsonObject(item)
@@ -468,38 +650,179 @@ function SettingsCard({
     );
   }
 
+  function renderSummary() {
+    const value = saved.value;
+    if (!value) {
+      return (
+        <p className="text-sm text-muted-foreground">
+          Nenhum conteúdo cadastrado.
+        </p>
+      );
+    }
+    if (freeMode) {
+      const keys = Object.keys(value);
+      const raw = saved.raw ?? "{}";
+      return (
+        <div className="space-y-2">
+          <p className="text-xs text-muted-foreground">
+            {keys.length === 0
+              ? "Objeto JSON vazio."
+              : `${keys.length} ${keys.length === 1 ? "campo" : "campos"}: ${keys
+                  .slice(0, 4)
+                  .map((key) => propertyLabel(key))
+                  .join(" • ")}${keys.length > 4 ? " • …" : ""}`}
+          </p>
+          <pre className="max-h-24 overflow-hidden rounded-md bg-muted/60 p-2.5 font-mono text-xs text-muted-foreground">
+            {truncate(raw, 280)}
+          </pre>
+        </div>
+      );
+    }
+    const entries = buildSummary(value, definition);
+    if (entries.length === 0) {
+      return (
+        <p className="text-sm text-muted-foreground">
+          Nenhum conteúdo cadastrado.
+        </p>
+      );
+    }
+    const visible = entries.slice(0, SUMMARY_LIMIT);
+    const hidden = entries.length - visible.length;
+    return (
+      <div className="space-y-2">
+        <dl className="grid gap-x-6 gap-y-2 sm:grid-cols-2 lg:grid-cols-3">
+          {visible.map((entry) => (
+            <div key={entry.key} className="min-w-0">
+              <dt className="truncate text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+                {entry.label}
+              </dt>
+              <dd className="truncate text-sm" title={entry.preview}>
+                {entry.preview}
+              </dd>
+            </div>
+          ))}
+        </dl>
+        {hidden > 0 && (
+          <p className="text-xs text-muted-foreground">
+            +{hidden} {hidden === 1 ? "campo" : "campos"} — edite para ver
+            todos.
+          </p>
+        )}
+      </div>
+    );
+  }
+
   return (
-    <Card className="min-w-0">
-      <CardHeader>
-        <CardTitle>{definition.title}</CardTitle>
-        <CardDescription className="break-all">
-          {definition.field}
-        </CardDescription>
+    <Card
+      className={cn(
+        "min-w-0 gap-0 overflow-hidden py-0 transition-all",
+        editing && "border-primary/60 shadow-md ring-2 ring-primary/15",
+      )}
+    >
+      <CardHeader className="px-4 pt-3.5 pb-3 sm:px-5">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex min-w-0 items-start gap-3">
+            <div
+              className={cn(
+                "flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted",
+                editing && "bg-primary/10 text-primary",
+              )}
+            >
+              <Icon className="size-4" aria-hidden="true" />
+            </div>
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <CardTitle className="text-sm sm:text-[15px]">
+                  {definition.title}
+                </CardTitle>
+                {editing ? (
+                  <Badge variant="secondary" className="text-[11px]">
+                    Editando
+                  </Badge>
+                ) : malformed ? (
+                  <Badge variant="destructive" className="text-[11px]">
+                    Revisar
+                  </Badge>
+                ) : null}
+              </div>
+              <CardDescription className="mt-0.5 line-clamp-2 text-xs">
+                {definition.description}
+              </CardDescription>
+            </div>
+          </div>
+          {!editing ? (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={beginEdit}
+              className="h-8 w-8 shrink-0 p-0"
+              aria-label={`Editar ${definition.title}`}
+            >
+              <Pencil className="h-4 w-4" aria-hidden="true" />
+            </Button>
+          ) : (
+            <div className="flex shrink-0 gap-1">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={cancelEdit}
+                disabled={pending}
+                className="h-8 w-8 p-0"
+                aria-label="Cancelar edição"
+              >
+                <X className="h-4 w-4" aria-hidden="true" />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={save}
+                disabled={pending}
+                className="h-8 w-8 p-0"
+                aria-label={
+                  pending ? "Salvando alterações" : "Salvar alterações"
+                }
+              >
+                <Check className="h-4 w-4" aria-hidden="true" />
+              </Button>
+            </div>
+          )}
+        </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3 px-4 pb-4 sm:px-5">
+        {editing && (
+          <p className="rounded-md bg-primary/5 px-2.5 py-1.5 text-xs text-muted-foreground">
+            Editando — altere os campos e confirme com o ícone de salvar no topo
+            do card.
+          </p>
+        )}
         {malformed && (
-          <p role="alert" className="text-sm text-destructive">
+          <p role="alert" className="text-xs text-destructive sm:text-sm">
             O conteúdo atual não corresponde à estrutura esperada. Revise o JSON
             antes de salvar.
           </p>
         )}
-        {freeMode ? (
-          <div className="space-y-2">
-            <label htmlFor={`${id}-json`} className="block text-sm font-medium">
+        {!editing ? (
+          renderSummary()
+        ) : freeMode ? (
+          <div className="space-y-1.5">
+            <label htmlFor={`${id}-json`} className="block text-xs font-medium">
               Objeto JSON
             </label>
             <Textarea
               id={`${id}-json`}
-              value={editing ? freeText : (saved.raw ?? "{}")}
-              readOnly={!editing || pending}
+              value={freeText}
+              readOnly={pending}
               onChange={(event) => setFreeText(event.target.value)}
-              rows={10}
+              rows={8}
               spellCheck={false}
               className="font-mono text-sm"
             />
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-2">
             {definition.properties?.map(renderProperty)}
             {Object.entries(displayed)
               .filter(
@@ -523,56 +846,79 @@ function SettingsCard({
             role={feedback.error ? "alert" : "status"}
             className={
               feedback.error
-                ? "text-sm text-destructive"
-                : "text-sm text-emerald-700 dark:text-emerald-400"
+                ? "text-xs text-destructive sm:text-sm"
+                : "text-xs text-emerald-700 sm:text-sm dark:text-emerald-400"
             }
           >
+            {pending ? "Salvando... " : ""}
             {feedback.message}
           </p>
         )}
       </CardContent>
-      <CardFooter className="flex flex-wrap gap-2">
-        {editing ? (
-          <>
-            <Button type="button" onClick={save} disabled={pending}>
-              {pending ? "Salvando..." : "Salvar"}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              disabled={pending}
-              onClick={() => {
-                setEditing(false);
-                setFeedback(null);
-              }}
-            >
-              Cancelar
-            </Button>
-          </>
-        ) : (
-          <Button type="button" variant="outline" onClick={beginEdit}>
-            Editar
-          </Button>
-        )}
-      </CardFooter>
     </Card>
   );
 }
 
 export function SettingsCards({ cards }: { cards: SettingCardData[] }) {
   const byField = new Map(cards.map((card) => [card.field, card]));
+  const byDefinition = new Map(
+    SETTINGS_DEFINITIONS.map((definition) => [definition.field, definition]),
+  );
+
+  function renderCard(field: SettingsField) {
+    const data = byField.get(field);
+    const definition = byDefinition.get(field);
+    if (!data || !definition) return null;
+    return <SettingsCard key={field} data={data} definition={definition} />;
+  }
+
   return (
-    <div className="grid gap-6 xl:grid-cols-2">
-      {SETTINGS_DEFINITIONS.map((definition) => {
-        const data = byField.get(definition.field);
-        return data ? (
-          <SettingsCard
-            key={definition.field}
-            data={data}
-            definition={definition}
-          />
-        ) : null;
-      })}
+    <div className="w-full space-y-4 sm:space-y-5">
+      <section aria-label="Configurações principais">
+        <div className="mb-2 sm:mb-2.5">
+          <h2 className="text-sm font-semibold sm:text-[15px]">Principais</h2>
+          <p className="text-xs text-muted-foreground sm:text-sm">
+            Dados mais consultados da empresa e do aplicativo.
+          </p>
+        </div>
+        <div className="space-y-3 sm:space-y-3.5">
+          {TOP_FIELDS.map(renderCard)}
+        </div>
+      </section>
+
+      <section aria-label="Configurações avançadas">
+        <div className="mb-2 sm:mb-2.5">
+          <h2 className="text-sm font-semibold sm:text-[15px]">
+            Configurações avançadas
+          </h2>
+          <p className="text-xs text-muted-foreground sm:text-sm">
+            Conteúdo institucional, vendas e página inicial.
+          </p>
+        </div>
+        <Tabs defaultValue={TAB_GROUPS[0].id} className="w-full gap-3">
+          <TabsList className="h-auto w-full justify-start gap-1 overflow-x-auto p-1">
+            {TAB_GROUPS.map((group) => (
+              <TabsTrigger
+                key={group.id}
+                value={group.id}
+                className="flex-none px-3 py-1.5 text-xs sm:text-sm"
+              >
+                {group.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          {TAB_GROUPS.map((group) => (
+            <TabsContent key={group.id} value={group.id} className="mt-0">
+              <p className="mb-2 text-xs text-muted-foreground">
+                {group.description}
+              </p>
+              <div className="space-y-3 sm:space-y-3.5">
+                {group.fields.map(renderCard)}
+              </div>
+            </TabsContent>
+          ))}
+        </Tabs>
+      </section>
     </div>
   );
 }

@@ -45,14 +45,16 @@ async function SettingsPageContent() {
           { label: "Configurações", isActive: true },
         ]}
       />
-      <div className="flex flex-1 flex-col">
-        <div className="@container/main flex flex-1 flex-col gap-6">
-          <div className="flex flex-col gap-6 py-6">
-            <div className="px-4 lg:px-6">
-              <div className="space-y-6">
+      <div className="mx-auto flex w-full max-w-[1400px] min-w-0 flex-1 flex-col">
+        <div className="@container/main flex flex-1 flex-col gap-4 sm:gap-6">
+          <div className="flex flex-col gap-4 py-4 sm:gap-5 sm:py-6">
+            <div className="px-3 sm:px-4 lg:px-6">
+              <div className="space-y-4 sm:space-y-5">
                 <div>
-                  <h1 className="text-3xl font-bold">Configurações</h1>
-                  <p className="text-muted-foreground mt-2">
+                  <h1 className="text-xl font-bold sm:text-2xl">
+                    Configurações
+                  </h1>
+                  <p className="text-muted-foreground mt-1 text-sm">
                     Gerencie os dados e a apresentação do aplicativo.
                   </p>
                 </div>
