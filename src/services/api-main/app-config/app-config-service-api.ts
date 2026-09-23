@@ -4,7 +4,6 @@ import { serverEnvs } from "@/core/config/envs.server";
 import {
   API_STATUS_CODES,
   APP_CONFIG_ENDPOINTS,
-  isApiError,
   isApiSuccess,
 } from "@/core/constants/api-constants";
 import { createLogger } from "@/core/logger";
@@ -89,14 +88,18 @@ export class AppConfigServiceApi extends BaseApiService {
 
       if (
         response.statusCode === API_STATUS_CODES.NOT_FOUND ||
-        response.statusCode === API_STATUS_CODES.UNPROCESSABLE
+        response.statusCode === API_STATUS_CODES.EMPTY_RESULT
       ) {
         throw new AppConfigNotFoundError({
           pe_config_id: configId,
         });
       }
 
-      if (isApiError(response.statusCode)) {
+      if (
+        !isApiSuccess(response.statusCode) ||
+        response.errorId !== 0 ||
+        !Array.isArray(response.data?.["App Config"])
+      ) {
         throw new AppConfigError(
           response.message ||
             "Erro ao buscar configuração do aplicativo por ID",
@@ -165,12 +168,20 @@ export class AppConfigServiceApi extends BaseApiService {
 
   private checkStoredProcedureError(response: AppConfigMutationResponse): void {
     const spResponse = response.data?.[0];
-    if (spResponse && spResponse.sp_error_id !== 0) {
+    if (
+      response.statusCode !== API_STATUS_CODES.SUCCESS ||
+      response.errorId !== 0 ||
+      !spResponse ||
+      spResponse.sp_error_id !== 0 ||
+      !Number.isInteger(spResponse.sp_return_id) ||
+      spResponse.sp_return_id <= 0
+    ) {
       throw new AppConfigError(
-        spResponse.sp_message ||
+        spResponse?.sp_message ||
+          response.message ||
           "Erro na operação de configuração do aplicativo",
         "APP_CONFIG_OPERATION_ERROR",
-        spResponse.sp_error_id,
+        response.statusCode,
       );
     }
   }

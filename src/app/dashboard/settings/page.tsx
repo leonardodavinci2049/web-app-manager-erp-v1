@@ -1,14 +1,39 @@
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { Spinner } from "@/components/ui/spinner";
-import { auth } from "@/lib/auth/auth";
+import { createLogger } from "@/core/logger";
+import { getAuthContext } from "@/server/auth-context";
+import { AppConfigNotFoundError } from "@/services/api-main/app-config";
 import { SiteHeaderWithBreadcrumb } from "../_components/header/site-header-with-breadcrumb";
+import { SettingsCards } from "./_components/settings-cards";
+import {
+  getSettingsConfig,
+  hasValidSystemClientId,
+  mapSettingsCards,
+} from "./settings-data";
+
+const logger = createLogger("SettingsPage");
 
 async function SettingsPageContent() {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user) {
-    redirect("/sign-in");
+  const { apiContext } = await getAuthContext();
+  let cards = null;
+  let errorMessage: string | null = null;
+
+  if (!hasValidSystemClientId(apiContext)) {
+    errorMessage =
+      "Cliente de sistema inválido. As configurações não estão disponíveis.";
+  } else {
+    try {
+      const config = await getSettingsConfig(apiContext);
+      cards = mapSettingsCards(config);
+    } catch (error) {
+      if (error instanceof AppConfigNotFoundError) {
+        errorMessage = "Nenhuma configuração foi encontrada para este cliente.";
+      } else {
+        logger.error("Failed to load application settings", error);
+        errorMessage =
+          "Não foi possível carregar as configurações. Tente novamente.";
+      }
+    }
   }
 
   return (
@@ -16,7 +41,7 @@ async function SettingsPageContent() {
       <SiteHeaderWithBreadcrumb
         title="Dashboard"
         breadcrumbItems={[
-          { label: "Dashboard", href: "#" },
+          { label: "Dashboard", href: "/dashboard" },
           { label: "Configurações", isActive: true },
         ]}
       />
@@ -25,16 +50,22 @@ async function SettingsPageContent() {
           <div className="flex flex-col gap-6 py-6">
             <div className="px-4 lg:px-6">
               <div className="space-y-6">
-                {/* Cabeçalho */}
                 <div>
                   <h1 className="text-3xl font-bold">Configurações</h1>
                   <p className="text-muted-foreground mt-2">
-                    Personalize sua experiência e configure suas preferências de
-                    conta
+                    Gerencie os dados e a apresentação do aplicativo.
                   </p>
                 </div>
-                {/* Conteúdo das Configurações */}
-                {/* <SettingsPageContent /> */}
+                {errorMessage ? (
+                  <div
+                    role="alert"
+                    className="rounded-lg border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive"
+                  >
+                    {errorMessage}
+                  </div>
+                ) : cards ? (
+                  <SettingsCards cards={cards} />
+                ) : null}
               </div>
             </div>
           </div>

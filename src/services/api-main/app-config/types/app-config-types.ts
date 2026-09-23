@@ -1,5 +1,7 @@
 import "server-only";
 
+import type { AppConfigUpdateGeneralFieldInput } from "../validation/app-config-schemas";
+
 interface AppConfigBaseRequest {
   pe_app_id?: number;
   pe_system_client_id?: number;
@@ -9,6 +11,14 @@ interface AppConfigBaseRequest {
   pe_user_name?: string;
   pe_user_role?: string;
   pe_person_id?: number;
+}
+
+interface AppConfigRequiredContextRequest extends AppConfigBaseRequest {
+  pe_system_client_id: number;
+  pe_organization_id: string;
+  pe_user_id: string;
+  pe_user_name: string;
+  pe_user_role: string;
 }
 
 interface AppConfigBaseResponse {
@@ -24,7 +34,8 @@ export interface AppConfigFindAllRequest extends AppConfigBaseRequest {
   pe_customer_id?: number;
 }
 
-export interface AppConfigFindByIdRequest extends AppConfigBaseRequest {
+export interface AppConfigFindByIdRequest
+  extends AppConfigRequiredContextRequest {
   pe_config_id: number;
 }
 
@@ -34,10 +45,10 @@ export interface AppMenuFindByTypeRequest extends AppConfigBaseRequest {
 }
 
 export interface AppConfigUpdateGeneralFieldRequest
-  extends AppConfigBaseRequest {
+  extends AppConfigRequiredContextRequest {
   pe_register_id: number;
   pe_field_type: number;
-  pe_field: string;
+  pe_field: AppConfigUpdateGeneralFieldInput["pe_field"];
   pe_value_str?: string | null;
   pe_value_int?: number | null;
   pe_value_numeric?: number | null;

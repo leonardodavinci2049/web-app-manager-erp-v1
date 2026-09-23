@@ -52,6 +52,7 @@ public/slides
 src/core/config-tenant
 /src/data
 /upload
+/app-config
 
 # agent files
 .agents/
