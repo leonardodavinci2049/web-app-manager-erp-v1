@@ -4,7 +4,8 @@ const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
 const APP_CONFIG_UPDATABLE_FIELDS = [
   "APP_NAME",
-  "CLIENT_NAME",
+  "DOMINIO",
+  "PATH_IMAGEM",
   "GENERAL_CONFIG_JSON",
   "COMPANY_INFO_JSON",
   "COMPANY_ABOUT_JSON",
@@ -19,6 +20,9 @@ const APP_CONFIG_UPDATABLE_FIELDS = [
   "HOME_SECTION_JSON",
   "HOME_MENU_JSON",
   "HOME_HERO_JSON",
+  "FLAG_MAINTENANCE",
+  "IS_ACTIVE",
+  "NOTES",
 ] as const;
 
 const AppConfigRequestContextSchema = z.object({
@@ -38,12 +42,13 @@ const AppConfigRequiredContextSchema = AppConfigRequestContextSchema.extend({
   pe_user_role: z.string().min(1).max(200),
 });
 
-export const AppConfigFindAllSchema = AppConfigRequestContextSchema.extend({
-  pe_customer_id: z.number().int().min(0).optional(),
+export const AppConfigFindAllSchema = AppConfigRequiredContextSchema.extend({
+  pe_limit: z.number().int(),
+  pe_search: z.string().max(100).nullable().optional(),
 });
 
 export const AppConfigFindByIdSchema = AppConfigRequiredContextSchema.extend({
-  pe_config_id: z.number().int().positive(),
+  pe_config_id: z.number().int().nonnegative().default(0),
 });
 
 export const AppMenuFindByTypeSchema = AppConfigRequestContextSchema.extend({

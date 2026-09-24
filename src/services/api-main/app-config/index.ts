@@ -10,6 +10,7 @@ export type {
   AppConfigFindByIdRequest,
   AppConfigFindByIdResponse,
   AppConfigMutationResponse,
+  AppConfigSummary,
   AppConfigUpdateGeneralFieldRequest,
   AppMenuEntry,
   AppMenuFindByTypeRequest,
