@@ -72,7 +72,6 @@ const TOP_FIELDS: readonly SettingsField[] = [
   "COMPANY_INFO_JSON",
   "COMPANY_ADDRESS_JSON",
   "COMPANY_LINKS_JSON",
-  "GENERAL_CONFIG_JSON",
 ];
 
 const TAB_GROUPS: readonly {
@@ -82,29 +81,58 @@ const TAB_GROUPS: readonly {
   fields: readonly SettingsField[];
 }[] = [
   {
-    id: "institucional",
-    label: "Institucional",
-    description: "Conteúdo institucional, SEO e ajuda.",
-    fields: ["COMPANY_ABOUT_JSON", "COMPANY_SEO_JSON", "COMPANY_FAQ_JSON"],
+    id: "sobre",
+    label: "Sobre",
+    description: "Texto institucional exibido no aplicativo.",
+    fields: ["COMPANY_ABOUT_JSON"],
   },
   {
-    id: "vendas",
-    label: "Vendas",
-    description: "Formas de pagamento aceitas na loja.",
+    id: "faq",
+    label: "FAQ",
+    description: "Dúvidas comuns e respostas do atendimento.",
+    fields: ["COMPANY_FAQ_JSON"],
+  },
+  {
+    id: "secoes",
+    label: "Seções",
+    description: "Vitrines e seções de produtos da página inicial.",
+    fields: ["HOME_SECTION_JSON"],
+  },
+  {
+    id: "categorias",
+    label: "Categorias",
+    description: "Categorias exibidas na página inicial.",
+    fields: ["HOME_CATEGORY_JSON"],
+  },
+  {
+    id: "pagamentos",
+    label: "Pagamentos",
+    description: "Meios de pagamento aceitos na loja.",
     fields: ["PAYMENT_METHOD_JSON"],
   },
   {
-    id: "vitrine",
-    label: "Página inicial",
-    description: "Vitrines, marcas, categorias e navegação.",
-    fields: [
-      "HOME_INFO_JSON",
-      "HOME_BRAND_JSON",
-      "HOME_CATEGORY_JSON",
-      "HOME_SECTION_JSON",
-      "HOME_MENU_JSON",
-      "HOME_HERO_JSON",
-    ],
+    id: "seo",
+    label: "SEO",
+    description: "Títulos, descrição e palavras-chave para buscas.",
+    fields: ["COMPANY_SEO_JSON"],
+  },
+  {
+    id: "home",
+    label: "HOME",
+    description: "Apresentação, marcas e destaques da página inicial.",
+    fields: ["HOME_INFO_JSON", "HOME_BRAND_JSON", "HOME_HERO_JSON"],
+  },
+  {
+    id: "menu",
+    label: "Menu",
+    description: "Itens de navegação do menu principal.",
+    fields: ["HOME_MENU_JSON"],
+  },
+  {
+    id: "diversos",
+    label: "Diversos",
+    description: "Parâmetros gerais do aplicativo.",
+    fields: ["GENERAL_CONFIG_JSON"],
   },
 ];
 
@@ -892,7 +920,7 @@ export function SettingsCards({ cards }: { cards: SettingCardData[] }) {
             Configurações avançadas
           </h2>
           <p className="text-xs text-muted-foreground sm:text-sm">
-            Conteúdo institucional, vendas e página inicial.
+            Conteúdo organizado por tema.
           </p>
         </div>
         <Tabs defaultValue={TAB_GROUPS[0].id} className="w-full gap-3">
