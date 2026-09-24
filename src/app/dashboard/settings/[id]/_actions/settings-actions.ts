@@ -5,14 +5,14 @@ import { z } from "zod";
 import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
 import { appConfigServiceApi } from "@/services/api-main/app-config";
+import { getSettingsConfig, hasValidSystemClientId } from "../../settings-data";
 import {
   type JsonObject,
   SETTINGS_FIELDS,
 } from "../_components/settings-field-definitions";
-import { getSettingsConfig, hasValidSystemClientId } from "../settings-data";
 
 const logger = createLogger("SettingsActions");
-const SETTINGS_PATH = "/dashboard/settings";
+const SETTINGS_PATH = "/dashboard/settings/[id]";
 
 const updateSettingsSchema = z.object({
   field: z.enum(SETTINGS_FIELDS),
@@ -51,7 +51,7 @@ export async function updateSettingsFieldAction(
       pe_value_str: value,
     });
 
-    revalidatePath(SETTINGS_PATH);
+    revalidatePath(SETTINGS_PATH, "page");
     return {
       success: true,
       message: "Configuração salva com sucesso.",

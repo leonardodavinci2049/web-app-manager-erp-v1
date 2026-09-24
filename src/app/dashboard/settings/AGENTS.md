@@ -1,16 +1,18 @@
 # Settings Route Agent Guide
 
 This file complements the repository and dashboard guides for
-`src/app/dashboard/settings`. It governs the `/dashboard/settings` page.
+`src/app/dashboard/settings`. It governs the `/dashboard/settings/[id]` page.
 
 ## Route Purpose
 
-The settings route displays and edits the 14 JSON fields of the authenticated
-system client's application configuration. Each field is saved separately.
+The `/dashboard/settings/[id]` route displays and edits the 14 JSON fields of
+the authenticated system client's application configuration. Each field is
+saved separately. The `/dashboard/settings` page is reserved for a future
+settings list and currently renders no content.
 
 ## Page Responsibilities
 
-`page.tsx` is a **Server Component**. It:
+`[id]/page.tsx` is a **Server Component**. It:
 
 1. Resolves authentication with `getAuthContext()` inside the existing
    `<Suspense>` boundary and rejects invalid system client IDs.
@@ -24,18 +26,20 @@ system client's application configuration. Each field is saved separately.
 
 ```text
 settings/
-├── page.tsx                  # Server: authenticated read and page states
+├── page.tsx                  # Empty placeholder for a future settings list
 ├── settings-data.ts         # Server: configuration lookup and JSON mapping
-├── _actions/
-│   └── settings-actions.ts  # Server: one-field update with renewed auth
-└── _components/
-    ├── settings-field-definitions.ts  # Allowed JSON fields and property shapes
-    └── settings-cards.tsx             # Client: per-card editing and feedback
+├── [id]/
+│   ├── page.tsx              # Server: authenticated read and page states
+│   ├── _actions/
+│   │   └── settings-actions.ts  # Server: one-field update with renewed auth
+│   └── _components/
+│       ├── settings-field-definitions.ts  # Allowed JSON fields and property shapes
+│       └── settings-cards.tsx             # Client: per-card editing and feedback
 ```
 
 ## Conventions for Changes
 
-- Keep `page.tsx` a Server Component and request-dependent reads behind its
+- Keep `[id]/page.tsx` a Server Component and request-dependent reads behind its
   `<Suspense>` boundary. Keep client interactivity in the colocated cards.
 - A Server Action must obtain `getAuthContext()` again, validate the system
   client ID, reread the configuration, and use its server-returned register ID.
@@ -48,6 +52,6 @@ settings/
 
 - Documentation-only changes: review Markdown structure and references.
 - TypeScript or React changes: run `pnpm lint`.
-- Visual changes: validate `/dashboard/settings` in the development server
+- Visual changes: validate `/dashboard/settings/<id>` in the development server
   (port set by the `PORT` env var), with and without an authenticated session.
 - This project currently has no automated test command; do not invent one.
