@@ -30,13 +30,15 @@ interface AppConfigBaseResponse {
   info1?: string;
 }
 
-export interface AppConfigFindAllRequest extends AppConfigBaseRequest {
-  pe_customer_id?: number;
+export interface AppConfigFindAllRequest
+  extends AppConfigRequiredContextRequest {
+  pe_limit: number;
+  pe_search?: string | null;
 }
 
 export interface AppConfigFindByIdRequest
   extends AppConfigRequiredContextRequest {
-  pe_config_id: number;
+  pe_config_id?: number;
 }
 
 export interface AppMenuFindByTypeRequest extends AppConfigBaseRequest {
@@ -55,10 +57,21 @@ export interface AppConfigUpdateGeneralFieldRequest
   pe_value_date?: string | null;
 }
 
+export interface AppConfigSummary {
+  ID: number;
+  APP_NAME: string | null;
+  DOMINIO: string | null;
+  PATH_IMAGEM: string | null;
+  FLAG_MAINTENANCE: number | null;
+  IS_ACTIVE: number | null;
+  UPDATEDAT: string | null;
+}
+
 export interface AppConfig {
   ID: number;
   APP_NAME: string | null;
-  CLIENT_NAME: string | null;
+  DOMINIO: string | null;
+  PATH_IMAGEM: string | null;
   GENERAL_CONFIG_JSON: string | null;
   COMPANY_INFO_JSON: string | null;
   COMPANY_ABOUT_JSON: string | null;
@@ -73,8 +86,11 @@ export interface AppConfig {
   HOME_SECTION_JSON: string | null;
   HOME_MENU_JSON: string | null;
   HOME_HERO_JSON: string | null;
+  FLAG_MAINTENANCE: number | null;
   IS_ACTIVE: number | null;
+  NOTES: string | null;
   UPDATEDAT: string | null;
+  CREATEDAT: string | null;
 }
 
 export interface AppMenuEntry {
@@ -103,7 +119,7 @@ export interface StoredProcedureResponse {
 
 export interface AppConfigFindAllResponse extends AppConfigBaseResponse {
   data: {
-    "App Config": AppConfig[];
+    "App Config": AppConfigSummary[];
   };
 }
 

@@ -17,6 +17,7 @@ import {
   type AppConfigFindByIdResponse,
   type AppConfigMutationResponse,
   AppConfigNotFoundError,
+  type AppConfigSummary,
   type AppConfigUpdateGeneralFieldRequest,
   type AppMenuEntry,
   type AppMenuFindByTypeRequest,
@@ -44,10 +45,10 @@ export class AppConfigServiceApi extends BaseApiService {
   }
 
   async findAllAppConfigs(
-    params: Partial<AppConfigFindAllRequest> = {},
+    params: AppConfigFindAllRequest,
   ): Promise<AppConfigFindAllResponse> {
     try {
-      const validatedParams = AppConfigFindAllSchema.partial().parse(params);
+      const validatedParams = AppConfigFindAllSchema.parse(params);
       const requestBody = this.buildBasePayload({
         pe_system_client_id: validatedParams.pe_system_client_id,
         pe_organization_id: validatedParams.pe_organization_id,
@@ -55,7 +56,8 @@ export class AppConfigServiceApi extends BaseApiService {
         pe_user_name: validatedParams.pe_user_name,
         pe_user_role: validatedParams.pe_user_role,
         pe_person_id: validatedParams.pe_person_id,
-        pe_customer_id: validatedParams.pe_customer_id ?? 0,
+        pe_search: validatedParams.pe_search,
+        pe_limit: validatedParams.pe_limit,
       });
 
       const response = await this.post<AppConfigFindAllResponse>(
@@ -75,10 +77,9 @@ export class AppConfigServiceApi extends BaseApiService {
   ): Promise<AppConfigFindByIdResponse> {
     try {
       const validatedParams = AppConfigFindByIdSchema.parse(params);
-      const configId = serverEnvs.CONFIG_ID;
+      const configId = validatedParams.pe_config_id;
       const requestBody = this.buildBasePayload({
         ...validatedParams,
-        pe_config_id: configId,
       });
 
       const response = await this.post<AppConfigFindByIdResponse>(
@@ -224,7 +225,7 @@ export class AppConfigServiceApi extends BaseApiService {
     return response;
   }
 
-  extractAppConfigs(response: AppConfigFindAllResponse): AppConfig[] {
+  extractAppConfigs(response: AppConfigFindAllResponse): AppConfigSummary[] {
     return response.data?.["App Config"] ?? [];
   }
 
