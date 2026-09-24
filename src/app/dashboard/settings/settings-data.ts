@@ -1,7 +1,6 @@
 import "server-only";
 
 import { z } from "zod";
-import { serverEnvs } from "@/core/config/envs.server";
 import type { AuthContext } from "@/server/auth-context";
 import {
   type AppConfig,
@@ -25,15 +24,21 @@ export function hasValidSystemClientId(apiContext: ApiContext): boolean {
 
 export async function getSettingsConfig(
   apiContext: ApiContext,
+  configId: number,
 ): Promise<AppConfig> {
   const response = await appConfigServiceApi.findAppConfigById({
     ...apiContext,
-    pe_config_id: serverEnvs.CONFIG_ID,
+    pe_config_id: configId,
   });
   const config = appConfigServiceApi.extractAppConfigDetail(response);
 
-  if (!config || !Number.isInteger(config.ID) || config.ID <= 0) {
-    throw new AppConfigNotFoundError();
+  if (
+    !config ||
+    !Number.isSafeInteger(config.ID) ||
+    config.ID <= 0 ||
+    config.ID !== configId
+  ) {
+    throw new AppConfigNotFoundError({ pe_config_id: configId });
   }
 
   return config;

@@ -38,7 +38,7 @@ export interface AppConfigFindAllRequest
 
 export interface AppConfigFindByIdRequest
   extends AppConfigRequiredContextRequest {
-  pe_config_id?: number;
+  pe_config_id: number;
 }
 
 export interface AppMenuFindByTypeRequest extends AppConfigBaseRequest {
