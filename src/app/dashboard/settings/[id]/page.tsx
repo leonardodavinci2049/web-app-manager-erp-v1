@@ -12,7 +12,7 @@ import {
   getSettingsConfig,
   hasValidSystemClientId,
   mapSettingsCards,
-} from "../settings-data";
+} from "../_utils/settings-data";
 import { SettingsCards } from "./_components/settings-cards";
 
 const logger = createLogger("SettingsPage");

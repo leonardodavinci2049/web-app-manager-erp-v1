@@ -5,7 +5,10 @@ import { z } from "zod";
 import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
 import { appConfigServiceApi } from "@/services/api-main/app-config";
-import { getSettingsConfig, hasValidSystemClientId } from "../../settings-data";
+import {
+  getSettingsConfig,
+  hasValidSystemClientId,
+} from "../../_utils/settings-data";
 import {
   type JsonObject,
   SETTINGS_FIELDS,

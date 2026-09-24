@@ -11,7 +11,7 @@ import {
   type SettingsListItem,
   toSettingsListItem,
 } from "./_components/settings-list-types";
-import { hasValidSystemClientId } from "./settings-data";
+import { hasValidSystemClientId } from "./_utils/settings-data";
 
 const logger = createLogger("SettingsListPage");
 
