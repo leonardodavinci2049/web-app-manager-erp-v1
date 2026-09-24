@@ -5,6 +5,7 @@
 
 // Entity Types supported by the API
 export type EntityType =
+  | "APP"
   | "PRODUCT"
   | "PROFILE"
   | "ORDER"
@@ -133,6 +134,17 @@ export interface DeleteFileResponse {
   message: string;
 }
 
+export interface ReorderImagesRequest {
+  entityType: EntityType;
+  entityId: string;
+  assetIds: string[];
+}
+
+export interface ReorderImagesResponse {
+  success: boolean;
+  message: string;
+}
+
 // Entity Gallery Request
 export interface EntityGalleryRequest {
   entityType: EntityType;
@@ -223,6 +235,7 @@ export const ALL_SUPPORTED_TYPES = [
 
 // Entity Type Labels for UI (with i18n keys)
 export const ENTITY_TYPE_LABELS: Record<EntityType, string> = {
+  APP: "assets.entityType.app",
   PRODUCT: "assets.entityType.product",
   PROFILE: "assets.entityType.profile",
   ORDER: "assets.entityType.order",

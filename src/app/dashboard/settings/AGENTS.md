@@ -9,8 +9,10 @@ This file complements the repository and dashboard guides for
 The `/dashboard/settings` route lists up to 50 application configurations that
 belong to the authenticated system client. It supports server-normalized search
 by name or ID plus a browser-persisted grid/list preference. The
-`/dashboard/settings/[id]` route displays and edits the 14 JSON fields of the
-selected configuration. Each field is saved separately.
+`/dashboard/settings/[id]` route follows the shared registration-detail layout.
+It edits four basic fields, `NOTES`, and the 14 JSON fields of the selected
+configuration. Each field is saved separately. Its `APP` image gallery uses the
+Assets API and keeps `PATH_IMAGEM` synchronized with the primary image.
 
 ## Page Responsibilities
 
@@ -36,7 +38,10 @@ The detail page:
    the returned `ID` matches the route ID, and returns `notFound()` for missing
    or unauthorized records.
 4. Accepts only a normalized `/dashboard/settings` URL as `returnTo`.
-5. Parses each JSON object and passes only the field data needed by the cards.
+5. Parses each JSON object and passes only the minimal detail data and field data
+   needed by the local components.
+6. Composes `DetailPageLayout`, keeps the desktop gallery in the left column,
+   and provides the mobile gallery through `DetailImageTab`.
 
 ## Folder Structure
 
@@ -53,10 +58,16 @@ settings/
 ├── [id]/
 │   ├── page.tsx              # Server: route-ID read and page states
 │   ├── _actions/
-│   │   └── settings-actions.ts  # Server: authorized one-field update
+│   │   ├── settings-actions.ts               # Basic, notes, and JSON updates
+│   │   └── settings-image-gallery-actions.ts # Gallery mutations + PATH sync
 │   └── _components/
-│       ├── settings-field-definitions.ts  # Allowed JSON fields and property shapes
-│       └── settings-cards.tsx             # Client: per-card editing and feedback
+│       ├── settings-detail-layout.tsx      # Shared detail-shell composition
+│       ├── settings-detail-types.ts        # Minimal detail DTO
+│       ├── settings-field-definitions.ts   # Allowed JSON fields/property shapes
+│       ├── settings-cards.tsx              # Per-card JSON editing and feedback
+│       ├── overview/                        # Heading + basic-field card
+│       ├── tabs/                            # Notes, images, disabled deletion
+│       └── image-gallery/                   # APP gallery server/client subsystem
 ```
 
 ## Conventions for Changes
@@ -78,6 +89,18 @@ settings/
 - Keep the 14-field allowlist in sync with the API contract. Preserve unknown
   JSON properties when editing structured fields and never replace invalid JSON
   without an explicit edit.
+- Use `EntityType: "APP"` and image files only for the gallery. Keep the
+  seven-image, 2 MB, JPEG/PNG/GIF/WebP limits enforced on both client and
+  server. Gallery actions must reread the authorized configuration and gallery
+  before mutating.
+- Keep the primary asset original URL synchronized into `PATH_IMAGEM` after the
+  first upload, a primary change, or primary-image deletion. Asset mutations
+  are not transactional with the app-config API, so surface a safe partial-
+  success warning when the asset operation succeeds but `PATH_IMAGEM` fails.
+- Keep the primary image first during reordering and reject reordered ID lists
+  that do not exactly match the current authorized gallery.
+- The deletion tab is intentionally visual-only: its controls remain disabled
+  and no delete action exists until an explicit contract is added.
 - Keep user-facing text in Brazilian Portuguese and code/comments in US English.
 
 ## Verification
