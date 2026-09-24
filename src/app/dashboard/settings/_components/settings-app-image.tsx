@@ -49,7 +49,7 @@ export function SettingsAppImage({
         className="object-cover transition-transform duration-200 group-hover:scale-105"
         sizes={
           variant === "grid"
-            ? "(max-width: 640px) 92vw, (max-width: 1280px) 45vw, 30vw"
+            ? "(max-width: 640px) 45vw, (max-width: 768px) 30vw, (max-width: 1200px) 25vw, 20vw"
             : variant === "list"
               ? "80px"
               : "64px"

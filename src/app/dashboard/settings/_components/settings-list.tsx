@@ -291,14 +291,14 @@ function SettingsCollection({
 
   if (viewMode === "grid") {
     return (
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-[repeat(auto-fill,minmax(190px,1fr))] sm:gap-3 lg:gap-4">
         {items.map((item, index) => (
           <SettingsCard
             key={item.id}
             item={item}
             href={buildSettingsDetailHref(item.id, searchState)}
             viewMode="grid"
-            eager={index < 3}
+            eager={index < 6}
           />
         ))}
       </div>
@@ -307,7 +307,7 @@ function SettingsCollection({
 
   return (
     <>
-      <div className="space-y-3 lg:hidden">
+      <div className="space-y-2 sm:space-y-3 lg:hidden">
         {items.map((item, index) => (
           <SettingsCard
             key={item.id}
