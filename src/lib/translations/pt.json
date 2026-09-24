@@ -731,6 +731,7 @@
     },
     "assets": {
       "entityType": {
+        "app": "Aplicativo",
         "product": "Produto",
         "profile": "Perfil",
         "order": "Pedido",

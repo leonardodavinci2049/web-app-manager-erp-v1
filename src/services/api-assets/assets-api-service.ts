@@ -15,6 +15,8 @@ import type {
   FindFileRequest,
   ListFilesRequest,
   ListFilesResponse,
+  ReorderImagesRequest,
+  ReorderImagesResponse,
   UploadFileRequest,
 } from "@/services/api-assets/types/api-assets";
 import { isApiError } from "@/services/api-assets/types/api-assets";
@@ -293,6 +295,31 @@ export class AssetsApiService {
         statusCode: 500,
         message: `Set primary failed: ${error instanceof Error ? error.message : "Unknown error"}`,
         error: "Set Primary Error",
+      };
+    }
+  }
+
+  /**
+   * ENDPOINT 08 - Reorder Images
+   * POST /file/v1/reorder-images
+   * Requires authentication
+   */
+  async reorderImages(
+    request: ReorderImagesRequest,
+  ): Promise<ApiResponse<ReorderImagesResponse>> {
+    try {
+      const response = await fetch(`${this.baseUrl}/file/v1/reorder-images`, {
+        method: "POST",
+        headers: this.getHeaders(),
+        body: JSON.stringify(request),
+      });
+
+      return this.handleResponse<ReorderImagesResponse>(response);
+    } catch (error) {
+      return {
+        statusCode: 500,
+        message: `Reorder failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+        error: "Reorder Error",
       };
     }
   }

@@ -6,14 +6,18 @@ import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
 import { AppConfigNotFoundError } from "@/services/api-main/app-config";
 import { SiteHeaderWithBreadcrumb } from "../../_components/header/site-header-with-breadcrumb";
-import { SettingsAppImage } from "../_components/settings-app-image";
 import { getSafeSettingsReturnTo } from "../_components/settings-list-params";
 import {
   getSettingsConfig,
   hasValidSystemClientId,
   mapSettingsCards,
 } from "../_utils/settings-data";
-import { SettingsCards } from "./_components/settings-cards";
+import {
+  SettingsImageGalleryServer,
+  SettingsImageGallerySkeleton,
+} from "./_components/image-gallery";
+import { SettingsDetailLayout } from "./_components/settings-detail-layout";
+import type { SettingsDetailData } from "./_components/settings-detail-types";
 
 const logger = createLogger("SettingsPage");
 
@@ -43,11 +47,7 @@ async function SettingsPageContent({
   const { apiContext } = await getAuthContext();
   let cards = null;
   let errorMessage: string | null = null;
-  let appConfig: {
-    id: number;
-    name: string | null;
-    imagePath: string | null;
-  } | null = null;
+  let appConfig: SettingsDetailData | null = null;
 
   if (!hasValidSystemClientId(apiContext)) {
     logger.warn("Invalid system client ID while loading app configuration", {
@@ -61,7 +61,11 @@ async function SettingsPageContent({
       appConfig = {
         id: config.ID,
         name: config.APP_NAME,
+        domain: config.DOMINIO,
         imagePath: config.PATH_IMAGEM,
+        maintenance: config.FLAG_MAINTENANCE,
+        active: config.IS_ACTIVE,
+        notes: config.NOTES,
       };
     } catch (error) {
       if (error instanceof AppConfigNotFoundError) {
@@ -91,38 +95,48 @@ async function SettingsPageContent({
         <div className="@container/main flex flex-1 flex-col gap-4 sm:gap-6">
           <div className="flex flex-col gap-4 py-4 sm:gap-5 sm:py-6">
             <div className="px-3 sm:px-4 lg:px-6">
-              <div className="space-y-4 sm:space-y-5">
-                <DetailBackLink
-                  href={returnTo}
-                  label="Voltar para configurações"
-                />
-                <div className="flex items-center gap-3">
-                  {appConfig && (
-                    <SettingsAppImage
-                      appName={appConfig.name}
-                      imagePath={appConfig.imagePath}
-                    />
-                  )}
-                  <div>
-                    <h1 className="text-xl font-bold sm:text-2xl">
-                      Configurações
-                    </h1>
-                    <p className="text-muted-foreground mt-1 text-sm">
-                      Gerencie os dados e a apresentação do aplicativo.
-                    </p>
-                  </div>
-                </div>
-                {errorMessage ? (
+              {errorMessage ? (
+                <div className="space-y-4 sm:space-y-5">
+                  <DetailBackLink
+                    href={returnTo}
+                    label="Voltar para configurações"
+                  />
                   <div
                     role="alert"
                     className="rounded-lg border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive"
                   >
                     {errorMessage}
                   </div>
-                ) : cards ? (
-                  <SettingsCards configId={configId} cards={cards} />
-                ) : null}
-              </div>
+                </div>
+              ) : appConfig && cards ? (
+                <SettingsDetailLayout
+                  config={appConfig}
+                  cards={cards}
+                  returnTo={returnTo}
+                  imageGallery={
+                    <Suspense fallback={<SettingsImageGallerySkeleton />}>
+                      <SettingsImageGalleryServer
+                        configId={appConfig.id}
+                        appName={
+                          appConfig.name?.trim() ||
+                          `Configuração ${appConfig.id}`
+                        }
+                      />
+                    </Suspense>
+                  }
+                  mobileImageGallery={
+                    <Suspense fallback={<SettingsImageGallerySkeleton />}>
+                      <SettingsImageGalleryServer
+                        configId={appConfig.id}
+                        appName={
+                          appConfig.name?.trim() ||
+                          `Configuração ${appConfig.id}`
+                        }
+                      />
+                    </Suspense>
+                  }
+                />
+              ) : null}
             </div>
           </div>
         </div>
