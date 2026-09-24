@@ -9,6 +9,7 @@ import {
   hasValidSystemClientId,
   mapSettingsCards,
 } from "../settings-data";
+import { SettingsAppImage } from "./_components/settings-app-image";
 import { SettingsCards } from "./_components/settings-cards";
 
 const logger = createLogger("SettingsPage");
@@ -17,6 +18,8 @@ async function SettingsPageContent() {
   const { apiContext } = await getAuthContext();
   let cards = null;
   let errorMessage: string | null = null;
+  let appConfig: { name: string | null; imagePath: string | null } | null =
+    null;
 
   if (!hasValidSystemClientId(apiContext)) {
     errorMessage =
@@ -25,6 +28,7 @@ async function SettingsPageContent() {
     try {
       const config = await getSettingsConfig(apiContext);
       cards = mapSettingsCards(config);
+      appConfig = { name: config.APP_NAME, imagePath: config.PATH_IMAGEM };
     } catch (error) {
       if (error instanceof AppConfigNotFoundError) {
         errorMessage = "Nenhuma configuração foi encontrada para este cliente.";
@@ -50,13 +54,21 @@ async function SettingsPageContent() {
           <div className="flex flex-col gap-4 py-4 sm:gap-5 sm:py-6">
             <div className="px-3 sm:px-4 lg:px-6">
               <div className="space-y-4 sm:space-y-5">
-                <div>
-                  <h1 className="text-xl font-bold sm:text-2xl">
-                    Configurações
-                  </h1>
-                  <p className="text-muted-foreground mt-1 text-sm">
-                    Gerencie os dados e a apresentação do aplicativo.
-                  </p>
+                <div className="flex items-center gap-3">
+                  {appConfig && (
+                    <SettingsAppImage
+                      appName={appConfig.name}
+                      imagePath={appConfig.imagePath}
+                    />
+                  )}
+                  <div>
+                    <h1 className="text-xl font-bold sm:text-2xl">
+                      Configurações
+                    </h1>
+                    <p className="text-muted-foreground mt-1 text-sm">
+                      Gerencie os dados e a apresentação do aplicativo.
+                    </p>
+                  </div>
                 </div>
                 {errorMessage ? (
                   <div
