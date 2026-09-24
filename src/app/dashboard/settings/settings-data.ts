@@ -12,7 +12,7 @@ import {
   type JsonObject,
   SETTINGS_DEFINITIONS,
   type SettingCardData,
-} from "./_components/settings-field-definitions";
+} from "./[id]/_components/settings-field-definitions";
 
 type ApiContext = AuthContext["apiContext"];
 
