@@ -177,6 +177,13 @@ export async function uploadSettingsImageAction(
         statusCode: result.statusCode,
         apiMessage: getSafeApiLogMessage(result.message),
       });
+      if (result.statusCode >= 500) {
+        return {
+          success: false,
+          error:
+            "O serviço de imagens está indisponível no momento. Tente novamente em instantes.",
+        };
+      }
       return { success: false, error: "Não foi possível enviar esta imagem." };
     }
 
