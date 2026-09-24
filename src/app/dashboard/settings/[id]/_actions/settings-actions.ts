@@ -12,9 +12,10 @@ import {
 } from "../_components/settings-field-definitions";
 
 const logger = createLogger("SettingsActions");
-const SETTINGS_PATH = "/dashboard/settings/[id]";
+const SETTINGS_PATH = "/dashboard/settings";
 
 const updateSettingsSchema = z.object({
+  configId: z.number().int().positive().max(Number.MAX_SAFE_INTEGER),
   field: z.enum(SETTINGS_FIELDS),
   value: z.record(z.string(), z.json()),
 });
@@ -40,7 +41,7 @@ export async function updateSettingsFieldAction(
   }
 
   try {
-    const config = await getSettingsConfig(apiContext);
+    const config = await getSettingsConfig(apiContext, parsed.data.configId);
     const value = JSON.stringify(parsed.data.value);
 
     await appConfigServiceApi.updateAppConfigGeneralField({
@@ -51,7 +52,8 @@ export async function updateSettingsFieldAction(
       pe_value_str: value,
     });
 
-    revalidatePath(SETTINGS_PATH, "page");
+    revalidatePath(SETTINGS_PATH);
+    revalidatePath(`${SETTINGS_PATH}/${config.ID}`);
     return {
       success: true,
       message: "Configuração salva com sucesso.",

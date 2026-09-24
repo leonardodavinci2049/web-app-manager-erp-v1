@@ -1,37 +1,71 @@
+import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { DetailBackLink } from "@/app/dashboard/_components/detail-page";
 import { Spinner } from "@/components/ui/spinner";
 import { createLogger } from "@/core/logger";
 import { getAuthContext } from "@/server/auth-context";
 import { AppConfigNotFoundError } from "@/services/api-main/app-config";
 import { SiteHeaderWithBreadcrumb } from "../../_components/header/site-header-with-breadcrumb";
+import { SettingsAppImage } from "../_components/settings-app-image";
+import { getSafeSettingsReturnTo } from "../_components/settings-list-params";
 import {
   getSettingsConfig,
   hasValidSystemClientId,
   mapSettingsCards,
 } from "../settings-data";
-import { SettingsAppImage } from "./_components/settings-app-image";
 import { SettingsCards } from "./_components/settings-cards";
 
 const logger = createLogger("SettingsPage");
 
-async function SettingsPageContent() {
+interface SettingsDetailPageProps {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}
+
+function parsePositiveInt(value: string): number {
+  if (!/^\d+$/.test(value)) return 0;
+  const parsed = Number(value);
+  return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : 0;
+}
+
+async function SettingsPageContent({
+  params,
+  searchParams,
+}: SettingsDetailPageProps) {
+  const [{ id }, rawSearchParams] = await Promise.all([params, searchParams]);
+  const configId = parsePositiveInt(id);
+  if (!configId) notFound();
+
+  const rawReturnTo = rawSearchParams.returnTo;
+  const returnTo = getSafeSettingsReturnTo(
+    typeof rawReturnTo === "string" ? rawReturnTo : rawReturnTo?.[0],
+  );
   const { apiContext } = await getAuthContext();
   let cards = null;
   let errorMessage: string | null = null;
-  let appConfig: { name: string | null; imagePath: string | null } | null =
-    null;
+  let appConfig: {
+    id: number;
+    name: string | null;
+    imagePath: string | null;
+  } | null = null;
 
   if (!hasValidSystemClientId(apiContext)) {
-    errorMessage =
-      "Cliente de sistema inválido. As configurações não estão disponíveis.";
+    logger.warn("Invalid system client ID while loading app configuration", {
+      configId,
+    });
+    notFound();
   } else {
     try {
-      const config = await getSettingsConfig(apiContext);
+      const config = await getSettingsConfig(apiContext, configId);
       cards = mapSettingsCards(config);
-      appConfig = { name: config.APP_NAME, imagePath: config.PATH_IMAGEM };
+      appConfig = {
+        id: config.ID,
+        name: config.APP_NAME,
+        imagePath: config.PATH_IMAGEM,
+      };
     } catch (error) {
       if (error instanceof AppConfigNotFoundError) {
-        errorMessage = "Nenhuma configuração foi encontrada para este cliente.";
+        notFound();
       } else {
         logger.error("Failed to load application settings", error);
         errorMessage =
@@ -43,10 +77,14 @@ async function SettingsPageContent() {
   return (
     <>
       <SiteHeaderWithBreadcrumb
-        title="Dashboard"
+        title="Configuração"
         breadcrumbItems={[
           { label: "Dashboard", href: "/dashboard" },
-          { label: "Configurações", isActive: true },
+          { label: "Configurações", href: returnTo },
+          {
+            label: appConfig?.name?.trim() || `Configuração ${configId}`,
+            isActive: true,
+          },
         ]}
       />
       <div className="mx-auto flex w-full max-w-[1400px] min-w-0 flex-1 flex-col">
@@ -54,6 +92,10 @@ async function SettingsPageContent() {
           <div className="flex flex-col gap-4 py-4 sm:gap-5 sm:py-6">
             <div className="px-3 sm:px-4 lg:px-6">
               <div className="space-y-4 sm:space-y-5">
+                <DetailBackLink
+                  href={returnTo}
+                  label="Voltar para configurações"
+                />
                 <div className="flex items-center gap-3">
                   {appConfig && (
                     <SettingsAppImage
@@ -78,7 +120,7 @@ async function SettingsPageContent() {
                     {errorMessage}
                   </div>
                 ) : cards ? (
-                  <SettingsCards cards={cards} />
+                  <SettingsCards configId={configId} cards={cards} />
                 ) : null}
               </div>
             </div>
@@ -102,10 +144,13 @@ function SettingsPageFallback() {
   );
 }
 
-function SettingsPage() {
+function SettingsPage(props: SettingsDetailPageProps) {
   return (
     <Suspense fallback={<SettingsPageFallback />}>
-      <SettingsPageContent />
+      <SettingsPageContent
+        params={props.params}
+        searchParams={props.searchParams}
+      />
     </Suspense>
   );
 }

@@ -425,9 +425,11 @@ function parseEditedObject(
 }
 
 function SettingsCard({
+  configId,
   data,
   definition,
 }: {
+  configId: number;
   data: SettingCardData;
   definition: SettingDefinition;
 }) {
@@ -495,6 +497,7 @@ function SettingsCard({
     startTransition(async () => {
       try {
         const result = await updateSettingsFieldAction({
+          configId,
           field: definition.field,
           value,
         });
@@ -887,7 +890,13 @@ function SettingsCard({
   );
 }
 
-export function SettingsCards({ cards }: { cards: SettingCardData[] }) {
+export function SettingsCards({
+  configId,
+  cards,
+}: {
+  configId: number;
+  cards: SettingCardData[];
+}) {
   const byField = new Map(cards.map((card) => [card.field, card]));
   const byDefinition = new Map(
     SETTINGS_DEFINITIONS.map((definition) => [definition.field, definition]),
@@ -897,7 +906,14 @@ export function SettingsCards({ cards }: { cards: SettingCardData[] }) {
     const data = byField.get(field);
     const definition = byDefinition.get(field);
     if (!data || !definition) return null;
-    return <SettingsCard key={field} data={data} definition={definition} />;
+    return (
+      <SettingsCard
+        key={field}
+        configId={configId}
+        data={data}
+        definition={definition}
+      />
+    );
   }
 
   return (

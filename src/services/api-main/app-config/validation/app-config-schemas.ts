@@ -48,7 +48,7 @@ export const AppConfigFindAllSchema = AppConfigRequiredContextSchema.extend({
 });
 
 export const AppConfigFindByIdSchema = AppConfigRequiredContextSchema.extend({
-  pe_config_id: z.number().int().nonnegative().default(0),
+  pe_config_id: z.number().int().positive().max(Number.MAX_SAFE_INTEGER),
 });
 
 export const AppMenuFindByTypeSchema = AppConfigRequestContextSchema.extend({

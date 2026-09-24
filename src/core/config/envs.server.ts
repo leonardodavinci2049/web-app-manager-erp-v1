@@ -12,7 +12,6 @@ export const serverEnvsSchema = z.object({
   EXTERNAL_API_ASSETS_URL: z.string().url(),
   APP_ID: z.coerce.number().positive(),
   STORE_ID: z.coerce.number().positive(),
-  CONFIG_ID: z.coerce.number().positive(),
   DATABASE_ADMIN_HOST: z.string().min(1),
   DATABASE_ADMIN_PORT: z.coerce.number().positive(),
   DATABASE_ADMIN_NAME: z.string().min(1),
