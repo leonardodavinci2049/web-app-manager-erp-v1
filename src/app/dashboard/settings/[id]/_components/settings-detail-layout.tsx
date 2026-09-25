@@ -31,15 +31,24 @@ export function SettingsDetailLayout({
       overview={
         <div className="space-y-3 sm:space-y-4">
           <SettingsGeneralDataCard key={config.id} config={config} />
-          <SettingsCards configId={config.id} cards={cards} />
+          <SettingsCards
+            configId={config.id}
+            cards={cards}
+            fields={[
+              "COMPANY_INFO_JSON",
+              "COMPANY_ADDRESS_JSON",
+              "COMPANY_LINKS_JSON",
+            ]}
+          />
         </div>
       }
       sectionsTitle="Seções da configuração"
-      sectionsDescription="Gerencie anotações, imagens e as ações disponíveis para esta configuração."
+      sectionsDescription="Gerencie anotações, imagens, dados da loja e configurações do aplicativo."
     >
       <SettingsDetailTabs
         configId={config.id}
         notes={config.notes}
+        cards={cards}
         mobileImageGallery={mobileImageGallery}
       />
     </DetailPageLayout>

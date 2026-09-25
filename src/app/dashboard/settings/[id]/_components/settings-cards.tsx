@@ -32,7 +32,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { updateSettingsFieldAction } from "../_actions/settings-actions";
@@ -67,74 +66,6 @@ const FIELD_ICONS: Record<SettingsField, LucideIcon> = {
   HOME_MENU_JSON: Menu,
   HOME_HERO_JSON: Sparkles,
 };
-
-const TOP_FIELDS: readonly SettingsField[] = [
-  "COMPANY_INFO_JSON",
-  "COMPANY_ADDRESS_JSON",
-  "COMPANY_LINKS_JSON",
-];
-
-const TAB_GROUPS: readonly {
-  id: string;
-  label: string;
-  description: string;
-  fields: readonly SettingsField[];
-}[] = [
-  {
-    id: "sobre",
-    label: "Sobre",
-    description: "Texto institucional exibido no aplicativo.",
-    fields: ["COMPANY_ABOUT_JSON"],
-  },
-  {
-    id: "faq",
-    label: "FAQ",
-    description: "Dúvidas comuns e respostas do atendimento.",
-    fields: ["COMPANY_FAQ_JSON"],
-  },
-  {
-    id: "secoes",
-    label: "Seções",
-    description: "Vitrines e seções de produtos da página inicial.",
-    fields: ["HOME_SECTION_JSON"],
-  },
-  {
-    id: "categorias",
-    label: "Categorias",
-    description: "Categorias exibidas na página inicial.",
-    fields: ["HOME_CATEGORY_JSON"],
-  },
-  {
-    id: "pagamentos",
-    label: "Pagamentos",
-    description: "Meios de pagamento aceitos na loja.",
-    fields: ["PAYMENT_METHOD_JSON"],
-  },
-  {
-    id: "seo",
-    label: "SEO",
-    description: "Títulos, descrição e palavras-chave para buscas.",
-    fields: ["COMPANY_SEO_JSON"],
-  },
-  {
-    id: "home",
-    label: "HOME",
-    description: "Apresentação, marcas e destaques da página inicial.",
-    fields: ["HOME_INFO_JSON", "HOME_BRAND_JSON", "HOME_HERO_JSON"],
-  },
-  {
-    id: "menu",
-    label: "Menu",
-    description: "Itens de navegação do menu principal.",
-    fields: ["HOME_MENU_JSON"],
-  },
-  {
-    id: "diversos",
-    label: "Diversos",
-    description: "Parâmetros gerais do aplicativo.",
-    fields: ["GENERAL_CONFIG_JSON"],
-  },
-];
 
 const SUMMARY_LIMIT = 6;
 
@@ -893,9 +824,11 @@ function SettingsCard({
 export function SettingsCards({
   configId,
   cards,
+  fields,
 }: {
   configId: number;
   cards: SettingCardData[];
+  fields: readonly SettingsField[];
 }) {
   const byField = new Map(cards.map((card) => [card.field, card]));
   const byDefinition = new Map(
@@ -917,52 +850,6 @@ export function SettingsCards({
   }
 
   return (
-    <div className="w-full space-y-4 sm:space-y-5">
-      <section aria-label="Configurações principais">
-        <div className="mb-2 sm:mb-2.5">
-          <h2 className="text-sm font-semibold sm:text-[15px]">Principais</h2>
-          <p className="text-xs text-muted-foreground sm:text-sm">
-            Dados mais consultados da empresa e do aplicativo.
-          </p>
-        </div>
-        <div className="space-y-3 sm:space-y-3.5">
-          {TOP_FIELDS.map(renderCard)}
-        </div>
-      </section>
-
-      <section aria-label="Configurações avançadas">
-        <div className="mb-2 sm:mb-2.5">
-          <h2 className="text-sm font-semibold sm:text-[15px]">
-            Configurações avançadas
-          </h2>
-          <p className="text-xs text-muted-foreground sm:text-sm">
-            Conteúdo organizado por tema.
-          </p>
-        </div>
-        <Tabs defaultValue={TAB_GROUPS[0].id} className="w-full gap-3">
-          <TabsList className="h-auto w-full justify-start gap-1 overflow-x-auto p-1">
-            {TAB_GROUPS.map((group) => (
-              <TabsTrigger
-                key={group.id}
-                value={group.id}
-                className="flex-none px-3 py-1.5 text-xs sm:text-sm"
-              >
-                {group.label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-          {TAB_GROUPS.map((group) => (
-            <TabsContent key={group.id} value={group.id} className="mt-0">
-              <p className="mb-2 text-xs text-muted-foreground">
-                {group.description}
-              </p>
-              <div className="space-y-3 sm:space-y-3.5">
-                {group.fields.map(renderCard)}
-              </div>
-            </TabsContent>
-          ))}
-        </Tabs>
-      </section>
-    </div>
+    <div className="space-y-3 sm:space-y-3.5">{fields.map(renderCard)}</div>
   );
 }
