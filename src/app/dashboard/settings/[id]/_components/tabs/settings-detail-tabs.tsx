@@ -1,7 +1,6 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useEffect, useRef, useState } from "react";
 import { DetailImageTab } from "@/app/dashboard/_components/detail-page";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SettingsCards } from "../settings-cards";
@@ -90,80 +89,49 @@ export function SettingsDetailTabs({
   cards,
   mobileImageGallery,
 }: SettingsDetailTabsProps) {
-  const [activeTab, setActiveTab] = useState("annotations");
-  const tabsContainerRef = useRef<HTMLDivElement>(null);
-  const hasMountedRef = useRef(false);
-
-  useEffect(() => {
-    if (!hasMountedRef.current) {
-      hasMountedRef.current = true;
-      return;
-    }
-
-    if (!SETTINGS_TABS.some((tab) => tab.id === activeTab)) return;
-
-    const activePanel = tabsContainerRef.current?.querySelector<HTMLElement>(
-      '[role="tabpanel"][data-state="active"]',
-    );
-
-    if (activePanel?.hasChildNodes()) {
-      activePanel.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  }, [activeTab]);
-
   return (
-    <div ref={tabsContainerRef} className="[overflow-anchor:none]">
-      <Tabs
-        value={activeTab}
-        onValueChange={setActiveTab}
-        className="w-full gap-3 sm:gap-4"
+    <Tabs defaultValue="annotations" className="w-full gap-3 sm:gap-4">
+      <TabsList
+        className="h-auto w-full justify-start gap-1 overflow-x-auto p-1 md:grid md:grid-cols-6 md:overflow-visible xl:grid-cols-12"
+        aria-label="Seções do detalhe da configuração"
       >
-        <TabsList
-          className="h-auto w-full justify-start gap-1 overflow-x-auto p-1 md:grid md:grid-cols-6 md:overflow-visible xl:grid-cols-12"
-          aria-label="Seções do detalhe da configuração"
-        >
-          {SETTINGS_TABS.map((tab) => (
-            <TabsTrigger
-              key={tab.id}
-              value={tab.id}
-              className="h-9 min-w-max px-3 text-xs sm:text-sm md:min-w-0 md:px-2"
-            >
-              {tab.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-
-        <TabsContent value="annotations" className="space-y-4">
-          <SettingsNotesTab configId={configId} initialNotes={notes} />
-        </TabsContent>
-
-        <TabsContent value="images" className="space-y-3 sm:space-y-4">
-          <DetailImageTab mobileGallery={mobileImageGallery} />
-        </TabsContent>
-
-        {SETTINGS_TABS.filter((tab) => tab.fields).map((tab) => (
-          <TabsContent
+        {SETTINGS_TABS.map((tab) => (
+          <TabsTrigger
             key={tab.id}
             value={tab.id}
-            className="min-w-0 space-y-3"
+            className="h-9 min-w-max px-3 text-xs sm:text-sm md:min-w-0 md:px-2"
           >
-            {tab.description ? (
-              <p className="text-xs text-muted-foreground sm:text-sm">
-                {tab.description}
-              </p>
-            ) : null}
-            <SettingsCards
-              configId={configId}
-              cards={cards}
-              fields={tab.fields ?? []}
-            />
-          </TabsContent>
+            {tab.label}
+          </TabsTrigger>
         ))}
+      </TabsList>
 
-        <TabsContent value="deletion">
-          <SettingsDeletionTab />
+      <TabsContent value="annotations" className="space-y-4">
+        <SettingsNotesTab configId={configId} initialNotes={notes} />
+      </TabsContent>
+
+      <TabsContent value="images" className="space-y-3 sm:space-y-4">
+        <DetailImageTab mobileGallery={mobileImageGallery} />
+      </TabsContent>
+
+      {SETTINGS_TABS.filter((tab) => tab.fields).map((tab) => (
+        <TabsContent key={tab.id} value={tab.id} className="min-w-0 space-y-3">
+          {tab.description ? (
+            <p className="text-xs text-muted-foreground sm:text-sm">
+              {tab.description}
+            </p>
+          ) : null}
+          <SettingsCards
+            configId={configId}
+            cards={cards}
+            fields={tab.fields ?? []}
+          />
         </TabsContent>
-      </Tabs>
-    </div>
+      ))}
+
+      <TabsContent value="deletion">
+        <SettingsDeletionTab />
+      </TabsContent>
+    </Tabs>
   );
 }
